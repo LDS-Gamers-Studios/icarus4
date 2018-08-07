@@ -1,0 +1,40 @@
+{
+  "token": "",
+  "homePage": "https://bitbucket.org/Gaiwecoor/icarus3/",
+  "db": {
+    "model": "models/mongo-models.js",
+    "db": "",
+		"auth": {
+			"user": "",
+			"pass": ""
+		}
+  },
+  "prefix": "!",
+  "ownerId": "",
+  "adminId": [],
+  "api": {},
+  "color": [248, 154, 34],
+  "error": {
+    "id": "",
+    "token": ""
+  },
+  "roles": {
+    "management": "96360253850935296",
+    "muted": "210909249218281474",
+    "team": "96345401078087680",
+    "trusted": "210912511514509312"
+  },
+  "ldsg": "96335850576556032",
+  "events": [
+		"channelCreate",
+		"disconnect",
+		"error",
+		"guildBanAdd",
+		"guildDelete",
+		"guildMemberAdd",
+		"guildMemberRemove",
+		"guildMemberUpdate",
+		"messageReactionAdd",
+		"presenceUpdate"
+	]
+}

@@ -1,0 +1,22 @@
+{
+  "name": "icarus3",
+  "version": "3.0.0",
+  "description": "Discord bot for the LDSG Community",
+  "main": "icarus.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://Gaiwecoor@bitbucket.org/Gaiwecoor/icarus3.git"
+  },
+  "author": "Kevin \"Gaiwecoor\" Dixon",
+  "license": "MIT",
+  "homepage": "https://bitbucket.org/Gaiwecoor/icarus3#readme",
+  "dependencies": {
+    "augurbot": "^1.0.0",
+    "cheerio": "^1.0.0-rc.2",
+    "discord.js": "^11.3.2",
+    "request": "^2.87.0"
+  }
+}
