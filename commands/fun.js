@@ -19,6 +19,36 @@ function quickText(msg, text) {
   msg.channel.send(text).catch(console.error);
 }
 
+function testBirthdays(bot) {
+	let curDate = new Date();
+  let ldsg = Module.config.ldsg;
+	if (curDate.getHours() == 16) {
+		Module.db.ign.getList("birthday").then(birthdays => {
+			birthdays.forEach(birthday => {
+				let date = new Date(birthday.ign);
+				if (date.getMonth() == curDate.getMonth() && date.getDate() == curDate.getDate()) {
+					let flair = [
+						":tada: ",
+						":confetti_ball: ",
+						":birthday: ",
+						":gift: ",
+						":cake: "
+					];
+					bot.guilds.get(ldsg).fetchMember(birthday.discordId).then(member => {
+						bot.channels.get(ldsg).send(":birthday: :confetti_ball: :tada: Happy Birthday, " + member + "! :tada: :confetti_ball: :birthday:").then(() => {
+							var birthdayLangs = require("../data/birthday.json");
+							let msgs = birthdayLangs.map(lang => member.send(flair[Math.floor(Math.random() * flair.length)] + " " + lang));
+							Promise.all(msgs).then(() => {
+								member.send(":birthday: :confetti_ball: :tada: A very happy birthday to you, from LDS Gamers! :tada: :confetti_ball: :birthday:");
+							});
+						});
+					});
+				}
+			});
+		});
+	}
+}
+
 const Module = new Augur.Module()
 .addCommand({name: "avatar",
   description: "Get a user's avatar",
@@ -359,5 +389,9 @@ const Module = new Augur.Module()
     ], "wut.gif");
   }
 };
+.addClockwork((bot) => {
+  testBirthdays(bot);
+  return setInterval(testBirthdays, 60 * 60 * 1000, bot);
+});
 
 module.exports = Module;
