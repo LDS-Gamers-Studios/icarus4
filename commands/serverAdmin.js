@@ -25,12 +25,12 @@ const Module = new Augur.Module()
       // BOT SPAM
       if (msg.mentions.channels.size > 0) {
         // SAVE BY MENTION
-        u.db.server.saveSetting(msg.guild, 'botspam', msg.mentions.channels.first().id);
+        Module.db..server.saveSetting(msg.guild, 'botspam', msg.mentions.channels.first().id);
         msg.channel.send("BotSpam settings saved! :thumbsup:"))
         .then(u.clean).catch(console.error);
       } else if ((value == "none") || (value == "false")) {
         // REMOVE BOTSPAM
-        u.db.server.updateSetting(msg.guild, 'botspam', null);
+        Module.db..server.updateSetting(msg.guild, 'botspam', null);
         msg.channel.send("BotSpam settings saved! :thumbsup:"))
         .then(u.clean).catch(console.error);
       } else {
@@ -42,7 +42,7 @@ const Module = new Augur.Module()
           channel = msg.guild.channels.find('name', value);
         }
         if (channel) {
-          u.db.server.saveSetting(msg.guild, 'botspam', channel.id);
+          Module.db..server.saveSetting(msg.guild, 'botspam', channel.id);
           msg.channel.send("BotSpam settings saved! :thumbsup:")
           .then(u.clean).catch(console.error);
         } else {
@@ -56,14 +56,14 @@ const Module = new Augur.Module()
       if ((userMentions.size > 1) || ((userMentions.size == 1) && (userMentions.first().id != bot.user.id))) {
         msg.reply("you cannot set the command prefix to mention any user but me.").then(u.clean);
       } else {
-        u.db.server.saveSetting(msg.guild, 'prefix', value);
+        Module.db..server.saveSetting(msg.guild, 'prefix', value);
         msg.channel.send("Prefix settings saved! :thumbsup:")
         .then(u.clean).catch(console.error);
       }
     } else if ((setting == 'language') || (setting == 'locale')) {
       let locales = ["EN"];
       if (locales.includes(value.toUpperCase())) {
-        u.db.server.saveSetting(msg.guild, "language", value.toUpperCase());
+        Module.db..server.saveSetting(msg.guild, "language", value.toUpperCase());
         msg.channel.send("Language settings saved! :thumbsup:"))
         .then(u.clean).catch(console.error);
       } else {
