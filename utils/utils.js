@@ -1,13 +1,12 @@
 const Discord = require("discord.js"),
   config = require("../config/config.json"),
-  serverSettings = new Map(),
-  fs = require("fs"),
-  errorLog = new Discord.WebhookClient(config.error.id, config.error.token),
-  db = require("../" + config.db.model);
+  db = require("../" + config.db.model),
+  fs = require("fs");
+
+const errorLog = new Discord.WebhookClient(config.error.id, config.error.token),
+  serverSettings = new Map();
 
 const Utils = {
-  db: db,
-  // ERROR LOGGING
   alertError: function(error, msg = null, p = null) {
     if (!error) return;
 
@@ -45,21 +44,23 @@ const Utils = {
     if (msg) console.error(`${msg.author.username} in ${(msg.guild ? (msg.guild.name + " > " + msg.channel.name) : "DM")}: ${msg.cleanContent}`);
     console.trace(error);
   },
-  errorLog: errorLog,
-
-  // GENERAL UTILITY
+  botSpam: function(msg) {
+    if (msg.guild && msg.channel.id != "209046676781006849") {
+      db.server.getSetting(msg.guild, "botspam").then(botspam => {
+        if (botspam && (botspam != msg.channel.id)) {
+          msg.reply(`I've placed your results in <#${serverSettings[msg.guild.id].botspam}> to keep things nice and tidy in here. Hurry before they get cold!`)
+          .then(Utils.clean);
+          return msg.guild.channels.get(botspam);
+        } else return msg.channel;
+      });
+    } else return msg.channel;
+  },
   clean: function(msg, t = 10000) {
     if (msg.deletable) msg.delete(t);
   },
-  userMentions: function(msg) {
-    // Useful to ensure the bot isn't included in the mention list,
-    // such as when the bot mention is the command prefix
-    let bot = msg.client;
-    let userMentions = msg.mentions.users;
-    if (userMentions.has(bot.user.id)) userMentions.delete(bot.user.id);
-    return userMentions;
-  },
-
+  db: db,
+  embed: () => new Discord.RichEmbed().setColor(config.color),
+  errorLog: errorLog,
   parse: function(msg) {
     let prefix = Utils.prefix(msg);
     let message = msg.cleanContent;
@@ -69,13 +70,18 @@ const Utils = {
       return {command: command, suffix: parse.join(" ")};
     }
   },
-
   prefix: function(msg) {
     if (msg.guild) return db.server.getSetting(msg.guild, "prefix");
     else return config.prefix;
   },
-
-  embed: () => new Discord.RichEmbed().setColor(config.color)
+  userMentions: function(msg) {
+    // Useful to ensure the bot isn't included in the mention list,
+    // such as when the bot mention is the command prefix
+    let bot = msg.client;
+    let userMentions = msg.mentions.users;
+    if (userMentions.has(bot.user.id)) userMentions.delete(bot.user.id);
+    return userMentions;
+  }
 };
 
 module.exports = Utils;
