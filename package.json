@@ -17,6 +17,7 @@
     "augurbot": "^1.0.0",
     "cheerio": "^1.0.0-rc.2",
     "discord.js": "^11.3.2",
+    "mongoose": "^5.2.7",
     "request": "^2.87.0"
   }
 }
