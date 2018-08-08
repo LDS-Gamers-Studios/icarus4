@@ -58,7 +58,6 @@ const Utils = {
   clean: function(msg, t = 10000) {
     if (msg.deletable) msg.delete(t);
   },
-  db: db,
   embed: () => new Discord.RichEmbed().setColor(config.color),
   errorLog: errorLog,
   parse: function(msg) {
