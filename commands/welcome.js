@@ -8,7 +8,7 @@ const Module = new Augur.Module()
     let guild = member.guild;
     let bot = member.client;
 
-    let user = await Module.db.user.getUser(member.id);
+    let user = await Module.db.user.fetchUser(member.id);
 		let general = bot.channels.get("96335850576556032"); // #general
 		let welcomeChannel = bot.channels.get("121751722308796416"); // #welcome
     let modLogs = bot.channels.get("154676105247195146"); // #mod-logs
@@ -48,7 +48,7 @@ const Module = new Augur.Module()
 			welcomeString = `${r(welcome)}, ${member}! ${r(info1)} ${welcomeChannel} ${r(info2)}. ${r(info3)}`;
 			embed.setTitle(member.displayName + " has joined the server.");
 
-      db.user.newUser(member.id);
+      Module.db.user.newUser(member.id);
 		}
 
 		modLogs.send(embed);
