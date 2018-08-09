@@ -8,14 +8,14 @@ const Module = new Augur.Module()
 .addCommand({name: "code",
 	description: "Our Code of Conduct",
 	aliases: ["coc", "tos", "terms"],
-	category: "LDSG"
+	category: "LDSG",
 	process: (msg) => {
 		msg.channel.send("Please read our Code of Conduct:\nhttp://ldsgamers.com/code-of-conduct").catch(console.error);
 	}
 })
 .addCommand({name: "donate",
 	description: "Help us out!",
-	category: "LDSG"
+	category: "LDSG",
 	process: (msg) => {
 		let	embed = u.embed()
 			.setTitle("Donate to LDSG")
