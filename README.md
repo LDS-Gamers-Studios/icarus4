@@ -44,7 +44,7 @@ Module.addEvent("eventName", (...args) => {});
 
 ### Clockwork
 ```
-Module.addClockwork((bot) => { return setInterval(); });
+Module.setClockwork((bot) => { return setInterval(); });
 ```
 
 ### Unload

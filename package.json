@@ -14,7 +14,7 @@
   "license": "MIT",
   "homepage": "https://bitbucket.org/Gaiwecoor/icarus3#readme",
   "dependencies": {
-    "augurbot": "^1.0.1",
+    "augurbot": "^1.1.0",
     "cheerio": "^1.0.0-rc.2",
     "discord.js": "^11.3.2",
     "mongoose": "^5.2.7",
