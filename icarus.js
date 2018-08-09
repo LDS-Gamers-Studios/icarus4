@@ -1,10 +1,11 @@
-const Augur = require("./Augur"),
+const Augur = require("augurbot"),
   config = require("./config/config.json"),
   fs = require("fs"),
   path = require("path"),
   u = require("./utils/utils");
 
 function loadCommands(Handler) {
+  u.init(Handler);
   fs.readdirSync("./commands").forEach(command => {
     Handler.register(path.resolve(process.cwd(), "./commands/", command));
   });
