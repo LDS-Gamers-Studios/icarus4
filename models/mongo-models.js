@@ -32,6 +32,15 @@ const models = {
           else fulfill(animation);
         });
       });
+    },
+    fetchAll: function(time = 14) {
+      return new Promise((fulfill, reject) => {
+        let since = new Date(Date.now() - (time * 24 * 60 * 60 * 1000));
+        Animation.find({date: { $gte: since }}, (err, records) => {
+          if (err) reject(err);
+          else fulfill(records);
+        });
+      });
     }
   },
   bank: {

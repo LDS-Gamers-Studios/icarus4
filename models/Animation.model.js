@@ -3,6 +3,7 @@ var	mongoose = require('mongoose'),
 
 var AnimationSchema = new Schema({
 	animationId: String,
+	channelId: String,
 	date: {
 		type: Date,
 		default: Date.now
