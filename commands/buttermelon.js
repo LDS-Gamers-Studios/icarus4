@@ -32,6 +32,9 @@ function buttermelonEdit(msg) {
 			msg.react(bot.emojis.get(emojis.buttermelon)).catch(console.error);
 		else if (/carp/.test(msg.content.toLowerCase()) && (roll < .3))
 			msg.react("🐟").catch(console.error);
+
+    if ((msg.channel.id == "203518149809799168") && (msg.cleanContent.toLowerCase() == "test"))
+      msg.channel.send((Math.random() < 0.8 ? "`pass`" : "`fail`"));
 	}
 }
 
