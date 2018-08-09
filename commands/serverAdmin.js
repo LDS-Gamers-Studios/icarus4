@@ -26,12 +26,12 @@ const Module = new Augur.Module()
       if (msg.mentions.channels.size > 0) {
         // SAVE BY MENTION
         Module.db.server.saveSetting(msg.guild, 'botspam', msg.mentions.channels.first().id);
-        msg.channel.send("BotSpam settings saved! :thumbsup:"))
+        msg.channel.send("BotSpam settings saved! :thumbsup:")
         .then(u.clean).catch(console.error);
       } else if ((value == "none") || (value == "false")) {
         // REMOVE BOTSPAM
         Module.db.server.updateSetting(msg.guild, 'botspam', null);
-        msg.channel.send("BotSpam settings saved! :thumbsup:"))
+        msg.channel.send("BotSpam settings saved! :thumbsup:")
         .then(u.clean).catch(console.error);
       } else {
         // SAVE BY CHANNEL NAME
@@ -64,7 +64,7 @@ const Module = new Augur.Module()
       let locales = ["EN"];
       if (locales.includes(value.toUpperCase())) {
         Module.db.server.saveSetting(msg.guild, "language", value.toUpperCase());
-        msg.channel.send("Language settings saved! :thumbsup:"))
+        msg.channel.send("Language settings saved! :thumbsup:")
         .then(u.clean).catch(console.error);
       } else {
         msg.reply("Available languages include: " + locales.join(", "))
