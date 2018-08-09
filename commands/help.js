@@ -3,6 +3,8 @@ const Augur = require("augurbot"),
 
 const Module = new Augur.Module()
 .addCommand({name: "help",
+  description: "Get a list of available commands or more indepth info about a single command.",
+  syntax: "[command name]",
   aliases: ["commands"],
   process: (msg, suffix) => {
     u.clean(msg);
@@ -26,9 +28,17 @@ const Module = new Augur.Module()
 
       categories.unshift("General");
 
+      let i = 1;
       categories.forEach(category => {
-        commands.filter(c => c.category == category).sort((a, b) => a.name.localeCompare(b.name)).forEach(command => {
+        commands.filter(c => c.category == category && !c.hidden).sort((a, b) => a.name.localeCompare(b.name)).forEach((command) => {
           embed.addField(prefix + command.name + " " + command.syntax, (command.description ? command.description : "Description"), true);
+          if (i == 20) {
+            msg.author.send(embed);
+            embed = u.embed().setTitle(msg.client.user.username + " Commands" + (msg.guild ? ` in ${msg.guild.name}.` : ".") + " (Cont.)")
+            .setDescription(`You have access to the following commands. For more info, type \`${prefix}help <command>\`.`);
+            i = 0;
+          }
+          i++;
         });
       });
 
