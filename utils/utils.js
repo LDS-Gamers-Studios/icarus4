@@ -1,7 +1,8 @@
 const Discord = require("discord.js"),
   config = require("../config/config.json"),
-  db = require("../" + config.db.model),
-  fs = require("fs");
+  fs = require("fs"),
+  path = require("path"),
+  db = require(path.resolve(process.cwd(), config.db.model));
 
 const errorLog = new Discord.WebhookClient(config.error.id, config.error.token),
   serverSettings = new Map();
@@ -60,6 +61,7 @@ const Utils = {
   },
   embed: () => new Discord.RichEmbed().setColor(config.color),
   errorLog: errorLog,
+  init: (Handler) => db.init(Handler),
   parse: function(msg) {
     let prefix = Utils.prefix(msg);
     let message = msg.cleanContent;
