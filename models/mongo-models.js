@@ -248,23 +248,11 @@ const models = {
       });
     },
     getSetting: (guild, setting) => {
-      return new Promise((fulfill, reject) => {
-        if (serverSettings.has(guild.id)) {
-          fulfill(serverSettings.get(guild.id)[setting]);
-        } else {
-          Server.findOne({serverId: guild.id}, (e, server) => {
-            if (e) reject({ error: e });
-            else if (server) {
-                serverSettings.set(server.serverId, server)
-                fulfill(serverSettings.get(server.serverId)[setting]);
-            } else {
-              models.server.addServer(guild).then(server => {
-                fulfill(server[setting]);
-              }).catch(reject);
-            }
-          });
-        }
-      });
+      if (serverSettings.has(guild.id)) return serverSettings.get(guild.id)[setting];
+      else {
+        models.server.addServer(guild);
+        return null;
+      }
     },
     saveSetting: (guild, setting, value) => {
       return new Promise((fulfill, reject) => {
@@ -538,10 +526,20 @@ const models = {
         });
       });
     }
+  },
+  init: (Handler) => {
+    Handler.bot.guilds.forEach(guild => {
+      Server.findOne({serverId: guild.id}, (e, server) => {
+        if (!e && server) {
+          serverSettings.set(server.serverId, server);
+        } else {
+          models.server.addServer(guild).then(server => {
+            serverSettings.set(server.serverId, server);
+          });
+        }
+      });
+    });
   }
 };
 
-module.exports = {
-  server: Server,
-  user: User
-};
+module.exports = models;
