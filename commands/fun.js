@@ -389,7 +389,7 @@ const Module = new Augur.Module()
     ], "wut.gif");
   }
 })
-.addClockwork((bot) => {
+.setClockwork((bot) => {
   testBirthdays(bot);
   return setInterval(testBirthdays, 60 * 60 * 1000, bot);
 });
