@@ -52,7 +52,7 @@ const Module = new Augur.Module()
 })
 .addCommand({name: "unlock",
 	description: "Unlocks your current voice channel for new users",
-	permissions: (msg) => (msg.guild && (msg.guild.id == activeServer) && msg.member.voiceChannel && availableNames.includes(msg.member.voiceChannel.name)),
+	permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && msg.member.voiceChannel && availableNames.includes(msg.member.voiceChannel.name)),
 	process: (msg) => {
 		let channel = msg.member.voiceChannel;
 		if (channel && availableNames.includes(channel.name)) {
@@ -72,7 +72,7 @@ const Module = new Augur.Module()
 	}
 })
 .addEvent("voiceStateUpdate", (oldMember, newMember) => {
-  if ((oldMember.guild.id == activeServer) && (oldMember.voiceChannelID != newMember.voiceChannelID)) {
+  if ((oldMember.guild.id == Module.config.ldsg) && (oldMember.voiceChannelID != newMember.voiceChannelID)) {
     if (oldMember.voiceChannelID && (oldMember.voiceChannel.members.size == 0) && availableNames.includes(oldMember.voiceChannel.name)) {
       // REMOVE OLD VOICE CHANNEL
       oldMember.voiceChannel.overwritePermissions(oldMember.guild.id, {CONNECT: null}).then(() => {
