@@ -2,3 +2,8 @@ node_modules
 config/*
 !config/*-example.json
 test.js
+commands/*-h.js
+data/*
+!data/*-reference.json
+!data/birthday.json
+!data/buttermelon.json
