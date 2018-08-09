@@ -67,7 +67,7 @@ const Module = new Augur.Module()
       msg.reply(user + " has not set an avatar.").then(u.clean);
     }
   },
-},
+})
 .addCommand({name: "acronym",
   description: "Get a random 3-5 letter acronym. For science.",
   aliases: ["word"],
@@ -90,7 +90,7 @@ const Module = new Augur.Module()
       }
     }
   },
-},
+})
 .addCommand({name: "allthe",
   description: "ALL THE _____!",
   syntax: "something",
@@ -99,7 +99,7 @@ const Module = new Augur.Module()
     u.clean(msg, 0);
     if (suffix) msg.channel.send(`${(msg.member ? msg.member.displayName : msg.author.username)}:\nALL THE ${suffix.toUpperCase()}!`, {files: ["https://cdn.discordapp.com/emojis/250348426817044482.png"]});
   }
-},
+})
 .addCommand({name: "birthday",
   description: "It's your birthday!?",
   syntax: "@user", hide: true,
@@ -126,14 +126,14 @@ const Module = new Augur.Module()
     }
   },
   permissions: (msg) => Module.config.adminId.includes(msg.author.id)
-},
+})
 .addCommand({name: "chaos",
   description: "IT'S MADNESS!",
   hide: true,
   process: (msg) => {
     quickFile(msg, "https://cdn.discordapp.com/attachments/96335850576556032/452153983931383808/FireGifLDSG.gif", "fire.gif");
   }
-},
+})
 .addCommand({name: "disagree",
   description: "I'm not sure I agree...",
   hide: true,
@@ -143,7 +143,7 @@ const Module = new Augur.Module()
       "http://i.imgur.com/eBHIyVA.png"
     ], "disagree.png");
   }
-},
+})
 .addCommand({name: "explosion",
   description: "Set an explosion",
   hide: true,
@@ -151,7 +151,7 @@ const Module = new Augur.Module()
   process: (msg) => {
     quickText(msg, ":fire: :fire: :fire:");
   }
-},
+})
 .addCommand({name: "fine",
   description: "You're fined.",
   syntax: "@user", hide: true,
@@ -165,21 +165,21 @@ const Module = new Augur.Module()
     }
   },
   permissions: (msg) => (msg.guild && msg.member.roles.has(Module.config.roles.team))
-},
+})
 .addCommand({name: "fire",
   description: "Light a fire",
   hide: true,
   process: (msg) => {
     quickText(msg, "*lights a small fire in the corner*\nNothing to see here, citizens. Return to your homes.");
   }
-},
+})
 .addCommand({name: "guilty",
   description: "Guilty as charged",
   hide: true,
   process: (msg) => {
     quickFile(msg, "https://cdn.discordapp.com/attachments/228688325169512450/280196904279736320/ezgif.com-1f661bc6b6.gif", "guilty.gif");
   }
-},
+})
 .addCommand({name: "happydance",
   description: "Happy Dance!",
   hide: true,
@@ -191,13 +191,13 @@ const Module = new Augur.Module()
       "https://media.giphy.com/media/26AHwHFm6z7TffC2k/giphy.gif" // Erkel
     ], "happydance.gif");
   }
-},
+})
 .addCommand({name: "handicorn",
   description: "HANDICORN BATTLE!",
   process: (msg) => {
     msg.channel.send("https://youtu.be/rlxHJsSsUGk");
   }
-},
+})
 .addCommand({name: "hbs",
   description: "Handicorn, Buttermelon, Sloth!",
   syntax: "handicorn | buttermelon | sloth",
@@ -227,7 +227,7 @@ const Module = new Augur.Module()
       msg.reply("you need to tell me what you pick: handicorn, buttermelon, or sloth!").then(u.clean);
     }
   }
-},
+})
 .addCommand({name: "hug",
   description: "Send a much needed hug.",
   syntax: "@user(s)",
@@ -255,7 +255,7 @@ const Module = new Augur.Module()
         .then(u.clean).catch(console.error);
     }
   }
-},
+})
 .addCommand({name: "hype",
   description: "Hype train!",
   aliases: ["hypetrain"],
@@ -265,7 +265,7 @@ const Module = new Augur.Module()
     //quickText(msg, ":steam_locomotive: :regional_indicator_h: :train: :regional_indicator_y: :train: :regional_indicator_p: :train: :regional_indicator_e: :train:");
     quickText(msg, ":steam_locomotive: 🇭 :train: 🇾 :train: 🇵 :train: 🇪 :train:");
   }
-},
+})
 .addCommand({name: "isee",
   description: "I see what you did there!",
   hide: true,
@@ -278,14 +278,14 @@ const Module = new Augur.Module()
       "https://media.giphy.com/media/12ZDIx1Mw1cXVm/giphy.gif" // DeNiro
     ], "isee.gif");
   }
-},
+})
 .addCommand({name: "itsgreat",
   description: "It's great! Except...",
   hide: true,
   process: (msg) => {
     quickFile(msg, "https://cdn.discordapp.com/attachments/96335850576556032/294187421648551936/image.jpg");
   }
-},
+})
 .addCommand({name: "ohsnap",
   description: "Oh, snap!",
   aliases: ["snap"],
@@ -298,14 +298,14 @@ const Module = new Augur.Module()
       "https://media.giphy.com/media/3oEduNITi4GfwxY1Fu/giphy.gif" // Fallon
     ], "ohsnap.gif");
   }
-},
+})
 .addCommand({name: "poke",
   description: "Poke it with a stick.",
   hide: true,
   process: (msg) => {
     quickFile(msg, "https://cdn.discordapp.com/attachments/209046676781006849/279365238699327490/image.gif");
   }
-},
+})
 .addCommand({name: "popcorn",
   description: "Popcorn",
   hide: true,
@@ -319,7 +319,7 @@ const Module = new Augur.Module()
       "https://media.giphy.com/media/NipFetnQOuKhW/giphy.gif" // Animal
     ], "popcorn.gif");
   }
-},
+})
 .addCommand({name: "rainbow",
   description: "Care Bear Stare",
   aliases: ["carebearstare"],
@@ -327,7 +327,7 @@ const Module = new Augur.Module()
   process: (msg) => {
     quickFile(msg, "https://cdn.discordapp.com/attachments/193042027066163200/288769459764854795/carebearstare.png", "carebearstare.png", false);
   }
-},
+})
 .addCommand({name: "salty",
   description: "Salty",
   aliases: ["salt"],
@@ -339,7 +339,7 @@ const Module = new Augur.Module()
       "https://media.giphy.com/media/7f2iTqiznYKvm/giphy.gif" // Hocus Pocus
     ], "salty.gif");
   }
-},
+})
 .addCommand({name: "shrug",
   description: "¯\_(ツ)_/¯",
   hide: true,
@@ -356,21 +356,21 @@ const Module = new Augur.Module()
       "https://cdn.discordapp.com/attachments/193042027066163200/301730491399274496/giphy.gif" // Colin
     ], "shrug.gif");
   }
-},
+})
 .addCommand({name: "troll",
   description: "Trollery detected.",
   hide: true,
   process: (msg) => {
     quickText(msg, "**Trollery Detected.**\nDispatching Troll Train.\n\n:train: :train: :train:");
   }
-},
+})
 .addCommand({name: "questions",
   description: "I now have additional questions.",
   hide: true,
   process: (msg) => {
     quickFile(msg, "http://i.imgur.com/SeHYADn.gif", "questions.gif");
   }
-},
+})
 .addCommand({name: "wut",
   description: "Wut?",
   hide: true,
@@ -388,7 +388,7 @@ const Module = new Augur.Module()
       "https://giphy.com/gifs/hulu-snl-saturday-night-live-nbc-3o7TKQ8kAP0f9X5PoY" // SNL
     ], "wut.gif");
   }
-};
+})
 .addClockwork((bot) => {
   testBirthdays(bot);
   return setInterval(testBirthdays, 60 * 60 * 1000, bot);
