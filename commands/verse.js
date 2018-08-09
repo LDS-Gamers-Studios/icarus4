@@ -182,7 +182,14 @@ const Module = new Augur.Module()
         if (alias[scripture.book]) scripture.book = alias[scripture.book];
         if (books[scripture.book]) {
           let link = `https://www.lds.org/scriptures/${books[scripture.book].work}/${scripture.book}/${scripture.chapter}${(scripture.verse ? ("." + scripture.verse + "#p" + scripture.start) : "")}`;
-          msg.channel.send(`**${books[scripture.book].title} ${scripture.chapter}${(scripture.verse ? (":" + scripture.verse) : "")}**\n<${link}>${(scripture.text ? ("\n```\n" + scripture.text + "\n```") : "")}`, {split: {char: "\n\n", append: "```", prepend: "```"}});
+					if (scripture.text) {
+						let embed = u.embed()
+						.setTitle(`${books[scripture.book].title} ${scripture.chapter}${(scripture.verse ? (":" + scripture.verse) : "")}`)
+						.setColor(0x012b57)
+						.setURL(link)
+						.setDescription((scripture.text.length > 1000 ? scripture.text.slice(0, 1000) + "..." : scripture.text));
+						msg.channel.send(embed);
+					} else msg.channel.send(`**${books[scripture.book].title} ${scripture.chapter}${(scripture.verse ? (":" + scripture.verse) : "")}**\n<${link}>`);
         } else msg.reply("sorry, I couldn't understand that reference.").then(u.clean);
       } else msg.reply("sorry, I couldn't understand that reference.").then(u.clean);
     } else msg.reply("you need to tell me which scripture to find!").then(u.clean);
