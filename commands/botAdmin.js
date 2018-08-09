@@ -90,7 +90,9 @@ const Module = new Augur.Module()
 .addCommand({name: "gotobed",
   category: "Admin",
   hidden: true,
+  aliases: ["q"],
   process: async function(msg) {
+    await msg.send("Going to bed now... :bed:");
     if (msg.client.shard) {
       msg.client.shard.broadcastEval("this.destroy().then(() => process.exit())");
     } else {
@@ -106,12 +108,15 @@ const Module = new Augur.Module()
   description: "Reload command files.",
   info: "Use the command without a suffix to reload all command files.\n\nUse the command with the module name (including the `.js`) to reload a specific file.",
   process: (msg, suffix) => {
+    u.clean(msg);
     let path = require("path");
     let files = (suffix ? suffix.split(" ") : fs.readdirSync(path.resolve(process.cwd(), "./commands")));
 
     files.forEach(file => {
       Module.handler.reload(path.resolve(process.cwd(), "./commands/", file));
     });
+
+    msg.channel.send("Reloaded " + files.join(", ")).then(u.clean);
   },
   permissions: (msg) => Module.config.adminId.includes(msg.author.id)
 });
