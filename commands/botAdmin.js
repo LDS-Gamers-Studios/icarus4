@@ -54,7 +54,7 @@ const Module = new Augur.Module()
   description: "Check the bot's heartbeat",
   process: async function(msg, suffix) {
     let bot = msg.client;
-    let Handler = Module.Handler;
+    let Handler = Module.handler;
 
     let embed = u.embed()
     .setAuthor(bot.user.username + " Heartbeat", bot.user.displayAvatarURL)
