@@ -7,7 +7,6 @@ const Module = new Augur.Module()
   syntax: "<botspam | prefix | language> <value>",
   info: "Updates server-specific settins.\n**SERVER ADMINS ONLY**\n* botspam #channel | here | none\n* prefix !\n* language EN | FR",
   aliases: ["setting", "set"],
-  hide: false,
   category: "Admin",
   process: function(msg, suffix) {
     let args = suffix.split(" ");

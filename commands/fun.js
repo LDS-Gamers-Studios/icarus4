@@ -94,7 +94,7 @@ const Module = new Augur.Module()
 .addCommand({name: "allthe",
   description: "ALL THE _____!",
   syntax: "something",
-  hide: true,
+  hidden: true,
   process: (msg, suffix) => {
     u.clean(msg, 0);
     if (suffix) msg.channel.send(`${(msg.member ? msg.member.displayName : msg.author.username)}:\nALL THE ${suffix.toUpperCase()}!`, {files: ["https://cdn.discordapp.com/emojis/250348426817044482.png"]});
@@ -102,7 +102,7 @@ const Module = new Augur.Module()
 })
 .addCommand({name: "birthday",
   description: "It's your birthday!?",
-  syntax: "@user", hide: true,
+  syntax: "@user", hidden: true,
   process: (msg) => {
     if (msg.mentions.users && msg.mentions.users.size > 0) {
       let birthday = msg.mentions.users.first();
@@ -129,14 +129,14 @@ const Module = new Augur.Module()
 })
 .addCommand({name: "chaos",
   description: "IT'S MADNESS!",
-  hide: true,
+  hidden: true,
   process: (msg) => {
     quickFile(msg, "https://cdn.discordapp.com/attachments/96335850576556032/452153983931383808/FireGifLDSG.gif", "fire.gif");
   }
 })
 .addCommand({name: "disagree",
   description: "I'm not sure I agree...",
-  hide: true,
+  hidden: true,
   process: (msg) => {
     quickFile(msg, [
       "https://cdn.discordapp.com/attachments/136577505418018826/274593594256523284/2FNHWnX.png",
@@ -146,7 +146,7 @@ const Module = new Augur.Module()
 })
 .addCommand({name: "explosion",
   description: "Set an explosion",
-  hide: true,
+  hidden: true,
   aliases: ["explode"],
   process: (msg) => {
     quickText(msg, ":fire: :fire: :fire:");
@@ -154,7 +154,7 @@ const Module = new Augur.Module()
 })
 .addCommand({name: "fine",
   description: "You're fined.",
-  syntax: "@user", hide: true,
+  syntax: "@user", hidden: true,
   process: (msg) => {
     if (msg.mentions.users.size > 0) {
       msg.mentions.users.forEach(function(user) {
@@ -168,21 +168,21 @@ const Module = new Augur.Module()
 })
 .addCommand({name: "fire",
   description: "Light a fire",
-  hide: true,
+  hidden: true,
   process: (msg) => {
     quickText(msg, "*lights a small fire in the corner*\nNothing to see here, citizens. Return to your homes.");
   }
 })
 .addCommand({name: "guilty",
   description: "Guilty as charged",
-  hide: true,
+  hidden: true,
   process: (msg) => {
     quickFile(msg, "https://cdn.discordapp.com/attachments/228688325169512450/280196904279736320/ezgif.com-1f661bc6b6.gif", "guilty.gif");
   }
 })
 .addCommand({name: "happydance",
   description: "Happy Dance!",
-  hide: true,
+  hidden: true,
   aliases: ["happy"],
   process: (msg) => {
     quickFile(msg, [
@@ -201,7 +201,7 @@ const Module = new Augur.Module()
 .addCommand({name: "hbs",
   description: "Handicorn, Buttermelon, Sloth!",
   syntax: "handicorn | buttermelon | sloth",
-  hide: true,
+  hidden: true,
   aliases: ["rps", "bhs", "sbh", "bsh", "hsb", "shb"],
   process: (msg, suffix) => {
     if (suffix && (suffix.toLowerCase().startsWith("b") || suffix.toLowerCase().startsWith("h") || suffix.toLowerCase().startsWith("s"))) {
@@ -232,7 +232,7 @@ const Module = new Augur.Module()
   description: "Send a much needed hug.",
   syntax: "@user(s)",
   info: "Sends someone a hug via direct message.",
-  hide: true,
+  hidden: true,
   process: (msg, suffix) => {
     u.clean(msg);
     if (msg.mentions.users && (msg.mentions.users.size > 0)) {
@@ -260,7 +260,7 @@ const Module = new Augur.Module()
   description: "Hype train!",
   aliases: ["hypetrain"],
   info: "Dispatching Hype Train",
-  hide: true,
+  hidden: true,
   process: (msg) => {
     //quickText(msg, ":steam_locomotive: :regional_indicator_h: :train: :regional_indicator_y: :train: :regional_indicator_p: :train: :regional_indicator_e: :train:");
     quickText(msg, ":steam_locomotive: 🇭 :train: 🇾 :train: 🇵 :train: 🇪 :train:");
@@ -268,7 +268,7 @@ const Module = new Augur.Module()
 })
 .addCommand({name: "isee",
   description: "I see what you did there!",
-  hide: true,
+  hidden: true,
   aliases: ["whatyoudid", "whatudid"],
   process: (msg) => {
     quickFile(msg, [
@@ -281,7 +281,7 @@ const Module = new Augur.Module()
 })
 .addCommand({name: "itsgreat",
   description: "It's great! Except...",
-  hide: true,
+  hidden: true,
   process: (msg) => {
     quickFile(msg, "https://cdn.discordapp.com/attachments/96335850576556032/294187421648551936/image.jpg");
   }
@@ -289,7 +289,7 @@ const Module = new Augur.Module()
 .addCommand({name: "ohsnap",
   description: "Oh, snap!",
   aliases: ["snap"],
-  hide: true,
+  hidden: true,
   process: (msg) => {
     quickFile(msg, [
       "https://cdn.discordapp.com/attachments/154625360514777088/281635879238369280/giphy-9.gif", // Andy Dwyer
@@ -301,14 +301,14 @@ const Module = new Augur.Module()
 })
 .addCommand({name: "poke",
   description: "Poke it with a stick.",
-  hide: true,
+  hidden: true,
   process: (msg) => {
     quickFile(msg, "https://cdn.discordapp.com/attachments/209046676781006849/279365238699327490/image.gif");
   }
 })
 .addCommand({name: "popcorn",
   description: "Popcorn",
-  hide: true,
+  hidden: true,
   process: (msg) => {
     quickFile(msg, [
       "https://media.giphy.com/media/tFK8urY6XHj2w/giphy.gif", // Colbert
@@ -323,7 +323,7 @@ const Module = new Augur.Module()
 .addCommand({name: "rainbow",
   description: "Care Bear Stare",
   aliases: ["carebearstare"],
-  hide: true,
+  hidden: true,
   process: (msg) => {
     quickFile(msg, "https://cdn.discordapp.com/attachments/193042027066163200/288769459764854795/carebearstare.png", "carebearstare.png", false);
   }
@@ -331,7 +331,7 @@ const Module = new Augur.Module()
 .addCommand({name: "salty",
   description: "Salty",
   aliases: ["salt"],
-  hide: true,
+  hidden: true,
   process: (msg) => {
     quickFile(msg, [
       "https://cdn.discordapp.com/attachments/209046676781006849/294937224137670656/salty.gif", // Ice age
@@ -342,7 +342,7 @@ const Module = new Augur.Module()
 })
 .addCommand({name: "shrug",
   description: "¯\_(ツ)_/¯",
-  hide: true,
+  hidden: true,
   process: (msg) => {
     quickFile(msg, [
       "https://cdn.discordapp.com/attachments/193042027066163200/301729544618901514/giphy.gif", // Compilation
@@ -359,21 +359,21 @@ const Module = new Augur.Module()
 })
 .addCommand({name: "troll",
   description: "Trollery detected.",
-  hide: true,
+  hidden: true,
   process: (msg) => {
     quickText(msg, "**Trollery Detected.**\nDispatching Troll Train.\n\n:train: :train: :train:");
   }
 })
 .addCommand({name: "questions",
   description: "I now have additional questions.",
-  hide: true,
+  hidden: true,
   process: (msg) => {
     quickFile(msg, "http://i.imgur.com/SeHYADn.gif", "questions.gif");
   }
 })
 .addCommand({name: "wut",
   description: "Wut?",
-  hide: true,
+  hidden: true,
   aliases: ["what", "odd", "huh", "wat"],
   process: (msg) => {
     quickFile(msg, [
