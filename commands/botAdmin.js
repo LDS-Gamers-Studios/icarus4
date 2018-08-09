@@ -92,7 +92,7 @@ const Module = new Augur.Module()
   hidden: true,
   aliases: ["q"],
   process: async function(msg) {
-    await msg.send("Going to bed now... :bed:");
+    await msg.channel.send("Going to bed now... :bed:");
     if (msg.client.shard) {
       msg.client.shard.broadcastEval("this.destroy().then(() => process.exit())");
     } else {
