@@ -78,7 +78,7 @@ const Module = new Augur.Module()
       msg.reply("you didn't give me a valid role to apply.").then(u.clean);
     }
   }
-},
+})
 .addCommand({name: "removechannel",
   description: "Remove a channel",
   syntax: Object.keys(roles).join(" | "),
@@ -101,7 +101,7 @@ const Module = new Augur.Module()
       msg.reply("you didn't give me a valid role to remove.").then(u.clean);
     }
   }
-},
+})
 .addCommand({name: "role",
   description: "See who has a role.",
   syntax: "[role name]",
@@ -112,6 +112,6 @@ const Module = new Augur.Module()
     else msg.channel.send("I couldn't find that role. :shrug:");
   },
   permissions: (msg) => msg.guild
-}
+});
 
 module.exports = Module;
