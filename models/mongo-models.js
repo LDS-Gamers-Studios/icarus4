@@ -134,7 +134,7 @@ const models = {
   infraction: {
     getSummary: (userId, time = 28) => {
       return new Promise((fulfill, reject) => {
-        let since = new Date(Date.now() - (time * day));
+        let since = new Date(Date.now() - (time * 24 * 60 * 60 * 1000));
         Infraction.find({discordId: userId, timestamp: { $gte: since }}, (err, records) => {
           if (err) {
             reject(err);
@@ -282,7 +282,7 @@ const models = {
     },
     fetchAll: function(time = 14) {
       return new Promise((fulfill, reject) => {
-        let since = new Date(Date.now() - (time * day));
+        let since = new Date(Date.now() - (time * 24 * 60 * 60 * 1000));
         Spoiler.find({timestamp: { $gte: since }}, (err, records) => {
           if (err) reject(err);
           else fulfill(records);
