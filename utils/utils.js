@@ -41,13 +41,12 @@ const Utils = {
   },
   botSpam: function(msg) {
     if (msg.guild && msg.channel.id != "209046676781006849") {
-      db.server.getSetting(msg.guild, "botspam").then(botspam => {
-        if (botspam && (botspam != msg.channel.id)) {
-          msg.reply(`I've placed your results in <#${serverSettings[msg.guild.id].botspam}> to keep things nice and tidy in here. Hurry before they get cold!`)
-          .then(Utils.clean);
-          return msg.guild.channels.get(botspam);
-        } else return msg.channel;
-      });
+      let botspam = db.server.getSetting(msg.guild, "botspam");
+      if (botspam && (botspam != msg.channel.id)) {
+        msg.reply(`I've placed your results in <#${serverSettings[msg.guild.id].botspam}> to keep things nice and tidy in here. Hurry before they get cold!`)
+        .then(Utils.clean);
+        return msg.guild.channels.get(botspam);
+      } else return msg.channel;
     } else return msg.channel;
   },
   clean: function(msg, t = 10000) {
