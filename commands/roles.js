@@ -2,11 +2,11 @@ const Augur = require("augurbot"),
   u = require("../utils/utils");
 
 const roles = {
-	"overwatch pc": "184397175978065921",
-	"overwatch ps": "184397093954125825",
-	"overwatch xb": "184396518143426570",
-	"ark pc": "258329492030750721",
-	"ark xb": "258329149859561484",
+	//"overwatch pc": "184397175978065921",
+	//"overwatch ps": "184397093954125825",
+	//"overwatch xb": "184396518143426570",
+	//"ark pc": "258329492030750721",
+	//"ark xb": "258329149859561484",
 	"firearms": "348136185106923521",
 	"rhythm": "360444518190940163",
 	"twitch raider": "309889486521892865",
