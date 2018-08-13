@@ -4,7 +4,7 @@ const Augur = require("augurbot"),
 const Module = new Augur.Module()
 .addCommand({name: "whoisplaying",
 	description: "Find who is playing a game in the server",
-	suffix: "[game name]",
+	suffix: "<game name>",
 	aliases: ["who'splaying", "whosplaying", "whoson", "whoison", "who'son"],
 	process: (msg, suffix) => {
 		if (suffix) {

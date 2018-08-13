@@ -9,7 +9,7 @@ const pf = new profanityFilter();
 const Module = new Augur.Module()
 .addCommand({name: "giphy",
 	description: "Post a gif reaction. Powered by GIPHY.",
-	syntax: "reaction",
+	syntax: "<reaction>",
 	aliases: ["gif", "react"],
   permissions: (msg) => (msg.guild && msg.channel.permissionsFor(msg.member).has(["EMBED_LINKS", "ATTACH_FILES"]) && msg.channel.permissionsFor(msg.client.user).has("ATTACH_FILES")),
 	process: (msg, suffix) => {

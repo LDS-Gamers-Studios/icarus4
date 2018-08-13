@@ -40,7 +40,7 @@ const Module = new Augur.Module()
 })
 .addCommand({name: "champion",
 	description: "Declare an LDSG Champion!",
-	syntax: "@user(s) <Tournament Name>",
+	syntax: "<@user(s)> <Tournament Name>",
 	process: (msg, suffix) => {
     let path = require("path");
     let fs = require("fs");
@@ -64,7 +64,7 @@ const Module = new Augur.Module()
 })
 .addCommand({name: "participant",
 	description: "Add or remove members from the Tournament Paricipant role",
-	syntax: "add/remove @user, clean",
+	syntax: "add <@user> | remove <@user> | clean",
 	process: (msg, suffix) => {
 		let role = "309889475633348608";
 		u.clean(msg);

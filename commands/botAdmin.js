@@ -32,7 +32,7 @@ const Module = new Augur.Module()
 })
 .addCommand({name: "playing",
 	description: "Set playing status",
-	syntax: "<game>",
+	syntax: "[game]",
 	aliases: ["setgame", "game"],
 	process: (msg, suffix) => {
 		if (suffix) msg.client.user.setActivity(suffix);
@@ -104,7 +104,7 @@ const Module = new Augur.Module()
 })
 .addCommand({name: "reload",
   category: "Admin",
-  syntax: "<file1.js> <file2.js>",
+  syntax: "[file1.js] [file2.js]",
   description: "Reload command files.",
   info: "Use the command without a suffix to reload all command files.\n\nUse the command with the module name (including the `.js`) to reload a specific file.",
   process: (msg, suffix) => {

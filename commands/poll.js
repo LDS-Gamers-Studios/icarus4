@@ -5,7 +5,7 @@ const Augur = require("augurbot"),
 const Module = new Augur.Module()
 .addCommand({name: "quote",
   description: "Create a StrawPoll.me poll",
-  syntax: "Title | Option 1 | Option 2",
+  syntax: "<Title> | <Option 1> | <Option 2>",
   process: (msg, suffix) => {
     let options = suffix.split("|").map(o => o.trim());
     let title = options.shift();

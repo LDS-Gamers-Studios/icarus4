@@ -104,12 +104,14 @@ const Module = new Augur.Module()
 })
 .addCommand({name: "role",
   description: "See who has a role.",
-  syntax: "[role name]",
+  syntax: "<role name>",
   process: (msg, suffix) => {
-    let guild = msg.guild;
-    let role = guild.roles.find(r => r.name.toLowerCase() == suffix.toLowerCase());
-    if (role) msg.channel.send(`Members with the ${role.name} role:\n\`\`\`${role.members.map(m => m.displayName).join("\n")}\`\`\``, {split: {prepend: "```", append: "```"}});
-    else msg.channel.send("I couldn't find that role. :shrug:");
+    if (suffix) {
+      let guild = msg.guild;
+      let role = guild.roles.find(r => r.name.toLowerCase() == suffix.toLowerCase());
+      if (role) msg.channel.send(`Members with the ${role.name} role:\n\`\`\`${role.members.map(m => m.displayName).join("\n")}\`\`\``, {split: {prepend: "```", append: "```"}});
+      else msg.channel.send("I couldn't find that role. :shrug:");
+    } else msg.reply("you need to tell me a role to find!").then(u.clean);
   },
   permissions: (msg) => msg.guild
 });

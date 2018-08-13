@@ -52,7 +52,7 @@ function testBirthdays(bot) {
 const Module = new Augur.Module()
 .addCommand({name: "avatar",
   description: "Get a user's avatar",
-  syntax: "@user",
+  syntax: "[@user]",
   process: (msg) => {
     let user = ((u.userMentions(msg)) ? bot.users.get(u.userMentions(msg).first()) : msg.author);
     if (user.avatarURL) {
@@ -102,7 +102,7 @@ const Module = new Augur.Module()
 })
 .addCommand({name: "birthday",
   description: "It's your birthday!?",
-  syntax: "@user", hidden: true,
+  syntax: "<@user>", hidden: true,
   process: (msg) => {
     if (msg.mentions.users && msg.mentions.users.size > 0) {
       let birthday = msg.mentions.users.first();
@@ -154,7 +154,7 @@ const Module = new Augur.Module()
 })
 .addCommand({name: "fine",
   description: "You're fined.",
-  syntax: "@user", hidden: true,
+  syntax: "<@user>", hidden: true,
   process: (msg) => {
     if (msg.mentions.users.size > 0) {
       msg.mentions.users.forEach(function(user) {
@@ -230,7 +230,7 @@ const Module = new Augur.Module()
 })
 .addCommand({name: "hug",
   description: "Send a much needed hug.",
-  syntax: "@user(s)",
+  syntax: "<@user(s)>",
   info: "Sends someone a hug via direct message.",
   hidden: true,
   process: (msg, suffix) => {

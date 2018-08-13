@@ -6,7 +6,7 @@ const Augur = require("augurbot"),
 const Module = new Augur.Module()
 .addCommand({name: "info",
   description: "Check when a user joined the server",
-  syntax: "@user",
+  syntax: "[@user]",
   category: "Members",
   process: (msg, suffix) => {
     let users = [msg.author];
