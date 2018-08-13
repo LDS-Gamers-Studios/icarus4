@@ -54,7 +54,7 @@ const Module = new Augur.Module()
   description: "Get a user's avatar",
   syntax: "@user",
   process: (msg) => {
-    let user = ((u.userMentions(msg)) ? bot.users.get(u.userMentions(msg)[0]) : msg.author);
+    let user = ((u.userMentions(msg)) ? bot.users.get(u.userMentions(msg).first()) : msg.author);
     if (user.avatarURL) {
       let member = ((msg.guild) ? msg.guild.members.get(user.id) : null);
       let name = (member ? member.displayName : user.username);

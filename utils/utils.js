@@ -75,7 +75,7 @@ const Utils = {
     let bot = msg.client;
     let userMentions = msg.mentions.users;
     if (userMentions.has(bot.user.id)) userMentions.delete(bot.user.id);
-    return userMentions;
+    return (userMentions.size > 0 ? userMentions : null);
   }
 };
 
