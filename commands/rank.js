@@ -1,6 +1,6 @@
 const Augur = require("augurbot"),
   Rank = require("../utils/RankInfo"),
-  u = require("../utils/utils"),
+  u = require("../utils/utils");
 
 var active = [],
   stars = {};
