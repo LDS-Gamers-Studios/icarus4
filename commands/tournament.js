@@ -2,13 +2,73 @@ const Augur = require("augurbot"),
   u = require("../utils/utils");
 
 const Module = new Augur.Module()
-.addCommand({name: "tournament",
+.addCommand({name: "bracket",
+	description: "Find upcoming LDSG tournaments.",
+	aliases: ["tournament", "tournaments", "tourneys", "tourney", "challonge", "brackets"],
+	process: async (msg) => {
+    let challonge = require("../utils/Challonge").init(Module.config.api.challonge);
+		let embed = u.embed();
+
+		embed.setDescription("Upcoming and Current LDSG Tournaments");
+
+    let responses = await Promise.all([
+      challonge.getTournamentsIndex({state: "pending", subdomain: "ldsg"}),
+      challonge.getTournamentsIndex({state: "in_progress", subdomain: "ldsg"})
+    ]);
+
+		let now = new Date();
+
+    let tournaments = responses.reduce((full, response) => full.concat(response), []);
+
+		tournaments.sort((a, b) => {
+			var aDate = new Date(a.tournament.start_at);
+			var bDate = new Date(b.tournament.start_at);
+			return aDate.getTime() - bDate.getTime();
+		});
+
+		tournaments.forEach(function(tournament){
+			let displayDate = (tournament.tournament.start_at ? new Date(tournament.tournament.start_at) : "Unscheduled");
+      if (typeof displayDate != "string") displayDate = displayDate.toDateString();
+
+			embed.addField(displayDate, `[${tournament.tournament.name}](${tournament.tournament.full_challonge_url})`);
+		});
+
+		if (embed.fields.length == 0) embed.addField("Community Tournaments", "No upcoming community tournaments found.");
+		else embed.description += "\n\nCommunity Tournaments:";
+		msg.channel.send(embed);
+	}
+})
+.addCommand({name: "champion",
+	description: "Declare an LDSG Champion!",
+	syntax: "@user(s) <Tournament Name>",
+	process: (msg, suffix) => {
+    let path = require("path");
+    let fs = require("fs");
+
+		u.clean(msg);
+		let reason = suffix.replace(/<@!?\d+>/g, "").trim();
+		if ((msg.mentions.members.size > 0) && (reason.length > 0)) {
+			msg.mentions.members.forEach(member => {
+				member.addRole(championRole);
+				champions[member.id] = new Date(Date.now() + (3 * 7 * 24 * 60 * 60 * 1000));
+			});
+			fs.writeFile(path.resolve(process.cwd, "./data/champions.json"), JSON.stringify(champions), (err) => {
+				if (err) console.error("ERROR UPDATING CHAMPIONS:", err);
+				else console.log("Champions update");
+			});
+			msg.guild.channels.get("121752198731268099").send(`Congratulations to our new tournament champions, ${Array.from(msg.mentions.members.values()).join(", ")}!\n\nTheir performance landed them the champion slot in the ${reason}, and they'll hold on to the LDSG Tourney Champion role for a few weeks.`);
+		} else
+      msg.reply("you need to tell me who to give the Tourney Champion role and the tournament name!").then(u.clean);
+	},
+	permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && msg.member.roles.has(Module.config.roles.team))
+})
+.addCommand({name: "participant",
 	description: "Add or remove members from the Tournament Paricipant role",
-	syntax: "add/remove @user, stop",
+	syntax: "add/remove @user, clean",
 	process: (msg, suffix) => {
 		let role = "309889475633348608";
 		u.clean(msg);
-		if ((suffix.toLowerCase() == "stop") || (suffix.toLowerCase() == "done")) {
+		if ((suffix.toLowerCase() == "clean")) {
 			msg.guild.roles.get(role).members.forEach(member => {
 				member.removeRole(role);
 			});
@@ -36,7 +96,7 @@ const Module = new Augur.Module()
 			msg.reply("you need to tell me whether to add or remove the user to the channel.").then(u.clean);
 		}
 	},
-	permissions: (msg) => (msg.guild && (msg.member.roles.has("96345401078087680")))
-})
+	permissions: (msg) => (msg.guild && (msg.member.roles.has(Module.config.roles.team)))
+});
 
 module.exports = Module;

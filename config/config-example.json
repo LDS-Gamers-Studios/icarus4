@@ -12,7 +12,9 @@
   "prefix": "!",
   "ownerId": "",
   "adminId": [],
-  "api": {},
+  "api": {
+    "challonge": ""
+  },
   "color": [248, 154, 34],
   "error": {
     "id": "",
