@@ -53,7 +53,7 @@ const Module = new Augur.Module()
 		if (u.userMentions(msg)) user = u.userMentions(msg).first();
 
 		let userDoc = await Module.db.user.findXPRank(user);
-		let member = msg.client.guilds.get(ldsg).members.get(userDoc.discordId);
+		let member = msg.client.guilds.get(Module.config.ldsg).members.get(userDoc.discordId);
 		let response = null;
 		if (Rank.excludeUsers.includes(member.id) || member.user.bot) {
 			let snark = [
@@ -67,7 +67,7 @@ const Module = new Augur.Module()
 			userDoc.nextLevel = parseInt(Rank.minXp(userDoc.level + 1), 10).toLocaleString();
 			response = u.embed()
 				.setAuthor(member.displayName, (member.user.displayAvatarURL ? member.user.displayAvatarURL : null))
-				.addField("Rank", `Current: ${userDoc.currentRank}/${msg.client.guilds.get(ldsg).memberCount}\nLifetime: ${userDoc.lifeRank}/${msg.client.guilds.get(ldsg).memberCount}`, true)
+				.addField("Rank", `Current: ${userDoc.currentRank}/${msg.client.guilds.get(Module.config.ldsg).memberCount}\nLifetime: ${userDoc.lifeRank}/${msg.client.guilds.get(Module.config.ldsg).memberCount}`, true)
 				.addField("Level", `Current Level: ${userDoc.level}\nNext Level: ${userDoc.nextLevel} XP`, true)
 				.addField("Exp.", `Current: ${parseInt(userDoc.currentXP, 10).toLocaleString()} XP\nLifetime: ${parseInt(userDoc.totalXP, 10).toLocaleString()} XP`, true)
 				.setTitle("LDSG Chat Ranking")
@@ -134,7 +134,7 @@ const Module = new Augur.Module()
 					let oldLvl = Rank.level(oldXP);
 
 					if (lvl != oldLvl) {
-						let member = bot.guilds.get(ldsg).members.get(user.discordId);
+						let member = bot.guilds.get(Module.config.ldsg).members.get(user.discordId);
 						let message = u.rand(Rank.messages) + " " + u.rand(Rank.levelPhrase).replace("%LEVEL%", lvl);
 
 						if (Rank.rewards.has(lvl)) {
