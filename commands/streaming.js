@@ -121,15 +121,15 @@ function processTwitch(bot, key, channel) {
 		member = ldsg.members.get(key);
 
   try {
-    twitch.getChannelStream(twitchChannel, function(error, body) {
+    twitch.getChannelStream(channel, function(error, body) {
       if (error) {
-        if (error.status == 400) console.log("TWITCH:", twitchChannel);
+        if (error.status == 400) console.log("TWITCH:", channel);
         console.log(error);
       } else if (body.stream) {
         let status = twitchStatus.get(key);
         if (!status || ((status.status == "offline") && ((Date.now() - status.since) >= (30 * 60 * 1000)))) {
           // Is LDSG streaming? Set Icarus status
-          if (twitchChannel.toLowerCase() == "ldsgamers") {
+          if (channel.toLowerCase() == "ldsgamers") {
             bot.user.setActivity(
               body.stream.channel.status,
               {
@@ -149,7 +149,7 @@ function processTwitch(bot, key, channel) {
         }
       } else if (twitchStatus.has(key) && (twitchStatus.get(key).status == "online")) {
         // Is LDSG streaming? Set Icarus status
-        if (twitchChannel.toLowerCase() == "ldsgamers") {
+        if (channel.toLowerCase() == "ldsgamers") {
           bot.user.setGame("");
         }
         if (liveRole.members.has(member.id)) member.removeRole(liveRole);
@@ -308,11 +308,8 @@ const Module = new Augur.Module()
     let twitchIgns = await Module.db.ign.getList("twitch");
     let mixerIgns = await Module.db.ign.getList("mixer");
 
-    //let twitchChannels = igns.filter(ign => msg.guild.members.has(ign.discordId)).map(ign => ign.ign);
-    //let mixerChannels = igns.filter(ign => msg.guild.members.has(ign.discordId)).map(ign => ign.ign);
-
-    let twitchChannels = twitchIgns.map(ign => ign.ign);
-    let mixerChannels = mixerIgns.map(ign => ign.ign);
+    let twitchChannels = igns.filter(ign => msg.guild.members.has(ign.discordId)).map(ign => ign.ign);
+    let mixerChannels = igns.filter(ign => msg.guild.members.has(ign.discordId)).map(ign => ign.ign);
 
     // Fetch channels from Twitch and Mixer
     let res = await Promise.all([
