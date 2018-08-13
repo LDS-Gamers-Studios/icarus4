@@ -3,23 +3,34 @@ const Augur = require("augurbot"),
   cheerio = require("cheerio"),
   u = require("../utils/utils");
 
+function userEmbed(member) {
+	let roles = member.roles.map(role => role.name);
+	let embed = u.embed()
+		.setTitle(member.displayName)
+		.addField("ID", member.id, true)
+		.addField("Joined", member.joinedAt.toUTCString(), true)
+		.addField("Account Created", member.user.createdAt.toUTCString(), true)
+		.addField("Roles", roles.join(", "), true);
+
+	if (member.user.displayAvatarURL) embed.setThumbnail(member.user.displayAvatarURL);
+
+	return embed;
+}
+
 const Module = new Augur.Module()
 .addCommand({name: "info",
   description: "Check when a user joined the server",
   syntax: "[@user]",
   category: "Members",
   process: (msg, suffix) => {
-    let users = [msg.author];
+    let users = null;
     let mentions = u.userMentions(msg);
-    if (mentions) {
-      if (mentions.length > 4) msg.channel.send("Limit of 4 users at once").then(u.clean).catch(console.error);
-      users = [];
-      mentions.forEach(mention => {
-        users.push({id: mention});
-      });
-    } else if (suffix) {
-      if (users.length > 4) { msg.channel.send("Limit of 4 users at once").then(u.clean).catch(console.error); return; }
+
+    if (!suffix) users = [msg.author];
+    else if (mentions) users = mentions;
+    else if (suffix) {
       users = suffix.split(/ ?\| ?/);
+      if (users.length > 4) { msg.channel.send("Limit of 4 users at once").then(u.clean).catch(console.error); return; }
     }
 
     users.forEach(user => {
