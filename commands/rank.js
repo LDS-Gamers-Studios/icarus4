@@ -43,7 +43,7 @@ const Module = new Augur.Module()
 .addCommand({name: "leaderboard",
   description: "View the LDSG Chat Leaderboard",
   aliases: ["levels"],
-  process: (msg) => msg.channel.send("LDSG Chat Leaderboard:\nhttp://my.ldsgamers.com/leaderboard");
+  process: (msg) => msg.channel.send("LDSG Chat Leaderboard:\nhttp://my.ldsgamers.com/leaderboard")
 })
 .addCommand({name: "rank",
 	description: "View your chat rank",
