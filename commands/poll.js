@@ -3,7 +3,7 @@ const Augur = require("augurbot"),
   u = require("../utils/utils");
 
 const Module = new Augur.Module()
-.addCommand({name: "quote",
+.addCommand({name: "poll",
   description: "Create a StrawPoll.me poll",
   syntax: "<Title> | <Option 1> | <Option 2>",
   process: (msg, suffix) => {
