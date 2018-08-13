@@ -8,7 +8,7 @@ const errorLog = new Discord.WebhookClient(config.error.id, config.error.token),
   serverSettings = new Map();
 
 const Utils = {
-  alertError: function(error, msg = null, p = null) {
+  alertError: function(error, msg = null) {
     if (!error) return;
 
     let errorInfo = new Discord.RichEmbed()
@@ -28,16 +28,10 @@ const Utils = {
       .addField("Command", msg.cleanContent, true)
     }
 
-    let errorStack = (error.stack ? error.stack : err.toString());
+    let errorStack = (error.stack ? error.stack : error.toString());
     if (errorStack.length > 1024) errorStack = errorStack.slice(0, 1000);
 
     errorInfo.addField("Error", errorStack);
-
-    if (p) {
-      let promiseInfo = "Promise:\n" + p;
-      if (promiseInfo.length > 1024) promiseInfo = promiseInfo.slice(0, 1000);
-      errorInfo.addField("Promise Info", promiseInfo);
-    }
 
     errorLog.send(errorInfo);
 
