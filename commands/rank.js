@@ -83,7 +83,7 @@ const Module = new Augur.Module()
 })
 .addEvent("messageReactionAdd", (reaction, user) => {
   let message = reaction.message;
-  if (message.guild && (message.guild.id == ldsg) && (reaction.emoji.name == "⭐") && !message.author.bot) {
+  if (message.guild && (message.guild.id == Module.config.ldsg) && (reaction.emoji.name == "⭐") && !message.author.bot) {
 		if (user.id != message.author.id) {
 			let valid = validate(reaction);
 			if ((valid == 1) && message.guild.roles.get(teamRole).members.has(user.id)) {
