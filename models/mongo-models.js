@@ -48,8 +48,10 @@ const models = {
       return new Promise((fulfill, reject) => {
         if ((typeof user) != "string") user = user.id;
         Bank.aggregate(
-          { $match: { discordId: user}},
-          { $group: { _id: null, balance: {$sum: "$value"}}},
+          [
+            { $match: { discordId: user}},
+            { $group: { _id: null, balance: {$sum: "$value"}}}
+          ],
           (err, record) => {
             if (err) reject(err);
             else if (record && (record.length > 0)) fulfill({discordId: user, balance: record[0].balance});
