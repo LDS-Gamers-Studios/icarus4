@@ -68,6 +68,7 @@ const Utils = {
     if (msg.guild) return db.server.getSetting(msg.guild, "prefix");
     else return config.prefix;
   },
+  rand: (array) => array[Math.floor(Math.random() * array.length)],
   userMentions: function(msg) {
     // Useful to ensure the bot isn't included in the mention list,
     // such as when the bot mention is the command prefix
