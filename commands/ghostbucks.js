@@ -159,8 +159,8 @@ const Module = new Augur.Module()
 							msg.reply(`You can't just *take* ${gb}, silly.`).then(u.clean);
 						} else if (admin || (bucks <= account.balance)) {
 							Module.db.bank.addGhostBucks(deposit).then(receipt => {
-								let member = ldsg.members.get(memberId);
-								Module.db.bank.getBalance(memberId).then(balance => {
+								let member = ldsg.members.get(user.id);
+								Module.db.bank.getBalance(user.id).then(balance => {
 									msg.channel.send(`${gb}${receipt.value} sent to ${member} for ${reason}`).then(u.clean);
 									msg.client.channels.get(modLogs).send(`**${msg.member.displayName}** gave **${member.displayName}** ${gb}${receipt.value} for ${reason}.`);
 									member.send(`You were just awarded ${gb}${receipt.value} from ${msg.member.displayName} for ${reason}! 💸\nYou now have a total of ${gb}${balance.balance} in your LDSG account.`);
