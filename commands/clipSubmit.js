@@ -25,9 +25,11 @@ function processClips(msg1, msg2 = null) {
 				path: {
 					board: 'Top 10 Clips',
 					list: 'Submitted Clips',
-					card: `${msg.member.displayName} ${((time) ? (time.toLocaleString()) : (""))} : ${link}`
+					card: `${msg.member.displayName} ${((time) ? (time.toLocaleString()) : (""))}`
 				},
 				content: {
+          cardDesc: link,
+          cardLabelColors: "blue",
 					cardComment: comment
 				}
 			};
