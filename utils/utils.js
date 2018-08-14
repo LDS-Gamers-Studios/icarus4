@@ -57,7 +57,7 @@ const Utils = {
   init: (Handler) => db.init(Handler),
   parse: function(msg) {
     let prefix = Utils.prefix(msg);
-    let message = msg.cleanContent;
+    let message = msg.content;
     if (message.startsWith(prefix) && !msg.author.bot) {
       let parse = message.slice(prefix.length).trim().split(" ");
       let command = parse.shift().toLowerCase();
