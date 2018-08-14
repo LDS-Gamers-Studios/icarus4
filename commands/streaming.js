@@ -381,11 +381,11 @@ const Module = new Augur.Module()
     if (u.userMentions(msg)) {
       user = u.userMentions(msg).first();
     } else if (!suffix) {
-      user = msg.author.id;
+      user = msg.author;
     }
 
     if (user) {
-      let ign = await Module.db.ign.find(user, 'twitch');
+      let ign = await Module.db.ign.find(user.id, 'twitch');
       if (ign) {
         name = encodeURIComponent(ign.ign);
 
