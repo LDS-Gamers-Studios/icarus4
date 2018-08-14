@@ -55,7 +55,7 @@ var gameids = new Map()
 	.set("warframe", new system({system: "warframe", name: "Warframe Name"}))
 	.set("twitch", new system({system: "twitch", name: "Twitch", category: "Streaming", link: "https://www.twitch.tv/"}))
 	.set("mixer", new system({system: "mixer", name: "Mixer", category: "Streaming", link: "https://mixer.com/"}))
-	.set("youtube", new system({system: "youtube", name: "YouTube", category: "Streaming", link: "https://www.youtube.com/c/"}))
+	.set("youtube", new system({system: "youtube", name: "YouTube", category: "Streaming", link: "https://www.youtube.com/channel/"}))
 	.set("skype", new system({system: "skype", name: "Skype", category: "Social"}))
 	.set("twitter", new system({system: "twitter", name: "Twitter", category: "Social", link: "https://twitter.com/"}))
 	.set("fb", new system({system: "facebook", name: "Facebook", category: "Social", link: "https://www.facebook.com/"}))
@@ -89,7 +89,8 @@ const aliases = {
 	"facebook": "fb",
 	"beam": "mixer",
 	"profession": "job",
-	"work": "job"
+	"work": "job",
+	"birfday": "birthday"
 };
 
 module.exports = {
