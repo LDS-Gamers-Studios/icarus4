@@ -468,7 +468,7 @@ const Module = new Augur.Module()
 .setInit((data) => {
   if (data) {
     data.mixerStatus.forEach((status, key) => mixerStatus.set(key, status));
-    data.twitchStatus.forEach()(status, key) => twitchStatus.set(key, status));
+    data.twitchStatus.forEach((status, key) => twitchStatus.set(key, status));
   }
 })
 .setUnload(() => ({ mixerStatus, twitchStatus }));})
