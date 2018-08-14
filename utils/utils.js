@@ -50,7 +50,7 @@ const Utils = {
     } else return msg.channel;
   },
   clean: function(msg, t = 10000) {
-    if (msg.deletable) msg.delete(t);
+    if (msg.deletable && !msg.deleted) msg.delete(t);
   },
   embed: () => new Discord.RichEmbed().setColor(config.color),
   errorLog: errorLog,
