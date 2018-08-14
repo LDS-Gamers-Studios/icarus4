@@ -1,6 +1,7 @@
 const Augur = require("augurbot"),
   Rank = require("../utils/RankInfo"),
-  u = require("../utils/utils");
+  u = require("../utils/utils"),
+  threshold = 4;
 
 const starboard = "405405857099284490";
 
