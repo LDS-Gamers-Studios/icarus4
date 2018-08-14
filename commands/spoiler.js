@@ -30,7 +30,7 @@ const Module = new Augur.Module()
 	syntax: "Spoiler Text",
 	info: "Hides your spoilers, so others can choose whether to see it.",
 	aliases: ["spoil", "spoilers"],
-  permissions: (msg) => msg.channel.permissionsFor(msg.client.user).has("MANAGE_MESSAGES"),
+  permissions: (msg) => (msg.guild && msg.channel.permissionsFor(msg.client.user).has("MANAGE_MESSAGES")),
 	process: async (msg, suffix) => {
 		u.clean(msg, 0);
 		let file = ((msg.attachments.size > 0) ? { "file": msg.attachments.first().url } : null);
