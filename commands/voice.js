@@ -84,7 +84,7 @@ const Module = new Augur.Module()
         if (!newMember.guild.channels.find(c => c.name == availableNames[i])) name = availableNames[i];
       }
       if (!name) name = availableNames[0];
-      newMember.voiceChannel.clone(name).then(channel => {
+      newMember.guild.createChannel(name).then(channel => {
         channel.setParent("363014069533540362");
       });
     }
