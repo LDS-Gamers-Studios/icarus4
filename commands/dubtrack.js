@@ -57,6 +57,7 @@ const Module = new Augur.Module()
 				nowPlaying = song.raw.songInfo.name;
 				let	embed = u.embed()
 					.setAuthor("Dubtrack.fm")
+          .setColor(0xeb008b)
 					.setURL("https://www.dubtrack.fm/join/lds-gamers")
 					.setTitle("Now Playing on Dubtrack.fm")
 					.setDescription(song.raw.songInfo.name)
