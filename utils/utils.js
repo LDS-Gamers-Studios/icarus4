@@ -68,6 +68,7 @@ const Utils = {
     if (msg.guild) return db.server.getSetting(msg.guild, "prefix");
     else return config.prefix;
   },
+  properCase: (string) => txt.split(" ").map(word => (word[0].toUpperCase() + word.substr(1).toLowerCase())).join(" "),
   rand: (array) => array[Math.floor(Math.random() * array.length)],
   userMentions: function(msg) {
     // Useful to ensure the bot isn't included in the mention list,
