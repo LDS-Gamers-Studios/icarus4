@@ -2,20 +2,20 @@ const u = require("../utils/utils"),
   Augur = require("augurbot");
 
 var availableNames = [
-  "Room Barley",
 	"Room Buttermelon",
-	"Room Cornmuffin",
+  "Room Slothmare",
+  "Room Handicorn",
+  "Room Manahands",
+  "Room Toxipandankery",
+  "Room Cornmuffin",
+  "Room Shenanigans",
   "Room Fancypants",
+  "Room Thunderpaws",
+  "Room Barley",
   "Room Fry Sauce",
   "Room Goat",
-	"Room Handicorn",
   "Room Ink",
-	"Room Manahands",
 	"Room Potato",
-	"Room Shenanigans",
-	"Room Slothmare",
-	"Room Thunder Paws",
-	"Room Toxipandankery",
   "Room Trogdor",
 ];
 
@@ -81,17 +81,11 @@ const Module = new Augur.Module()
     }
     if (newMember.voiceChannelID && (newMember.voiceChannel.members.size == 1) && availableNames.includes(newMember.voiceChannel.name)) {
       // CREATE NEW VOICE CHANNEL
-      let temp = [], n = availableNames.length, name = "";
-      for (var i = 0; i < n; i++) {
-        temp.unshift(availableNames.splice(Math.floor(Math.random() * availableNames.length), 1)[0]);
-        if (!name && !newMember.guild.channels.find("name", temp[0])) name = temp[0];
+      let name = "";
+      for (var i = 0; (i < availableNames.length && !name); i++) {
+        if (!newMember.guild.channels.find("name", availableNames[i])) name = availableNames[i];
       }
-      if (!name) name = temp[0];
-      availableNames = temp;
-      for (var i = 0; i < availableNames.length; i++) {
-        name = availableNames[i];
-        if (!newMember.guild.channels.find("name", name)) break;
-      }
+      if (!name) name = availableNames[0];
       newMember.voiceChannel.clone(name).then(channel => {
         channel.setParent("363014069533540362");
       });
