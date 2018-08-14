@@ -61,7 +61,7 @@ const Module = new Augur.Module()
 .addCommand({name: "missionreturn",
   syntax: "@user",
   description: "Remove a user from the missionary list",
-  permissions: (msg) => config.adminId.includes(msg.author.id),
+  permissions: (msg) => Module.config.adminId.includes(msg.author.id),
   process: (msg) => {
     msg.mentions.users.forEach(user => {
       Module.db.mission.delete(user.id).then(() => {
