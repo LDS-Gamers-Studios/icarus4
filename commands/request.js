@@ -4,7 +4,7 @@ const Augur = require("augurbot"),
 
 const Module = new Augur.Module()
 .addCommand({name: "request",
-  description: "Request a feature for " + Module.handler.bot.user.username,
+  description: "Request a feature for Icarus",
   info: "Send a feature request to the bot Trello board.",
   syntax: "Requested Feature",
   process: (msg, suffix) => {
