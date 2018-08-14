@@ -5,12 +5,19 @@ const Augur = require("augurbot"),
 function addIgnFields(embed, igns) {
 	if (igns.length > 0) {
 		let hasLink = /(http(s?):\/\/)?(\w+\.)+\w+\//ig;
-		igns.forEach(ign => {
-			let name = ign.ign;
-			if (Ign.aliases[ign.system]) ign.system = Ign.aliases[ign.system];
-			if (Ign.gameids.get(ign.system).link && !hasLink.test(name)) name = `[${name}](${Ign.gameids.get(ign.system).link}${encodeURIComponent(name)})`;
-			embed.addField(Ign.gameids.get(ign.system).name, name, true);
-		});
+
+    Ign.categories.forEach(category => {
+      igns
+      .filter(ign => Ign.gameids.get(ign.system).category == category)
+      .sort((a, b) => Ign.gameids.get(a.system).name.localeCompare(Ign.gameids.get(b.system).name))
+      .forEach(ign => {
+        let name = ign.ign;
+        if (Ign.aliases[ign.system]) ign.system = Ign.aliases[ign.system];
+        if (Ign.gameids.get(ign.system).link && !hasLink.test(name)) name = `[${name}](${Ign.gameids.get(ign.system).link}${encodeURIComponent(name)})`;
+        embed.addField(Ign.gameids.get(ign.system).name, name, true);
+      });
+    });
+
 		return embed;
 	} else return false;
 };
