@@ -1,5 +1,6 @@
 const Augur = require("augurbot"),
-  u = require("../utils/utils");
+  u = require("../utils/utils"),
+  mod_log = "154676105247195146";
 
 var r = (parts) => parts[Math.floor(Math.random() * parts.length)];
 
@@ -12,7 +13,7 @@ const Module = new Augur.Module()
     let user = await Module.db.user.fetchUser(member.id);
 		let general = bot.channels.get("96335850576556032"); // #general
 		let welcomeChannel = bot.channels.get("121751722308796416"); // #welcome
-    let modLogs = bot.channels.get("154676105247195146"); // #mod-logs
+    let modLogs = bot.channels.get(mod_log); // #mod-logs
 
 		let embed = u.embed()
 			.setDescription("Account Created:\n" + member.user.createdAt.toLocaleDateString());
@@ -55,6 +56,23 @@ const Module = new Augur.Module()
 		modLogs.send(embed);
 		general.send(welcomeString);
   }
+})
+.addEvent("guildMemberRemove", (member) => {
+  if (member.guild.id == Module.config.ldsg) {
+		Module.db.user.findXPRank(member.id).then(rank => {
+			let response = [
+				`**${member.displayName}** has left the server.`,
+				"Joined: " + member.joinedAt.toLocaleDateString(),
+				"Lifetime XP: " + rank.totalXP
+			];
+			member.client.channels.get(mod_log).send(response.join("\n"));
+		});
+	}
+})
+.addEvent("guildMemberUpdate", (oldMember, newMember) => {
+  if (newMember.guild.id == Module.config.ldsg && (oldMember.roles.size != newMember.roles.size)) {
+		Module.db.user.updateRoles(newMember);
+	}
 });
 
 module.exports = Module;
