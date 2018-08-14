@@ -1,7 +1,7 @@
 const u = require("../utils/utils"),
   Augur = require("augurbot");
 
-const availableNames = [
+var availableNames = [
   "Room Barley",
 	"Room Buttermelon",
 	"Room Cornmuffin",
