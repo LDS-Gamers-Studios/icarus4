@@ -138,16 +138,16 @@ const Module = new Augur.Module()
 	permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg)),
 	process: (msg, suffix) => {
 		msg.delete();
-		if (u.userMentions(msg)) {
-			u.userMentions(msg).forEach(memberId => {
-				let admin = ((msg.author.id == "96335658997526528") || (msg.author.id == "111232201848295424"));
+		if (msg.mentions.users && msg.mentions.users.size > 0) {
+			msg.mentions.users.forEach(user => {
+				let admin = Module.config.adminId.includes(msg.member.id);
 				let ldsg = msg.client.guilds.get(Module.config.ldsg);
 				let reason = suffix.replace(/<@!?\d+>/ig, "").trim().split(" ");
 				let bucks = parseInt(reason.shift(), 10);
 				reason = ((reason.length > 0) ? reason.join(" ") : "No particular reason.");
 
 				let deposit = {
-					discordId: memberId,
+					discordId: user.id,
 					description: `From ${msg.member.displayName}: ${reason}`,
 					value: bucks,
 					mod: msg.author.id
@@ -158,7 +158,6 @@ const Module = new Augur.Module()
 						if (!admin && (bucks < 0)) {
 							msg.reply(`You can't just *take* ${gb}, silly.`).then(u.clean);
 						} else if (admin || (bucks <= account.balance)) {
-
 							Module.db.bank.addGhostBucks(deposit).then(receipt => {
 								let member = ldsg.members.get(memberId);
 								Module.db.bank.getBalance(memberId).then(balance => {
