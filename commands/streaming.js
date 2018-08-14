@@ -471,7 +471,7 @@ const Module = new Augur.Module()
     data.twitchStatus.forEach((status, key) => twitchStatus.set(key, status));
   }
 })
-.setUnload(() => ({ mixerStatus, twitchStatus }));})
+.setUnload(() => ({ mixerStatus, twitchStatus }))
 .setClockwork(() => {
   let bot = Module.handler.bot;
   let interval = 5 * 60 * 1000;
