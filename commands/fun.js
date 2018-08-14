@@ -34,8 +34,8 @@ function testBirthdays(bot) {
 						":gift: ",
 						":cake: "
 					];
-					bot.guilds.get(ldsg).fetchMember(birthday.discordId).then(member => {
-						bot.channels.get(ldsg).send(":birthday: :confetti_ball: :tada: Happy Birthday, " + member + "! :tada: :confetti_ball: :birthday:").then(() => {
+					msg.client.guilds.get(ldsg).fetchMember(birthday.discordId).then(member => {
+						msg.client.channels.get(ldsg).send(":birthday: :confetti_ball: :tada: Happy Birthday, " + member + "! :tada: :confetti_ball: :birthday:").then(() => {
 							var birthdayLangs = require("../data/birthday.json");
 							let msgs = birthdayLangs.map(lang => member.send(flair[Math.floor(Math.random() * flair.length)] + " " + lang));
 							Promise.all(msgs).then(() => {
@@ -54,7 +54,7 @@ const Module = new Augur.Module()
   description: "Get a user's avatar",
   syntax: "[@user]",
   process: (msg) => {
-    let user = ((u.userMentions(msg)) ? bot.users.get(u.userMentions(msg).first()) : msg.author);
+    let user = ((u.userMentions(msg)) ? msg.client.users.get(u.userMentions(msg).first()) : msg.author);
     if (user.avatarURL) {
       let member = ((msg.guild) ? msg.guild.members.get(user.id) : null);
       let name = (member ? member.displayName : user.username);
@@ -239,7 +239,7 @@ const Module = new Augur.Module()
       msg.channel.send("Hug" + ((msg.mentions.users.size > 1) ? "s" : "") + " on the way!")
         .then(u.clean).catch(console.error);
       msg.mentions.users.forEach(function(user) {
-        bot.fetchUser(user.id).then((user) => {
+        msg.client.fetchUser(user.id).then((user) => {
           //u.dmChannel.send(`Incoming hug from ${msg.author}!`, {"file": {"attachment": "http://24.media.tumblr.com/72f1025bdbc219e38ea4a491639a216b/tumblr_mo6jla4wPo1qe89guo1_1280.gif", "name": "hug.gif"}})
           let hugs = [
             "http://24.media.tumblr.com/72f1025bdbc219e38ea4a491639a216b/tumblr_mo6jla4wPo1qe89guo1_1280.gif",
