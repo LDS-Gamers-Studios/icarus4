@@ -34,8 +34,8 @@ function testBirthdays(bot) {
 						":gift: ",
 						":cake: "
 					];
-					msg.client.guilds.get(ldsg).fetchMember(birthday.discordId).then(member => {
-						msg.client.channels.get(ldsg).send(":birthday: :confetti_ball: :tada: Happy Birthday, " + member + "! :tada: :confetti_ball: :birthday:").then(() => {
+					bot.guilds.get(ldsg).fetchMember(birthday.discordId).then(member => {
+						bot.channels.get(ldsg).send(":birthday: :confetti_ball: :tada: Happy Birthday, " + member + "! :tada: :confetti_ball: :birthday:").then(() => {
 							var birthdayLangs = require("../data/birthday.json");
 							let msgs = birthdayLangs.map(lang => member.send(flair[Math.floor(Math.random() * flair.length)] + " " + lang));
 							Promise.all(msgs).then(() => {
