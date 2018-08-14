@@ -97,7 +97,8 @@ const Module = new Augur.Module()
     animate(msg, frames);
   }
 })
-.setInit(async (bot) => {
+.setInit(async () => {
+  let bot = Module.handler.bot;
   let animations = await Module.db.spoiler.fetchAll();
   animations.forEach(async animation => {
     if (animation.channelId && bot.channels.has(animation.channelId)) {

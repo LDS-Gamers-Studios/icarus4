@@ -48,7 +48,8 @@ const Module = new Augur.Module()
     collector(m);
 	}
 })
-.setInit(async (bot) => {
+.setInit(async () => {
+  let bot = Module.handler.bot;
   let spoilers = await Module.db.spoiler.fetchAll();
   spoilers.forEach(async spoiler => {
     if (bot.channels.has(spoiler.channelId)) {

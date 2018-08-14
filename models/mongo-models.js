@@ -538,8 +538,8 @@ const models = {
       });
     }
   },
-  init: (Handler) => {
-    Handler.bot.guilds.forEach(guild => {
+  init: (bot) => {
+    bot.guilds.forEach(guild => {
       Server.findOne({serverId: guild.id}, (e, server) => {
         if (!e && server) {
           serverSettings.set(server.serverId, server);

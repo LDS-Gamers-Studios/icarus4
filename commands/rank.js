@@ -125,7 +125,8 @@ const Module = new Augur.Module()
 		if (valid || ((reaction.users.size >= threshold) && !excludeChannels.includes(message.channel.id)) || message.guild.roles.get(teamRole).members.has(user.id)) updateStarboard(reaction);
 	}
 })
-.setClockwork((bot) => {
+.setClockwork(() => {
+  let bot = Module.handler.bot;
   bot.channels.get(starboard).fetchMessages().then((messages) => { console.log(`Fetched ${messages.size} stars`)});
 	return setInterval(function(bot) {
 		Module.db.user.addXp(active).then((response) => {

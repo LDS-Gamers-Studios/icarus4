@@ -7,7 +7,7 @@ const Augur = require("augurbot"),
 const mixer = new Mixer.Client(new Mixer.DefaultRequestRunner()),
   mixerStatus = new Map(),
   twitch = new TwitchApi(twitchConfig),
-  twitchStatus = new Map;
+  twitchStatus = new Map();
 
 function checkStreams(bot) {
   // Approved Streamers
@@ -465,7 +465,15 @@ const Module = new Augur.Module()
     neMember.client.channels.get("154676105247195146").send(`**${newMember.displayName}** has become a Twitch Sub!`);
   }
 })
-.setClockwork((bot) => {
+.setInit((data) => {
+  if (data) {
+    data.mixerStatus.forEach((status, key) => mixerStatus.set(key, status));
+    data.twitchStatus.forEach()(status, key) => twitchStatus.set(key, status));
+  }
+})
+.setUnload(() => ({ mixerStatus, twitchStatus }));})
+.setClockwork(() => {
+  let bot = Module.handler.bot;
   let interval = 5 * 60 * 1000;
   checkStreams(bot);
   return setInterval(checkStreams, interval, bot);

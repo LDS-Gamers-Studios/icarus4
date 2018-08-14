@@ -7,6 +7,8 @@ const Module = new Augur.Module()
 	description: "Pull bot updates from git",
 	hidden: true,
 	process: (msg) => {
+    let spawn = require("child_process").spawn;
+    
 		u.clean(msg);
 
 		let cmd = spawn("git", ["pull"], {cwd: process.cwd()});
