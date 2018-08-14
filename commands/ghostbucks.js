@@ -141,7 +141,7 @@ const Module = new Augur.Module()
 		if (u.userMentions(msg)) {
 			u.userMentions(msg).forEach(memberId => {
 				let admin = ((msg.author.id == "96335658997526528") || (msg.author.id == "111232201848295424"));
-				let ldsg = msg.client.guilds.get(config.ldsg);
+				let ldsg = msg.client.guilds.get(Module.config.ldsg);
 				let reason = suffix.replace(/<@!?\d+>/ig, "").trim().split(" ");
 				let bucks = parseInt(reason.shift(), 10);
 				reason = ((reason.length > 0) ? reason.join(" ") : "No particular reason.");
