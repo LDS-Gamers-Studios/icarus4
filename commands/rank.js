@@ -37,7 +37,7 @@ function updateStarboard(reaction) {
 
 function validate(reaction) {
   let team = reaction.message.guild.roles.get(Module.config.roles.team);
-  let valid = reaction.users.reduce((v, u) => (team.members.has(u.id) ? v++ : v));
+  let valid = reaction.users.reduce((v, u) => v += (team.members.has(u.id) ? 1 : 0), 0);
   return valid;
 };
 
