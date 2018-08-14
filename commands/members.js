@@ -48,6 +48,17 @@ const Module = new Augur.Module()
   },
   permissions: (msg) => msg.guild
 })
+.addCommand({name: "fullinfo",
+  description: "Check when a user joined the server and rank information",
+  syntax: "[@user]",
+  category: "Members",
+  hidden: true,
+  process: (msg, suffix) => {
+    Module.handler.execute("info", msg, suffix);
+    Module.handler.execute("rank", msg, suffix);
+  },
+  permissions: (msg) => msg.guild
+})
 .addCommand({name: "members",
   description: "How many members are in LDSG?",
   category: "Members",
@@ -77,9 +88,8 @@ const Module = new Augur.Module()
         let discordId = $('.member-content > h2')[0].attribs["data-discordid"];
         let text = $('.featured-member-content > p:first-of-type')[0].children[0].data;
 
-        let embed = new Discord.RichEmbed()
+        let embed = u.embed()
           .setTitle("MEMBER SPOTLIGHT")
-          .setColor(config.color)
           .setURL(`${memberUrl}#member-spotlight`)
           .setDescription('Our community is filled with amazing people. Know someone that deserves the spotlight? Nominate them by sending CJ Stormblessed a message!');
 

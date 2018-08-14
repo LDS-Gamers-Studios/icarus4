@@ -471,4 +471,4 @@ const Module = new Augur.Module()
   return setInterval(checkStreams, interval, bot);
 });
 
-module.exports = Module;
+//module.exports = Module;
