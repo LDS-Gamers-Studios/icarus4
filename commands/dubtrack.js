@@ -70,10 +70,10 @@ const Module = new Augur.Module()
 		bot.connect(config.url);
 	});
 })
-.setUnload() => {
+.setUnload(() => {
   dubReady = false;
   dubBot.disconnect();
   return nowPlaying;
-};
+});
 
 module.exports = Module;
