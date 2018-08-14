@@ -1,4 +1,5 @@
-const Augur = require("augurbot");
+const Augur = require("augurbot"),
+  u = require("../utils/utils");
 
 var r = (parts) => parts[Math.floor(Math.random() * parts.length)];
 
@@ -13,7 +14,7 @@ const Module = new Augur.Module()
 		let welcomeChannel = bot.channels.get("121751722308796416"); // #welcome
     let modLogs = bot.channels.get("154676105247195146"); // #mod-logs
 
-		let embed = new Discord.RichEmbed()
+		let embed = u.embed()
 			.setDescription("Account Created:\n" + member.user.createdAt.toLocaleDateString());
 		if (member.user.avatarURL) embed.setThumbnail(member.user.avatarURL);
 
