@@ -75,15 +75,13 @@ const Module = new Augur.Module()
   if ((oldMember.guild.id == Module.config.ldsg) && (oldMember.voiceChannelID != newMember.voiceChannelID)) {
     if (oldMember.voiceChannelID && (oldMember.voiceChannel.members.size == 0) && availableNames.includes(oldMember.voiceChannel.name)) {
       // REMOVE OLD VOICE CHANNEL
-      oldMember.voiceChannel.overwritePermissions(oldMember.guild.id, {CONNECT: null}).then(() => {
-        oldMember.voiceChannel.delete().catch(console.error);
-      });
+      oldMember.voiceChannel.delete().catch(console.error);
     }
     if (newMember.voiceChannelID && (newMember.voiceChannel.members.size == 1) && availableNames.includes(newMember.voiceChannel.name)) {
       // CREATE NEW VOICE CHANNEL
       let name = "";
       for (var i = 0; (i < availableNames.length && !name); i++) {
-        if (!newMember.guild.channels.find("name", availableNames[i])) name = availableNames[i];
+        if (!newMember.guild.channels.find(c => c.name == availableNames[i])) name = availableNames[i];
       }
       if (!name) name = availableNames[0];
       newMember.voiceChannel.clone(name).then(channel => {
