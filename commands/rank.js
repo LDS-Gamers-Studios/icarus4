@@ -2,6 +2,8 @@ const Augur = require("augurbot"),
   Rank = require("../utils/RankInfo"),
   u = require("../utils/utils");
 
+const starboard = "405405857099284490";
+
 var active = [],
   stars = {};
 
@@ -124,7 +126,7 @@ const Module = new Augur.Module()
 	}
 })
 .setClockwork((bot) => {
-  bot.channels.get("405405857099284490").fetchMessages().then((messages) => { console.log(`Fetched ${messages.size} stars`)});
+  bot.channels.get(starboard).fetchMessages().then((messages) => { console.log(`Fetched ${messages.size} stars`)});
 	return setInterval(function(bot) {
 		Module.db.user.addXp(active).then((response) => {
 			if (response.users.length > 0) {
