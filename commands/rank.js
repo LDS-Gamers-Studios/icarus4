@@ -89,7 +89,7 @@ const Module = new Augur.Module()
   if (message.guild && (message.guild.id == Module.config.ldsg) && (reaction.emoji.name == "⭐") && !message.author.bot) {
 		if (user.id != message.author.id) {
 			let valid = validate(reaction);
-			if ((valid == 1) && message.guild.roles.get(teamRole).members.has(user.id)) {
+			if ((valid == 1) && message.guild.roles.get(Module.config.roles.team).members.has(user.id)) {
 				// add all stars
 				if (stars[message.author.id]) stars[message.author.id] += reaction.users.size;
 				else stars[message.author.id] = reaction.users.size;
@@ -119,11 +119,11 @@ const Module = new Augur.Module()
 		if (valid) {
 			if (stars.hasOwnProperty(message.author.id)) stars[message.author.id] -= 1;
 			else stars[message.author.id] = -1;
-		} else if (message.guild.roles.get(teamRole).members.has(user.id)) {
+		} else if (message.guild.roles.get(Module.config.roles.team).members.has(user.id)) {
 			if (stars.hasOwnProperty(message.author.id)) stars[message.author.id] -= (reaction.users.size + 1);
 			else stars[message.author.id] = 0 - (reaction.users.size + 1);
 		}
-		if (valid || ((reaction.users.size >= threshold) && !excludeChannels.includes(message.channel.id)) || message.guild.roles.get(teamRole).members.has(user.id)) updateStarboard(reaction);
+		if (valid || ((reaction.users.size >= threshold) && !excludeChannels.includes(message.channel.id)) || message.guild.roles.get(Module.config.roles.team).members.has(user.id)) updateStarboard(reaction);
 	}
 })
 .setClockwork(() => {
