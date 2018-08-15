@@ -56,6 +56,7 @@ const Module = new Augur.Module()
   process: (msg) => {
     let alphabet = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "Y", "Z"];
     let len = Math.floor(Math.random() * 3) + 3;
+    let profanityFilter = require("profanity-matcher");
     let pf = new profanityFilter();
     let word = [];
 
