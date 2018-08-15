@@ -28,9 +28,10 @@ const Module = new Augur.Module()
   	let channel = msg.member.voiceChannel;
   	if (channel && availableNames.includes(channel.name)) {
   		let users = Array.from(channel.members.values()).concat(Array.from(msg.mentions.members.values()));
+      users.push(msg.client.user);
 
   		let channelMods = [];
-  		let muted = msg.guild.roles.find("name", "Muted").id;
+  		let muted = Module.config.roles.muted;
 
   		channelMods.push(channel.overwritePermissions(msg.guild.id, {CONNECT: false}));
 
@@ -43,7 +44,7 @@ const Module = new Augur.Module()
   		});
 
   		Promise.all(channelMods).then(() => {
-  			msg.channel.send(`${channel.name} locked to all users except ${users.map(u => u.displayName).join(", ")}`);
+  			msg.channel.send(`${channel.name} locked to all users except ${users.filter(u => u.id !== msg.client.user.id).map(u => u.displayName).join(", ")}`);
   		});
   	} else {
   		msg.reply("you need to be in a community voice channel to use this command!").then(u.clean);
@@ -57,7 +58,7 @@ const Module = new Augur.Module()
 		let channel = msg.member.voiceChannel;
 		if (channel && availableNames.includes(channel.name)) {
 			let channelMods = [];
-			let muted = msg.guild.roles.find("name", "Muted").id;
+			let muted = Module.config.roles.muted;
 			channelMods.push(channel.overwritePermissions(msg.guild.id, {CONNECT: null}));
 			channel.permissionOverwrites.forEach(permission => {
 				if ((permission.id != muted) && (permission.id != msg.guild.id)) channelMods.push(permission.delete());
