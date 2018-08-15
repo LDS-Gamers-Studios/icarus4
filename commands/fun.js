@@ -22,7 +22,7 @@ function quickText(msg, text) {
 function testBirthdays(bot) {
 	let curDate = new Date();
   let ldsg = Module.config.ldsg;
-	if (curDate.getHours() == 12) {
+	if (curDate.getHours() == 20) {
 		Module.db.ign.getList("birthday").then(birthdays => {
 			birthdays.forEach(birthday => {
 				let date = new Date(birthday.ign);
