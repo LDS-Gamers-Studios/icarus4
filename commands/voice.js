@@ -86,10 +86,10 @@ const Module = new Augur.Module()
 })
 .addCommand({name: "sound",
   syntax: "<search>",
-  aliases: ["s"],
+  aliases: ["sb", "soundboard"],
   description: "Plays a sound",
   info: "Plays a matched sound from Freesound.org",
-  permissions: (msg) => (msg.guild && msg.guild.id == "136569499859025920" && msg.member.voiceChannel),
+  permissions: (msg) => (msg.guild && ((msg.guild.id == "136569499859025920") || (msg.guild.id == Module.config.ldsg)) && msg.member.voiceChannel && (msg.member.roles.has(Module.config.roles.team) || (msg.member.roles.has("114816596341424129")))),
   process: (msg, suffix) => {
     if (suffix) {
       let pf = new profanityFilter();
