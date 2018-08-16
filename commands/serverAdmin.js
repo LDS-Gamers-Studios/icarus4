@@ -71,7 +71,7 @@ const Module = new Augur.Module()
       }
     }
   },
-  permissions: (msg) => (msg.guild && (msg.member.hasPermission('MANAGE_GUILD') || msg.member.hasPermission('ADMINISTRATOR') || Module.config.adminId.includes(msg.author.id)))
+  permissions: (msg) => (msg.guild && (msg.member.has('MANAGE_GUILD') || msg.member.has('ADMINISTRATOR') || Module.config.adminId.includes(msg.author.id)))
 });
 
 module.exports = Module;

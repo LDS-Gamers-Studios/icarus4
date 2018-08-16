@@ -133,7 +133,7 @@ const Module = new Augur.Module()
       msg.reply(`you need to tell me which system and game to remove! (\`${u.prefix(msg)}removelfg ${this.usage}\`)`).then(u.clean);
     }
   },
-  permissions: (msg) => (msg.guild && (msg.guild.id == "96335850576556032") && msg.member.permissions.hasPermission("MANAGE_MESSAGES"))
+  permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && msg.member.permissions.has("MANAGE_MESSAGES"))
 })
 .addEvent("message", (msg) => {
   if (msg.channel.id == lfgBoard.channel) msg.delete();
