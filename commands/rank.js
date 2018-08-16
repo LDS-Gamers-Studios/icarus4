@@ -77,9 +77,9 @@ const Module = new Augur.Module()
 			userDoc.nextLevel = parseInt(Rank.minXp(userDoc.level + 1), 10).toLocaleString();
 			response = u.embed()
 				.setAuthor(member.displayName, (member.user.displayAvatarURL ? member.user.displayAvatarURL : null))
-				.addField("Rank", `Current: ${userDoc.currentRank}/${msg.client.guilds.get(Module.config.ldsg).memberCount}\nLifetime: ${userDoc.lifeRank}/${msg.client.guilds.get(Module.config.ldsg).memberCount}`, true)
+				.addField("Rank", `Season: ${userDoc.currentRank}/${msg.client.guilds.get(Module.config.ldsg).memberCount}\nLifetime: ${userDoc.lifeRank}/${msg.client.guilds.get(Module.config.ldsg).memberCount}`, true)
 				.addField("Level", `Current Level: ${userDoc.level}\nNext Level: ${userDoc.nextLevel} XP`, true)
-				.addField("Exp.", `Current: ${parseInt(userDoc.currentXP, 10).toLocaleString()} XP\nLifetime: ${parseInt(userDoc.totalXP, 10).toLocaleString()} XP`, true)
+				.addField("Exp.", `Season: ${parseInt(userDoc.currentXP, 10).toLocaleString()} XP\nLifetime: ${parseInt(userDoc.totalXP, 10).toLocaleString()} XP`, true)
 				.setTitle("LDSG Chat Ranking")
 				.setURL("http://my.ldsgamers.com/leaderboard")
 				.setFooter("http://my.ldsgamers.com/leaderboard");
