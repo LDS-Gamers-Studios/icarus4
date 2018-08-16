@@ -59,20 +59,23 @@ const Module = new Augur.Module()
   description: "Plays a sound",
   info: "Plays a matched sound from Freesound.org",
   permissions: (msg) => (msg.guild && msg.guild.id == "136569499859025920" && msg.member.voiceChannel),
-  process: async (msg, suffix) => {
+  process: (msg, suffix) => {
     if (suffix) {
       let pf = new profanityFilter();
       if (pf.scan(suffix.toLowerCase()).length == 0) {
-        let connection = await msg.member.voiceChannel.join();
         let url = `https://freesound.org/apiv2/search/text/?query=${suffix}&fields=name,id,duration,previews&filter=duration:[* TO 10]&token=${Module.config.api.freesound}`;
-        request(url, (err, response, body) => {
+        request(url, async function(err, response, body) {
           if (!err && response.statusCode == 200) {
             body = JSON.parse(body);
-            let sound = body.results[Math.floor(Math.random() * body.results.length)];
 
-            let dispatcher = connection.playStream(sound.previews["preview-lq-mp3"]);
-            dispatcher.on("end", (reason) => connection.disconnect());
-          } else console.log(err);
+            if (body.results.length > 0) {
+              let sound = body.results[Math.floor(Math.random() * body.results.length)];
+
+              let connection = await msg.member.voiceChannel.join();
+              let dispatcher = connection.playStream(sound.previews["preview-lq-mp3"]);
+              dispatcher.on("end", (reason) => connection.disconnect());
+            } else msg.reply("I couldn't find any sounds for " + suffix);
+          } else u.alertError(err, msg);
         });
       } else msg.reply("I'm not going to make that sound.").then(u.clean);
     }
