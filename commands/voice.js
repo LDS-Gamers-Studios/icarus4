@@ -24,27 +24,31 @@ nowPlaying = false,
 soundboardQueue = [];
 
 async function playSound() {
-  if (soundboardQueue.length > 0) {
-    nowPlaying = true;
-    let {channel, sound} = soundboardQueue.shift();
+  try {
+    if (soundboardQueue.length > 0) {
+      nowPlaying = true;
+      let {channel, sound} = soundboardQueue.shift();
 
-    let voiceConnection = channel.guild.client.voiceConnections.get(channel.guild.id);
-    if (voiceConnection && (voiceConnection.channel.id != channel.id)) {
-      await voiceConnection.disconnect();
-      voiceConnection = await channel.join();
-    } else if (!voiceConnection) {
-      voiceConnection = await channel.join();
-    }
-
-    let dispatcher = voiceConnection.playStream(sound);
-    dispatcher.on("end", (reason) => {
-      if (soundboardQueue.length == 0) {
-        nowPlaying = false;
-        voiceConnection.disconnect();
-      } else {
-        playSound();
+      let voiceConnection = channel.guild.client.voiceConnections.get(channel.guild.id);
+      if (voiceConnection && (voiceConnection.channel.id != channel.id)) {
+        await voiceConnection.disconnect();
+        voiceConnection = await channel.join();
+      } else if (!voiceConnection) {
+        voiceConnection = await channel.join();
       }
-    });
+
+      let dispatcher = voiceConnection.playStream(sound);
+      dispatcher.on("end", (reason) => {
+        if (soundboardQueue.length == 0) {
+          nowPlaying = false;
+          voiceConnection.disconnect();
+        } else {
+          playSound();
+        }
+      });
+    }
+  } catch(e) {
+    u.alertError(e);
   }
 }
 
@@ -98,7 +102,7 @@ const Module = new Augur.Module()
             if (body.results.length > 0) {
               let sound = body.results[Math.floor(Math.random() * body.results.length)];
 
-              soundboardQueue.push({member: msg.member, sound: sound.previews["preview-lq-mp3"]});
+              soundboardQueue.push({channel: msg.member.voiceChannel, sound: sound.previews["preview-lq-mp3"]});
               if (!nowPlaying) playSound();
 
             } else msg.reply("I couldn't find any sounds for " + suffix);
