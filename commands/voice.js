@@ -20,26 +20,34 @@ var availableNames = [
 	"Room Potato",
   "Room Trogdor",
 ],
+nowPlaying = false,
 soundboardQueue = [];
 
-async function playSound(member, sound) {
-  let voiceConnection = msg.client.voiceConnections.get(msg.guild.id);
-  if (voiceConnection && (voiceConnection.channel.id != member.voiceChannel.id)) {
-    await voiceConnection.disconnect();
-    voiceConnection = await member.voiceChannel.join();
-  } else if (!voiceConnection) {
-    voiceConnection = await member.voiceChannel.join();
-  }
+async function playSound() {
+  if (soundboardQueue.length > 0) {
+    nowPlaying = true;
+    let next = soundboardQueue.shift();
+    let channel = next.member.voiceChannel;
+    let sound = next.sound;
 
-  let dispatcher = voiceConnection.playStream(sound);
-  dispatcher.on("end", (reason) => {
-    if (soundboardQueue.length == 0) {
-      voiceConnection.disconnect();
-    } else {
-      let nextSound = soundboardQueue.shift();
-      playSound(nextSound.member, nextSound.sound);
+    let voiceConnection = msg.client.voiceConnections.get(msg.guild.id);
+    if (voiceConnection && (voiceConnection.channel.id != channel.id)) {
+      await voiceConnection.disconnect();
+      voiceConnection = await channel.join();
+    } else if (!voiceConnection) {
+      voiceConnection = await channel.join();
     }
-  });
+
+    let dispatcher = voiceConnection.playStream(sound);
+    dispatcher.on("end", (reason) => {
+      if (soundboardQueue.length == 0) {
+        nowPlaying = false;
+        voiceConnection.disconnect();
+      } else {
+        playSound();
+      }
+    });
+  }
 }
 
 const Module = new Augur.Module()
@@ -91,13 +99,9 @@ const Module = new Augur.Module()
 
             if (body.results.length > 0) {
               let sound = body.results[Math.floor(Math.random() * body.results.length)];
-              let voiceConnection = msg.client.voiceConnections.get(msg.guild.id);
 
-              if (voiceConnection && voiceConnection.dispatcher) {
-                soundboardQueue.push({member: msg.member, sound: sound.previews["preview-lq-mp3"]});
-              } else {
-                playSound(msg.member, sound.previews["preview-lq-mp3"]);
-              }
+              soundboardQueue.push({member: msg.member, sound: sound.previews["preview-lq-mp3"]});
+              if (!nowPlaying) playSound();
 
             } else msg.reply("I couldn't find any sounds for " + suffix);
           } else u.alertError(err, msg);
