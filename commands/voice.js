@@ -19,12 +19,27 @@ var availableNames = [
   "Room Ink",
 	"Room Potato",
   "Room Trogdor",
-];
+],
+soundboardQueue = [];
 
 async function playSound(member, sound) {
-  let connection = await member.voiceChannel.join();
-  let dispatcher = connection.playStream(sound);
-  dispatcher.on("end", (reason) => connection.disconnect());
+  let voiceConnection = msg.client.voiceConnections.get(msg.guild.id);
+  if (voiceConnection && (voiceConnection.channel.id != member.voiceChannel.id)) {
+    await voiceConnection.disconnect();
+    voiceConnection = await member.voiceChannel.join();
+  } else if (!voiceConnection) {
+    voiceConnection = await member.voiceChannel.join();
+  }
+
+  let dispatcher = voiceConnection.playStream(sound);
+  dispatcher.on("end", (reason) => {
+    if (soundboardQueue.length == 0) {
+      voiceConnection.disconnect();
+    } else {
+      let nextSound = soundboardQueue.shift();
+      playSound(nextSound.member, nextSound.sound);
+    }
+  });
 }
 
 const Module = new Augur.Module()
@@ -79,7 +94,7 @@ const Module = new Augur.Module()
               let voiceConnection = msg.client.voiceConnections.get(msg.guild.id);
 
               if (voiceConnection && voiceConnection.dispatcher) {
-                voiceConnection.dispatcher.on("end", () => playSound(msg.member, sound.previews["preview-lq-mp3"]));
+                soundboardQueue.push({member: msg.member, sound: sound.previews["preview-lq-mp3"]});
               } else {
                 playSound(msg.member, sound.previews["preview-lq-mp3"]);
               }
