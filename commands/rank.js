@@ -45,7 +45,7 @@ function validate(reaction) {
 
 const Module = new Augur.Module()
 .setInit(() => {
-  Module.db.users.getUsers({excludeXP: true})
+  Module.db.user.getUsers({excludeXP: true})
   .then(users => {
     excludeUsers = users.map(u => u.discordId);
   });
