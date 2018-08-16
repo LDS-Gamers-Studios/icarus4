@@ -26,11 +26,9 @@ soundboardQueue = [];
 async function playSound() {
   if (soundboardQueue.length > 0) {
     nowPlaying = true;
-    let next = soundboardQueue.shift();
-    let channel = next.member.voiceChannel;
-    let sound = next.sound;
+    let {channel, sound} = soundboardQueue.shift();
 
-    let voiceConnection = msg.client.voiceConnections.get(msg.guild.id);
+    let voiceConnection = channel.guild.client.voiceConnections.get(channel.guild.id);
     if (voiceConnection && (voiceConnection.channel.id != channel.id)) {
       await voiceConnection.disconnect();
       voiceConnection = await channel.join();
