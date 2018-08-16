@@ -504,6 +504,14 @@ const models = {
         });
       });
     },
+    getUsers: (options) => {
+      return new Promise((fulfill, reject) => {
+        User.find(options, (error, userDocs) => {
+          if (error) reject(error);
+          else fulfill(userDocs);
+        });
+      });
+    },
     newUser: (user) => {
       if ((typeof user) != "string") user = user.id;
       User.findOne({discordId: user}, (err, doc) => {
@@ -522,6 +530,22 @@ const models = {
             else console.log("New Member Saved: " + doc.discordId);
           });
         }
+      });
+    },
+    update: (member, options) => {
+      return new Promise((fulfill, reject) => {
+        if ((typeof user) != "string") member = member.id;
+
+        User.findOne({discordId: member}, (err, user) => {
+          if (err) reject (err);
+          else if (user) {
+            user.set(options);
+            user.save((err, newUser) => {
+              if (err) reject(err);
+              else fulfill(newUser);
+            });
+          } else fulfill(null);
+        });
       });
     },
     updateRoles: (member) => {

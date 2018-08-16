@@ -13,11 +13,6 @@ const Rank = {
 		"121755900313731074"  // gifs-and-memes
 	],
 	excludeRoles: [],
-	excludeUsers: [
-		"96335658997526528", // Ghost
-		"114521577835462658", // Jaxs
-		"111232201848295424" // Gai
-	],
 	messages: [
 		"Your future is looking so bright that I need sunglasses.",
 		"Keep being awesome, and I'll keep saying congratulations.",

@@ -6,7 +6,8 @@ const Augur = require("augurbot"),
 const starboard = "405405857099284490";
 
 var active = [],
-  stars = {};
+  stars = {},
+  excludeUsers = [];
 
 function updateStarboard(reaction) {
   let message = reaction.message;
@@ -43,6 +44,12 @@ function validate(reaction) {
 };
 
 const Module = new Augur.Module()
+.setInit(() => {
+  Module.db.users.getUsers({excludeXP: true})
+  .then(users => {
+    excludeUsers = users.map(u => u.discordId);
+  });
+})
 .addCommand({name: "leaderboard",
   description: "View the LDSG Chat Leaderboard",
   aliases: ["levels"],
@@ -58,7 +65,7 @@ const Module = new Augur.Module()
 		let userDoc = await Module.db.user.findXPRank(user);
 		let member = msg.client.guilds.get(Module.config.ldsg).members.get(userDoc.discordId);
 		let response = null;
-		if (Rank.excludeUsers.includes(member.id) || member.user.bot) {
+		if (excludeUsers.includes(member.id) || member.user.bot) {
 			let snark = [
 				"don't got time for dat.",
 				"ain't interested in no XP gettin'.",
@@ -80,8 +87,28 @@ const Module = new Augur.Module()
 		u.botSpam(msg).send(response);
 	}
 })
+.addCommand({name: "trackxp",
+  description: "Tell Icarus whether to track your chat XP.",
+  syntax: "true | false",
+  process: (msg, suffix) => {
+    suffix = suffix.toLowerCase();
+    if (suffix == "true") {
+      Module.db.users.update(msg.author, {excludeXP: false})
+      .then((user) => {
+        if (excludeUsers.includes(user.discordId)) excludeUsers = excludeUsers.filter(u => u != user.discordId);
+        msg.reply("I'll keep track of your chat XP!");
+      });
+    } else if (suffix == "false") {
+      Module.db.users.update(msg.author, {excludeXP: true})
+      .then((user) => {
+        if (!excludeUsers.includes(user.discordId)) excludeUsers.push(user.discordId);
+        msg.reply("I won't track your chat XP anymore!");
+      });
+    } else msg.reply("you need to tell me `true` or `false` for tracking your chat XP!");
+  }
+})
 .addEvent("message", (msg) => {
-  if (msg.guild && (msg.guild.id == Module.config.ldsg) && !msg.author.bot && !Rank.excludeChannels.includes(msg.channel.id) && !Rank.excludeUsers.includes(msg.author.id) && !u.parse(msg) && !active.includes(msg.author.id))
+  if (msg.guild && (msg.guild.id == Module.config.ldsg) && !active.includes(msg.author.id) && !Rank.excludeChannels.includes(msg.channel.id) && !u.parse(msg) && !excludeUsers.includes(msg.author.id) && !msg.author.bot)
 		active.push(msg.author.id);
 })
 .addEvent("messageReactionAdd", (reaction, user) => {

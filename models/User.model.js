@@ -31,6 +31,10 @@ var UserSchema = new Schema({
 		type: String,
 		default: null
 	},
+	excludeXP: {
+		type: Boolean,
+		default: false
+	},
 	roles: [String]
 });
 
