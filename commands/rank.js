@@ -93,13 +93,13 @@ const Module = new Augur.Module()
   process: (msg, suffix) => {
     suffix = suffix.toLowerCase();
     if (suffix == "true") {
-      Module.db.users.update(msg.author, {excludeXP: false})
+      Module.db.user.update(msg.author, {excludeXP: false})
       .then((user) => {
         if (excludeUsers.includes(user.discordId)) excludeUsers = excludeUsers.filter(u => u != user.discordId);
         msg.reply("I'll keep track of your chat XP!");
       });
     } else if (suffix == "false") {
-      Module.db.users.update(msg.author, {excludeXP: true})
+      Module.db.user.update(msg.author, {excludeXP: true})
       .then((user) => {
         if (!excludeUsers.includes(user.discordId)) excludeUsers.push(user.discordId);
         msg.reply("I won't track your chat XP anymore!");
