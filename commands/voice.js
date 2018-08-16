@@ -1,5 +1,6 @@
 const u = require("../utils/utils"),
   Augur = require("augurbot"),
+  profanityFilter = require("profanity-matcher"),
   request = require("request");
 
 var availableNames = [
@@ -60,17 +61,20 @@ const Module = new Augur.Module()
   permissions: (msg) => (msg.guild && msg.guild.id == "136569499859025920" && msg.member.voiceChannel),
   process: async (msg, suffix) => {
     if (suffix) {
-      let connection = await msg.member.voiceChannel.join();
-      let url = `https://freesound.org/apiv2/search/text/?query=${suffix}&fields=name,id,duration,previews&token=${Module.config.api.freesound}`;
-      request(url, (err, response, body) => {
-        if (!err && response.statusCode == 200) {
-          body = JSON.parse(body);
-          let sound = body.results[Math.floor(Math.random() * body.results.length)];
+      let pf = new profanityFilter();
+      if (pf.scan(suffix.toLowerCase()).length == 0) {
+        let connection = await msg.member.voiceChannel.join();
+        let url = `https://freesound.org/apiv2/search/text/?query=${suffix}&fields=name,id,duration,previews&filter=duration:[* TO 10]&token=${Module.config.api.freesound}`;
+        request(url, (err, response, body) => {
+          if (!err && response.statusCode == 200) {
+            body = JSON.parse(body);
+            let sound = body.results[Math.floor(Math.random() * body.results.length)];
 
-          let dispatcher = await connection.playStream(sound.previews["preview-lq-mp3"]);
-          dispatcher.on("end", (reason) => connection.disconnect());
-        } else console.log(err);
-      });
+            let dispatcher = connection.playStream(sound.previews["preview-lq-mp3"]);
+            dispatcher.on("end", (reason) => connection.disconnect());
+          } else console.log(err);
+        });
+      } else msg.reply("I'm not going to make that sound.").then(u.clean);
     }
   }
 })
