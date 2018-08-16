@@ -114,7 +114,7 @@ const Module = new Augur.Module()
 })
 .addEvent("messageReactionRemove", (reaction, user) => {
   let message = reaction.message;
-	if (message.guild && (message.guild.id == ldsg) && (reaction.emoji.name == "⭐") && (user.id != message.author.id)) {
+	if (message.guild && (message.guild.id == Module.config.ldsg) && (reaction.emoji.name == "⭐") && (user.id != message.author.id)) {
 		let valid = validate(reaction);
 		if (valid) {
 			if (stars.hasOwnProperty(message.author.id)) stars[message.author.id] -= 1;
