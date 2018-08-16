@@ -21,6 +21,12 @@ var availableNames = [
   "Room Trogdor",
 ];
 
+async function playSound(member, sound) {
+  let connection = await member.voiceChannel.join();
+  let dispatcher = connection.playStream(sound);
+  dispatcher.on("end", (reason) => connection.disconnect());
+}
+
 const Module = new Augur.Module()
 .addCommand({name: "lock",
   syntax: "[@additionalUser(s)]",
@@ -70,10 +76,14 @@ const Module = new Augur.Module()
 
             if (body.results.length > 0) {
               let sound = body.results[Math.floor(Math.random() * body.results.length)];
+              let voiceConnection = msg.client.voiceConnections.get(msg.guild.id);
 
-              let connection = await msg.member.voiceChannel.join();
-              let dispatcher = connection.playStream(sound.previews["preview-lq-mp3"]);
-              dispatcher.on("end", (reason) => connection.disconnect());
+              if (voiceConnection && voiceConnection.dispatcher) {
+                voiceConnection.dispatcher.on("end", () => playSound(msg.member, sound.previews["preview-lq-mp3"]));
+              } else {
+                playSound(msg.member, sound.previews["preview-lq-mp3"]);
+              }
+
             } else msg.reply("I couldn't find any sounds for " + suffix);
           } else u.alertError(err, msg);
         });
