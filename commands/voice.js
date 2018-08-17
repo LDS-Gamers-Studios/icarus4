@@ -2,7 +2,7 @@ const u = require("../utils/utils"),
   Augur = require("augurbot"),
   profanityFilter = require("profanity-matcher"),
   request = require("request"),
-  ytdl = require("ytdl");
+  ytdl = require("ytdl-core");
 
 const availableNames = [
 	"Room Buttermelon",
