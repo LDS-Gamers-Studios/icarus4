@@ -1,9 +1,10 @@
 const u = require("../utils/utils"),
   Augur = require("augurbot"),
   profanityFilter = require("profanity-matcher"),
-  request = require("request");
+  request = require("request"),
+  ytdl = require("ytdl");
 
-var availableNames = [
+const availableNames = [
 	"Room Buttermelon",
   "Room Slothmare",
   "Room Handicorn",
@@ -82,6 +83,26 @@ const Module = new Augur.Module()
   	} else {
   		msg.reply("you need to be in a community voice channel to use this command!").then(u.clean);
   	}
+  }
+})
+.addCommand({name: "song",
+  aliases: ["yt"],
+  description: "Play a YouTube Song",
+  syntax: "<YouTube URL>",
+  permissions: (msg) => (msg.guild && msg.guild.id == "136569499859025920" && msg.member.voiceChannel),
+  process: async function(msg, song) {
+    if (song.startsWith("<") && song.endsWith(">")) song = song.substr(1, song.length - 2);
+
+    if (ytdl.validateURL(song)) {
+      let info = await ytdl.getBasicInfo(song);
+      if (!queue.has(msg.guild.id)) queue.set(msg.guild.id, []);
+
+      msg.channel.send(`Queueing ${info.title}...`);
+      let guildQueue = queue.get(msg.guild.id);
+      guildQueue.push({channel: msg.member.voiceChannel, sound: ytdl(song, {filter: "audioonly"})});
+      if (!(msg.guild.voiceConnection && msg.guild.voiceConnection.dispatcher)) playSound(msg.guild.id);
+
+    } else msg.reply(`\`${suffix}\` isn't a valid YouTube URL.`);
   }
 })
 .addCommand({name: "sound",
