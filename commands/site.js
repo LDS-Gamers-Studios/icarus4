@@ -32,10 +32,10 @@ const Module = new Augur.Module()
   let routers = fs.readdirSync(routerPath);
   routers = routers.filter(r => r.endsWith(".js")).map(f => f.slice(0, -3));
 
-  routers.forEach(path => {
-    let router = require(path.resolve(routerPath, path));
-    if (path == "root") path = "";
-    app.use(`/${path}`, router);
+  routers.forEach(route => {
+    let router = require(path.resolve(routerPath, route));
+    if (route == "root") route = "";
+    app.use(`/${route}`, router);
   });
 
   app.use(Express.static("./site/public"));
