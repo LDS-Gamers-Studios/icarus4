@@ -1,6 +1,5 @@
 const Augur = require("augurbot"),
   Express = require("express"),
-  auth = require("../utils/auth"),
   bodyParser = require("body-parser"),
   config = require("../config/site.json"),
   fs = require("fs"),
@@ -10,12 +9,6 @@ const Augur = require("augurbot"),
 const app = new Express(),
   http = require("http").Server(app);
   //io = require("socket.io")(http);
-
-const root = Express.router();
-
-root.get("/logout", auth.revoke),
-root.get("/callback", auth.getToken),
-root.get("/", (req, res) => res.redirect("/leaderboard"));
 
 const Module = new Augur.Module()
 .setInit(() => {
