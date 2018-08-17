@@ -53,8 +53,8 @@ const Module = new Augur.Module()
   let routers = fs.readdirSync(routerPath);
   routers = routers.filter(r => r.endsWith(".js"));
 
-  routers.forEach(path => {
-    delete require.cache[require.resolve(path.resolve(routerPath, path))];
+  routers.forEach(route => {
+    delete require.cache[require.resolve(path.resolve(routerPath, route))];
   });
 });
 
