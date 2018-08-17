@@ -150,7 +150,7 @@ const Module = new Augur.Module()
 			if (stars.hasOwnProperty(message.author.id)) stars[message.author.id] -= (reaction.users.size + 1);
 			else stars[message.author.id] = 0 - (reaction.users.size + 1);
 		}
-		if (valid || ((reaction.users.size >= threshold) && !excludeChannels.includes(message.channel.id)) || message.guild.roles.get(Module.config.roles.team).members.has(user.id)) updateStarboard(reaction);
+		if (valid || ((reaction.users.size >= threshold) && !Rank.excludeChannels.includes(message.channel.id)) || message.guild.roles.get(Module.config.roles.team).members.has(user.id)) updateStarboard(reaction);
 	}
 })
 .setClockwork(() => {
