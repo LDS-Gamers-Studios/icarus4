@@ -20,16 +20,16 @@ var availableNames = [
 	"Room Potato",
   "Room Trogdor",
 ],
-nowPlaying = false,
-soundboardQueue = [];
+queue = new Map();
 
-async function playSound() {
+async function playSound(guildId) {
   try {
-    if (soundboardQueue.length > 0) {
-      nowPlaying = true;
-      let {channel, sound} = soundboardQueue.shift();
+    let guildQueue = queue.get(guildId);
+    if (guildQueue && guildQueue.length > 0) {
+      let {channel, sound} = guildQueue.shift();
 
-      let voiceConnection = channel.guild.client.voiceConnections.get(channel.guild.id);
+      let voiceConnection = channel.guild.voiceConnection;
+
       if (voiceConnection && (voiceConnection.channel.id != channel.id)) {
         await voiceConnection.disconnect();
         voiceConnection = await channel.join();
@@ -38,12 +38,12 @@ async function playSound() {
       }
 
       let dispatcher = voiceConnection.playStream(sound);
+
       dispatcher.on("end", (reason) => {
-        if (soundboardQueue.length == 0) {
-          nowPlaying = false;
+        if (guildQueue.length == 0) {
           voiceConnection.disconnect();
         } else {
-          playSound();
+          playSound(guildId);
         }
       });
     }
@@ -102,8 +102,11 @@ const Module = new Augur.Module()
             if (body.results.length > 0) {
               let sound = body.results[Math.floor(Math.random() * body.results.length)];
 
-              soundboardQueue.push({channel: msg.member.voiceChannel, sound: sound.previews["preview-lq-mp3"]});
-              if (!nowPlaying) playSound();
+              if (!queue.has(msg.guild.id)) queue.set(msg.guild.id, []);
+              let guildQueue = queue.get(msg.guild.id);
+
+              guildQueue.push({channel: msg.member.voiceChannel, sound: sound.previews["preview-lq-mp3"]});
+              if (!(msg.guild.voiceConnection && msg.guild.voiceConnection.dispatcher)) playSound(msg.guild.id);
 
             } else msg.reply("I couldn't find any sounds for " + suffix);
           } else u.alertError(err, msg);
