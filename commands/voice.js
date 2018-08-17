@@ -135,7 +135,7 @@ const Module = new Augur.Module()
 })
 .addEvent("voiceStateUpdate", (oldMember, newMember) => {
   if ((oldMember.guild.id == Module.config.ldsg) && (oldMember.voiceChannelID != newMember.voiceChannelID)) {
-    if (oldMember.voiceChannelID && (oldMember.voiceChannel.members.size == 0) && availableNames.includes(oldMember.voiceChannel.name)) {
+    if (oldMember.voiceChannel && (oldMember.voiceChannel.members.size == 0) && availableNames.includes(oldMember.voiceChannel.name)) {
       // REMOVE OLD VOICE CHANNEL
       oldMember.voiceChannel.delete().catch(console.error);
     }
