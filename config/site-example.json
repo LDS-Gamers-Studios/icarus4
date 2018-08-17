@@ -1,0 +1,19 @@
+{
+	"port": 3001,
+	"root": "http://my.ldsgamers.com",
+	"cb": "",
+	"sessionSecret": "",
+	"oauth2": {
+		"client": {
+			"id": "",
+			"secret": ""
+		},
+		"auth": {
+			"tokenHost": "https://discordapp.com",
+			"tokenPath": "/api/oauth2/token",
+			"authorizePath": "/api/oauth2/authorize",
+			"revokePath": "/api/oauth2/token/revoke"
+		}
+	},
+	"ldsg": "96335850576556032"
+}

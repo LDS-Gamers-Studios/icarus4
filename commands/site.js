@@ -1,0 +1,68 @@
+const Augur = require("augurbot"),
+  Express = require("express"),
+  auth = require("../utils/auth"),
+  bodyParser = require("body-parser"),
+  config = require("../config/site.json"),
+  fs = require("fs"),
+  path = require("path"),
+  session = require("express-session");
+
+const app = new Express(),
+  http = require("http").Server(app);
+  //io = require("socket.io")(http);
+
+const root = Express.router();
+
+root.get("/logout", auth.revoke),
+root.get("/callback", auth.getToken),
+root.get("/", (req, res) => res.redirect("/leaderboard"));
+
+const Module = new Augur.Module()
+.setInit(() => {
+  app.set("views", "./site/views");
+  app.set("view engine", "pug");
+
+  app.use((req, res, next) => {
+    res.locals.bot = Module.handler.bot;
+    next();
+  });
+
+  app.use(session({
+    secret: config.sessionSecret,
+    cookie: { maxAge: 3600000 }
+  }));
+
+  app.use(bodyParser.json());
+  app.use(bodyParser.urlencoded({extended: true}));
+
+  let routerPath = path.resolve(process.cwd(), "./site/private");
+  let routers = fs.readdirSync(routerPath);
+  routers = routers.filter(r => r.endsWith(".js")).map(f => f.slice(0, -3));
+
+  routers.forEach(path => {
+    let router = require(path.resolve(routerPath, path));
+    if (path == "root") path = "";
+    app.use(`/${path}`, router);
+  });
+
+  app.use(Express.static("./site/public"));
+
+  http.listen(config.port, (err) => {
+    if (err) console.error(err);
+    else console.log("Listening on port", config.port);
+  });
+
+})
+.setUnload(() => {
+  http.close();
+
+  let routerPath = path.resolve(process.cwd(), "./site/private");
+  let routers = fs.readdirSync(routerPath);
+  routers = routers.filter(r => r.endsWith(".js"));
+
+  routers.forEach(path => {
+    delete require.cache[require.resolve(path.resolve(routerPath, path))];
+  });
+});
+
+module.exports = Module;
