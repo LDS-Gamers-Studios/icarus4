@@ -7,4 +7,5 @@ data/*
 !data/*-reference.json
 !data/birthday.json
 !data/buttermelon.json
+!data/whoisplaying.json
 site/*
