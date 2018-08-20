@@ -40,7 +40,7 @@ const Module = new Augur.Module()
 .addCommand({name: "whoisplaying",
 	description: "Find who is playing a game in the server",
 	suffix: "<game name>",
-	aliases: ["who'splaying", "whosplaying", "whoson", "whoison", "who'son"],
+	aliases: ["who'splaying", "whosplaying", "whoson", "whoison", "who'son", "wip"],
 	process: (msg, suffix) => {
     if (!suffix && gameDefaults[msg.channel.id]) suffix = gameDefaults[msg.channel.id];
 
