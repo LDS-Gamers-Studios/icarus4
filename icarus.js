@@ -26,3 +26,5 @@ process.on("unhandledRejection", (error, p) => {
 process.on("uncaughtException", (error) => {
   u.alertError(error);
 });
+
+module.exports = {Handler: Handler, bot: Handler.bot};
