@@ -8,7 +8,7 @@ const Module = new Augur.Module()
 	hidden: true,
 	process: (msg) => {
     let spawn = require("child_process").spawn;
-    
+
 		u.clean(msg);
 
 		let cmd = spawn("git", ["pull"], {cwd: process.cwd()});
@@ -54,6 +54,7 @@ const Module = new Augur.Module()
 .addCommand({name: "pulse",
   category: "Admin",
   description: "Check the bot's heartbeat",
+  permissions: (msg) => (Module.config.ownerId === (msg.author.id)),
   process: async function(msg, suffix) {
     let bot = msg.client;
     let Handler = Module.handler;
