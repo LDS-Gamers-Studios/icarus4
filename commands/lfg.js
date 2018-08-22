@@ -37,7 +37,7 @@ function updateBoard(bot, system) {
 
 function writeData() {
   if (update) {
-    fs.writeFile(path.resolve(process.cwd(), "../data/lfgboard.json"), JSON.stringify(lfgBoard), (err) => {
+    fs.writeFile(path.resolve(process.cwd(), "./data/lfgboard.json"), JSON.stringify(lfgBoard), (err) => {
       if (err) console.error("ERROR WRITING LFG DATA");
     });
     update = false;
