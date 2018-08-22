@@ -47,8 +47,8 @@ const Module = new Augur.Module()
     await m.react("💬");
     collector(m);
 	}
-})
-.setInit(async () => {
+});
+/*.setInit(async () => {
   let bot = Module.handler.bot;
   let spoilers = await Module.db.spoiler.fetchAll();
   spoilers.forEach(async spoiler => {
@@ -57,6 +57,6 @@ const Module = new Augur.Module()
       collector(msg);
     }
   });
-});
+});*/
 
 module.exports = Module;

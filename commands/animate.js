@@ -96,16 +96,16 @@ const Module = new Augur.Module()
     ];
     animate(msg, frames);
   }
-})
-.setInit(async () => {
+});
+/*.setInit(async () => {
   let bot = Module.handler.bot;
-  let animations = await Module.db.spoiler.fetchAll();
+  let animations = await Module.db.animation.fetchAll();
   animations.forEach(async animation => {
     if (animation.channelId && bot.channels.has(animation.channelId)) {
       let msg = await bot.channels.get(animation.channelId).fetchMessage(animation.spoilerId);
       reload(msg);
     }
   });
-});
+});*/
 
 module.exports = Module;
