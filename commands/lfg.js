@@ -89,13 +89,16 @@ const Module = new Augur.Module()
       if (lfgBoard.systems.includes(system)) {
         // Remove player from log
         suffix = u.properCase(args.join(" ").trim());
-
-        if (lfgBoard[system].games[suffix]) {
-          removePlayer(msg.client, system, suffix, msg.member.displayName);
-          msg.reply(`removed you from the list in <#${lfgBoard.channel}>!`).then(u.clean);
-        } else {
-          msg.reply("that game wasn't on the list.").then(u.clean);
+        let removed = false;
+        for (var game in lfgBoard[system].games) {
+          if (game.toLowerCase() == suffix.toLowerCase()) {
+            removePlayer(msg.client, system, game, msg.member.displayName);
+            msg.reply(`removed you from the list in <#${lfgBoard.channel}>!`).then(u.clean);
+            removed = true;
+          }
         }
+
+        if (!removed) msg.reply("that game wasn't on the list.").then(u.clean);
       } else {
         msg.reply(`you need to tell me which system and game you're playing! (\`!donelfg ${this.usage}\`)`).then(u.clean);
       }
