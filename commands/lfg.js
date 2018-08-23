@@ -2,24 +2,27 @@ const Augur = require("augurbot"),
   path = require("path")
   fs = require("fs"),
   lfgBoard = require("../data/lfgboard.json"),
+  gameDefaults = require("../data/whoisplaying.json"),
   u = require("../utils/utils");
 
-var update = false;
+var update = false,
+  lfgChannel = null;
 
-function removePlayer(bot, system, game, player) {
-  if (lfgBoard[system].games[game]) {
-    lfgBoard[system].games[game] = lfgBoard[system].games[game].filter(p => p != player);
-    if (lfgBoard[system].games[game].length == 0) delete(lfgBoard[system].games[game]);
-
-    updateBoard(bot, system);
+function removePlayer(player, games) {
+  if (games.length > 0) {
+    games.forEach(game => {
+      game.users = game.users.filter(u => u != player);
+    });
+    lfgBoard.games = lfgBoard.games.filter(g => g.users.length > 0);
   }
-};
+  updateBoard(system);
+}
 
-function updateBoard(bot, system) {
+function updateBoard(system) {
   // Post updated board
   update = true;
 
-  bot.channels.get(lfgBoard.channel).fetchMessage(lfgBoard[system].message).then(message => {
+  lfgChannel.fetchMessage(lfgBoard[system].message).then(message => {
 		let sys = lfgBoard[system];
 		let embed = u.embed()
       .setColor(sys.color)
@@ -28,9 +31,12 @@ function updateBoard(bot, system) {
       .setTimestamp()
       .setThumbnail(sys.thumb);
 
-		for (game in sys.games) {
-			embed.addField(game, sys.games[game].join("\n"), true);
-		}
+    lfgBoard.games
+    .filter(g => g.system == system)
+    .sort()
+    .forEach(game => {
+      embed.addField(game.title, game.users.map(u => channel.guild.members.get(u).displayName).join("\n"), true);
+    });
 		message.edit(embed);
 	});
 };
@@ -58,13 +64,18 @@ const Module = new Augur.Module()
         // Add player to log
         suffix = u.properCase(args.join(" "));
 
-        if (!lfgBoard[system].games[suffix]) lfgBoard[system].games[suffix] = [];
-        lfgBoard[system].games[suffix].push(msg.member.displayName);
+        let game = lfgBoard.games.find(g => ((g.system == system) && (g.title == suffix)));
+        if (!game) {
+          lfgBoard.games.push({system: system, title: suffix, users: [msg.author.id]})
+          game = lfgBoard.games.find(g => ((g.system == system) && (g.title == suffix)));
+        }
 
-        updateBoard(msg.client, system);
+        game.users.push(msg.author.id);
+
+        updateBoard(system);
 
         // Remove player after timeout
-        setTimeout(removePlayer, lfgBoard.timeout, msg.client, system, suffix, msg.member.displayName);
+        setTimeout(removePlayer, lfgBoard.timeout, msg.author.id, [game]);
 
         msg.reply(`added you to the list for ${lfgBoard[system].system} - ${suffix} in <#${lfgBoard.channel}>!`);
         u.clean(msg);
@@ -82,28 +93,33 @@ const Module = new Augur.Module()
   syntax: `(${lfgBoard.systems.join("/")}) Game Name`,
   process: (msg, suffix) => {
     let args = suffix.trim().toLowerCase().replace(/\s\s+/, " ").split(" ");
-    if (suffix && (args.length > 1)) {
+    if (!suffix) {
+      // Remove all
+      let games = lfgBoard.games.filter(g => g.users.includes(msg.author.id));
+      removePlayer(msg.author.id, games);
+      msg.reply(`removed you from the list in <#${lfgBoard.channel}>!`).then(u.clean);
+    } else if (suffix && (args.length == 1)) {
+      // Remove platform
       let system = args.shift();
       if (lfgBoard.aliases[system]) system = lfgBoard.aliases[system];
 
       if (lfgBoard.systems.includes(system)) {
-        // Remove player from log
-        suffix = u.properCase(args.join(" ").trim());
-        let removed = false;
-        for (var game in lfgBoard[system].games) {
-          if (game.toLowerCase() == suffix.toLowerCase()) {
-            removePlayer(msg.client, system, game, msg.member.displayName);
-            msg.reply(`removed you from the list in <#${lfgBoard.channel}>!`).then(u.clean);
-            removed = true;
-          }
-        }
+        let games = lfgBoard.games.filter(g => ((g.system == system) && (g.users.includes(msg.author.id))));
+        removePlayer(msg.author.id, games);
+        msg.reply(`removed you from the list in <#${lfgBoard.channel}>!`).then(u.clean);
+      } else msg.reply("I couldn't understand which system you wanted. Try `!donelfg` to remove yourself from all lists, `!donelfg <system>` to remove yourself from all games on a system, or `!donelfg <system> <game title>` to remove yourself for a particular game.").then(u.clean);
+    } else if (suffix && (args.length > 1)) {
+      // Particular game
+      let system = args.shift();
+      if (lfgBoard.aliases[system]) system = lfgBoard.aliases[system];
 
-        if (!removed) msg.reply("that game wasn't on the list.").then(u.clean);
+      if (lfgBoard.systems.includes(system)) {
+        suffix = u.properCase(args.join(" ").trim());
+        let games = lfgBoard.games.filter(g => ((g.system == system) && (g.title == suffix)));
+        removePlayer(msg.author.id, games);
       } else {
-        msg.reply(`you need to tell me which system and game you're playing! (\`!donelfg ${this.usage}\`)`).then(u.clean);
+        msg.reply("I couldn't understand which system you wanted. Try `!donelfg` to remove yourself from all lists, `!donelfg <system>` to remove yourself from all games on a system, or `!donelfg <system> <game title>` to remove yourself for a particular game.").then(u.clean);
       }
-    } else {
-      msg.reply(`you need to tell me which system and game you're playing! (\`!donelfg ${this.usage}\`)`).then(u.clean);
     }
   },
   permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg))
@@ -124,7 +140,7 @@ const Module = new Augur.Module()
 
         if (lfgBoard[system].games[suffix]) {
           delete(lfgBoard[system].games[suffix]);
-          updateBoard(msg.client, system);
+          updateBoard(system);
           msg.reply(`removed the game from the list in <#${lfgBoard.channel}>!`).then(u.clean);
         } else {
           msg.reply("that game wasn't on the list.").then(u.clean);
@@ -138,19 +154,48 @@ const Module = new Augur.Module()
   },
   permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && msg.member.permissions.has("MANAGE_MESSAGES"))
 })
+.addCommand({name: "whoisplaying",
+	description: "Find who is playing a game in the server",
+	suffix: "<game name>",
+	aliases: ["who'splaying", "whosplaying", "whoson", "whoison", "who'son", "wip"],
+	process: (msg, suffix) => {
+    if (!suffix && gameDefaults[msg.channel.id]) suffix = gameDefaults[msg.channel.id];
+
+		if (suffix) {
+			msg.guild.fetchMembers().then(guild => {
+				let players = guild.members
+          .filter(u => (u.presence.game && (u.presence.game.name.toLowerCase().startsWith(suffix.toLowerCase()))))
+          .map(u => `• ${u.displayName}`);
+				if (players.length > 0) {
+					let embed = u.embed()
+					.setTitle(`${msg.guild.name} members currently playing ${suffix}`)
+					.setDescription(players.join("\n"))
+					.setTimestamp();
+					u.botSpam(msg).send(embed);
+				} else
+				  u.botSpam(msg).send(`I couldn't find any members playing ${suffix}.`);
+			});
+		} else
+			msg.reply("you need to tell me which game to find.").then(u.clean);
+	},
+	permissions: (msg) => msg.guild
+})
 .addEvent("message", (msg) => {
   if (msg.channel.id == lfgBoard.channel) msg.delete();
 })
 .setUnload(writeData)
 .setClockwork(() => {
   // Set a timeout to clear existing LFG players, in case of reload.
-  let bot = Module.handler.bot;
-  lfgBoard.systems.forEach(system => {
-    for (var game in lfgBoard[system].games) {
-      lfgBoard[system].games[game].forEach(player => {
-        setTimeout(removePlayer, lfgBoard.timeout, bot, system, game, player);
-      });
-    }
+  lfgChannel = Module.handler.bot.channels.get(lfgBoard.channel);
+
+  if (!lfgBoard.games) lfgBoard.games = [];
+
+  lfgBoard.games
+  .reduce((a, c) => a.concat(c.users), [])
+  .filter((u, i, all) => all.indexOf(u) == i)
+  .forEach(u => {
+    let games = lfgBoard.games.filter(g => g.users.includes(u));
+    setTimeout(removePlayer, lfgBoard.timeout, u, games);
   });
 
   return setInterval(writeData, 60000);
