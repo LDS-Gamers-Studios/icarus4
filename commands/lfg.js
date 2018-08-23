@@ -66,12 +66,11 @@ const Module = new Augur.Module()
 
         let game = lfgBoard.games.find(g => ((g.system == system) && (g.title == suffix)));
         if (!game) {
-          lfgBoard.games.push({system: system, title: suffix, users: [msg.author.id]})
+          lfgBoard.games.push({system: system, title: suffix, users: []});
           game = lfgBoard.games.find(g => ((g.system == system) && (g.title == suffix)));
         }
 
         game.users.push(msg.author.id);
-
         updateBoard(system);
 
         // Remove player after timeout
@@ -86,11 +85,12 @@ const Module = new Augur.Module()
       msg.reply(`you need to tell me which system and game you're playing! (\`!lfg ${this.usage}\`)`).then(u.clean);
     }
   },
-  permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg))
+  permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && (msg.channel.id == "209046676781006849"))
 })
 .addCommand({name: "donelfg",
   description: "Remove yourself from a LFG list",
   syntax: `(${lfgBoard.systems.join("/")}) Game Name`,
+  hidden: true,
   process: (msg, suffix) => {
     let args = suffix.trim().toLowerCase().replace(/\s\s+/, " ").split(" ");
     if (!suffix) {
@@ -187,8 +187,6 @@ const Module = new Augur.Module()
 .setClockwork(() => {
   // Set a timeout to clear existing LFG players, in case of reload.
   lfgChannel = Module.handler.bot.channels.get(lfgBoard.channel);
-
-  if (!lfgBoard.games) lfgBoard.games = [];
 
   lfgBoard.games
   .reduce((a, c) => a.concat(c.users), [])
