@@ -22,7 +22,9 @@ const Module = new Augur.Module()
 
   app.use(session({
     secret: config.sessionSecret,
-    cookie: { maxAge: 3600000 }
+    cookie: { maxAge: 3600000 },
+    resave: false,
+    saveUninitialized: false
   }));
 
   app.use(bodyParser.json());
