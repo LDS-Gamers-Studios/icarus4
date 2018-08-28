@@ -115,14 +115,21 @@ const Module = new Augur.Module()
     if (suffix) {
       let pf = new profanityFilter();
       if (pf.scan(suffix.toLowerCase()).length == 0) {
-        let url = `https://freesound.org/apiv2/search/text/?query=${suffix}&fields=name,id,duration,previews&filter=duration:[* TO 10]&token=${Module.config.api.freesound}`;
+        let url = `https://freesound.org/apiv2/search/text/?query=${suffix}&fields=name,id,duration,previews,tags,description&filter=duration:[* TO 10]&token=${Module.config.api.freesound}`;
         request(url, async function(err, response, body) {
           if (!err && response.statusCode == 200) {
             body = JSON.parse(body);
+            let sound = null;
 
-            if (body.results.length > 0) {
-              let sound = body.results[Math.floor(Math.random() * body.results.length)];
+            while (!sound && (body.results.length > 0)) {
+              sound = body.results[Math.floor(Math.random() * body.results.length)];
+              if ((pf.scan(sound.tags.join()).length > 0) || (pf.scan(sound.tags.description).length > 0)) {
+                body.results = body.results.filter(r => r.id != sound.id);
+                sound = null;
+              }
+            }
 
+            if (sound) {
               if (!queue.has(msg.guild.id)) queue.set(msg.guild.id, []);
               let guildQueue = queue.get(msg.guild.id);
 
