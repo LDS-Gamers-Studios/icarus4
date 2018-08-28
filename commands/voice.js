@@ -123,7 +123,7 @@ const Module = new Augur.Module()
 
             while (!sound && (body.results.length > 0)) {
               sound = body.results[Math.floor(Math.random() * body.results.length)];
-              if ((pf.scan(sound.tags.join()).length > 0) || (pf.scan(sound.tags.description).length > 0)) {
+              if ((pf.scan(sound.tags.join(" ")).length > 0) || (pf.scan(sound.description).length > 0)) {
                 body.results = body.results.filter(r => r.id != sound.id);
                 sound = null;
               }
