@@ -54,7 +54,8 @@ const Module = new Augur.Module()
 		}
 
 		modLogs.send(embed);
-		general.send(welcomeString);
+    if (!member.roles.has(Module.config.roles.muted))
+		  general.send(welcomeString);
   }
 })
 .addEvent("guildMemberRemove", (member) => {
