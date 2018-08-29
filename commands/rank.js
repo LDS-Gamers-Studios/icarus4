@@ -62,7 +62,7 @@ const Module = new Augur.Module()
 		let user = msg.author.id;
 		if (u.userMentions(msg)) user = u.userMentions(msg).first();
 
-		let member = msg.client.guilds.get(Module.config.ldsg).members.get(user);
+		let member = msg.client.guilds.get(Module.config.ldsg).members.get(user.id);
 		let response = null;
 		if (excludeUsers.includes(member.id) || member.user.bot) {
 			let snark = [
