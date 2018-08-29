@@ -62,8 +62,7 @@ const Module = new Augur.Module()
 		let user = msg.author.id;
 		if (u.userMentions(msg)) user = u.userMentions(msg).first();
 
-		let userDoc = await Module.db.user.findXPRank(user);
-		let member = msg.client.guilds.get(Module.config.ldsg).members.get(userDoc.discordId);
+		let member = msg.client.guilds.get(Module.config.ldsg).members.get(user);
 		let response = null;
 		if (excludeUsers.includes(member.id) || member.user.bot) {
 			let snark = [
@@ -73,6 +72,7 @@ const Module = new Augur.Module()
 			];
 			response = `**${member.displayName}** ${u.rand(snark)}`;
 		} else {
+      let userDoc = await Module.db.user.findXPRank(user);
 			userDoc.level = Rank.level(userDoc.totalXP);
 			userDoc.nextLevel = parseInt(Rank.minXp(userDoc.level + 1), 10).toLocaleString();
 			response = u.embed()

@@ -486,6 +486,8 @@ const models = {
         User.findOne({discordId: user}, (error, userDoc) => {
           if (error) reject(error);
           else {
+            if (!userDoc.currentXP) userDoc.currentXP = 0;
+            if (!userDoc.totalXP) userDoc.totalXP = 0;
             User.count({"$or": [{currentXP: {"$gt": userDoc.currentXP}}, {currentXP: userDoc.currentXP, totalXP: {"$gt": userDoc.totalXP}}]}, (e, currentRank) => {
               if (e) reject(e);
               else {
