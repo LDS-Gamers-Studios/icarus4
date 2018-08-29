@@ -59,7 +59,7 @@ const Module = new Augur.Module()
 	description: "View your chat rank",
 	syntax: "[@user]",
 	process: async function (msg) {
-		let user = msg.author.id;
+		let user = msg.author;
 		if (u.userMentions(msg)) user = u.userMentions(msg).first();
 
 		let member = msg.client.guilds.get(Module.config.ldsg).members.get(user.id);
