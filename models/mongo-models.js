@@ -468,7 +468,7 @@ const models = {
         User.findOne({discordId: user}, (error, userDoc) => {
           if (error) reject(error);
           else {
-            User.count({"$or": [{totalXP: {"$gt": userDoc.totalXP}}, {totalXP: userDoc.totalXP, currentXP: {"$gt": userDoc.currentXP}}]}, (e, userRank) => {
+            User.countDocuments({"$or": [{totalXP: {"$gt": userDoc.totalXP}}, {totalXP: userDoc.totalXP, currentXP: {"$gt": userDoc.currentXP}}]}, (e, userRank) => {
               if (e) reject(e);
               else {
                 userDoc.rank = userRank + 1;
@@ -488,12 +488,12 @@ const models = {
           else {
             if (!userDoc.currentXP) userDoc.currentXP = 0;
             if (!userDoc.totalXP) userDoc.totalXP = 0;
-            User.count({"$or": [{currentXP: {"$gt": userDoc.currentXP}}, {currentXP: userDoc.currentXP, totalXP: {"$gt": userDoc.totalXP}}]}, (e, currentRank) => {
+            User.countDocuments({"$or": [{currentXP: {"$gt": userDoc.currentXP}}, {currentXP: userDoc.currentXP, totalXP: {"$gt": userDoc.totalXP}}]}, (e, currentRank) => {
               if (e) reject(e);
               else {
                 userDoc.currentRank = currentRank + 1;
 
-                User.count({"$or": [{totalXP: {"$gt": userDoc.totalXP}}, {totalXP: userDoc.totalXP, currentXP: {"$gt": userDoc.currentXP}}]}, (e, lifeRank) => {
+                User.countDocuments({"$or": [{totalXP: {"$gt": userDoc.totalXP}}, {totalXP: userDoc.totalXP, currentXP: {"$gt": userDoc.currentXP}}]}, (e, lifeRank) => {
                   if (e) reject(e);
                   else {
                     userDoc.lifeRank = lifeRank + 1;
