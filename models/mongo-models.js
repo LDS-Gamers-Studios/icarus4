@@ -275,7 +275,10 @@ const models = {
           {upsert: true, new: true},
           (err, server) => {
             if (err) reject(err);
-            else fulfill(server);
+            else {
+              serverSettings.set(server.serverId, server);
+              fulfill(server)
+            };
           }
         );
       });
