@@ -155,8 +155,9 @@ const Module = new Augur.Module()
   permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && msg.member.permissions.has("MANAGE_MESSAGES"))
 })
 .addCommand({name: "whoisplaying",
-	description: "Find who is playing a game in the server",
+	description: "Find who is playing a game in the server or list all games being played.",
 	suffix: "<game name>",
+  info: "Search for server members playing <game name>. If no game is provided, it will search for the applicable game in game specific channels or list the top 25 games, otherwise.",
 	aliases: ["who'splaying", "whosplaying", "whoson", "whoison", "who'son", "wip"],
 	process: (msg, suffix) => {
     if (!suffix && gameDefaults[msg.channel.id]) suffix = gameDefaults[msg.channel.id];
@@ -175,8 +176,28 @@ const Module = new Augur.Module()
 				} else
 				  u.botSpam(msg).send(`I couldn't find any members playing ${suffix}.`);
 			});
-		} else
-			msg.reply("you need to tell me which game to find.").then(u.clean);
+		} else {
+      let gameList = Array.from(
+        msg.guild.members
+        .reduce((games, m) => {
+          let game = (m.presence.game ? m.presence.game.name : null);
+          if (game && !games.has(game)) games.set(game, {game: game, players: 0});
+          if (game) games.get(game).players++;
+          return games;
+        }, new Map())
+        .values()
+      ).sort((a, b) => b.players - a.players)
+      .filter((e, i) => i < 25);
+
+      let embed = u.embed()
+      .setTitle("Currently played games in " + msg.guild.name)
+      .setDescription("The top 25 games currently being played in " + msg.guild.name)
+      .setTimestamp();
+      gameList.forEach(g => {
+        embed.addField(g.game, g.players, true);
+      });
+      u.botSpam(msg).send(embed);
+    }
 	},
 	permissions: (msg) => msg.guild
 })
