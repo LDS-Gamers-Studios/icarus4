@@ -205,9 +205,11 @@ const Module = new Augur.Module()
       .setDescription("The top 25 games currently being played in " + msg.guild.name + " (with more than one player):")
       .setTimestamp();
 
-      gameList.forEach(g => {
-        embed.addField(g.game, g.players, true);
-      });
+      if (gameList.length > 0) {
+        gameList.forEach(g => {
+          embed.addField(g.game, g.players, true);
+        });
+      } else embed.setDescription("Well, this is awkward ... I couldn't find any games with more than one member playing.");
 
       u.botSpam(msg).send(embed);
     }
