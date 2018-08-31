@@ -193,7 +193,7 @@ const Module = new Augur.Module()
         }, new Map())
         .values()
       ).sort((a, b) => {
-        if (b.players == a.players) return a.localeCompare(b);
+        if (b.players == a.players) return a.game.localeCompare(b.game);
         else return b.players - a.players
       })
       .filter((e, i) => i < 25);
