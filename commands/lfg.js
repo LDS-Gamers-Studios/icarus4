@@ -159,43 +159,54 @@ const Module = new Augur.Module()
 	suffix: "<game name>",
   info: "Search for server members playing <game name>. If no game is provided, it will search for the applicable game in game specific channels or list the top 25 games, otherwise.",
 	aliases: ["who'splaying", "whosplaying", "whoson", "whoison", "who'son", "wip"],
-	process: (msg, suffix) => {
+	process: async function(msg, suffix) {
     if (!suffix && gameDefaults[msg.channel.id]) suffix = gameDefaults[msg.channel.id];
 
-		if (suffix) {
-			msg.guild.fetchMembers().then(guild => {
-				let players = guild.members
-          .filter(u => (u.presence.game && (u.presence.game.name.toLowerCase().startsWith(suffix.toLowerCase()))))
-          .map(u => `• ${u.displayName}`);
-				if (players.length > 0) {
-					let embed = u.embed()
-					.setTitle(`${msg.guild.name} members currently playing ${suffix}`)
-					.setDescription(players.join("\n"))
-					.setTimestamp();
-					u.botSpam(msg).send(embed);
-				} else
-				  u.botSpam(msg).send(`I couldn't find any members playing ${suffix}.`);
-			});
+    let guild = await msg.guild.fetchMembers();
+
+	  if (suffix) {
+      // List people playing the game
+			let players = guild.members
+      .filter(u => (u.presence.game && (u.presence.game.name.toLowerCase().startsWith(suffix.toLowerCase()))))
+      .map(u => `• ${u.displayName}`);
+
+			if (players.length > 0) {
+				let embed = u.embed()
+				.setTitle(`${msg.guild.name} members currently playing ${suffix}`)
+				.setDescription(players.join("\n"))
+				.setTimestamp();
+
+				u.botSpam(msg).send(embed);
+			} else
+			  u.botSpam(msg).send(`I couldn't find any members playing ${suffix}.`);
 		} else {
+      // List *all* games played
       let gameList = Array.from(
-        msg.guild.members
+        guild.members
         .reduce((games, m) => {
-          let game = (m.presence.game ? m.presence.game.name : null);
-          if (game && !games.has(game)) games.set(game, {game: game, players: 0});
-          if (game) games.get(game).players++;
+          if (!m.user.bot) {
+            let game = (m.presence.game ? m.presence.game.name : null);
+            if (game && !games.has(game)) games.set(game, {game: game, players: 0});
+            if (game) games.get(game).players++;
+          }
           return games;
         }, new Map())
         .values()
-      ).sort((a, b) => b.players - a.players)
+      ).sort((a, b) => {
+        if (b.players == a.players) return a.localeCompare(b);
+        else return b.players - a.players
+      })
       .filter((e, i) => i < 25);
 
       let embed = u.embed()
       .setTitle("Currently played games in " + msg.guild.name)
       .setDescription("The top 25 games currently being played in " + msg.guild.name)
       .setTimestamp();
+
       gameList.forEach(g => {
         embed.addField(g.game, g.players, true);
       });
+
       u.botSpam(msg).send(embed);
     }
 	},
