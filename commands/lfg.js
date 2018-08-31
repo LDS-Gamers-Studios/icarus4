@@ -192,15 +192,17 @@ const Module = new Augur.Module()
           return games;
         }, new Map())
         .values()
-      ).sort((a, b) => {
+      )
+      .filter(g => g.players > 1)
+      .sort((a, b) => {
         if (b.players == a.players) return a.game.localeCompare(b.game);
         else return b.players - a.players
       })
-      .filter((e, i) => i < 25);
+      .filter((g, i) => i < 25);
 
       let embed = u.embed()
       .setTitle("Currently played games in " + msg.guild.name)
-      .setDescription("The top 25 games currently being played in " + msg.guild.name)
+      .setDescription("The top 25 games currently being played in " + msg.guild.name + " (with more than one player):")
       .setTimestamp();
 
       gameList.forEach(g => {
