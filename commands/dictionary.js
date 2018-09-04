@@ -17,8 +17,8 @@ const Module = new Augur.Module()
           parseXML(body, {explicitArray: false}, (err, xml) => {
             if (err) u.alertError(err, msg);
             else {
-              let entry = xml.entry_list.entry;
-              let defs = entry.def.dt;
+              let entry = xml.entry_list.entry[0];
+              let defs = entry.def[0].dt;
               if (defs.length > 0) {
                 let description = `**${entry.ew}**\n\`${entry.hw}\` | \`${entry.pr}\`\n`;
 
