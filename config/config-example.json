@@ -13,7 +13,13 @@
   "ownerId": "",
   "adminId": [],
   "api": {
-    "challonge": ""
+    "challonge": "",
+    "steam": "",
+    "feesound": "",
+    "mw": {
+      "dictionary": "",
+      "thesaurus": ""
+    }
   },
   "color": [248, 154, 34],
   "error": {
