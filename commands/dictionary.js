@@ -14,7 +14,7 @@ const Module = new Augur.Module()
       let url = "https://www.dictionaryapi.com/api/v1/references/collegiate/xml/" + encodeURIComponent(suffix) + "?key=" + Module.config.api.mw.dictionary;
       request(url, (error, response, body) => {
         if (!error && response && response.statusCode == 200) {
-          parseXML(body, {explicitArray: false}, (err, xml) => {
+          parseXML(body, (err, xml) => {
             if (err) u.alertError(err, msg);
             else {
               let entry = xml.entry_list.entry[0];
