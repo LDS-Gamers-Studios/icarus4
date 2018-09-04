@@ -3,6 +3,15 @@ const Augur = require("augurbot"),
   u = require("../utils/utils"),
   request = require("request");
 
+function stringify(text) {
+  if (typeof text == "string")
+    return text;
+  else if (Array.isArray(text))
+    return text.join(", ");
+  else if (typeof text == "object")
+    return text._;
+}
+
 const Module = new Augur.Module()
 .addCommand({name: "define",
   description: "Define a word",
