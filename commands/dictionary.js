@@ -20,7 +20,7 @@ const Module = new Augur.Module()
               let entry = xml.entry_list.entry[0];
               let defs = entry.def[0].dt;
               if (defs.length > 0) {
-                let description = `**${entry.ew}**\n\`${entry.hw}\` | \`${entry.pr}\`\n`;
+                let description = `**${entry.ew}** *(${entry.fl})*\n\`${entry.hw}\` | \`${entry.pr}\`\n`;
 
                 defs.forEach((def, i) => description += `\n**${i + 1}**${(typeof def == "object" ? def._.replace("  ", ` ${def.d_link} `) : def)}`);
 
