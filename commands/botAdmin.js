@@ -122,6 +122,10 @@ const Module = new Augur.Module()
     msg.channel.send("Reloaded " + files.join(", ")).then(u.clean);
   },
   permissions: (msg) => Module.config.adminId.includes(msg.author.id)
+})
+.addEvent("ready", () => {
+  if (!Module.bot.shard || Module.bot.shard.id == 0)
+    Module.handler.errorHandler("Bot is ready!");
 });
 
 module.exports = Module;
