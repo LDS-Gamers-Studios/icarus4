@@ -1,5 +1,6 @@
 const Augur = require("augurbot"),
   fs = require("fs"),
+  path = require("path"),
   u = require("../utils/utils");
 
 const Module = new Augur.Module()
@@ -96,6 +97,13 @@ const Module = new Augur.Module()
   aliases: ["q"],
   process: async function(msg) {
     await msg.channel.send("Going to bed now... :bed:");
+
+    let files = fs.readdirSync(path.resolve(process.cwd(), "./commands"));
+
+    files.forEach(file => {
+      Module.handler.unload(path.resolve(process.cwd(), "./commands/", file));
+    });
+
     if (msg.client.shard) {
       msg.client.shard.broadcastEval("this.destroy().then(() => process.exit())");
     } else {
