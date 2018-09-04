@@ -1,4 +1,4 @@
-const Augur = require("../Augur"),
+const Augur = require("augurbot"),
   parseXML = require("xml2js").parseString,
   u = require("../utils/utils"),
   request = require("request");
