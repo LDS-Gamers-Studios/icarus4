@@ -133,7 +133,7 @@ const Module = new Augur.Module()
 })
 .setInit(() => {
   if (!Module.handler.bot.shard || Module.handler.bot.shard.id == 0)
-    Module.handler.errorHandler("Bot is ready!");
+    u.errorLog.send("```\n" + Date() + "\nBot is ready!```\n");
 });
 
 module.exports = Module;
