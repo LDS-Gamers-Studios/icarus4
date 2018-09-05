@@ -36,13 +36,15 @@ const Module = new Augur.Module()
                 .setFooter("Provided by Merriam-Webster's Collegiate® Dictionary");
 
                 entries.forEach(entry => {
-                  let defs = entry.def[0].dt;
-                  if (defs.length > 0) {
-                    let info = [];
-                    ["hw", "pr"].forEach(e => { if (entry[e]) info.push(entry[e][0]); });
+                  if (entry.def) {
+                    let defs = entry.def[0].dt;
+                    if (defs.length > 0) {
+                      let info = [];
+                      ["hw", "pr"].forEach(e => { if (entry[e]) info.push(entry[e][0]); });
 
-                    description += `\n\n**${stringify(entry.ew)}** *(${entry.fl})*\n` + info.map(i => `\`${stringify(i)}\``).join(" | ") + "\n";
-                    defs.forEach((def, i) => description += `\n**${i + 1}**${stringify(def)}`);
+                      description += `\n\n**${stringify(entry.ew)}** *(${entry.fl})*\n` + info.map(i => `\`${stringify(i)}\``).join(" | ") + "\n";
+                      defs.forEach((def, i) => description += `\n**${i + 1}**${stringify(def)}`);
+                    }
                   }
                 });
 
