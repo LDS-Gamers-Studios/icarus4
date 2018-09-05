@@ -25,7 +25,7 @@ const Module = new Augur.Module()
         if (!error && response && response.statusCode == 200) {
           parseXML(body, (err, xml) => {
             if (err) u.alertError(err, msg);
-            else {
+            else if (xml.entry_list.entry && xml.entry_list.entry.length > 0) {
               let entries = xml.entry_list.entry.filter(e => e.ew && stringify(e.ew).toLowerCase() == suffix.toLowerCase());
 
               if (entries.length > 0) {
@@ -49,7 +49,7 @@ const Module = new Augur.Module()
                 embed.setDescription(description.trim().slice(0, 2000));
                 msg.channel.send(embed);
               } else msg.reply(`I couldn't find a definition for **${suffix}**`);
-            }
+            }  else msg.reply(`I couldn't find a definition for **${suffix}**`);
           });
         } else u.alertError(error, msg);
       });
