@@ -64,7 +64,9 @@ var gameids = new Map()
 	.set("nick", new system({system: "nick", name: "Childhood Nickname", category: "Personal", display: false}))
 	.set("birthday", new system({system: "birthday", name: "Birthday", category: "Personal", display: false}))
 	.set("stake", new system({system: "stake", name: "Stake", category: "Personal", display: false}))
-	.set("job", new system({system: "job", name: "Job Title/Industry", category: "Personal", display: false}));
+	.set("job", new system({system: "job", name: "Job Title/Industry", category: "Personal", display: false}))
+	.set("timezone", new system({system: "timezone", name: "Timezone", category: "Personal", display: false}))
+	.set("location", new system({system: "location", name: "Location", category: "Personal", display: false}));
 
 const aliases = {
 	"xbox": "xb",
@@ -90,7 +92,9 @@ const aliases = {
 	"beam": "mixer",
 	"profession": "job",
 	"work": "job",
-	"birfday": "birthday"
+	"birfday": "birthday",
+	"time": "timezone",
+	"city": "location"
 };
 
 module.exports = {
