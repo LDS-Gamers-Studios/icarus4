@@ -132,7 +132,7 @@ const Module = new Augur.Module()
   permissions: (msg) => Module.config.adminId.includes(msg.author.id)
 })
 .setInit(() => {
-  if (!Module.bot.shard || Module.bot.shard.id == 0)
+  if (!Module.handler.bot.shard || Module.handler.bot.shard.id == 0)
     Module.handler.errorHandler("Bot is ready!");
 });
 
