@@ -309,8 +309,8 @@ const Module = new Augur.Module()
       let twitchIgns = await Module.db.ign.getList("twitch");
       let mixerIgns = await Module.db.ign.getList("mixer");
 
-      let twitchChannels = igns.filter(ign => msg.guild.members.has(ign.discordId)).map(ign => ign.ign);
-      let mixerChannels = igns.filter(ign => msg.guild.members.has(ign.discordId)).map(ign => ign.ign);
+      let twitchChannels = twitchIgns.filter(ign => msg.guild.members.has(ign.discordId)).map(ign => ign.ign);
+      let mixerChannels = mixerIgns.filter(ign => msg.guild.members.has(ign.discordId)).map(ign => ign.ign);
 
       // Fetch channels from Twitch and Mixer
       let res = await Promise.all([
