@@ -98,7 +98,7 @@ const Module = new Augur.Module()
   }
 });
 /*.setInit(async () => {
-  let bot = Module.handler.bot;
+  let bot = Module.handler.client;
   let animations = await Module.db.animation.fetchAll();
   animations.forEach(async animation => {
     if (animation.channelId && bot.channels.has(animation.channelId)) {

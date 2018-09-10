@@ -222,7 +222,7 @@ const Module = new Augur.Module()
 .setUnload(writeData)
 .setClockwork(() => {
   // Set a timeout to clear existing LFG players, in case of reload.
-  lfgChannel = Module.handler.bot.channels.get(lfgBoard.channel);
+  lfgChannel = Module.handler.client.channels.get(lfgBoard.channel);
 
   lfgBoard.games
   .reduce((a, c) => a.concat(c.users), [])

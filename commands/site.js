@@ -16,7 +16,7 @@ const Module = new Augur.Module()
   app.set("view engine", "pug");
 
   app.use((req, res, next) => {
-    res.locals.bot = Module.handler.bot;
+    res.locals.bot = Module.handler.client;
     next();
   });
 

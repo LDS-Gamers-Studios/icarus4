@@ -153,7 +153,7 @@ const Module = new Augur.Module()
 	}
 })
 .setClockwork(() => {
-  let bot = Module.handler.bot;
+  let bot = Module.handler.client;
   bot.channels.get(starboard).fetchMessages().then((messages) => { console.log(`Fetched ${messages.size} stars`)});
 	return setInterval(function(bot) {
 		Module.db.user.addXp(active).then((response) => {

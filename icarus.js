@@ -5,8 +5,8 @@ const Augur = require("augurbot"),
   u = require("./utils/utils");
 
 function loadCommands(Handler) {
-  Handler.db.init(Handler.bot);
-  Handler.bot.on("ready", () => console.log("Ready at:", Date()));
+  Handler.db.init(Handler.client);
+  Handler.client.on("ready", () => console.log("Ready at:", Date()));
   fs.readdirSync("./commands").forEach(command => {
     Handler.register(path.resolve(process.cwd(), "./commands/", command));
   });
@@ -27,4 +27,4 @@ process.on("uncaughtException", (error) => {
   u.alertError(error);
 });
 
-module.exports = {Handler: Handler, bot: Handler.bot};
+module.exports = {Handler: Handler, bot: Handler.client};

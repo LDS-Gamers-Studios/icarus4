@@ -473,7 +473,7 @@ const Module = new Augur.Module()
 })
 .setUnload(() => ({ mixerStatus, twitchStatus }))
 .setClockwork(() => {
-  let bot = Module.handler.bot;
+  let bot = Module.handler.client;
   let interval = 5 * 60 * 1000;
   checkStreams(bot);
   return setInterval(checkStreams, interval, bot);
