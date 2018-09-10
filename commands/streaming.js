@@ -305,42 +305,43 @@ const Module = new Augur.Module()
 .addCommand({name: "streaming",
   description: "Who in the server is streaming right now?",
   process: async function (msg) {
-    let twitchIgns = await Module.db.ign.getList("twitch");
-    let mixerIgns = await Module.db.ign.getList("mixer");
+    try {
+      let twitchIgns = await Module.db.ign.getList("twitch");
+      let mixerIgns = await Module.db.ign.getList("mixer");
 
-    let twitchChannels = igns.filter(ign => msg.guild.members.has(ign.discordId)).map(ign => ign.ign);
-    let mixerChannels = igns.filter(ign => msg.guild.members.has(ign.discordId)).map(ign => ign.ign);
+      let twitchChannels = igns.filter(ign => msg.guild.members.has(ign.discordId)).map(ign => ign.ign);
+      let mixerChannels = igns.filter(ign => msg.guild.members.has(ign.discordId)).map(ign => ign.ign);
 
-    // Fetch channels from Twitch and Mixer
-    let res = await Promise.all([
-      new Promise((fulfill, reject) => {
-        twitch.getStreams({
-          channel: twitchChannels.join(",")
-        }, (error, body) => {
-          if (error) reject(error);
-          else fulfill({service: "twitch", channels: body.streams});
-        });
-      }),
-      new Promise((fulfill, reject) => {
-        mixer.request("GET", `channels?where=token:in:${mixerChannels.join(";")}`)
+      // Fetch channels from Twitch and Mixer
+      let res = await Promise.all([
+        new Promise((fulfill, reject) => {
+          twitch.getStreams({
+            channel: twitchChannels.join(",")
+          }, (error, body) => {
+            if (error) reject(error);
+            else fulfill({service: "twitch", channels: body.streams});
+          });
+        }),
+        new Promise((fulfill, reject) => {
+          mixer.request("GET", `channels?where=token:in:${mixerChannels.join(";")}`)
           .then(res => {
             fulfill({service: "mixer", channels: res.body});
           })
           .catch(reject);
-      })
-    ]);
+        })
+      ]);
 
-    let embed = u.embed()
-    .setColor('#325CBD')
-    .setTimestamp()
-    .setTitle("Currently Streaming in " + msg.guild.name);
+      let embed = u.embed()
+      .setColor('#325CBD')
+      .setTimestamp()
+      .setTitle("Currently Streaming in " + msg.guild.name);
 
-    let channels = [];
-    res.forEach(service => {
-      if (service.service == "twitch") {
-        service.channels.forEach(stream => {
-          let channel = stream.channel;
-          if (channel)
+      let channels = [];
+      res.forEach(service => {
+        if (service.service == "twitch") {
+          service.channels.forEach(stream => {
+            let channel = stream.channel;
+            if (channel)
             channels.push({
               name: channel.display_name,
               game: channel.game,
@@ -348,25 +349,29 @@ const Module = new Augur.Module()
               title: channel.status,
               url: channel.url
             });
-        });
-      } else if (service.service == "mixer") {
-        service.channels.forEach(stream => {
-          channels.push({
-            name: stream.token,
-            game: stream.type.name,
-            service: "Mixer",
-            title: stream.name,
-            url: `https://mixer.com/${stream.token}`
           });
-        });
-      }
-    });
+        } else if (service.service == "mixer") {
+          service.channels.forEach(stream => {
+            channels.push({
+              name: stream.token,
+              game: stream.type.name,
+              service: "Mixer",
+              title: stream.name,
+              url: `https://mixer.com/${stream.token}`
+            });
+          });
+        }
+      });
 
-    channels.sort((a, b) => a.name.localeCompare(b.name)).forEach(channel => {
-      embed.addField(`${channel.name} playing ${channel.game} [${channel.service}]`, `[${channel.title}](${channel.url})`, true);
-    });
+      channels.sort((a, b) => a.name.localeCompare(b.name)).forEach(channel => {
+        embed.addField(`${channel.name} playing ${channel.game} [${channel.service}]`, `[${channel.title}](${channel.url})`, true);
+      });
 
-    u.botSpam(msg).send(embed);
+      u.botSpam(msg).send(embed);
+
+    } catch (e) {
+      Module.handler.errorHandler(e, msg);
+    }
   },
   permissions: (msg) => msg.guild
 })
