@@ -2,26 +2,30 @@ const Augur = require("augurbot"),
   u = require("../utils/utils");
 
 async function collector(msg) {
-  let existing = (msg.reactions.get("💬") ? msg.reactions.get("💬").users.keyArray() : []);
-  let bot = msg.client;
-  let reactions = await msg.awaitReactions(
-    (reaction, user) => ((reaction.emoji.name == "💬") && !user.bot),
-    {max: 1}
-  );
-  let user = reactions.first().users.find(u => !existing.includes(u.id));
-  let spoiler = await Module.db.spoiler.fetch(msg.id);
-  if (spoiler && user) {
-		let author = await bot.fetchUser(spoiler.authorId)
-    let embed = u.embed();
-		embed.setAuthor(spoiler.authorName, author.displayAvatarURL)
-			.setColor(Module.config.color)
-			.setDescription(spoiler.content)
-			.setTimestamp(spoiler.timestamp)
-			.setTitle(`Spoiler${(spoiler.channelName ? (" in #" + spoiler.channelName) : "")}:`);
+  try {
+    let existing = (msg.reactions.get("💬") ? msg.reactions.get("💬").users.keyArray() : []);
+    let bot = msg.client;
+    let reactions = await msg.awaitReactions(
+      (reaction, user) => ((reaction.emoji.name == "💬") && !user.bot),
+      {max: 1}
+    );
+    let user = reactions.first().users.find(u => !existing.includes(u.id));
+    let spoiler = await Module.db.spoiler.fetch(msg.id);
+    if (spoiler && user) {
+      let author = await bot.fetchUser(spoiler.authorId)
+      let embed = u.embed();
+      embed.setAuthor(spoiler.authorName, author.displayAvatarURL)
+      .setColor(Module.config.color)
+      .setDescription(spoiler.content)
+      .setTimestamp(spoiler.timestamp)
+      .setTitle(`Spoiler${(spoiler.channelName ? (" in #" + spoiler.channelName) : "")}:`);
 
-    user.send(embed);
+      user.send(embed);
+    }
+    collector(msg);
+  } catch(e) {
+    u.alertError(e);
   }
-  collector(msg);
 }
 
 const Module = new Augur.Module()

@@ -160,58 +160,62 @@ const Module = new Augur.Module()
   info: "Search for server members playing <game name>. If no game is provided, it will search for the applicable game in game specific channels or list the top 25 games, otherwise.",
 	aliases: ["who'splaying", "whosplaying", "whoson", "whoison", "who'son", "wip"],
 	process: async function(msg, suffix) {
-    if (!suffix && gameDefaults[msg.channel.id]) suffix = gameDefaults[msg.channel.id];
+    try {
+      if (!suffix && gameDefaults[msg.channel.id]) suffix = gameDefaults[msg.channel.id];
 
-    let guild = await msg.guild.fetchMembers();
+      let guild = await msg.guild.fetchMembers();
 
-	  if (suffix) {
-      // List people playing the game
-			let players = guild.members
-      .filter(u => (u.presence.game && (u.presence.game.name.toLowerCase().startsWith(suffix.toLowerCase()))))
-      .map(u => `• ${u.displayName}`);
+      if (suffix) {
+        // List people playing the game
+        let players = guild.members
+        .filter(u => (u.presence.game && (u.presence.game.name.toLowerCase().startsWith(suffix.toLowerCase()))))
+        .map(u => `• ${u.displayName}`);
 
-			if (players.length > 0) {
-				let embed = u.embed()
-				.setTitle(`${msg.guild.name} members currently playing ${suffix}`)
-				.setDescription(players.join("\n"))
-				.setTimestamp();
+        if (players.length > 0) {
+          let embed = u.embed()
+          .setTitle(`${msg.guild.name} members currently playing ${suffix}`)
+          .setDescription(players.join("\n"))
+          .setTimestamp();
 
-				u.botSpam(msg).send(embed);
-			} else
-			  u.botSpam(msg).send(`I couldn't find any members playing ${suffix}.`);
-		} else {
-      // List *all* games played
-      let gameList = Array.from(
-        guild.members
-        .reduce((games, m) => {
-          if (!m.user.bot) {
-            let game = (m.presence.game ? m.presence.game.name : null);
-            if (game && !games.has(game)) games.set(game, {game: game, players: 0});
-            if (game) games.get(game).players++;
-          }
-          return games;
-        }, new Map())
-        .values()
-      )
-      .filter(g => g.players > 1)
-      .sort((a, b) => {
-        if (b.players == a.players) return a.game.localeCompare(b.game);
-        else return b.players - a.players
-      })
-      .filter((g, i) => i < 25);
+          u.botSpam(msg).send(embed);
+        } else
+        u.botSpam(msg).send(`I couldn't find any members playing ${suffix}.`);
+      } else {
+        // List *all* games played
+        let gameList = Array.from(
+          guild.members
+          .reduce((games, m) => {
+            if (!m.user.bot) {
+              let game = (m.presence.game ? m.presence.game.name : null);
+              if (game && !games.has(game)) games.set(game, {game: game, players: 0});
+              if (game) games.get(game).players++;
+            }
+            return games;
+          }, new Map())
+          .values()
+        )
+        .filter(g => g.players > 1)
+        .sort((a, b) => {
+          if (b.players == a.players) return a.game.localeCompare(b.game);
+          else return b.players - a.players
+        })
+        .filter((g, i) => i < 25);
 
-      let embed = u.embed()
-      .setTitle("Currently played games in " + msg.guild.name)
-      .setDescription("The top 25 games currently being played in " + msg.guild.name + " (with more than one player):")
-      .setTimestamp();
+        let embed = u.embed()
+        .setTitle("Currently played games in " + msg.guild.name)
+        .setDescription("The top 25 games currently being played in " + msg.guild.name + " (with more than one player):")
+        .setTimestamp();
 
-      if (gameList.length > 0) {
-        gameList.forEach(g => {
-          embed.addField(g.game, g.players, true);
-        });
-      } else embed.setDescription("Well, this is awkward ... I couldn't find any games with more than one member playing.");
+        if (gameList.length > 0) {
+          gameList.forEach(g => {
+            embed.addField(g.game, g.players, true);
+          });
+        } else embed.setDescription("Well, this is awkward ... I couldn't find any games with more than one member playing.");
 
-      u.botSpam(msg).send(embed);
+        u.botSpam(msg).send(embed);
+      }
+    } catch(e) {
+      Module.handler.errorHandler(e, msg);
     }
 	},
 	permissions: (msg) => msg.guild

@@ -81,12 +81,11 @@ function notificationEmbed(body, srv) {
 };
 
 async function processMixer(bot, key, channel) {
-  let ldsg = bot.guilds.get(Module.config.ldsg),
-		liveRole = ldsg.roles.get("281135201407467520"),
-		notificationChannel = ldsg.channels.get(Module.config.ldsg), // #general
-		member = ldsg.members.get(key);
-
   try {
+    let ldsg = bot.guilds.get(Module.config.ldsg),
+      liveRole = ldsg.roles.get("281135201407467520"),
+      notificationChannel = ldsg.channels.get(Module.config.ldsg), // #general
+      member = ldsg.members.get(key);
     let res = await mixer.request("GET", `channels/${channel}`);
     res = res.body;
 
@@ -214,35 +213,39 @@ const Module = new Augur.Module()
   description: "Links to a Mixer stream",
   syntax: "<mixerChannel> | <@user>",
   process: async function(msg, suffix) {
-    let user = false,
+    try {
+      let user = false,
       name = false;
 
-    if (u.userMentions(msg)) user = u.userMentions(msg).first();
-    else if (!suffix) user = msg.author;
-    if (user) {
-      let ign = await Module.db.ign.find(user.id, "mixer");
-      if (ign) {
-        name = encodeURIComponent(ign.ign);
+      if (u.userMentions(msg)) user = u.userMentions(msg).first();
+      else if (!suffix) user = msg.author;
+      if (user) {
+        let ign = await Module.db.ign.find(user.id, "mixer");
+        if (ign) {
+          name = encodeURIComponent(ign.ign);
+          let res = await mixer.request("GET", `channels/${name}`);
+          res = res.body;
+          if (res.statusCode && (res.statusCode == 404)) {
+            msg.channel.send("I couldn't find a Mixer channel for " + ign.ign).then(u.clean);
+          } else {
+            msg.channel.send(mixerEmbed(res));
+          }
+        } else {
+          msg.channel.send("<@" + user + "> has not set a Mixer name with `!addign mixer`.").then(u.clean);
+        }
+      } else {
+        name = encodeURIComponent(suffix);
+
         let res = await mixer.request("GET", `channels/${name}`);
         res = res.body;
         if (res.statusCode && (res.statusCode == 404)) {
-          msg.channel.send("I couldn't find a Mixer channel for " + ign.ign).then(u.clean);
+          msg.channel.send("I couldn't find a Mixer channel for " + name).then(u.clean);
         } else {
           msg.channel.send(mixerEmbed(res));
         }
-      } else {
-        msg.channel.send("<@" + user + "> has not set a Mixer name with `!addign mixer`.").then(u.clean);
       }
-    } else {
-      name = encodeURIComponent(suffix);
-
-      let res = await mixer.request("GET", `channels/${name}`);
-      res = res.body;
-      if (res.statusCode && (res.statusCode == 404)) {
-        msg.channel.send("I couldn't find a Mixer channel for " + name).then(u.clean);
-      } else {
-        msg.channel.send(mixerEmbed(res));
-      }
+    } catch(e) {
+      Module.handler.errorHandler(e, msg);
     }
   }
 })
@@ -380,20 +383,45 @@ const Module = new Augur.Module()
   syntax: "<streamer_name> | <@user>",
   info: "Displays stream status and stream info.",
   process: async function(msg, suffix) {
-    let user = false,
+    try {
+      let user = false,
       name = false;
 
-    if (u.userMentions(msg)) {
-      user = u.userMentions(msg).first();
-    } else if (!suffix) {
-      user = msg.author;
-    }
+      if (u.userMentions(msg)) {
+        user = u.userMentions(msg).first();
+      } else if (!suffix) {
+        user = msg.author;
+      }
 
-    if (user) {
-      let ign = await Module.db.ign.find(user.id, 'twitch');
-      if (ign) {
-        name = encodeURIComponent(ign.ign);
+      if (user) {
+        let ign = await Module.db.ign.find(user.id, 'twitch');
+        if (ign) {
+          name = encodeURIComponent(ign.ign);
 
+          twitch.getChannelStream(name, function(error, body) {
+            if (error && error.status == 404) {
+              msg.channel.send("I couldn't find a Twitch channel for " + ign.ign).then(u.clean);
+            } else if (error) {
+              console.error(error);
+            } else if (body.stream) {
+              msg.channel.send(twitchEmbed(body));
+            } else {
+              twitch.getChannel(name, function(error, body){
+                if (error && error.status == 404) {
+                  msg.channel.send("I couldn't find a Twitch channel for " + ign.ign).then(u.clean);
+                } else if (error) {
+                  console.error(error);
+                } else {
+                  msg.channel.send(twitchEmbed(body));
+                }
+              });
+            }
+          });
+        } else {
+          msg.channel.send("<@" + user + "> has not set a Twitch name with `!addign twitch`.").then(u.clean);
+        }
+      } else {
+        name = encodeURIComponent(suffix);
         twitch.getChannelStream(name, function(error, body) {
           if (error && error.status == 404) {
             msg.channel.send("I couldn't find a Twitch channel for " + ign.ign).then(u.clean);
@@ -413,30 +441,9 @@ const Module = new Augur.Module()
             });
           }
         });
-      } else {
-        msg.channel.send("<@" + user + "> has not set a Twitch name with `!addign twitch`.").then(u.clean);
       }
-    } else {
-      name = encodeURIComponent(suffix);
-      twitch.getChannelStream(name, function(error, body) {
-        if (error && error.status == 404) {
-          msg.channel.send("I couldn't find a Twitch channel for " + ign.ign).then(u.clean);
-        } else if (error) {
-          console.error(error);
-        } else if (body.stream) {
-          msg.channel.send(twitchEmbed(body));
-        } else {
-          twitch.getChannel(name, function(error, body){
-            if (error && error.status == 404) {
-              msg.channel.send("I couldn't find a Twitch channel for " + ign.ign).then(u.clean);
-            } else if (error) {
-              console.error(error);
-            } else {
-              msg.channel.send(twitchEmbed(body));
-            }
-          });
-        }
-      });
+    } catch(e) {
+      Module.handler.errorHandler(e, msg);
     }
   }
 })

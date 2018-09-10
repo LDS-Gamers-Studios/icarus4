@@ -59,31 +59,35 @@ const Module = new Augur.Module()
 	description: "View your chat rank",
 	syntax: "[@user]",
 	process: async function (msg) {
-		let user = (u.userMentions(msg) ? u.userMentions(msg).first() : msg.author);
+    try {
+      let user = (u.userMentions(msg) ? u.userMentions(msg).first() : msg.author);
 
-		let member = msg.client.guilds.get(Module.config.ldsg).members.get(user.id);
-		let response = null;
-		if (excludeUsers.includes(member.id) || member.user.bot) {
-			let snark = [
-				"don't got time for dat.",
-				"ain't interested in no XP gettin'.",
-				"don't talk to me no more, so I ignore 'em."
-			];
-			response = `**${member.displayName}** ${u.rand(snark)}`;
-		} else {
-      let userDoc = await Module.db.user.findXPRank(user);
-			userDoc.level = Rank.level(userDoc.totalXP);
-			userDoc.nextLevel = parseInt(Rank.minXp(userDoc.level + 1), 10).toLocaleString();
-			response = u.embed()
-				.setAuthor(member.displayName, (member.user.displayAvatarURL ? member.user.displayAvatarURL : null))
-				.addField("Rank", `Season: ${userDoc.currentRank}/${msg.client.guilds.get(Module.config.ldsg).memberCount}\nLifetime: ${userDoc.lifeRank}/${msg.client.guilds.get(Module.config.ldsg).memberCount}`, true)
-				.addField("Level", `Current Level: ${userDoc.level}\nNext Level: ${userDoc.nextLevel} XP`, true)
-				.addField("Exp.", `Season: ${parseInt(userDoc.currentXP, 10).toLocaleString()} XP\nLifetime: ${parseInt(userDoc.totalXP, 10).toLocaleString()} XP`, true)
-				.setTitle("LDSG Chat Ranking")
-				.setURL("http://my.ldsgamers.com/leaderboard")
-				.setFooter("http://my.ldsgamers.com/leaderboard");
-		}
-		u.botSpam(msg).send(response);
+      let member = msg.client.guilds.get(Module.config.ldsg).members.get(user.id);
+      let response = null;
+      if (excludeUsers.includes(member.id) || member.user.bot) {
+        let snark = [
+          "don't got time for dat.",
+          "ain't interested in no XP gettin'.",
+          "don't talk to me no more, so I ignore 'em."
+        ];
+        response = `**${member.displayName}** ${u.rand(snark)}`;
+      } else {
+        let userDoc = await Module.db.user.findXPRank(user);
+        userDoc.level = Rank.level(userDoc.totalXP);
+        userDoc.nextLevel = parseInt(Rank.minXp(userDoc.level + 1), 10).toLocaleString();
+        response = u.embed()
+        .setAuthor(member.displayName, (member.user.displayAvatarURL ? member.user.displayAvatarURL : null))
+        .addField("Rank", `Season: ${userDoc.currentRank}/${msg.client.guilds.get(Module.config.ldsg).memberCount}\nLifetime: ${userDoc.lifeRank}/${msg.client.guilds.get(Module.config.ldsg).memberCount}`, true)
+        .addField("Level", `Current Level: ${userDoc.level}\nNext Level: ${userDoc.nextLevel} XP`, true)
+        .addField("Exp.", `Season: ${parseInt(userDoc.currentXP, 10).toLocaleString()} XP\nLifetime: ${parseInt(userDoc.totalXP, 10).toLocaleString()} XP`, true)
+        .setTitle("LDSG Chat Ranking")
+        .setURL("http://my.ldsgamers.com/leaderboard")
+        .setFooter("http://my.ldsgamers.com/leaderboard");
+      }
+      u.botSpam(msg).send(response);
+    } catch(e) {
+      Module.handler.errorHandler(e, msg);
+    }
 	}
 })
 .addCommand({name: "trackxp",
