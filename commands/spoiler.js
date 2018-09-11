@@ -51,16 +51,24 @@ const Module = new Augur.Module()
     await m.react("💬");
     collector(m);
 	}
+})
+.setInit(async () => {
+  try {
+    let bot = Module.handler.client;
+    let spoilers = await Module.db.spoiler.fetchAll();
+    spoilers.forEach(async spoiler => {
+      try {
+        if (bot.channels.has(spoiler.channelId)) {
+          let msg = await bot.channels.get(spoiler.channelId).fetchMessage(spoiler.spoilerId);
+          collector(msg);
+        }
+      } catch(err) {
+        Module.handler.errorHandler(e);
+      }
+    });
+  } catch(e) {
+    Module.handler.errorHandler(e);
+  }
 });
-/*.setInit(async () => {
-  let bot = Module.handler.client;
-  let spoilers = await Module.db.spoiler.fetchAll();
-  spoilers.forEach(async spoiler => {
-    if (bot.channels.has(spoiler.channelId)) {
-      let msg = await bot.channels.get(spoiler.channelId).fetchMessage(spoiler.spoilerId);
-      collector(msg);
-    }
-  });
-});*/
 
 module.exports = Module;
