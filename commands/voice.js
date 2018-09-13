@@ -88,8 +88,9 @@ const Module = new Augur.Module()
 .addCommand({name: "song",
   aliases: ["yt"],
   description: "Play a YouTube Song",
+  hidden: true,
   syntax: "<YouTube URL>",
-  permissions: (msg) => (msg.guild && msg.guild.id == "136569499859025920" && msg.member.voiceChannel),
+  permissions: (msg) => (msg.guild && ((msg.guild.id == "136569499859025920") || ((msg.guild.id == "136569499859025920") || ((msg.guild.id == Module.config.ldsg) && (msg.member.roles.has(Module.config.roles.team) || msg.member.roles.has("114816596341424129")))) && msg.member.voiceChannel)),
   process: async function(msg, song) {
     try {
       if (song.startsWith("<") && song.endsWith(">")) song = song.substr(1, song.length - 2);
