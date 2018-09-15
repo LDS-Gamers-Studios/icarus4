@@ -80,7 +80,7 @@ const Module = new Augur.Module()
   process: async (msg) => {
     try {
       let channel = u.properCase(msg.channel.name.toLowerCase().replace(/(general)|(lfg)/ig, "").replace(/\-+/g, " ").trim());
-      if (channel == "") channel = "LDSG";
+      if (!channel) channel = "LDSG";
       let role = msg.guild.roles.find(r => r.name.toLowerCase() == channel.toLowerCase());
       if (!role) {
         role = await msg.guild.createRole({
