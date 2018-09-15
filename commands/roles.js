@@ -67,7 +67,7 @@ const Module = new Augur.Module()
         msg.reply("I couldn't see a pingable role for this channel applied to you.");
       } else {
         await msg.member.removeRole(role);
-        msg.reply(`I removed the \`@${channel}\` role!`);
+        msg.reply(`I removed the \`@${role.name}\` role!`);
       }
     } catch(e) {
       Module.handler.errorHandler(e, msg);
@@ -90,7 +90,7 @@ const Module = new Augur.Module()
         });
       }
       await msg.member.addRole(role);
-      msg.reply(`I gave you the pingable \`@${channel}\` role!`);
+      msg.reply(`I gave you the pingable \`@${role.name}\` role!`);
     } catch(e) {
       Module.handler.errorHandler(e, msg);
     }
