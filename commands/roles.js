@@ -85,7 +85,7 @@ const Module = new Augur.Module()
       if (!role) {
         role = await msg.guild.createRole({
           name: channel,
-          permissions: 0,
+          permissions: [],
           mentionable: true
         });
       }
