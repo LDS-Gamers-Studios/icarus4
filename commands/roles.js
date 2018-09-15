@@ -2,11 +2,6 @@ const Augur = require("augurbot"),
   u = require("../utils/utils");
 
 const roles = {
-	//"overwatch pc": "184397175978065921",
-	//"overwatch ps": "184397093954125825",
-	//"overwatch xb": "184396518143426570",
-	//"ark pc": "258329492030750721",
-	//"ark xb": "258329149859561484",
 	"firearms": "348136185106923521",
 	"rhythm": "360444518190940163",
 	"twitch raider": "309889486521892865",
@@ -17,25 +12,6 @@ const roles = {
 };
 
 const aliases = {
-	//"overwatch-pc": "overwatch pc",
-	//"overwatchpc": "overwatch pc",
-	//"overwatch-ps4": "overwatch ps",
-	//"overwatchps4": "overwatch ps",
-	//"overwatch ps4": "overwatch ps",
-	//"overwatch-ps": "overwatch ps",
-	//"overwatchps": "overwatch ps",
-	//"overwatch xb1": "overwatch xb",
-	//"overwatch-xb1": "overwatch xb",
-	//"overwatchxb1": "overwatch xb",
-	//"overwatch-xb": "overwatch xb",
-	//"overwatchxb": "overwatch xb",
-	//"ark-pc": "ark pc",
-	//"arkpc": "ark pc",
-	//"ark-xb1": "ark xb",
-	//"ark xb1": "ark xb",
-	//"arkxb1": "ark xb",
-	//"ark-xb": "ark xb",
-	//"arkxb": "ark xb",
 	"firearm": "firearms",
 	"gun": "firearms",
 	"guns": "firearms",
@@ -76,6 +52,46 @@ const Module = new Augur.Module()
       });
     } else {
       msg.reply("you didn't give me a valid role to apply.").then(u.clean);
+    }
+  }
+})
+.addCommand({name: "nopings",
+  description: "Remove a pingable role for your current channel",
+  permissions: (msg) => msg.guild && msg.guild.id == "96335850576556032",
+  process: async (msg) => {
+    try {
+      let channel = u.properCase(msg.channel.name.toLowerCase().replace(/(general)|(lfg)/ig, "").replace(/\-+/g, " ").trim());
+      if (channel == "") channel = "LDSG";
+      let role = msg.members.roles.find(r => r.name.toLowerCase() == channel);
+      if (!role) {
+        msg.reply("I couldn't see a pingable role for this channel applied to you.");
+      } else {
+        await msg.member.removeRole(role);
+        msg.reply(`I removed the \`@${channel}\` role!`);
+      }
+    } catch(e) {
+      Module.handler.errorHandler(e, msg);
+    }
+  }
+})
+.addCommand({name: "pingme",
+  description: "Add a pingable role for your current channel",
+  permissions: (msg) => msg.guild && msg.guild.id == "96335850576556032",
+  process: async (msg) => {
+    try {
+      let channel = u.properCase(msg.channel.name.toLowerCase().replace(/(general)|(lfg)/ig, "").replace(/\-+/g, " ").trim());
+      if (channel == "") channel = "LDSG";
+      let role = msg.guild.roles.find(r => r.name.toLowerCase() == channel);
+      if (!role) {
+        role = await msg.guild.createRole({
+          name: channel,
+          mentionable: true
+        });
+      }
+      await msg.member.addRole(role);
+      msg.reply(`I gave you the pingable \`@${channel}\` role!`);
+    } catch(e) {
+      Module.handler.errorHandler(e, msg);
     }
   }
 })
