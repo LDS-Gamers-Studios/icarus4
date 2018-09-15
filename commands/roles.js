@@ -60,8 +60,8 @@ const Module = new Augur.Module()
   permissions: (msg) => msg.guild && msg.guild.id == "96335850576556032",
   process: async (msg) => {
     try {
-      let channel = u.properCase(msg.channel.name.toLowerCase().replace(/(general)|(lfg)/ig, "").replace(/\-+/g, " ").trim());
-      if (channel == "") channel = "LDSG";
+      let channel = msg.channel.name.toLowerCase().replace(/(general)|(lfg)/ig, "").replace(/\-+/g, " ").trim();
+      channel = (channel ? u.properCase(channel) : "LDSG");
       let role = msg.member.roles.find(r => r.name.toLowerCase() == channel.toLowerCase());
       if (!role) {
         msg.reply("I couldn't see a pingable role for this channel applied to you.");
