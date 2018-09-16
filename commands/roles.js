@@ -61,7 +61,7 @@ const Module = new Augur.Module()
   process: async (msg) => {
     try {
       let channel = msg.channel.name.toLowerCase().replace(/(general)|(lfg)/ig, "").replace(/\-+/g, " ").trim();
-      channel = (channel ? u.properCase(channel) : "LDSG");
+      channel = (channel ? u.properCase(channel) : "LDSGamer");
       let role = msg.member.roles.find(r => r.name.toLowerCase() == channel.toLowerCase());
       if (!role) {
         msg.reply("I couldn't see a pingable role for this channel applied to you.");
@@ -80,7 +80,7 @@ const Module = new Augur.Module()
   process: async (msg) => {
     try {
       let channel = msg.channel.name.toLowerCase().replace(/(general)|(lfg)/ig, "").replace(/\-+/g, " ").trim();
-      channel = (channel ? u.properCase(channel) : "LDSG");
+      channel = (channel ? u.properCase(channel) : "LDSGamer");
       let role = msg.guild.roles.find(r => r.name.toLowerCase() == channel.toLowerCase());
       if (!role) {
         role = await msg.guild.createRole({
