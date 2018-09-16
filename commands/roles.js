@@ -60,6 +60,7 @@ const Module = new Augur.Module()
   permissions: (msg) => msg.guild && msg.guild.id == "96335850576556032",
   process: async (msg) => {
     try {
+      u.clean(msg);
       let channel = msg.channel.name.toLowerCase().replace(/(general)|(lfg)/ig, "").replace(/\-+/g, " ").trim();
       channel = (channel ? u.properCase(channel) : "LDSGamer");
       let role = msg.member.roles.find(r => r.name.toLowerCase() == channel.toLowerCase());
@@ -67,7 +68,7 @@ const Module = new Augur.Module()
         msg.reply("I couldn't see a pingable role for this channel applied to you.");
       } else {
         await msg.member.removeRole(role);
-        msg.reply(`I removed the \`@${role.name}\` role!`);
+        msg.reply(`I removed the \`@${role.name}\` role!`).then(u.clean);
       }
     } catch(e) {
       Module.handler.errorHandler(e, msg);
@@ -90,7 +91,7 @@ const Module = new Augur.Module()
         });
       }
       await msg.member.addRole(role);
-      msg.reply(`I gave you the pingable \`@${role.name}\` role!`);
+      msg.reply(`I gave you the pingable \`@${role.name}\` role!`).then(u.clean);
     } catch(e) {
       Module.handler.errorHandler(e, msg);
     }
