@@ -1,3 +1,5 @@
+// Reactions powered by GIPHY.
+
 const Augur = require("augurbot"),
   config = require("../config/giphy.json"),
   profanityFilter = require("profanity-matcher"),
@@ -16,14 +18,14 @@ const Module = new Augur.Module()
 		u.clean(msg, 0);
     let bot = msg.client;
 		if (pf.scan(suffix.toLowerCase()).length == 0) {
-			let url = `https://api.giphy.com/v1/gifs/search?api_key=${config.apiKey}&q=${encodeURI(suffix)}&limit=${config.limit}&offset=0&rating=${config.rating}&lang=${config.lang}`;
+      let url = `https://api.giphy.com/v1/gifs/translate?api_key=${config.apiKey}&s=${encodeURIComponent(suffix)}`;
 
 			request(url, async function(error, response, body) {
         try {
           if (!error && response.statusCode == 200) {
             body = JSON.parse(body);
-            if (body.data.length > 0) {
-              let file = body.data[Math.floor(Math.random() * body.data.length)].images;
+            if (body.data && config.rating.includes(body.data.rating.toUpperCase())) {
+              let file = body.data.images;
               if (file.downsized) file = file.downsized.url;
               else if (file.downsized_medium) file = file.downsized_medium.url;
               else if (file.downsized_large) file = file.downsized_large.url;
@@ -43,7 +45,9 @@ const Module = new Augur.Module()
               if (reactions.size > 0) reactions.first().message.delete();
               else m.reactions.get("🚫").remove(bot.user.id);
 
-            } else msg.reply("I couldn't find any gifs for " + suffix).then(u.clean);
+            } else if (body.data && !config.rating.includes(body.data.rating.toUpperCase())) {
+              Module.handler.execute("giphy", msg, suffix);
+            } msg.reply("I couldn't find any gifs for " + suffix).then(u.clean);
           } else msg.reply("I ran into an error:" + JSON.stringify(error)).then(u.clean);
         } catch(e) {
           Module.handler.errorHandler(e, msg);
@@ -51,6 +55,9 @@ const Module = new Augur.Module()
 			});
 		} else msg.reply("I'm not going to search for that. :rolling_eyes:").then(u.clean);
 	}
+})
+.setUnload(() => {
+  delete require.cache[require.resolve(path.resolve(process.cwd(), "./config/giphy.json"))];
 });
 
 module.exports = Module;
