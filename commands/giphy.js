@@ -57,7 +57,7 @@ const Module = new Augur.Module()
 	}
 })
 .setUnload(() => {
-  delete require.cache[require.resolve(path.resolve(process.cwd(), "./config/giphy.json"))];
+  delete require.cache[require.resolve(process.cwd() + "/config/giphy.json")];
 });
 
 module.exports = Module;
