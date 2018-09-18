@@ -47,7 +47,7 @@ const Module = new Augur.Module()
 
             } else if (body.data && !config.rating.includes(body.data.rating.toUpperCase())) {
               Module.handler.execute("giphy", msg, suffix);
-            } msg.reply("I couldn't find any gifs for " + suffix).then(u.clean);
+            } else msg.reply("I couldn't find any gifs for " + suffix).then(u.clean);
           } else msg.reply("I ran into an error:" + JSON.stringify(error)).then(u.clean);
         } catch(e) {
           Module.handler.errorHandler(e, msg);
