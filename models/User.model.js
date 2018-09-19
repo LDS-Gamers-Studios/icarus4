@@ -36,6 +36,8 @@ var UserSchema = new Schema({
 		default: false
 	},
 	roles: [String]
+}, {
+	minimize: false
 });
 
 module.exports = mongoose.model("User", UserSchema);
