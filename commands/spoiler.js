@@ -56,12 +56,11 @@ const Module = new Augur.Module()
   try {
     let bot = Module.handler.client;
     let spoilers = await Module.db.spoiler.fetchAll();
+    spoilers = spoilers.filter(s => bot.channels.has(s.channelId));
     spoilers.forEach(async spoiler => {
       try {
-        if (bot.channels.has(spoiler.channelId)) {
-          let msg = await bot.channels.get(spoiler.channelId).fetchMessage(spoiler.spoilerId);
-          collector(msg);
-        }
+        let msg = await bot.channels.get(spoiler.channelId).fetchMessage(spoiler.spoilerId);
+        collector(msg);
       } catch(err) {
         Module.handler.errorHandler(e);
       }
