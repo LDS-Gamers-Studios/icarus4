@@ -105,11 +105,12 @@ const Module = new Augur.Module()
 			.then(m => {m.channel.stopTyping()}).catch(Module.handler.errorHandler);
 	}
 })
-.addCommand({name: "staff",
-	description: "Get to know the staff!",
+.addCommand({name: "team",
+	description: "Get to know the LDSG Team!",
+  aliases: ["staff"],
 	category: "LDSG",
 	process: (msg) => {
-		msg.channel.send("Get to know the staff!\nhttp://LDSGamers.com/about/staff").catch(Module.handler.errorHandler);
+		msg.channel.send("Get to know the LDSG Team!\nhttp://LDSGamers.com/about/staff").catch(Module.handler.errorHandler);
 	}
 })
 .addCommand({name: "store",
