@@ -447,6 +447,12 @@ const Module = new Augur.Module()
     }
   }
 })
+.addCommand({name: "twitchteam",
+  description: "See the LDSG Twitch Team Page",
+  process: (msg) => {
+    msg.channel.send("Spend some time with the LDSG Twitch Team!\nhttps://www.twitch.tv/team/ldsgamers");
+  }
+})
 .addCommand({name: "unapprove",
   description: "Unapprove an LDSG Streamer",
   syntax: "@user(s)",
