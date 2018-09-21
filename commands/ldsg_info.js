@@ -105,6 +105,14 @@ const Module = new Augur.Module()
 			.then(m => {m.channel.stopTyping()}).catch(Module.handler.errorHandler);
 	}
 })
+.addCommand({name: "store",
+description: "Check out some cool stuff!",
+aliases: ["shop"],
+category: "LDSG",
+process: (msg) => {
+  msg.channel.send("Check out the new store!\n<https://ldsgamers.com/shop>").catch(Module.handler.errorHandler);
+}
+})
 .addCommand({name: "team",
 	description: "Get to know the LDSG Team!",
   aliases: ["staff"],
@@ -113,15 +121,7 @@ const Module = new Augur.Module()
 		msg.channel.send("Get to know the LDSG Team!\nhttp://LDSGamers.com/about/staff").catch(Module.handler.errorHandler);
 	}
 })
-.addCommand({name: "store",
-	description: "Check out some cool stuff!",
-	aliases: ["shop"],
-	category: "LDSG",
-	process: (msg) => {
-		msg.channel.send("Check out the new store!\n<https://ldsgamers.com/shop>").catch(Module.handler.errorHandler);
-	}
-})
-.addCommand({name: "youtube",
+.addCommand({name: "videos",
 	description: "The LDSG YouTube Channel",
 	category: "LDSG",
 	process: (msg) => {
