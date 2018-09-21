@@ -462,6 +462,7 @@ const Module = new Augur.Module()
 .addCommand({name: "youtube",
   description: "Show a user's recent videos",
   syntax: "<youtube user name> | <@user>",
+  aliases: ["yt"],
   info: "Displays user videos and stream info.",
   process: async function(msg, suffix) {
     try {
