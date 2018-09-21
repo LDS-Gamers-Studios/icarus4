@@ -53,11 +53,11 @@ function yt(api_key) {
     });
   }
 
-  this.fetchUserContent = function(username) {
+  this.fetchUserContent = function(username, eventType = null) {
     return new Promise((fulfill, reject) => {
       fetchChannelId(username).then(channel => {
         if (channel) {
-          fetchChannelContent(channel.id).then(content => {
+          fetchChannelContent(channel.id, eventType).then(content => {
             fulfill({channel, content});
           }).catch(reject);
         } else {

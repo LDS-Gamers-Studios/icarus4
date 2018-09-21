@@ -4,10 +4,13 @@ const Augur = require("augurbot"),
   twitchConfig = require("../config/twitch.json"),
   u = require("../utils/utils");
 
+var yt;
+
 const mixer = new Mixer.Client(new Mixer.DefaultRequestRunner()),
   mixerStatus = new Map(),
   twitch = new TwitchApi(twitchConfig),
-  twitchStatus = new Map();
+  twitchStatus = new Map(),
+  ytStatus = new Map();
 
 function checkStreams(bot) {
   // Approved Streamers
@@ -26,6 +29,12 @@ function checkStreams(bot) {
       processMixer(bot, ign.discordId, channelName);
     });
   });
+
+  // YOUTUBE LIVE TEST
+  [
+    {discordId: "176849126317752320", ign: "adamandstevie"},
+    {discordId: "340645910130196482", ign: "CBWMechBot"}
+  ].forEach(ign => processYouTube(bot, ign.discordId, ign.ign));
 };
 
 function isPartnered(member) {
@@ -76,7 +85,14 @@ function notificationEmbed(body, srv) {
 			.setTitle(body.name)
 			.setAuthor(body.user.username + ((body.type && body.type.name) ? ` playing ${body.type.name}` : ""), body.user.avatarUrl)
 			.setURL(`https://mixer.com/${body.token}`);
-	}
+	} else if (srv == "youtube") {
+    let content = body.content.items[0].snippet;
+    embed.setColor("#ff0000")
+      .setThumbnail(content.thumbnails.default.url)
+      .setTitle(content.title)
+      .setAuthor(content.channelTitle)
+      .setURL(`https://www.youtube.com/watch?v=${body.content.items[0].id.videoId}`);
+  }
 	return embed;
 };
 
@@ -159,6 +175,38 @@ function processTwitch(bot, key, channel) {
         });
       }
     });
+  } catch(e) {
+    u.alertError(e);
+  }
+};
+
+async function processYouTube(bot, key, channel) {
+  try {
+    let ldsg = bot.guilds.get(Module.config.ldsg),
+      liveRole = ldsg.roles.get("281135201407467520"),
+      notificationChannel = ldsg.channels.get("209046676781006849"), // #general
+      member = ldsg.members.get(key);
+
+    let info = await yt.fetchUserContent(channel, "live");
+
+    if (info && info.content.items.length > 0) { // STREAM IS LIVE
+      let status = ytStatus.get(key);
+      if (!status || ((status.status == "offline") && ((Date.now() - status.since) >= (30 * 60 * 1000)))) {
+        ytStatus.set(key, {
+          status: "online",
+          since: Date.now()
+        });
+
+        notificationChannel.send(notificationEmbed(info, "youtube"));
+        if (isPartnered(member)) member.addRole(liveRole);
+      }
+    } else if (ytStatus.has(key) && (ytStatus.get(key).status == "online")) {	// STREAM IS OFFLINE
+      ytStatus.set(key, {
+        status: "offline",
+        since: Date.now()
+      });
+      if (liveRole.members.has(member.id)) member.removeRole(liveRole);
+    }
   } catch(e) {
     u.alertError(e);
   }
@@ -466,8 +514,6 @@ const Module = new Augur.Module()
   info: "Displays user videos and stream info.",
   process: async function(msg, suffix) {
     try {
-      let yt = require("../utils/youtube")(Module.config.api.youtube);
-
       let user = false,
         name = false;
 
@@ -508,12 +554,15 @@ const Module = new Augur.Module()
   }
 })
 .setInit((data) => {
+  yt = require("../utils/youtube")(Module.config.api.youtube);
+
   if (data) {
     data.mixerStatus.forEach((status, key) => mixerStatus.set(key, status));
     data.twitchStatus.forEach((status, key) => twitchStatus.set(key, status));
+    data.ytStatus.forEach((status, key) => ytStatus.set(key, status));
   }
 })
-.setUnload(() => ({ mixerStatus, twitchStatus }))
+.setUnload(() => ({ mixerStatus, twitchStatus, ytStatus }))
 .setClockwork(() => {
   let bot = Module.handler.client;
   let interval = 5 * 60 * 1000;
