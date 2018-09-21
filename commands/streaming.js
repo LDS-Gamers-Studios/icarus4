@@ -188,6 +188,21 @@ function twitchEmbed(body) {
   return embed;
 };
 
+function youtubeEmbed(info) {
+  let embed = u.embed()
+    .setColor(0xff0000)
+    .setTimestamp()
+    .setTitle("YouTube Channel: " + info.channel.snippet.title)
+    .setDescription(info.channel.snippet.description)
+    .setURL("https://www.youtube.com/" + (info.channel.snippet.customUrl ? info.channel.snippet.customUrl : `channel/${info.channel.id}`))
+    .setThumbnail(info.channel.snippet.thumbnails.default.url)
+    .setAuthor(info.channel.snippet.title, info.channel.snippet.thumbnails.default.url);
+
+  info.content.forEach(vid => embed.addField("Video", `[${vid.snippet.title}](https://www.youtube.com/watch?v=${vid.id.videoId})`, true));
+
+  return embed;
+}
+
 const Module = new Augur.Module()
 .addCommand({name: "approve",
   description: "Approve an LDSG Streamer",
@@ -219,30 +234,22 @@ const Module = new Augur.Module()
 
       if (u.userMentions(msg)) user = u.userMentions(msg).first();
       else if (!suffix) user = msg.author;
+
       if (user) {
         let ign = await Module.db.ign.find(user.id, "mixer");
-        if (ign) {
-          name = encodeURIComponent(ign.ign);
-          let res = await mixer.request("GET", `channels/${name}`);
-          res = res.body;
-          if (res.statusCode && (res.statusCode == 404)) {
-            msg.channel.send("I couldn't find a Mixer channel for " + ign.ign).then(u.clean);
-          } else {
-            msg.channel.send(mixerEmbed(res));
-          }
-        } else {
-          msg.channel.send("<@" + user + "> has not set a Mixer name with `!addign mixer`.").then(u.clean);
+        if (ign) name = encodeURIComponent(ign.ign);
+        else {
+          msg.channel.send(user + " has not set a Mixer name with `!addign mixer`.").then(u.clean);
+          return;
         }
-      } else {
-        name = encodeURIComponent(suffix);
+      } else name = encodeURIComponent(suffix);
 
-        let res = await mixer.request("GET", `channels/${name}`);
-        res = res.body;
-        if (res.statusCode && (res.statusCode == 404)) {
-          msg.channel.send("I couldn't find a Mixer channel for " + name).then(u.clean);
-        } else {
-          msg.channel.send(mixerEmbed(res));
-        }
+      let res = await mixer.request("GET", `channels/${name}`);
+      res = res.body;
+      if (res.statusCode && (res.statusCode == 404)) {
+        msg.channel.send("I couldn't find a Mixer channel for " + decodeURIname(name)).then(u.clean);
+      } else {
+        msg.channel.send(mixerEmbed(res));
       }
     } catch(e) {
       Module.handler.errorHandler(e, msg);
@@ -395,53 +402,32 @@ const Module = new Augur.Module()
 
       if (user) {
         let ign = await Module.db.ign.find(user.id, 'twitch');
-        if (ign) {
-          name = encodeURIComponent(ign.ign);
+        if (ign) name = encodeURIComponent(ign.ign);
+        else {
+          msg.channel.send(user + " has not set a Twitch name with `!addign twitch`.").then(u.clean);
+          return;
+        }
+      } else name = encodeURIComponent(suffix);
 
-          twitch.getChannelStream(name, function(error, body) {
+      twitch.getChannelStream(name, function(error, body) {
+        if (error && error.status == 404) {
+          msg.channel.send("I couldn't find a Twitch channel for " + decodeURIComponent(name)).then(u.clean);
+        } else if (error) {
+          console.error(error);
+        } else if (body.stream) {
+          msg.channel.send(twitchEmbed(body));
+        } else {
+          twitch.getChannel(name, function(error, body){
             if (error && error.status == 404) {
-              msg.channel.send("I couldn't find a Twitch channel for " + ign.ign).then(u.clean);
+              msg.channel.send("I couldn't find a Twitch channel for " + decodeURIComponent(name)).then(u.clean);
             } else if (error) {
               console.error(error);
-            } else if (body.stream) {
-              msg.channel.send(twitchEmbed(body));
             } else {
-              twitch.getChannel(name, function(error, body){
-                if (error && error.status == 404) {
-                  msg.channel.send("I couldn't find a Twitch channel for " + ign.ign).then(u.clean);
-                } else if (error) {
-                  console.error(error);
-                } else {
-                  msg.channel.send(twitchEmbed(body));
-                }
-              });
+              msg.channel.send(twitchEmbed(body));
             }
           });
-        } else {
-          msg.channel.send("<@" + user + "> has not set a Twitch name with `!addign twitch`.").then(u.clean);
         }
-      } else {
-        name = encodeURIComponent(suffix);
-        twitch.getChannelStream(name, function(error, body) {
-          if (error && error.status == 404) {
-            msg.channel.send("I couldn't find a Twitch channel for " + ign.ign).then(u.clean);
-          } else if (error) {
-            console.error(error);
-          } else if (body.stream) {
-            msg.channel.send(twitchEmbed(body));
-          } else {
-            twitch.getChannel(name, function(error, body){
-              if (error && error.status == 404) {
-                msg.channel.send("I couldn't find a Twitch channel for " + ign.ign).then(u.clean);
-              } else if (error) {
-                console.error(error);
-              } else {
-                msg.channel.send(twitchEmbed(body));
-              }
-            });
-          }
-        });
-      }
+      });
     } catch(e) {
       Module.handler.errorHandler(e, msg);
     }
@@ -472,6 +458,43 @@ const Module = new Augur.Module()
     }
   },
   permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && msg.member.roles.has(Module.config.roles.team))
+})
+.addCommand({name: "youtube",
+  description: "Show a user's recent videos",
+  syntax: "<youtube user name> | <@user>",
+  info: "Displays user videos and stream info.",
+  process: async function(msg, suffix) {
+    try {
+      let yt = require("../utils/youtube")(Module.config.api.youtube);
+
+      let user = false,
+        name = false;
+
+      if (u.userMentions(msg)) {
+        user = u.userMentions(msg).first();
+      } else if (!suffix) {
+        user = msg.author;
+      }
+
+      if (user) {
+        let ign = await Module.db.ign.find(user.id, "youtube");
+        if (ign) name = encodeURIComponent(ign.ign);
+        else {
+          msg.channel.send(user + " has not set a YouTube name with `!addign youtube`.").then(u.clean);
+          return;
+        }
+      } else name = encodeURIComponent(suffix);
+
+      let info = await yt.fetchUserContent(name);
+
+      if (info) {
+        let embed = youtubeEmbed(info);
+        msg.channel.send({embed: embed});
+      } else {
+        msg.channel.send(`I couldn't find channel info for YouTube user \`${name}\``).then(u.clean);
+      }
+    } catch(e) { Module.handler.errorHandler(e, msg); }
+  }
 })
 .addEvent("guildMemberUpdate", (oldMember, newMember) => {
   let twitchSub = "338056125062578176";

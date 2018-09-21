@@ -15,11 +15,12 @@
   "api": {
     "challonge": "",
     "steam": "",
-    "feesound": "",
+    "freesound": "",
     "mw": {
       "dictionary": "",
       "thesaurus": ""
-    }
+    },
+    "youtube": ""
   },
   "color": [248, 154, 34],
   "error": {
