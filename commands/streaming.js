@@ -86,12 +86,12 @@ function notificationEmbed(body, srv) {
 			.setAuthor(body.user.username + ((body.type && body.type.name) ? ` playing ${body.type.name}` : ""), body.user.avatarUrl)
 			.setURL(`https://mixer.com/${body.token}`);
 	} else if (srv == "youtube") {
-    let content = body.content.items[0].snippet;
+    let content = body.content[0].snippet;
     embed.setColor("#ff0000")
       .setThumbnail(content.thumbnails.default.url)
       .setTitle(content.title)
       .setAuthor(content.channelTitle)
-      .setURL(`https://www.youtube.com/watch?v=${body.content.items[0].id.videoId}`);
+      .setURL(`https://www.youtube.com/watch?v=${body.content[0].id.videoId}`);
   }
 	return embed;
 };
@@ -189,7 +189,7 @@ async function processYouTube(bot, key, channel) {
 
     let info = await yt.fetchUserContent(channel, "live");
 
-    if (info && info.content.items.length > 0) { // STREAM IS LIVE
+    if (info && info.content.length > 0) { // STREAM IS LIVE
       let status = ytStatus.get(key);
       if (!status || ((status.status == "offline") && ((Date.now() - status.since) >= (30 * 60 * 1000)))) {
         ytStatus.set(key, {
