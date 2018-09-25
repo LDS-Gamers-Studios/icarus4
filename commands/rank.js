@@ -14,6 +14,7 @@ function updateStarboard(reaction) {
   let bot = message.client;
 
 	let embed = u.embed()
+    .setURL(message.url)
 		.setAuthor(message.member.displayName, message.author.displayAvatarURL)
 		.setTimestamp(message.createdAt)
 		.setDescription(message.cleanContent)
