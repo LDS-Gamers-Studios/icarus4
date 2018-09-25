@@ -16,10 +16,11 @@ function updateStarboard(reaction) {
 	let embed = u.embed()
 		.setAuthor(message.member.displayName, message.author.displayAvatarURL)
 		.setTimestamp(message.createdAt)
-		.setDescription(`${message.cleanContent}\n\n[Jump to Starred Post](${message.url})`)
+		.setDescription(message.cleanContent)
 		.setFooter("⭐" + reaction.users.size)
 		.setColor((validate(reaction) ? "DARK_GOLD" : null))
-		.addField("Channel", message.channel.name);
+		.addField("Channel", message.channel.name)
+    .addField("Jump to post", message.url);
 
 	if (message.attachments && (message.attachments.size > 0))
 		embed.setImage(message.attachments.first().url);
