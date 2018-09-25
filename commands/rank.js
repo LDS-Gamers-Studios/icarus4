@@ -14,11 +14,9 @@ function updateStarboard(reaction) {
   let bot = message.client;
 
 	let embed = u.embed()
-    .setURL(message.url)
-    .setTitle("Starred Post")
 		.setAuthor(message.member.displayName, message.author.displayAvatarURL)
 		.setTimestamp(message.createdAt)
-		.setDescription(message.cleanContent)
+		.setDescription(`${message.cleanContent}\n\n[Jump to Starred Post](${message.url})`)
 		.setFooter("⭐" + reaction.users.size)
 		.setColor((validate(reaction) ? "DARK_GOLD" : null))
 		.addField("Channel", message.channel.name);
