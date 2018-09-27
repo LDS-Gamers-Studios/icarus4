@@ -35,6 +35,7 @@ function system(data) {
 
 var gameids = new Map()
 	.set("battlenet", new system({system: "battlenet", name: "Battle.net ID"}))
+	.set("dragalia", new system({system: "dragalia", name: "Dragalia Lost"}))
 	.set("elite", new system({system: "elite", name: "Elite: Dangerous CMDR Name"}))
 	.set("epic", new system({system: "epic", name: "Epic Games Battletag"}))
 	.set("gog", new system({system: "gog", name: "GOG Galaxy", link: "https://www.gog.com/u/"}))
