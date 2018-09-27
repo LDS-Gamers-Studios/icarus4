@@ -80,6 +80,7 @@ const Module = new Augur.Module()
 .addCommand({name: "members",
   description: "How many members are in LDSG?",
   category: "Members",
+  permissions: (msg) => msg.guild,
   process: (msg) => {
     let	members = msg.guild.members;
     let	online = 0;
@@ -99,44 +100,39 @@ const Module = new Augur.Module()
   process: (msg) => {
     let memberUrl = 'http://ldsgamers.com/community';
 
-    request(memberUrl, function(error, response, body) {
-      if (!error && response.statusCode == 200) {
-        let $ = cheerio.load(body);
-        let name = $('.member-content > h2')[0].children[0].data;
-        let discordId = $('.member-content > h2')[0].attribs["data-discordid"];
-        let text = $('.featured-member-content > p:first-of-type')[0].children[0].data;
+    request(memberUrl, async function(error, response, body) {
+      try {
+        if (!error && response.statusCode == 200) {
+          let $ = cheerio.load(body);
+          let name = $('.member-content > h2')[0].children[0].data;
+          let discordId = $('.member-content > h2')[0].attribs["data-discordid"];
+          let text = $('.featured-member-content > p:first-of-type')[0].children[0].data;
 
-        let embed = u.embed()
-          .setTitle("MEMBER SPOTLIGHT")
-          .setURL(`${memberUrl}#member-spotlight`)
-          .setDescription('Our community is filled with amazing people. Know someone that deserves the spotlight? Nominate them by sending CJ Stormblessed a message!');
+          let embed = u.embed()
+            .setTitle("MEMBER SPOTLIGHT")
+            .setURL(`${memberUrl}#member-spotlight`)
+            .setDescription('Our community is filled with amazing people. Know someone that deserves the spotlight? Nominate them by sending CJ Stormblessed a message!');
 
-        if (msg.guild && (msg.guild.id == '96335850576556032')) {
-          msg.guild.fetchMember(discordId).then((discordUser) => {
+          let discordUser = null;
+          let avatar = null
 
-            let avatar = (discordUser ? discordUser.user.avatarURL : null);
-            let image = (avatar)?(avatar):("http://ldsgamers.com" + $('.member-image > img')[0].attribs.src);
+          if (msg.guild && (msg.guild.id == Module.config.ldsg)) {
+            discordUser = await msg.guild.fetchMember(discordId);
+          } else discordUser = await bot.fetchUser(discordId);
 
-            //let communityContent = `__**MEMBER SPOTLIGHT**__\nOur community is filled with amazing people. Know someone that deserves the spotlight? Nominate them here: <http://ldsg.io/nominate>\n\nThe spotlight currently shines on **<@${discordId}>**!\n\n${text} ...\n\nTo read more, go to <${memberUrl}#member-spotlight>.`;
-            //msg.channel.send(communityContent, {"file": {"attachment": image}}).catch(console.error);
+          let avatar = (discordUser.user ? discordUser.user.avatarURL : discordUser.avatarURL);
+          let image = (avatar)?(avatar):("http://ldsgamers.com" + $('.member-image > img')[0].attribs.src);
 
-            embed.addField('Current Spotlight', `The spotlight currently shines on **${discordUser.displayName}**!\n\n${text} ...\n[READ MORE](${memberUrl}#member-spotlight)`)
-              .setThumbnail(image);
+          //let communityContent = `__**MEMBER SPOTLIGHT**__\nOur community is filled with amazing people. Know someone that deserves the spotlight? Nominate them here: <http://ldsg.io/nominate>\n\nThe spotlight currently shines on **<@${discordId}>**!\n\n${text} ...\n\nTo read more, go to <${memberUrl}#member-spotlight>.`;
+          //msg.channel.send(communityContent, {"file": {"attachment": image}}).catch(console.error);
 
-            msg.channel.send({embed: embed});
-          }).catch(console.error);
-        } else {
-          bot.fetchUser(discordId).then((discordUser) => {
-            let avatar = (discordUser ? discordUser.avatarURL : null);
-            let image = (avatar)?(avatar):("http://ldsgamers.com" + $('.member-image > img')[0].attribs.src);
+          embed.addField('Current Spotlight', `The spotlight currently shines on **${(discordUser.displayName ? discordUser.displayName : discordUser.username)}**!\n\n${text} ...\n[READ MORE](${memberUrl}#member-spotlight)`)
+            .setThumbnail(image);
 
-            embed.addField('Current Spotlight', `The spotlight currently shines on **${discordUser.username}**!\n\n${text} ...\n[READ MORE](${memberUrl}#member-spotlight)`)
-              .setThumbnail(image);
+          msg.channel.send({embed: embed});
 
-            msg.channel.send({embed: embed});
-          }).catch(console.error);
         }
-      }
+      } catch(e) { Module.handler.errorHandler(e, msg); }
     });
   }
 });
