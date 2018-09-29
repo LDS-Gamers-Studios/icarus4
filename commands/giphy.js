@@ -16,6 +16,7 @@ const Module = new Augur.Module()
   permissions: (msg) => (msg.guild && msg.channel.permissionsFor(msg.member).has(["EMBED_LINKS", "ATTACH_FILES"]) && msg.channel.permissionsFor(msg.client.user).has("ATTACH_FILES")),
 	process: (msg, suffix) => {
 		u.clean(msg, 0);
+    if (!suffix) return msg.reply("you need to tell me what kind of reaction to search!");
     let bot = msg.client;
 		if (pf.scan(suffix.toLowerCase()).length == 0) {
       let url = `https://api.giphy.com/v1/gifs/translate?api_key=${config.apiKey}&s=${encodeURIComponent(suffix)}`;
