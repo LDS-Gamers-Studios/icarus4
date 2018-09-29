@@ -114,7 +114,6 @@ const Module = new Augur.Module()
             .setDescription('Our community is filled with amazing people. Know someone that deserves the spotlight? Nominate them by sending CJ Stormblessed a message!');
 
           let discordUser = null;
-          let avatar = null
 
           if (msg.guild && (msg.guild.id == Module.config.ldsg)) {
             discordUser = await msg.guild.fetchMember(discordId);
