@@ -117,7 +117,7 @@ const Module = new Augur.Module()
 
           if (msg.guild && (msg.guild.id == Module.config.ldsg)) {
             discordUser = await msg.guild.fetchMember(discordId);
-          } else discordUser = await bot.fetchUser(discordId);
+          } else discordUser = await msg.client.fetchUser(discordId);
 
           let avatar = (discordUser.user ? discordUser.user.avatarURL : discordUser.avatarURL);
           let image = (avatar)?(avatar):("http://ldsgamers.com" + $('.member-image > img')[0].attribs.src);
