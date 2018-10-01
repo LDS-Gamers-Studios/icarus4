@@ -164,7 +164,6 @@ const Module = new Augur.Module()
     try {
       let response = await Module.db.user.addXp(active);
       if (response.users.length > 0) {
-        console.log(Date(), response.xp);
         response.users.forEach(user => {
           let oldXP = user.totalXP - response.xp;
           let lvl = Rank.level(user.totalXP);

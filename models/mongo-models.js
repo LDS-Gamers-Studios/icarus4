@@ -397,8 +397,16 @@ const models = {
           (err, newUsers) => {
             if (err) reject(err);
             else {
-              response.users = newUsers;
-              fulfill(response);
+              User.find(
+                { discordId: {$in: users} },
+                (error, userDocs) => {
+                  if (error) reject(error);
+                  else {
+                    response.users = userDocs;
+                    fulfill(response);
+                  }
+                }
+              );
             }
           }
         );
