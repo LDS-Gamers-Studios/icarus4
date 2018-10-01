@@ -517,11 +517,15 @@ const models = {
         else if (!doc) {
           let newMember = new User({
             discordId: user,
-            currentXP: 0,
-            totalXP: 0,
-            preferences: 0,
-            ghostBucks: 0,
-            house: null
+          	currentXP: 0,
+          	totalXP: 0,
+          	posts: 0,
+          	stars: 0,
+          	preferences: 0,
+          	ghostBucks: 0,
+          	house: null,
+          	excludeXP: false,
+          	roles: []
           });
           newMember.save((err, doc) => {
             if (err) console.error(err);
