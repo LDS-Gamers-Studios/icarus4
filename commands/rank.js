@@ -93,10 +93,10 @@ const Module = new Augur.Module()
 })
 .addCommand({name: "rankreset",
   description: "Reset the LDSG chat ranks!",
-  syntax: "GhostBucksSpread"
+  syntax: "GhostBucksSpread",
   info: "Reset chat ranks and give the indicated number of Ghost Bucks to the members, proportional to their chat XP.",
   permissions: (msg) => Module.config.adminId.includes(msg.author.id) && msg.guild && msg.guild.id == Module.config.ldsg,
-  process: async (msg, suffix) {
+  process: async function(msg, suffix) {
     try {
       let gb = "<:gb:493084576470663180>";
       let dist = parseInt(suffix, 10) || 0;
