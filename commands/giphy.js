@@ -46,7 +46,7 @@ const Module = new Augur.Module()
               if (reactions.size > 0) reactions.first().message.delete();
               else m.reactions.get("🚫").remove(bot.user.id);
 
-            } else if (body.data && !config.rating.includes(body.data.rating.toUpperCase())) {
+            } else if (body.data && body.data.rating && !config.rating.includes(body.data.rating.toUpperCase())) {
               Module.handler.execute("giphy", msg, suffix);
             } else msg.reply("I couldn't find any gifs for " + suffix).then(u.clean);
           } else msg.reply("I ran into an error:" + JSON.stringify(error)).then(u.clean);
