@@ -102,7 +102,7 @@ const Module = new Augur.Module()
       let dist = parseInt(suffix, 10) || 0;
       let guild = await msg.guild.fetchMembers();
       let users = await Module.db.user.getUsers({currentXP: {$gt: 0}});
-      users = user.filter(u => guild.members.has(u.discordId));
+      users = users.filter(u => guild.members.has(u.discordId));
       let totalXP = users.reduce((a, c) => a + c.currentXP, 0);
       let rate = dist / totalXP;
       let top3 = users
