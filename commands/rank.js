@@ -160,33 +160,34 @@ const Module = new Augur.Module()
 .setClockwork(() => {
   let bot = Module.handler.client;
   bot.channels.get(starboard).fetchMessages().then((messages) => { console.log(`Fetched ${messages.size} stars`)});
-	return setInterval(function(bot) {
-		Module.db.user.addXp(active).then((response) => {
-			if (response.users.length > 0) {
-				response.users.forEach(user => {
-					let oldXP = user.totalXP - response.xp;
-					let lvl = Rank.level(user.totalXP);
-					let oldLvl = Rank.level(oldXP);
+	return setInterval(async function(bot) {
+    try {
+      let response = await Module.db.user.addXp(active);
+      if (response.users.length > 0) {
+        console.log(Date(), response.xp);
+        response.users.forEach(user => {
+          let oldXP = user.totalXP - response.xp;
+          let lvl = Rank.level(user.totalXP);
+          let oldLvl = Rank.level(oldXP);
 
-					if (lvl != oldLvl) {
-						let member = bot.guilds.get(Module.config.ldsg).members.get(user.discordId);
-						let message = u.rand(Rank.messages) + " " + u.rand(Rank.levelPhrase).replace("%LEVEL%", lvl);
+          if (lvl != oldLvl) {
+            let member = bot.guilds.get(Module.config.ldsg).members.get(user.discordId);
+            let message = u.rand(Rank.messages) + " " + u.rand(Rank.levelPhrase).replace("%LEVEL%", lvl);
 
-						if (Rank.rewards.has(lvl)) {
-							let reward = bot.guilds.get(Module.config.ldsg).roles.get(Rank.rewards.get(lvl).id);
-							member.addRole(reward);
-							message += `\n\nYou have been awarded the ${reward.name} role!`;
-						}
-						member.send(message);
-					}
-				});
-			}
-			active = [];
-		}).catch(console.error);
+            if (Rank.rewards.has(lvl)) {
+              let reward = bot.guilds.get(Module.config.ldsg).roles.get(Rank.rewards.get(lvl).id);
+              member.addRole(reward);
+              message += `\n\nYou have been awarded the ${reward.name} role!`;
+            }
+            member.send(message);
+          }
+        });
+      }
+      active = [];
 
-		Module.db.user.addStars(stars).then(() => {
-			stars = {};
-		});
+      await Module.db.user.addStars(stars);
+      stars = {};
+    } catch(e) { Module.handler.errorHandler(e); }
 	}, 60000, bot);
 });
 

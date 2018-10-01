@@ -385,36 +385,23 @@ const models = {
       });
     },
     addXp: (users) => {
-      return new Promise((fulfill, reject) => {
+      let response = { users: [], xp: 0 };
+      if (user.length == 0) return Promise.resolve(response);
+      else return new Promise((fulfill, reject) => {
         let xp = Math.floor(Math.random() * 11) + 15;
-        let response = { users: [], xp: xp };
-        if (users.length > 0) {
-          User.find(
-            { discordId: {$in: users} },
-            (e, users) => {
-              if (e) reject(e);
-              else if (users) {
-                let updates = users.map(user => {
-                  return new Promise((fulfill, reject) => {
-                    User.findOneAndUpdate(
-                      { discordId: user.discordId },
-                      { $inc: { currentXP: xp, totalXP: xp, posts: 1 } },
-                      { new: true, upsert: true },
-                      (err, newUser) => {
-                        if (err) reject(err);
-                        else fulfill(newUser);
-                      }
-                    );
-                  });
-                });
-                Promise.all(updates).then(responses => {
-                  response.users = responses;
-                  fulfill(response);
-                }).catch(reject);
-              } else fulfill(response);
+        response.xp = xp;
+        User.updateMany(
+          { discordId: {$in: users} },
+          { $inc: { currentXP: xp, totalXP: xp, posts: 1 } },
+          { new: true, upsert: true },
+          (err, newUsers) => {
+            if (err) reject(err);
+            else {
+              response.users = newUsers;
+              fulfill(response);
             }
-          );
-        } else fulfill(response);
+          }
+        );
       });
     },
     fetchCurrentRankings: (limit = 50, page = 1) => {
