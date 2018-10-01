@@ -34,6 +34,12 @@ function processLinks(msg) {
 }
 
 const Module = new Augur.Module()
+.addCommand({name: "humble",
+  description: "Get the LDSG Partner link to the current Humble Bundle.",
+  aliases: ["hb"],
+  category: "LDSG",
+  process: (msg) => msg.channel.send("LDSG's Partner link to the current Humble Bundle:\nhttps://www.humblebundle.com/games?partner=ldsgamers")
+})
 .addEvent("message", (msg) => {
   if (hasLink.test(msg.cleanContent))
     processLinks(msg);
