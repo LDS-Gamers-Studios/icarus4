@@ -534,6 +534,19 @@ const models = {
         }
       });
     },
+    resetXP: () => {
+      return new Promise((fulfill, reject) => {
+        User.updateMany(
+          {},
+          { currentXP: 0 },
+          { new: true, upsert: true },
+          (err, users) => {
+            if (err) reject(err);
+            else fulfill(users);
+          }
+        );
+      });
+    },
     update: (member, options) => {
       return new Promise((fulfill, reject) => {
         if ((typeof user) != "string") member = member.id;

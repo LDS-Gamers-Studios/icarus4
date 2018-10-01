@@ -91,6 +91,44 @@ const Module = new Augur.Module()
     }
 	}
 })
+.addCommand({name: "rankreset",
+  description: "Reset the LDSG chat ranks!",
+  syntax: "GhostBucksSpread"
+  info: "Reset chat ranks and give the indicated number of Ghost Bucks to the members, proportional to their chat XP.".
+  permissions: (msg) => Module.config.adminId.includes(msg.author.id) && msg.guild && msg.guild.id == Module.config.ldsg,
+  process: async (msg, suffix) {
+    try {
+      let gb = "<:gb:493084576470663180>";
+      let dist = parseInt(suffix, 10) || 0;
+      let guild = await msg.guild.fetchMembers();
+      let users = await Module.db.user.getUsers({currentXP: {$gt: 0}});
+      users = user.filter(u => guild.members.has(u.discordId));
+      let totalXP = users.reduce((a, c) => a + c.currentXP, 0);
+      let rate = dist / totalXP;
+      let top3 = users
+        .sort((a, b) => b.currentXP - a.currentXP)
+        .filter((u, i) => i < 3)
+        .map((u, i) => `${(i + 1)}) ${guild.members.get(u.discordId)}`)
+        .join("\n");
+
+      users.forEach(user => {
+        let award = Math.round(rate * user.currentXP);
+        Module.db.bank.addGhostBucks({
+          discordId: user.discordId,
+          description: "Chat Rank Reset - " + new Date().toDateString(),
+          value: award,
+          mod: msg.author.id
+        }).then(deposit => {
+          guild.members.get(deposit.discordId).send(`${guild.name} Chat Ranks have been reset! You've been awarded ${gb}${deposit.value} for your participation this season!`);
+        });
+      });
+
+      msg.guild.channels.get("121752198731268099").send(`__**CHAT RANK RESET!!**__\n\nAnother chat season has come to a close! In the most recent season, the three most active members were:\n${top3}\n\n${gb}${dist} have been distributed among *all* LDSG members who participated in chat this season!`);
+
+      Module.db.resetXP();
+    } catch(e) { Module.handler.errorHandler(e); }
+  }
+})
 .addCommand({name: "trackxp",
   description: "Tell Icarus whether to track your chat XP.",
   syntax: "true | false",
