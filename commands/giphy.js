@@ -25,7 +25,7 @@ const Module = new Augur.Module()
         try {
           if (!error && response.statusCode == 200) {
             body = JSON.parse(body);
-            if (body.data && config.rating.includes(body.data.rating.toUpperCase())) {
+            if (body.data && body.data.rating && config.rating.includes(body.data.rating.toUpperCase())) {
               let file = body.data.images;
               if (file.downsized) file = file.downsized.url;
               else if (file.downsized_medium) file = file.downsized_medium.url;
