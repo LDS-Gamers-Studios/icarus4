@@ -386,7 +386,7 @@ const models = {
     },
     addXp: (users) => {
       let response = { users: [], xp: 0 };
-      if (user.length == 0) return Promise.resolve(response);
+      if (users.length == 0) return Promise.resolve(response);
       else return new Promise((fulfill, reject) => {
         let xp = Math.floor(Math.random() * 11) + 15;
         response.xp = xp;
