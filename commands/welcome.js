@@ -54,7 +54,7 @@ const Module = new Augur.Module()
 		}
 
 		modLogs.send(embed);
-    if (!member.roles.has(Module.config.roles.muted))
+    if (!member.roles.has(Module.config.roles.muted) && !member.user.bot)
 		  general.send(welcomeString);
   }
 })
