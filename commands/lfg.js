@@ -169,7 +169,7 @@ const Module = new Augur.Module()
         // List people playing the game
         let players = guild.members
         .filter(u => (u.presence.game && (u.presence.game.name.toLowerCase().startsWith(suffix.toLowerCase()))))
-        .sort((a, b) => a.localeCompare(b))
+        .sort((a, b) => a.displayName.localeCompare(b.displayName))
         .map(u => `• ${u.displayName}`);
 
         if (players.length > 0) {
