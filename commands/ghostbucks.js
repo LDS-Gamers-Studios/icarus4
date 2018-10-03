@@ -8,6 +8,8 @@ const doc = new GoogleSpreadsheet(google.sheets.games),
   gb = "<:gb:493084576470663180>",
   modLogs = "154676105247195146";
 
+var steamGameList;
+
 function code(n) {
 	let chars = "123456789ABCDEFGHJKLMNPQRSTUVWXYZ";
 	let newCode = "";
@@ -52,7 +54,11 @@ const Module = new Augur.Module()
 							  .setTitle("Games Available to Redeem")
 								.setDescription(`Redeem ${gb} for game codes with the \`!gameredeem code\` command.`);
 						}
-						embed.addField(`${game.gametitle} (${game.system})`, `${gb}${game.cost}\n\`!gameredeem ${game.code}\``);
+
+            let steamApp = null;
+            if (game.system.toLowerCase() == "steam") steamApp = steamGameList.find(g => g.name.toLowerCase() == game.gametitle.toLowerCase());
+
+						embed.addField(`${game.gametitle} (${game.system})`, `${gb}${game.cost}\n${(steamApp ? `[Store Page](https://store.steampowered.com/app/${steamApp.appid})\n` : "")}\`!gameredeem ${game.code}\``);
 					});
 					msg.author.send(embed);
 		    });
@@ -236,6 +242,17 @@ const Module = new Augur.Module()
 			msg.reply("you need to tell me how many Ghost Bucks to redeem!").then(u.clean);
 		}
 	}
-});
+})
+.setInit(async function(gl) {
+  try {
+    if (gl) steamGameList = gl;
+    else {
+      let SteamApi = require("steamapi"),
+        steam = new SteamApi(Module.config.api.steam);
+      steamGameList = await steam.getAppList();
+    }
+  } catch(e) { Module.handler.errorHandler(e); }
+})
+.setUnload(() => steamGameList);
 
 module.exports = Module;
