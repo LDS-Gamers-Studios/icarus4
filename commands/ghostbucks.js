@@ -36,7 +36,7 @@ const Module = new Augur.Module()
 						game.save();
 					});
 
-					games = games.filter(g => !g.recipient).filter(filterUnique);
+					games = games.filter(g => !g.recipient).filter(filterUnique).sort((a, b) => (b.gametitle.localeCompare(a.gametitle) == 0 ? (b.cost - a.cost) : a.gametitle.localeCompare(b.gametitle)));
 
 					let embed = u.embed()
 					  .setTitle("Games Available to Redeem")
@@ -48,7 +48,7 @@ const Module = new Augur.Module()
 							  .setTitle("Games Available to Redeem")
 								.setDescription(`Redeem ${gb} for game codes with the \`!gameredeem code\` command.`);
 						}
-						embed.addField(`${game.gametitle} (${game.system})`, `${gb}${game.cost}\n\`!gameredeem ${game.code}\``, true);
+						embed.addField(`${game.gametitle} (${game.system})`, `${gb}${game.cost}\n\`!gameredeem ${game.code}\``);
 					});
 					msg.author.send(embed);
 		    });
