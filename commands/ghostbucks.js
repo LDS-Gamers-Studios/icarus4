@@ -36,7 +36,7 @@ const Module = new Augur.Module()
 						game.save();
 					});
 
-					games = games.filter(g => !g.recipient).filter(filterUnique).sort((a, b) => (b.gametitle.localeCompare(a.gametitle) == 0 ? (b.cost - a.cost) : a.gametitle.localeCompare(b.gametitle)));
+					games = games.filter(g => !g.recipient).filter(filterUnique).sort((a, b) => a.gametitle.localeCompare(b.gametitle));
 
 					let embed = u.embed()
 					  .setTitle("Games Available to Redeem")
