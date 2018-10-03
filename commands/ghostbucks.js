@@ -38,6 +38,10 @@ const Module = new Augur.Module()
 
 					games = games.filter(g => !g.recipient).filter(filterUnique).sort((a, b) => a.gametitle.localeCompare(b.gametitle));
 
+          // Filter Rated M, unless the member has the Rated M Role
+          if (!(msg.member && msg.member.roles.has("281708645161631745")))
+            games = games.filter(g => g.rating.toUpperCase() != "M");
+
 					let embed = u.embed()
 					  .setTitle("Games Available to Redeem")
 						.setDescription(`Redeem ${gb} for game codes with the \`!gameredeem code\` command.`);
