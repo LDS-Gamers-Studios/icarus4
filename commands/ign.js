@@ -126,7 +126,7 @@ const Module = new Augur.Module()
           let wePlay = users
           .filter(u => guild.members.has(u.discordId))
           .sort(sort)
-          .map(u => `· **${guild.members.get(u.discordId).displayName}**: ${(u.ign.startsWith("http") ? "<" + u.ign + ">" : u.ign)}`);
+          .map(user => `· **${u.escapeText(guild.members.get(user.discordId).displayName)}**: ${(user.ign.startsWith("http") ? "<" + user.ign + ">" : user.ign)}`);
 
           msg.channel.send(`The following members have saved an IGN for ${Ign.gameids.get(suffix).name}:\n` + wePlay.join("\n"), { split: true });
         } else msg.channel.send(`No members have saved an IGN for ${Ign.gameids.get(suffix).name}.`);
