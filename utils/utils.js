@@ -54,7 +54,7 @@ const Utils = {
   },
   embed: () => new Discord.RichEmbed().setColor(config.color),
   errorLog: errorLog,
-  escapeText: (msg) => msg.replace(/\\*/g,"\\*").replace(/_/g,"\\_").replace(/~/g,"\~"),
+  escapeText: (msg) => msg.replace(/\*/g,"\\*").replace(/_/g,"\\_").replace(/~/g,"\\~"),
   init: (Handler) => db.init(Handler),
   parse: function(msg) {
     let prefix = Utils.prefix(msg);
