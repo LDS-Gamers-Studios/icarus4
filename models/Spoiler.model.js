@@ -8,6 +8,7 @@ var SpoilerSchema = new Schema({
 	channelId: String,
 	channelName: String,
 	content: String,
+	topic: String,
 	timestamp: {
 		type: Date,
 		default: Date.now
