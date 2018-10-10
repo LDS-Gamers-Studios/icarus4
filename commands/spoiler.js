@@ -31,7 +31,7 @@ async function collector(msg) {
 const Module = new Augur.Module()
 .addCommand({name: "spoiler",
 	description: "Hide your spoilers",
-	syntax: "Spoiler Text",
+	syntax: "Spoiler Text [## Spoiler Topic]",
 	info: "Hides your spoilers, so others can choose whether to see it.",
 	aliases: ["spoil", "spoilers"],
   permissions: (msg) => (msg.guild && msg.channel.permissionsFor(msg.client.user).has("MANAGE_MESSAGES")),
