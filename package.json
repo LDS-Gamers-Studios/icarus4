@@ -26,6 +26,7 @@
     "ffmpeg-binaries": "^4.0.0",
     "google-spreadsheet": "^2.0.5",
     "libsodium-wrappers": "^0.7.3",
+    "markdown": "^0.5.0",
     "mongoose": "^5.2.7",
     "opusscript": "0.0.6",
     "profanity-matcher": "^1.0.1",
