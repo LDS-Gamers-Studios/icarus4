@@ -15,8 +15,9 @@ const Module = new Augur.Module()
   app.set("views", "./site/views");
   app.set("view engine", "pug");
   app.disable("view cache");
-  
+
   app.use((req, res, next) => {
+    res.locals.handler = Module.handler;
     res.locals.bot = Module.handler.client;
     next();
   });
