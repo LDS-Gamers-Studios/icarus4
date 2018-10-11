@@ -106,7 +106,7 @@ const Module = new Augur.Module()
   syntax: Object.keys(roles).join(" | "),
   aliases: ["removerole", "remove"],
   info: "Removes one of the following roles/channels:\n```md\n* " + Object.keys(roles).join("\n* ") + "```",
-  category: Members,
+  category: "Members",
   process: (msg, suffix) => {
     if (aliases[suffix.toLowerCase()]) suffix = aliases[suffix.toLowerCase()];
     if (roles[suffix.toLowerCase()]) {
