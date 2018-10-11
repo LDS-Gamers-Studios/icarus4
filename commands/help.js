@@ -13,6 +13,7 @@ const Module = new Augur.Module()
     let commands = Module.handler.commands.filter(c => c.permissions(msg));
 
     let embed = u.embed()
+    .setURL("https://my.ldsgamers.com/commands")
     .setThumbnail(msg.client.user.displayAvatarURL);
 
     if (!suffix) { // FULL HELP
@@ -35,6 +36,7 @@ const Module = new Augur.Module()
           if (i == 20) {
             msg.author.send(embed);
             embed = u.embed().setTitle(msg.client.user.username + " Commands" + (msg.guild ? ` in ${msg.guild.name}.` : ".") + " (Cont.)")
+            .setURL("https://my.ldsgamers.com/commands")
             .setDescription(`You have access to the following commands. For more info, type \`${prefix}help <command>\`.`);
             i = 0;
           }
