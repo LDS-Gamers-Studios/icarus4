@@ -45,6 +45,8 @@ const Module = new Augur.Module()
 .addCommand({name: "newmission",
   syntax: "@user email@myldsmail.net <mission> <month year>",
   description: "Add a new missionary to the database",
+  hidden: true,
+  category: "Mission",
   permissions: (msg) => Module.config.adminId.includes(msg.author.id),
   process: (msg, suffix) => {
     let missionData = parseMission(suffix);
@@ -61,6 +63,8 @@ const Module = new Augur.Module()
 .addCommand({name: "missionreturn",
   syntax: "@user",
   description: "Remove a user from the missionary list",
+  hidden: true,
+  category: "Mission",
   permissions: (msg) => Module.config.adminId.includes(msg.author.id),
   process: (msg) => {
     msg.mentions.users.forEach(user => {
@@ -72,6 +76,7 @@ const Module = new Augur.Module()
 })
 .addCommand({name: "missionaries",
   description: "Displays LDSG Missionaries (that we know about)",
+  category: "Mission",
   hidden: true,
   process: (msg) => {
     Module.db.mission.findAll().then(missionaries => {

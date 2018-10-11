@@ -54,7 +54,8 @@ const Module = new Augur.Module()
 .addCommand({name: "lfg",
   description: "Add yourself to the Looking for Game wall!",
   syntax: `(${lfgBoard.systems.join("/")}) Game Name`,
-  process: (msg, suffix) => {
+  category: "LFG",
+	process: (msg, suffix) => {
     let args = suffix.trim().toLowerCase().replace(/\s\s+/, " ").split(" ");
     if (suffix && (args.length > 1)) {
       let system = args.shift();
@@ -91,7 +92,8 @@ const Module = new Augur.Module()
   description: "Remove yourself from a LFG list",
   syntax: `(${lfgBoard.systems.join("/")}) Game Name`,
   hidden: true,
-  process: (msg, suffix) => {
+  category: "LFG",
+	process: (msg, suffix) => {
     let args = suffix.trim().toLowerCase().replace(/\s\s+/, " ").split(" ");
     if (!suffix) {
       // Remove all
@@ -127,7 +129,9 @@ const Module = new Augur.Module()
 .addCommand({name: "removelfg",
   description: "Remove a game from LFG",
   syntax: `(${lfgBoard.systems.join("/")}) Game Name`,
-  process: (msg, suffix) => {
+  hidden: true,
+  category: "LFG",
+	process: (msg, suffix) => {
     let args = suffix.trim().toLowerCase().replace(/\s\s+/, " ").split(" ");
 
     if (suffix && (args.length > 1)) {
@@ -159,6 +163,7 @@ const Module = new Augur.Module()
 	suffix: "<game name>",
   info: "Search for server members playing <game name>. If no game is provided, it will search for the applicable game in game specific channels or list the top 25 games, otherwise.",
 	aliases: ["who'splaying", "whosplaying", "whoson", "whoison", "who'son", "wip"],
+	category: "LFG",
 	process: async function(msg, suffix) {
     try {
       if (!suffix && gameDefaults[msg.channel.id]) suffix = gameDefaults[msg.channel.id];

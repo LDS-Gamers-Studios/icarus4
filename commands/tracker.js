@@ -26,7 +26,7 @@ const Module = new Augur.Module()
 	description: "Destiny Stat Tracker",
 	syntax: "<action> [[@user | user+name] [console]]",
   aliases: ["d"],
-  hidden: true,
+	category: "Trackers",
 	process: (msg, suffix) => {
 		u.clean(msg);
 		if (suffix) {
@@ -91,7 +91,7 @@ const Module = new Augur.Module()
 	description: "Destiny 2 Stat Tracker",
 	syntax: "<action> [[@user | user+name] [console]]",
 	aliases: ["d2"],
-  hidden: true,
+	category: "Trackers",
 	process: (msg, suffix) => {
 		u.clean(msg);
 		if (suffix) {
@@ -157,6 +157,7 @@ const Module = new Augur.Module()
 .addCommand({name: "fortnite",
 	description: "Fortnite Stat Tracker",
 	syntax: "<action> [[@user | user+name] [console]]",
+	category: "Trackers",
 	process: (msg, suffix) => {
 		u.clean(msg);
 		if (suffix) {
@@ -224,6 +225,7 @@ const Module = new Augur.Module()
 .addCommand({name: "overwatch",
 	description: "Overwatch Stat Tracker",
 	syntax: "<action> [[@user | user+name] [console]]",
+	category: "Trackers",
 	process: (msg, suffix) => {
 		u.clean(msg);
 

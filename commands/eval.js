@@ -4,7 +4,7 @@ const Augur = require("augurbot"),
 const Module = new Augur.Module()
 .addCommand({name: "eval",
   hidden: true,
-  category: "Admin",
+  category: "Bot Admin",
   process: (msg, suffix) => {
     if (msg.author.id !== Module.config.ownerId) {
       msg.channel.reply("stop it! Go away!");
@@ -22,7 +22,7 @@ const Module = new Augur.Module()
 })
 .addCommand({name: "seval",
   hidden: true,
-  category: "Admin",
+  category: "Bot Admin",
   process: (msg, suffix) => {
     if (msg.deletable) msg.delete();
     Module.handler.execute("eval", msg, suffix);

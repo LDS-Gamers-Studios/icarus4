@@ -5,6 +5,7 @@ const Augur = require("augurbot"),
 
 const Module = new Augur.Module()
 .addCommand({name: "pull",
+  category: "Bot Admin",
 	description: "Pull bot updates from git",
 	hidden: true,
 	process: (msg) => {
@@ -34,6 +35,8 @@ const Module = new Augur.Module()
 	permissions: (msg) => (Module.config.ownerId === (msg.author.id))
 })
 .addCommand({name: "playing",
+  category: "Bot Admin",
+  hidden: true,
 	description: "Set playing status",
 	syntax: "[game]",
 	aliases: ["setgame", "game"],
@@ -44,6 +47,7 @@ const Module = new Augur.Module()
 	permissions: (msg) => (Module.config.adminId.includes(msg.author.id))
 })
 .addCommand({name: "ping",
+  category: "Bot Admin",
 	description: "Check bot ping.",
 	hidden: true,
 	process: (msg) => {
@@ -53,7 +57,8 @@ const Module = new Augur.Module()
 	}
 })
 .addCommand({name: "pulse",
-  category: "Admin",
+  category: "Bot Admin",
+  hidden: true,
   description: "Check the bot's heartbeat",
   permissions: (msg) => (Module.config.ownerId === (msg.author.id)),
   process: async function(msg, suffix) {
@@ -92,7 +97,7 @@ const Module = new Augur.Module()
   }
 })
 .addCommand({name: "gotobed",
-  category: "Admin",
+  category: "Bot Admin",
   hidden: true,
   aliases: ["q"],
   process: async function(msg) {
@@ -114,7 +119,8 @@ const Module = new Augur.Module()
   permissions: (msg) => Module.config.adminId.includes(msg.author.id)
 })
 .addCommand({name: "reload",
-  category: "Admin",
+  category: "Bot Admin",
+  hidden: true,
   syntax: "[file1.js] [file2.js]",
   description: "Reload command files.",
   info: "Use the command without a suffix to reload all command files.\n\nUse the command with the module name (including the `.js`) to reload a specific file.",

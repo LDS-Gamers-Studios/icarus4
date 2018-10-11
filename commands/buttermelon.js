@@ -42,6 +42,7 @@ const Module = new Augur.Module()
 .addCommand({name: "buttermelon",
 	description: "Buttermelon facts",
 	aliases: ["buttermelonfacts"],
+  category: "Silly",
 	process: (msg) => {
 		let fact = Math.floor(Math.random() * buttermelon.facts.length);
 		msg.channel.send("🍌 " + buttermelon.facts[fact]).catch(console.error);
@@ -49,7 +50,8 @@ const Module = new Augur.Module()
 })
 .addCommand({name: "buttermelonhistory",
 	description: "History of the Buttermelon",
-	process: (msg) => {
+  category: "Silly",
+  process: (msg) => {
 		msg.channel.send("http://ytcropper.com/cropped/lY59de2f95eaaba");
 	}
 })

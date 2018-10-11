@@ -27,6 +27,7 @@ const Module = new Augur.Module()
 	description: "View an IGN",
 	syntax: "[@user] [system]",
 	info: "Displays various game system IGNs or social network names that have been added via the `!addign` command. Use the `!whoplays` command to view all people who have saved IGNs for a particular system.\n" + Ign.helpList(),
+	category: "IGN",
 	process: async function(msg, suffix) {
     try {
       let user = (msg.mentions.users.size > 0 ? msg.mentions.users.first() : msg.author);
@@ -55,6 +56,7 @@ const Module = new Augur.Module()
 	syntax: "<system> <ign>",
 	info: "Saves various game system IGNs or social network names. User IGNs are visible with the `!ign` command, and lists of users with the `!whoplays` command.\n" + Ign.helpList(),
 	aliases: ["adding"],
+	category: "IGN",
 	process: async function(msg, suffix) {
     try {
       if (!suffix) {
@@ -100,6 +102,7 @@ const Module = new Augur.Module()
 	syntax: "<system>",
 	info: "Lists members who have saved IGNs for a given system.\n" + Ign.helpList(),
 	aliases: ["whohas", "whoison"],
+	category: "IGN",
 	process: async function(msg, suffix) {
     try {
       if (!suffix) {

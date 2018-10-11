@@ -255,6 +255,7 @@ const Module = new Augur.Module()
 .addCommand({name: "approve",
   description: "Approve an LDSG Streamer",
   syntax: "@user(s)",
+  category: "Streaming",
   process: (msg) => {
     u.clean(msg);
     let bot = msg.client;
@@ -275,6 +276,7 @@ const Module = new Augur.Module()
 .addCommand({name: "mixer",
   description: "Links to a Mixer stream",
   syntax: "<mixerChannel> | <@user>",
+  category: "Streaming",
   process: async function(msg, suffix) {
     try {
       let user = false,
@@ -308,6 +310,7 @@ const Module = new Augur.Module()
   description: "Show your support for LDSG on Twitch!",
   info: "Assigns you the Twitch Raiders role, showing your support for LDSG Streaming.",
   aliases: ["raiders", "twitchraider", "twitchraiders"],
+  category: "Streaming",
   process: (msg, suffix) => {
     let bot = msg.client;
     let quitter = ["done", "off", "false", "remove", "quit", "no"];
@@ -331,11 +334,13 @@ const Module = new Augur.Module()
 })
 .addCommand({name: "schedule",
   description: "Check the LDSG streaming schedule",
+  category: "Streaming",
   process: (msg) => msg.channel.send("**LDSG Streaming Schedule:**\nhttp://ldsgamers.com/community/streaming-schedule")
 })
 .addCommand({name: "stream",
   description: "Watch the LDSG Twitch stream",
   info: "Displays LDSG stream status and stream info.",
+  category: "Streaming",
   process: (msg) => {
     let name = "ldsgamers";
 
@@ -362,6 +367,7 @@ const Module = new Augur.Module()
 })
 .addCommand({name: "streaming",
   description: "Who in the server is streaming right now?",
+  category: "Streaming",
   process: async function (msg) {
     try {
       let twitchIgns = await Module.db.ign.getList("twitch");
@@ -437,6 +443,7 @@ const Module = new Augur.Module()
   description: "Links to a Twitch stream",
   syntax: "<streamer_name> | <@user>",
   info: "Displays stream status and stream info.",
+  category: "Streaming",
   process: async function(msg, suffix) {
     try {
       let user = false,
@@ -483,6 +490,7 @@ const Module = new Augur.Module()
 })
 .addCommand({name: "twitchteam",
   description: "See the LDSG Twitch Team Page",
+  category: "Streaming",
   process: (msg) => {
     msg.channel.send("Spend some time with the LDSG Twitch Team!\nhttps://www.twitch.tv/team/ldsgamers");
   }
@@ -490,6 +498,8 @@ const Module = new Augur.Module()
 .addCommand({name: "unapprove",
   description: "Unapprove an LDSG Streamer",
   syntax: "@user(s)",
+  hidden: true,
+  category: "Streaming",
   process: (msg) => {
     u.clean(msg);
     if (u.userMentions(msg)) {
@@ -512,6 +522,7 @@ const Module = new Augur.Module()
   syntax: "<youtube user name> | <@user>",
   aliases: ["yt"],
   info: "Displays user videos and stream info.",
+  category: "Streaming",
   process: async function(msg, suffix) {
     try {
       let user = false,

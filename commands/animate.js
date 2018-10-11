@@ -42,7 +42,6 @@ const Module = new Augur.Module()
 .addCommand({name: "mariokart",
   description: "Mario Kart frame animation.",
   aliases: ["mk"],
-  hidden: true,
   process: async (msg) => {
     let blueshell = msg.guild.emojis.find("name", "blueshell").toString();
     let frames = [
@@ -58,7 +57,6 @@ const Module = new Augur.Module()
 })
 .addCommand({name: "volcano",
   description: "Volcano Animation",
-  hidden: true,
   process: async (msg) => {
     let frames = [
       [

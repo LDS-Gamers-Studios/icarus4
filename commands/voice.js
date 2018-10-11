@@ -57,6 +57,7 @@ const Module = new Augur.Module()
 .addCommand({name: "lock",
   syntax: "[@additionalUser(s)]",
   description: "Locks your current voice channel to new users",
+  category: "Voice",
   permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && msg.member.voiceChannel && availableNames.includes(msg.member.voiceChannel.name)),
   process: (msg) => {
   	let channel = msg.member.voiceChannel;
@@ -90,6 +91,7 @@ const Module = new Augur.Module()
   description: "Play a YouTube Song",
   hidden: true,
   syntax: "<YouTube URL>",
+  category: "Voice",
   permissions: (msg) => (msg.guild && ((msg.guild.id == "136569499859025920") || ((msg.guild.id == "136569499859025920") || ((msg.guild.id == Module.config.ldsg) && (msg.member.roles.has(Module.config.roles.team) || msg.member.roles.has("114816596341424129")))) && msg.member.voiceChannel)),
   process: async function(msg, song) {
     try {
@@ -115,6 +117,7 @@ const Module = new Augur.Module()
   aliases: ["sb", "soundboard"],
   description: "Plays a sound",
   info: "Plays a matched sound from Freesound.org",
+  category: "Voice",
   permissions: (msg) => (msg.guild && ((msg.guild.id == "136569499859025920") || ((msg.guild.id == Module.config.ldsg) && (msg.member.roles.has(Module.config.roles.team) || msg.member.roles.has("114816596341424129")))) && msg.member.voiceChannel),
   process: (msg, suffix) => {
     if (suffix) {
@@ -154,6 +157,8 @@ const Module = new Augur.Module()
 })
 .addCommand({name: "unlock",
 	description: "Unlocks your current voice channel for new users",
+  category: "Voice",
+  hidden: true,
 	permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && msg.member.voiceChannel && availableNames.includes(msg.member.voiceChannel.name)),
 	process: (msg) => {
 		let channel = msg.member.voiceChannel;

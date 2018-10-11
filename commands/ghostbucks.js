@@ -25,8 +25,8 @@ function filterUnique(e, i, a) {
 
 const Module = new Augur.Module()
 .addCommand({name: "gamelist",
-	hidden: true,
 	description: "See what games are available to redeem.",
+	category: "Ghost Bucks",
 	process: (msg, suffix) => {
 		doc.useServiceAccountAuth(google.creds, (err) => {
 		  if (err) console.error(err);
@@ -69,6 +69,7 @@ const Module = new Augur.Module()
 .addCommand({name: "gameredeem",
 	syntax: "came code", hidden: true,
 	description: "Redeem a game code",
+	category: "Ghost Bucks",
 	process: (msg, suffix) => {
 		doc.useServiceAccountAuth(google.creds, (err) => {
 			if (err) console.error(err);
@@ -131,10 +132,9 @@ const Module = new Augur.Module()
 	}
 })
 .addCommand({name: "gb",
-	syntax: "",
-	aliases: ["account", "gb", "sprouts", "brussels", "brusselssprouts", gb],
+	aliases: ["account", gb],
 	description: "Show how many Ghost Bucks you've earned.",
-	category: "mod",
+	category: "Ghost Bucks",
 	process: (msg) => {
 		let user = ( ((msg.mentions.users.size > 0) && (msg.guild && msg.member.roles.has("96345401078087680"))) ? msg.mentions.users.first() : msg.author );
 		Module.db.bank.getBalance(user).then(userBalance => {
@@ -146,6 +146,7 @@ const Module = new Augur.Module()
 	syntax: "@user amount",
 	description: "Give a user Ghost Bucks",
 	permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg)),
+	category: "Ghost Bucks",
 	process: (msg, suffix) => {
 		msg.delete();
 		if (msg.mentions.users && msg.mentions.users.size > 0) {
@@ -202,6 +203,7 @@ const Module = new Augur.Module()
 .addCommand({name: "redeem",
 	syntax: "amount",
 	description: "Redeem Ghost Bucks for an LDSG store code",
+	category: "Ghost Bucks",
 	process: (msg, suffix) => {
 		msg.delete();
 		let amount = parseInt(suffix, 10);

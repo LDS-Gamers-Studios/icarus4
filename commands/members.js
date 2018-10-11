@@ -21,6 +21,7 @@ const Module = new Augur.Module()
 .addCommand({name: "avatar",
   description: "Get a user's avatar",
   syntax: "[@user]",
+  category: "Members",
   process: (msg) => {
     let user = (msg.mentions.users.size > 0 ? msg.mentions.users.first() : msg.author);
     if (user.avatarURL) {

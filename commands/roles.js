@@ -37,6 +37,7 @@ const Module = new Augur.Module()
   syntax: Object.keys(roles).join(" | "),
   aliases: ["addrole", "add"],
   info: "Gives you one of the following roles/channels:\n```md\n* " + Object.keys(roles).join("\n* ") + "```",
+  category: "Members",
   process: (msg, suffix) => {
     if (aliases[suffix.toLowerCase()]) suffix = aliases[suffix.toLowerCase()];
     if (roles[suffix.toLowerCase()]) {
@@ -58,6 +59,8 @@ const Module = new Augur.Module()
 .addCommand({name: "nopings",
   description: "Remove a pingable role for your current channel",
   permissions: (msg) => msg.guild && msg.guild.id == "96335850576556032",
+  category: "Members",
+  hidden: true,
   process: async (msg) => {
     try {
       u.clean(msg);
@@ -78,6 +81,7 @@ const Module = new Augur.Module()
 .addCommand({name: "pingme",
   description: "Add a pingable role for your current channel",
   permissions: (msg) => msg.guild && msg.guild.id == "96335850576556032",
+  category: "Members",
   process: async (msg) => {
     try {
       let channel = msg.channel.name.toLowerCase().replace(/(general)|(lfg)/ig, "").replace(/\-+/g, " ").trim();
@@ -102,6 +106,7 @@ const Module = new Augur.Module()
   syntax: Object.keys(roles).join(" | "),
   aliases: ["removerole", "remove"],
   info: "Removes one of the following roles/channels:\n```md\n* " + Object.keys(roles).join("\n* ") + "```",
+  category: Members,
   process: (msg, suffix) => {
     if (aliases[suffix.toLowerCase()]) suffix = aliases[suffix.toLowerCase()];
     if (roles[suffix.toLowerCase()]) {
@@ -123,6 +128,7 @@ const Module = new Augur.Module()
 .addCommand({name: "role",
   description: "See who has a role.",
   syntax: "<role name>",
+  category: "Members",
   process: (msg, suffix) => {
     if (suffix) {
       let guild = msg.guild;
