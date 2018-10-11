@@ -31,7 +31,7 @@ const Module = new Augur.Module()
       let i = 1;
       categories.forEach(category => {
         commands.filter(c => c.category == category && !c.hidden).sort((a, b) => a.name.localeCompare(b.name)).forEach((command) => {
-          embed.addField(prefix + command.name + " " + command.syntax, (command.description ? command.description : "Description"), true);
+          embed.addField(prefix + command.name + " " + command.syntax, (command.description ? command.description : "Description"));
           if (i == 20) {
             msg.author.send(embed);
             embed = u.embed().setTitle(msg.client.user.username + " Commands" + (msg.guild ? ` in ${msg.guild.name}.` : ".") + " (Cont.)")
@@ -51,8 +51,8 @@ const Module = new Augur.Module()
         embed
         .setTitle(prefix + command.name + " help")
         .setDescription(command.info)
-        .addField("Category", command.category, true)
-        .addField("Usage", prefix + command.name + " " + command.syntax, true);
+        .addField("Category", command.category)
+        .addField("Usage", prefix + command.name + " " + command.syntax);
 
         if (command.aliases.length > 0) embed.addField("Aliases", command.aliases.map(a => `!${a}`).join(", "));
 
