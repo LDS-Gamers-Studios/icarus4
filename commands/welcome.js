@@ -1,6 +1,7 @@
 const Augur = require("augurbot"),
   u = require("../utils/utils"),
-  mod_log = "154676105247195146";
+  mod_log = "154676105247195146",
+  milestone = 3000;
 
 var r = (parts) => parts[Math.floor(Math.random() * parts.length)];
 
@@ -56,9 +57,9 @@ const Module = new Augur.Module()
 		modLogs.send(embed);
     if (!member.roles.has(Module.config.roles.muted) && !member.user.bot)
 		  general.send(welcomeString);
-    if (guild.members.size == 2000) {
-      general.send(":tada: :confetti_ball: We're back to 2,000 members! :confetti_ball: :tada:");
-      modLogs.send(":tada: :confetti_ball: We're back to 2,000 members! :confetti_ball: :tada:\n*pinging for effect: <@96335658997526528> <@111232201848295424>*");
+    if (guild.members.size == milestone) {
+      general.send(`:tada: :confetti_ball: We're now at ${milestone} members! :confetti_ball: :tada:`);
+      modLogs.send(`:tada: :confetti_ball: We're now at ${milestone} members! :confetti_ball: :tada:\n*pinging for effect: <@96335658997526528> <@111232201848295424>*`);
     }
   }
 })
