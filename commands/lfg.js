@@ -175,7 +175,7 @@ const Module = new Augur.Module()
         let players = guild.members
         .filter(u => (u.presence.game && (u.presence.game.name.toLowerCase().startsWith(suffix.toLowerCase()))))
         .sort((a, b) => a.displayName.localeCompare(b.displayName))
-        .map(u => `• ${u.displayName}`);
+        .map(user => `• ${u.escapeText(user.displayName)}`);
 
         if (players.length > 0) {
           let embed = u.embed()

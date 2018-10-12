@@ -116,7 +116,9 @@ const Module = new Augur.Module()
         if (users.length > 0) {
           let guild = msg.guild;
 
-          let sort = function(a, b) {
+          let wePlay = users
+          .filter(u => guild.members.has(u.discordId))
+          .sort((a, b) => {
             if (suffix != "birthday")
             return guild.members.get(a.discordId).displayName.toLowerCase().localeCompare(guild.members.get(b.discordId).displayName.toLowerCase())
             else {
@@ -124,12 +126,8 @@ const Module = new Augur.Module()
               let bDate = new Date(b.ign);
               return aDate - bDate;
             }
-          };
-
-          let wePlay = users
-          .filter(u => guild.members.has(u.discordId))
-          .sort(sort)
-          .map(user => `· **${u.escapeText(guild.members.get(user.discordId).displayName)}**: ${(user.ign.startsWith("http") ? "<" + user.ign + ">" : user.ign)}`);
+          })
+          .map(user => `· **${u.escapeText(guild.members.get(user.discordId).displayName)}**: ${(user.ign.startsWith("http") ? "<" + u.escapeText(user.ign) + ">" : u.escapeText(user.ign))}`);
 
           msg.channel.send(`The following members have saved an IGN for ${Ign.gameids.get(suffix).name}:\n` + wePlay.join("\n"), { split: true });
         } else msg.channel.send(`No members have saved an IGN for ${Ign.gameids.get(suffix).name}.`);
