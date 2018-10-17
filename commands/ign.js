@@ -30,7 +30,8 @@ const Module = new Augur.Module()
 	category: "IGN",
 	process: async function(msg, suffix) {
     try {
-      let user = (msg.mentions.users.size > 0 ? msg.mentions.users.first() : msg.author);
+	  let userMentions = u.userMentions(msg);
+      let user = (userMentions.size > 0 ? userMentions.first() : msg.author);
       let member = ((msg.guild) ? (msg.guild.members.get(user.id)): null);
 
       let embed = u.embed()
