@@ -31,17 +31,21 @@ const Module = new Augur.Module()
 	process: async function(msg, suffix) {
     try {
 	  let userMentions = u.userMentions(msg);
-      let user = (userMentions.size > 0 ? userMentions.first() : msg.author);
+	  if (userMentions.size > 0) {
+        let user = userMentions.first();
+        let systems = suffix.replace(/<@!?\d+>/ig, '').toLowerCase().trim();
+      } else {
+        let user = u.getUser(msg, suffix);
+        let systems = null;
+      }
+
       let member = ((msg.guild) ? (msg.guild.members.get(user.id)): null);
+      systems = (systems ? systems.split(' ').map(s => (Ign.aliases[s] ? Ign.aliases[s] : s)) : null);
+      let igns = await Module.db.ign.find(user.id, systems);
 
       let embed = u.embed()
       .setTitle('IGNs for ' + (member ? member.displayName : user.username))
       .setAuthor((member ? member.displayName : user.username), user.displayAvatarURL);
-
-      let systems = suffix.replace(/<@!?\d+>/ig, '').toLowerCase().trim();
-      systems = (systems ? systems.split(' ').map(s => (Ign.aliases[s] ? Ign.aliases[s] : s)) : null);
-
-      let igns = await Module.db.ign.find(user.id, systems);
 
       embed = addIgnFields(embed, igns);
 
