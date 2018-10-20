@@ -75,18 +75,18 @@ const Utils = {
     let foundUser = memberCollection.find(myFn);
 
     // If no exact match, find a user whose nick or username begins with the query
-    if (foundUser === undefined) {
+    if (!foundUser) {
       myFn = (element) => (element.displayName.toLowerCase().startsWith(lcUser) || element.user.username.toLowerCase().startsWith(lcUser));
       foundUser = memberCollection.find(myFn);
     }
 
     // If still no match, search by ID
-    if (foundUser === undefined)
+    if (!foundUser)
       foundUser = memberCollection.get(user);
 
     // If still no match, return message author
-    if (foundUser === undefined)
       foundUser = msg.author;
+    if (!foundUser)
 
     return foundUser;
   }
