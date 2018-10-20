@@ -59,7 +59,7 @@ const Utils = {
     // Finds a user in the same guild as the message.
 
     // If no user to look for, return message author.
-    if (user.length == 0) return msg.author;
+    if (user.length == 0) return msg.member;
 
     let lcUser = user.toLowerCase();
     let memberCollection = msg.guild.members;
@@ -85,8 +85,8 @@ const Utils = {
       foundUser = memberCollection.get(user);
 
     // If still no match, return message author
-      foundUser = msg.author;
     if (!foundUser)
+      foundUser = msg.member;
 
     return foundUser;
   }
