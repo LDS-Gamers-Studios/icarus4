@@ -32,11 +32,11 @@ const Module = new Augur.Module()
     try {
       let userMentions = u.userMentions(msg);
       if (userMentions) {
-        let user = userMentions.first();
-        let systems = suffix.replace(/<@!?\d+>/ig, '').toLowerCase().trim();
+        var user = userMentions.first();
+        var systems = suffix.replace(/<@!?\d+>/ig, '').toLowerCase().trim();
       } else {
-        let user = u.getUser(msg, suffix);
-        let systems = null;
+        var user = u.getUser(msg, suffix);
+        var systems = null;
       }
 
       let member = ((msg.guild) ? (msg.guild.members.get(user.id)): null);
