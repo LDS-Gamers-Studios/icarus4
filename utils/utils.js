@@ -89,7 +89,7 @@ const Utils = {
       foundUser = msg.member;
 
     return foundUser;
-  }
+  },
   init: (Handler) => db.init(Handler),
   parse: function(msg) {
     let prefix = Utils.prefix(msg);
