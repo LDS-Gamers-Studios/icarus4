@@ -285,7 +285,7 @@ const Module = new Augur.Module()
           let discount = await snipcart.getDiscountCode(code);
           if (discount && (newLevel.rate > 0)) {
             // Discount has changed. Edit.
-            discount.rate = newLevel.value;
+            discount.rate = newLevel.rate;
             discount = await snipcart.editDiscount(discount);
             newMember.send(`Thanks for joining the ${role} ranks! As a thank you, you get a ${discount.rate}% discount on purchases in the shop by using code \`${discount.code}\`. This discount will apply as long as you keep the ${role} role.\nhttps://ldsgamers.com/shop`);
           } else if (discount && (newLevel.rate == 0)) {
