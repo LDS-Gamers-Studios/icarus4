@@ -294,7 +294,7 @@ const Module = new Augur.Module()
           } else if (newLevel.rate > 0) {
             // New discount code
             discount = {
-              name: newMember.user.username,
+              name: newMember.user.username + " Sponsor",
               trigger: "Code",
               code: code,
               type: "Rate",
