@@ -71,4 +71,4 @@ const SnipCart = function(auth) {
   return this;
 };
 
-module.exports = SnipCart("ST_OGE1ZDEyOTktNmM3Yy00Y2UyLTlhZjEtZTFkNDM0YTlhZmVkNjM2NDI2NTM5ODMzMTA3MjI1");
+module.exports = SnipCart;
