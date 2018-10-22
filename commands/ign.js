@@ -30,17 +30,22 @@ const Module = new Augur.Module()
 	category: "IGN",
 	process: async function(msg, suffix) {
     try {
-      let user = (msg.mentions.users.size > 0 ? msg.mentions.users.first() : msg.author);
+      let userMentions = u.userMentions(msg);
+      if (userMentions) {
+        var user = userMentions.first();
+        var systems = suffix.replace(/<@!?\d+>/ig, '').toLowerCase().trim();
+      } else {
+        var user = u.getUser(msg, suffix);
+        var systems = null;
+      }
+
       let member = ((msg.guild) ? (msg.guild.members.get(user.id)): null);
+      systems = (systems ? systems.split(' ').map(s => (Ign.aliases[s] ? Ign.aliases[s] : s)) : null);
+      let igns = await Module.db.ign.find(user.id, systems);
 
       let embed = u.embed()
       .setTitle('IGNs for ' + (member ? member.displayName : user.username))
       .setAuthor((member ? member.displayName : user.username), user.displayAvatarURL);
-
-      let systems = suffix.replace(/<@!?\d+>/ig, '').toLowerCase().trim();
-      systems = (systems ? systems.split(' ').map(s => (Ign.aliases[s] ? Ign.aliases[s] : s)) : null);
-
-      let igns = await Module.db.ign.find(user.id, systems);
 
       embed = addIgnFields(embed, igns);
 
