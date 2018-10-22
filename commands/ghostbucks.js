@@ -287,7 +287,7 @@ const Module = new Augur.Module()
             // Discount has changed. Edit.
             discount.rate = newLevel.value;
             discount = await snipcart.editDiscount(discount);
-            newMember.send(`Thanks for being a ${role}! As a thank you, you get a ${discount.rate}% discount on purchases in the shop. This discount will apply as long as you keep the ${role} role.\nhttps://ldsgamers.com/shop`);
+            newMember.send(`Thanks for joining the ${role} ranks! As a thank you, you get a ${discount.rate}% discount on purchases in the shop by using code \`${discount.code}\`. This discount will apply as long as you keep the ${role} role.\nhttps://ldsgamers.com/shop`);
           } else if (discount && (newLevel.rate == 0)) {
             // Discount no longer applies. Delete.
             snipcart.deleteDiscount(discount);
@@ -302,7 +302,7 @@ const Module = new Augur.Module()
             };
 
             await snipcart.newDiscount(discount);
-            newMember.send(`Thanks for being a ${role}! As a thank you, you get a ${discount.rate}% discount on purchases in the shop. This discount will apply as long as you keep the ${role} role.\nhttps://ldsgamers.com/shop`);
+            newMember.send(`Thanks for joining the ${role} ranks! As a thank you, you get a ${discount.rate}% discount on purchases in the shop by using code \`${discount.code}\`. This discount will apply as long as you keep the ${role} role.\nhttps://ldsgamers.com/shop`);
           }
         }
       }
