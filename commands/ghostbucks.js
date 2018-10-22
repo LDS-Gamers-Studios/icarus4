@@ -234,7 +234,7 @@ const Module = new Augur.Module()
             amount: (amount / 100)
           };
 
-          let discount = await snipcart.newDiscount(discount);
+          let discount = await snipcart.newDiscount(discountInfo);
 
           if (discount.amount && discount.code) {
             let withdrawl = {
