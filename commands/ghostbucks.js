@@ -280,7 +280,7 @@ const Module = new Augur.Module()
         if (user) {
           // Check if current discount exists.
           let snipcart = require("../utils/snipcart")(Module.config.api.snipcart);
-          let code = parseInt(user["_id"].substr(16), 16).toString(36).toUpperCase();
+          let code = parseInt(user["_id"].toString().substr(16), 16).toString(36).toUpperCase();
 
           let discount = await snipcart.getDiscountCode(code);
           if (discount && (newLevel.rate > 0)) {
