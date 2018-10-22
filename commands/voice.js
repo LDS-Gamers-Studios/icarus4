@@ -86,6 +86,17 @@ const Module = new Augur.Module()
   	}
   }
 })
+.addCommand({name: "silent",
+  description: "Stop playing sounds",
+  hidden: true,
+  category: "Voice",
+  permissions: (msg) => (msg.guild && msg.guild.voiceConnection && msg.guild.voiceConnection.dispatcher),
+  process: async function(msg) {
+    let guildQueue = queue.get(msg.guild.id).queue;
+    guildQueue = [];
+    msg.guild.voiceConnection.dispatcher.end();
+  }
+})
 .addCommand({name: "song",
   description: "Play a YouTube Song",
   hidden: true,
