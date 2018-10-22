@@ -25,7 +25,7 @@ queue = new Map();
 
 async function playSound(guildId) {
   try {
-    let guildQueue = queue.get(guildId);
+    let guildQueue = queue.get(guildId).queue;
     if (guildQueue && guildQueue.length > 0) {
       let {channel, sound} = guildQueue.shift();
 
@@ -87,7 +87,6 @@ const Module = new Augur.Module()
   }
 })
 .addCommand({name: "song",
-  aliases: ["yt"],
   description: "Play a YouTube Song",
   hidden: true,
   syntax: "<YouTube URL>",
@@ -99,14 +98,16 @@ const Module = new Augur.Module()
 
       if (ytdl.validateURL(song)) {
         let info = await ytdl.getBasicInfo(song);
-        if (!queue.has(msg.guild.id)) queue.set(msg.guild.id, []);
-
-        msg.channel.send(`Queueing ${info.title}...`);
+        if (!queue.has(msg.guild.id)) queue.set(msg.guild.id, {queue: [], nonce: null});
         let guildQueue = queue.get(msg.guild.id);
-        guildQueue.push({channel: msg.member.voiceChannel, sound: ytdl(song, {filter: "audioonly"})});
-        if (!(msg.guild.voiceConnection && msg.guild.voiceConnection.dispatcher)) playSound(msg.guild.id);
 
-      } else msg.reply(`\`${suffix}\` isn't a valid YouTube URL.`);
+        if (msg.nonce != guildQueue.nonce) { // Prevent double-queueing due to embed updates
+          msg.channel.send(`Queueing ${info.title}...`);
+          guildQueue.queue.push({channel: msg.member.voiceChannel, sound: ytdl(song, {filter: "audioonly"})});
+          guildQueue.nonce = msg.nonce;
+          if (!(msg.guild.voiceConnection && msg.guild.voiceConnection.dispatcher)) playSound(msg.guild.id);
+        }
+      } else msg.reply(`\`${song}\` isn't a valid YouTube URL.`);
     } catch(e) {
       Module.handler.errorHandler(e, msg);
     }
