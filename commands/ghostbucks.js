@@ -275,7 +275,7 @@ const Module = new Augur.Module()
       let newLevel = discountLevel(newMember);
       if (discountLevel(oldMember).rate != newLevel.rate) {
         // Fetch user
-        let user = await Module.db.user.getUser({discordId: newMember.id});
+        let user = await Module.db.user.fetchUser({discordId: newMember.id});
         let role = newMember.roles.get(newLevel.role).name;
         if (user) {
           // Check if current discount exists.
