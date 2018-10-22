@@ -19,6 +19,19 @@ function code(n) {
 	return newCode;
 }
 
+function discountLevel(member) {
+  let discount = { rate: 0, role: null };
+  let discounts = {
+    "114816596341424129": 5,  // Elite
+    "121783798647095297": 10, // Onyx
+    "121783903630524419": 15  // Pro
+  };
+  for (var role in discounts) {
+    if (member.roles.has(role)) discount = { rate: discounts[role], role: role };
+  }
+  return discount;
+}
+
 function filterUnique(e, i, a) {
   return (a.indexOf(a.find(g => g.gametitle == e.gametitle && g.system == e.system)) == i);
 }
@@ -204,45 +217,45 @@ const Module = new Augur.Module()
 	syntax: "amount",
 	description: "Redeem Ghost Bucks for an LDSG store code",
 	category: "Ghost Bucks",
-	process: (msg, suffix) => {
-		msg.delete();
-		let amount = parseInt(suffix, 10);
-		if (amount) {
-			Module.db.bank.getBalance(msg.author).then(balance => {
-				if ((amount <= balance.balance) && (amount > 0)) {
-					let options = require("../config/snipcart.json");
+	process: async (msg, suffix) => {
+    try {
+      msg.delete();
+      let amount = parseInt(suffix, 10);
+      if (amount) {
+        let balance = await Module.db.bank.getBalance(msg.author);
+        if ((amount <= balance.balance) && (amount > 0)) {
+          let snipcart = require("../utils/snipcart")(Module.config.api.snipcart);
+          let discountInfo = {
+            name: msg.author.username + " " + Date().toLocaleString(),
+            maxNumberOfUsages: 1,
+            trigger: "Code",
+            code: code(6),
+            type: "FixedAmount",
+            amount: (amount / 100)
+          };
 
-					options.form.name = msg.author.username + " " + Date().toLocaleString();
-					options.form.code = code(6);
-					options.form.amount = (amount / 100);
+          let discount = await snipcart.newDiscount(discount);
 
-					request.post(options, (error, response, body) => {
-						if (!error && body) {
-							body = JSON.parse(body);
-							if (body.amount && body.code) {
-								let withdrawl = {
-									discordId: msg.author.id,
-									description: "LDSG Store Discount Code",
-									value: (0 - amount),
-									mod: msg.author.id
-								};
-								Module.db.bank.addGhostBucks(withdrawl).then(withdraw => {
-									msg.author.send(`You have redeemed ${gb}${amount} for a $${body.amount} discount code in the LDS Gamers Store! <http://ldsgamers.com/shop>\n\nUse code __**${body.code}**__ at checkout to apply the discount. This code will be good for ${body.maxNumberOfUsages} use. (Note that means that if you redeem a code and don't use its full value, the remaining value is lost.)\n\nYou now have ${gb}${balance.balance - amount}.`);
-									msg.client.channels.get(modLogs).send(`**${msg.author.username}** just redeemed ${gb}${amount} for a store coupon code. They now have ${gb}${balance.balance - amount}.`);
-								});
-							} else {
-								msg.reply("Sorry, something went wrong. Please try again.").then(u.clean);
-							}
-						}
-					});
-
-				} else {
-					msg.reply(`you can currently redeem up to ${gb}${balance.balance}.`).then(u.clean);
-				}
-			}).catch(console.error);
-		} else {
-			msg.reply("you need to tell me how many Ghost Bucks to redeem!").then(u.clean);
-		}
+          if (discount.amount && discount.code) {
+            let withdrawl = {
+              discordId: msg.author.id,
+              description: "LDSG Store Discount Code",
+              value: (0 - amount),
+              mod: msg.author.id
+            };
+            let withdraw = await Module.db.bank.addGhostBucks(withdrawl);
+            msg.author.send(`You have redeemed ${gb}${amount} for a $${discount.amount} discount code in the LDS Gamers Store! <http://ldsgamers.com/shop>\n\nUse code __**${discount.code}**__ at checkout to apply the discount. This code will be good for ${discount.maxNumberOfUsages} use. (Note that means that if you redeem a code and don't use its full value, the remaining value is lost.)\n\nYou now have ${gb}${balance.balance - amount}.`);
+            msg.client.channels.get(modLogs).send(`**${msg.author.username}** just redeemed ${gb}${amount} for a store coupon code. They now have ${gb}${balance.balance - amount}.`);
+          } else {
+            msg.reply("Sorry, something went wrong. Please try again.").then(u.clean);
+          }
+        } else {
+          msg.reply(`you can currently redeem up to ${gb}${balance.balance}.`).then(u.clean);
+        }
+      } else {
+        msg.reply("you need to tell me how many Ghost Bucks to redeem!").then(u.clean);
+      }
+    } catch(e) { u.alertError(e, msg); }
 	}
 })
 .setInit(async function(gl) {
@@ -255,6 +268,46 @@ const Module = new Augur.Module()
     }
   } catch(e) { Module.handler.errorHandler(e); }
 })
-.setUnload(() => steamGameList);
+.setUnload(() => steamGameList)
+.addEvent("guildMemberUpdate", async (oldMember, newMember) => {
+  if ((newMember.guild.id == Module.config.ldsg) && (oldMember.roles.size != newMember.roles.size)) {
+    try {
+      let newLevel = discountLevel(newMember);
+      if (discountLevel(oldMember).rate != newLevel.rate) {
+        // Fetch user
+        let user = await Module.db.user.getUser({discordId: newMember.id});
+        let role = newMember.roles.get(newLevel.role).name;
+        if (user) {
+          // Check if current discount exists.
+          let snipcart = require("../utils/snipcart")(Module.config.api.snipcart);
+          let code = parseInt(user["_id"].substr(16), 16).toString(36).toUpperCase();
+
+          let discount = await snipcart.getDiscountCode(code);
+          if (discount && (newLevel.rate > 0)) {
+            // Discount has changed. Edit.
+            discount.rate = newLevel.value;
+            discount = await snipcart.editDiscount(discount);
+            newMember.send(`Thanks for being a ${role}! As a thank you, you get a ${discount.rate}% discount on purchases in the shop. This discount will apply as long as you keep the ${role} role.\nhttps://ldsgamers.com/shop`);
+          } else if (discount && (newLevel.rate == 0)) {
+            // Discount no longer applies. Delete.
+            snipcart.deleteDiscount(discount);
+          } else if (newLevel.rate > 0) {
+            // New discount code
+            discount = {
+              name: newMember.user.username,
+              trigger: "Code",
+              code: code,
+              type: "Rate",
+              rate: newLevel.rate
+            };
+
+            await snipcart.newDiscount(discount);
+            newMember.send(`Thanks for being a ${role}! As a thank you, you get a ${discount.rate}% discount on purchases in the shop. This discount will apply as long as you keep the ${role} role.\nhttps://ldsgamers.com/shop`);
+          }
+        }
+      }
+    } catch(e) { u.alertError(e); }
+  }
+});
 
 module.exports = Module;
