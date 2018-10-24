@@ -61,22 +61,24 @@ const Module = new Augur.Module()
     } catch(e) { u.alertError(e, msg); }
 	}
 })
-.setInit(async () => {
-  try {
-    let bot = Module.handler.client;
-    let spoilers = await Module.db.spoiler.fetchAll();
-    spoilers = spoilers.filter(s => bot.channels.has(s.channelId));
-    spoilers.forEach(async spoiler => {
-      try {
-        let msg = await bot.channels.get(spoiler.channelId).fetchMessage(spoiler.spoilerId);
-        collector(msg);
-      } catch(err) {
-        Module.handler.errorHandler(e);
-      }
-    });
-  } catch(e) {
-    Module.handler.errorHandler(e);
-  }
+.setInit(() => {
+  setTimeout(() => {
+    try {
+      let bot = Module.handler.client;
+      let spoilers = await Module.db.spoiler.fetchAll();
+      spoilers = spoilers.filter(s => bot.channels.has(s.channelId));
+      spoilers.forEach(async spoiler => {
+        try {
+          let msg = await bot.channels.get(spoiler.channelId).fetchMessage(spoiler.spoilerId);
+          collector(msg);
+        } catch(err) {
+          Module.handler.errorHandler(e);
+        }
+      });
+    } catch(e) {
+      Module.handler.errorHandler(e);
+    }
+  }, 5000);
 });
 
 module.exports = Module;
