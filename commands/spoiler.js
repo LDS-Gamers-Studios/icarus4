@@ -62,7 +62,7 @@ const Module = new Augur.Module()
 	}
 })
 .setInit(() => {
-  setTimeout(() => {
+  setTimeout(async () => {
     try {
       let bot = Module.handler.client;
       let spoilers = await Module.db.spoiler.fetchAll();
