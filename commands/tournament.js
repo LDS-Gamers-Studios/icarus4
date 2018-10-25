@@ -21,10 +21,10 @@ const Module = new Augur.Module()
 
     let tournaments = responses.reduce((full, response) => full.concat(response), []);
 
-		tournaments.sort((a, b) => a.tournament.start_at - b.tournament.start_at);
+		tournaments.sort((a, b) => new Date(a.tournament.start_at) - new Date(b.tournament.start_at));
 
 		tournaments.forEach(function(tournament){
-			let displayDate = (tournament.tournament.start_at ? new Date(tournament.tournament.start_at) : "Unscheduled");
+			let displayDate = (tournament.tournament.start_at ? new Date(tournament.tournament.start_at.substr(0, tournament.start_at.indexOf("T"))) : "Unscheduled");
       if (typeof displayDate != "string") displayDate = displayDate.toLocaleDateString("en-us");
 
 			embed.addField(displayDate, `[${tournament.tournament.name}](${tournament.tournament.full_challonge_url})`);
