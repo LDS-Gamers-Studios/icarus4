@@ -21,15 +21,11 @@ const Module = new Augur.Module()
 
     let tournaments = responses.reduce((full, response) => full.concat(response), []);
 
-		tournaments.sort((a, b) => {
-			var aDate = new Date(a.tournament.start_at);
-			var bDate = new Date(b.tournament.start_at);
-			return aDate.getTime() - bDate.getTime();
-		});
+		tournaments.sort((a, b) => a.tournament.start_at - b.tournament.start_at);
 
 		tournaments.forEach(function(tournament){
 			let displayDate = (tournament.tournament.start_at ? new Date(tournament.tournament.start_at) : "Unscheduled");
-      if (typeof displayDate != "string") displayDate = displayDate.toDateString();
+      if (typeof displayDate != "string") displayDate = displayDate.toLocaleDateString("en-us");
 
 			embed.addField(displayDate, `[${tournament.tournament.name}](${tournament.tournament.full_challonge_url})`);
 		});
