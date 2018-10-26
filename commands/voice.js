@@ -113,9 +113,9 @@ const Module = new Augur.Module()
         let guildQueue = queue.get(msg.guild.id);
 
         if (msg.nonce != guildQueue.nonce) { // Prevent double-queueing due to embed updates
-          msg.channel.send(`Queueing ${info.title}...`);
           guildQueue.queue.push({channel: msg.member.voiceChannel, sound: ytdl(song, {filter: "audioonly"})});
           guildQueue.nonce = msg.nonce;
+          msg.channel.send(`Queueing ${info.title}...`);
           if (!(msg.guild.voiceConnection && msg.guild.voiceConnection.dispatcher)) playSound(msg.guild.id);
         }
       } else msg.reply(`\`${song}\` isn't a valid YouTube URL.`);
@@ -151,8 +151,8 @@ const Module = new Augur.Module()
               }
 
               if (sound) {
-                if (!queue.has(msg.guild.id)) queue.set(msg.guild.id, []);
-                let guildQueue = queue.get(msg.guild.id);
+                if (!queue.has(msg.guild.id)) queue.set(msg.guild.id, {queue: [], nonce: null});
+                let guildQueue = queue.get(msg.guild.id).queue;
 
                 guildQueue.push({channel: msg.member.voiceChannel, sound: sound.previews["preview-lq-mp3"]});
                 if (!(msg.guild.voiceConnection && msg.guild.voiceConnection.dispatcher)) playSound(msg.guild.id);
@@ -160,7 +160,7 @@ const Module = new Augur.Module()
               } else msg.reply("I couldn't find any sounds for " + suffix);
             } else u.alertError(err, msg);
           } catch(e) {
-            Module.handler.errorHandler(e, msg);
+            u.alertError(e, msg);
           }
         });
       } else msg.reply("I'm not going to make that sound.").then(u.clean);
