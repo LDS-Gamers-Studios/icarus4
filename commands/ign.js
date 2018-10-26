@@ -36,7 +36,7 @@ const Module = new Augur.Module()
         var systems = suffix.replace(/<@!?\d+>/ig, '').toLowerCase().trim();
       } else {
         var user = u.getUser(msg, suffix);
-        var systems = null;
+        var systems = (user.id == msg.author.id ? suffix : null);
       }
 
       let member = ((msg.guild) ? (msg.guild.members.get(user.id)): null);
