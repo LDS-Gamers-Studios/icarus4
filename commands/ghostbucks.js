@@ -6,7 +6,7 @@ const Augur = require("augurbot"),
 
 const doc = new GoogleSpreadsheet(google.sheets.games),
   gb = "<:gb:493084576470663180>",
-  modLogs = "154676105247195146";
+  modLogs = "506575671242260490";
 
 var steamGameList;
 

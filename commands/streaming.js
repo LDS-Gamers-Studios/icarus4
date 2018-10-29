@@ -266,7 +266,7 @@ const Module = new Augur.Module()
         member.addRole("267038468474011650").then((streamer) => {
           streamer.send("Congratulations! You've been added to the Approved Streamers list in LDSG!\n\nWhile streaming, please remember the Streaming Guidelines ( https://goo.gl/Pm3mwS ) and LDSG Code of Conduct ( http://ldsgamers.com/code-of-conduct ). Also, please be aware that LDSG may make changes to the Approved Streamers list from time to time at its discretion.");
           msg.reply("I applied the role to " + streamer.displayName + "!").then(u.clean);
-          bot.channels.get("154676105247195146").send((msg.member ? msg.member.displayName : msg.author.username) + " has made " + streamer.displayName + " an Approved Streamer.");
+          bot.channels.get("506575671242260490").send((msg.member ? msg.member.displayName : msg.author.username) + " has made " + streamer.displayName + " an Approved Streamer.");
         });
       });
     } else msg.reply("you need to tell me who to approve!").then(u.clean);
@@ -320,14 +320,14 @@ const Module = new Augur.Module()
       msg.delete();
       msg.reply("ok ... I guess. :cry:").then(u.clean);
       msg.member.removeRole(raider);
-      bot.channels.get("154676105247195146").send(msg.member.displayName + " is no longer a Twitch Raider. :cry:");
+      bot.channels.get("506575671242260490").send(msg.member.displayName + " is no longer a Twitch Raider. :cry:");
     } else {
       let ldsg = bot.emojis.get("447251297033256962"); // Hex logo
 
       msg.member.addRole(raider);
       msg.reply("thanks for being a Twitch Raider! " + ldsg);
 
-      bot.channels.get("154676105247195146").send(msg.member.displayName + " has become a Twitch Raider!");
+      bot.channels.get("506575671242260490").send(msg.member.displayName + " has become a Twitch Raider!");
     }
   },
   permissions: (msg) => (msg.guild && (msg.guild.id == "96335850576556032"))
@@ -508,7 +508,7 @@ const Module = new Augur.Module()
         member.removeRole("267038468474011650").then((streamer) => {
           streamer.send("You've been removed from the Approved Streamers list in LDSG.");
           msg.reply("I removed the role from " + streamer.displayName).then(u.clean);
-          bot.channels.get("154676105247195146").send((msg.member ? msg.member.displayName : msg.author.username) + " has removed " + streamer.displayName + " from Approved Streamers.");
+          bot.channels.get("506575671242260490").send((msg.member ? msg.member.displayName : msg.author.username) + " has removed " + streamer.displayName + " from Approved Streamers.");
         });
       });
     } else {
@@ -558,10 +558,10 @@ const Module = new Augur.Module()
   let twitchSub = "338056125062578176";
   if (oldMember.roles.has(twitchSub) && !newMember.roles.has(twitchSub)) {
     newMember.send("It looks like your Twitch subscription to LDS Gamers has expired!\n\nTwitch Prime subscriptions need to be resubbed on a monthly basis. If this was unintentional, please consider resubbing at <https://www.twitch.tv/ldsgamers>. It helps keep the website and various game servers running. Thanks for the support! <:hexlogo:447251297033256962>");
-    newMember.client.channels.get("154676105247195146").send(`**${newMember.displayName}**'s Twitch Sub has expired!`);
+    newMember.client.channels.get("506575671242260490").send(`**${newMember.displayName}**'s Twitch Sub has expired!`);
   } else if (!oldMember.roles.has(twitchSub) && newMember.roles.has(twitchSub)) {
     newMember.send("Thanks for becoming an LDS Gamers Twitch Subscriber! People like you help keep the website and various game servers running. If you subscribed with a Twitch Prime sub, those need to be renewed monthly. You'll get a notification if I notice it lapse. Thanks for the support! <:hexlogo:447251297033256962>");
-    newMember.client.channels.get("154676105247195146").send(`**${newMember.displayName}** has become a Twitch Sub!`);
+    newMember.client.channels.get("506575671242260490").send(`**${newMember.displayName}** has become a Twitch Sub!`);
   }
 })
 .setInit((data) => {

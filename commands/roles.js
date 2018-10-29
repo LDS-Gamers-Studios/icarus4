@@ -42,7 +42,7 @@ const Module = new Augur.Module()
     if (aliases[suffix.toLowerCase()]) suffix = aliases[suffix.toLowerCase()];
     if (roles[suffix.toLowerCase()]) {
       let ldsg = msg.client.guilds.get(Module.config.ldsg);
-      let modLogs = msg.client.channels.get("154676105247195146");
+      let modLogs = msg.client.channels.get("506575671242260490");
       let role = ldsg.roles.get(roles[suffix.toLowerCase()]);
 
       ldsg.fetchMember(msg.author.id).then(member => {
@@ -111,7 +111,7 @@ const Module = new Augur.Module()
     if (aliases[suffix.toLowerCase()]) suffix = aliases[suffix.toLowerCase()];
     if (roles[suffix.toLowerCase()]) {
       let ldsg = msg.client.guilds.get(Module.config.ldsg);
-      let modLogs = msg.client.channels.get("154676105247195146");
+      let modLogs = msg.client.channels.get("506575671242260490");
       let role = ldsg.roles.get(roles[suffix.toLowerCase()]);
 
       ldsg.fetchMember(msg.author).then(member => {

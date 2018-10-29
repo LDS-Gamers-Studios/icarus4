@@ -1,6 +1,6 @@
 const Augur = require("augurbot"),
   u = require("../utils/utils"),
-  mod_log = "154676105247195146",
+  mod_log = "506575671242260490",
   milestone = 3000;
 
 var r = (parts) => parts[Math.floor(Math.random() * parts.length)];
