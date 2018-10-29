@@ -145,7 +145,7 @@ const Module = new Augur.Module()
 	}
 })
 .addCommand({name: "gb",
-	aliases: ["account", gb],
+	aliases: ["account", gb, "ghostbucks"],
 	description: "Show how many Ghost Bucks you've earned.",
 	category: "Ghost Bucks",
 	process: (msg) => {
