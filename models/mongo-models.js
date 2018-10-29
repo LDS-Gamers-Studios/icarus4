@@ -164,7 +164,7 @@ const models = {
     save: (data) => {
       return new Promise((fulfill, reject) => {
         let record = new Infraction({
-          discordId: data.userId,
+          discordId: (data.discordId || data.userId),
           channel: data.channel,
           message: data.message,
           flag: data.flag,
