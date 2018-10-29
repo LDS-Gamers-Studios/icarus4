@@ -150,7 +150,7 @@ const Module = new Augur.Module()
       msg.reply("you need to let me know who to fine.").then(u.clean).catch(console.error);
     }
   },
-  permissions: (msg) => (msg.guild && msg.member.roles.has(Module.config.roles.team))
+  permissions: (msg) => (msg.guild && msg.member.roles.has(Module.config.roles.mod))
 })
 .addCommand({name: "fire",
   description: "Light a fire",

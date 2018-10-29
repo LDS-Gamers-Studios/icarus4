@@ -39,7 +39,7 @@ function updateStarboard(reaction) {
 };
 
 function validate(reaction) {
-  let team = reaction.message.guild.roles.get(Module.config.roles.team);
+  let team = reaction.message.guild.roles.get(Module.config.roles.mod);
   let valid = reaction.users.reduce((v, u) => v += (team.members.has(u.id) ? 1 : 0), 0);
   return valid;
 };
@@ -158,7 +158,7 @@ const Module = new Augur.Module()
   if (message.guild && (message.guild.id == Module.config.ldsg) && (reaction.emoji.name == "⭐") && !message.author.bot) {
 		if (user.id != message.author.id) {
 			let valid = validate(reaction);
-			if ((valid == 1) && message.guild.roles.get(Module.config.roles.team).members.has(user.id)) {
+			if ((valid == 1) && message.guild.roles.get(Module.config.roles.mod).members.has(user.id)) {
 				// add all stars
 				if (stars[message.author.id]) stars[message.author.id] += reaction.users.size;
 				else stars[message.author.id] = reaction.users.size;
@@ -173,7 +173,7 @@ const Module = new Augur.Module()
 			reaction.remove(user);
 			message.reply("you can't star your own message, silly.").then(u.clean);
 		}
-	} else if (message.guild && (message.guild.id == Module.config.ldsg) && (reaction.emoji.name == "🚫") && (message.channel.id == starboard) && (message.guild.roles.get(Module.config.roles.team).members.has(user.id))) { // Remove from star board
+	} else if (message.guild && (message.guild.id == Module.config.ldsg) && (reaction.emoji.name == "🚫") && (message.channel.id == starboard) && (message.guild.roles.get(Module.config.roles.mod).members.has(user.id))) { // Remove from star board
 		let deniable = (message.embeds[0].color == null);
 		if (deniable) {
 			message.delete();
@@ -188,11 +188,11 @@ const Module = new Augur.Module()
 		if (valid) {
 			if (stars.hasOwnProperty(message.author.id)) stars[message.author.id] -= 1;
 			else stars[message.author.id] = -1;
-		} else if (message.guild.roles.get(Module.config.roles.team).members.has(user.id)) {
+		} else if (message.guild.roles.get(Module.config.roles.mod).members.has(user.id)) {
 			if (stars.hasOwnProperty(message.author.id)) stars[message.author.id] -= (reaction.users.size + 1);
 			else stars[message.author.id] = 0 - (reaction.users.size + 1);
 		}
-		if (valid || ((reaction.users.size >= threshold) && !Rank.excludeChannels.includes(message.channel.id)) || message.guild.roles.get(Module.config.roles.team).members.has(user.id)) updateStarboard(reaction);
+		if (valid || ((reaction.users.size >= threshold) && !Rank.excludeChannels.includes(message.channel.id)) || message.guild.roles.get(Module.config.roles.mod).members.has(user.id)) updateStarboard(reaction);
 	}
 })
 .setClockwork(() => {

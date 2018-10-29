@@ -90,7 +90,7 @@ const Module = new Augur.Module()
   description: "Stop playing sounds",
   hidden: true,
   category: "Voice",
-  permissions: (msg) => (msg.guild && msg.guild.voiceConnection && msg.guild.voiceConnection.dispatcher),
+  permissions: (msg) => (msg.guild && msg.guild.voiceConnection && msg.guild.voiceConnection.dispatcher && msg.member.roles.has(Module.config.roles.mod)),
   process: async function(msg) {
     let guildQueue = queue.get(msg.guild.id).queue;
     guildQueue = [];
