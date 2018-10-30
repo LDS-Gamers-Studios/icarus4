@@ -55,7 +55,7 @@ const Utils = {
   embed: () => new Discord.RichEmbed().setColor(config.color),
   errorLog: errorLog,
   escapeText: (msg) => msg.replace(/\*/g,"\\*").replace(/_/g,"\\_").replace(/~/g,"\\~"),
-  getUser: function(msg, user) {
+  getUser: function(msg, user, strict = false) {
     // Finds a user in the same guild as the message.
 
     // If no user to look for, return message author.
@@ -69,13 +69,13 @@ const Utils = {
     if (lcUser.length > 5 && lcUser.charAt(lcUser.length-5) === "#")
       myFn = (element) => element.user.tag.toLowerCase() === lcUser;
     // Otherwise look for exact match of either nickname or username
-    else
+    else if (!strict)
       myFn = (element) => (element.displayName.toLowerCase() === lcUser || element.user.username.toLowerCase() === lcUser);
 
     let foundUser = memberCollection.find(myFn);
 
     // If no exact match, find a user whose nick or username begins with the query
-    if (!foundUser) {
+    if (!foundUser && !strict) {
       myFn = (element) => (element.displayName.toLowerCase().startsWith(lcUser) || element.user.username.toLowerCase().startsWith(lcUser));
       foundUser = memberCollection.find(myFn);
     }
@@ -85,7 +85,7 @@ const Utils = {
       foundUser = memberCollection.get(user);
 
     // If still no match, return message author
-    if (!foundUser)
+    if (!foundUser && !strict)
       foundUser = msg.member;
 
     return foundUser;
