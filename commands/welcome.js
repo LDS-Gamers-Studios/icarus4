@@ -25,7 +25,7 @@ const Module = new Augur.Module()
 		if (user) { // Member is returning
 			embed.setTitle(member.displayName + " has rejoined the server.");
 			welcomeString = `Welcome back, ${member}! Glad to see you again.`;
-			if (user.roles.length > 0) member.addRoles(user.roles);
+			if (user.roles.length > 0) member = await member.addRoles(user.roles);
 		} else { // Member is new
 			let welcome = [
 				"Welcome",
