@@ -37,7 +37,7 @@ const Module = new Augur.Module()
   permissions: (msg) => (msg.guild && msg.channel.permissionsFor(msg.client.user).has("MANAGE_MESSAGES")),
 	process: async (msg, suffix) => {
     try {
-      u.clean(msg, 75);
+      u.clean(msg, 0);
 
       let file = ((msg.attachments.size > 0) ? { "file": msg.attachments.first().url } : null);
       let topicTag = suffix.indexOf("##");
