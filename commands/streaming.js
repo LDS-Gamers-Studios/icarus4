@@ -39,6 +39,7 @@ function checkStreams(bot) {
 
 function isPartnered(member) {
   let roles = [
+    '507031155627786250', // Extra Life
     '121783798647095297', // Onyx Sponsor
     '121783903630524419', // Pro Sponsor
     '96345401078087680' // Staff
