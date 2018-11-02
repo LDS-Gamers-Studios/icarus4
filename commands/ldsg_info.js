@@ -29,7 +29,7 @@ const Module = new Augur.Module()
 .addCommand({name: "extralife",
   description: "Play a game, save a life.",
   category: "LDSG",
-  process: (msg) => msg.channel.send("http://ldsg.io/extralife");
+  process: (msg) => msg.channel.send("http://ldsg.io/extralife")
 })
 .addCommand({name: "invite",
 	description: "Get the link to invite someone to our Discord server",
