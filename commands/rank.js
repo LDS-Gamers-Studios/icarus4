@@ -17,7 +17,7 @@ function updateStarboard(message) {
 		.setAuthor(message.member.displayName, message.author.displayAvatarURL)
 		.setTimestamp(message.createdAt)
 		.setDescription(message.cleanContent)
-    .setColor(valid ? "DARK_GOLD" : null))
+    .setColor((valid ? "DARK_GOLD" : null))
 		.setFooter(`⭐ ${stars} | 🌟 ${superstars}`)
 		.addField("Channel", message.channel.name)
     .addField("Jump to post", message.url);
