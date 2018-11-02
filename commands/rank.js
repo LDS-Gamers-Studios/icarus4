@@ -9,16 +9,16 @@ var active = [],
   stars = {},
   excludeUsers = [];
 
-function updateStarboard(reaction) {
-  let message = reaction.message;
+function updateStarboard(message) {
   let bot = message.client;
+  let {stars, superstars, valid} = validate(message);
 
 	let embed = u.embed()
 		.setAuthor(message.member.displayName, message.author.displayAvatarURL)
 		.setTimestamp(message.createdAt)
 		.setDescription(message.cleanContent)
-		.setFooter("⭐" + reaction.users.size)
-		.setColor((validate(reaction) ? "DARK_GOLD" : null))
+    .setColor(valid ? "DARK_GOLD" : null))
+		.setFooter(`⭐ ${stars} | 🌟 ${superstars}`)
 		.addField("Channel", message.channel.name)
     .addField("Jump to post", message.url);
 
@@ -38,10 +38,12 @@ function updateStarboard(reaction) {
 	}).catch(console.error);
 };
 
-function validate(reaction) {
-  let team = reaction.message.guild.roles.get(Module.config.roles.mod);
-  let valid = reaction.users.reduce((v, u) => v += (team.members.has(u.id) ? 1 : 0), 0);
-  return valid;
+function validate(message) {
+  let stars = (message.reactions.has("⭐") ? message.reactions.get("⭐").users.size : 0);
+  let superstars = (message.reactions.has("🌟") ? message.reactions.get("🌟").users.size : 0);
+  let team = message.guild.roles.get(Module.config.roles.mod);
+  let valid = (superstars ? message.reactions.get("🌟").users.reduce((v, u) => v || team.members.has(u.id), false) : 0);
+  return {stars, superstars, valid};
 };
 
 const Module = new Augur.Module()
@@ -155,31 +157,24 @@ const Module = new Augur.Module()
 })
 .addEvent("messageReactionAdd", (reaction, user) => {
   let message = reaction.message;
-  if (message.guild && (message.guild.id == Module.config.ldsg) && (reaction.emoji.name == "⭐") && !message.author.bot) {
-		if (user.id != message.author.id) {
-			let valid = validate(reaction);
-			if ((valid == 1) && message.guild.roles.get(Module.config.roles.mod).members.has(user.id)) {
-				// add all stars
-				if (stars[message.author.id]) stars[message.author.id] += reaction.users.size;
-				else stars[message.author.id] = reaction.users.size;
-			} else if (valid) {
-				// add one star
-				if (stars[message.author.id]) stars[message.author.id]++;
-				else stars[message.author.id] = 1;
-			}
-
-			if (valid || ((reaction.users.size > threshold) && !Rank.excludeChannels.includes(message.channel.id))) updateStarboard(reaction);
-		} else {
-			reaction.remove(user);
-			message.reply("you can't star your own message, silly.").then(u.clean);
-		}
-	} else if (message.guild && (message.guild.id == Module.config.ldsg) && (reaction.emoji.name == "🚫") && (message.channel.id == starboard) && (message.guild.roles.get(Module.config.roles.mod).members.has(user.id))) { // Remove from star board
-		let deniable = (message.embeds[0].color == null);
-		if (deniable) {
-			message.delete();
-			Module.db.starboard.denyStar(message);
-		}
-	}
+  if (message.guild && (message.guild.id == Module.config.ldsg) && !message.author.bot) {
+    if ((reaction.emoji.name == "⭐") || (reaction.emoji.name == "🌟")) {
+      if (user.id != message.author.id) {
+        let {stars, superstars, valid} = validate(message);
+        if (valid || (((stars >= threshold) || (superstars >= threshold)) && !Rank.excludeChannels.includes(message.channel.id)))
+          updateStarboard(message);
+      } else {
+        reaction.remove(user);
+        message.reply("you can't star your own message, silly.");
+      }
+    }
+    else if (reaction.emoji.name == "🚫" && (message.channel.id == starboard) && (message.guild.roles.get(Module.config.roles.mod).members.has(user.id))) {
+      if (message.embeds[0].color == null) {
+        message.delete();
+        Module.db.starboard.denyStar(message);
+      }
+    }
+  }
 })
 .addEvent("messageReactionRemove", (reaction, user) => {
   let message = reaction.message;
