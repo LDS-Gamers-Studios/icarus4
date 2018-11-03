@@ -178,16 +178,10 @@ const Module = new Augur.Module()
 })
 .addEvent("messageReactionRemove", (reaction, user) => {
   let message = reaction.message;
-	if (message.guild && (message.guild.id == Module.config.ldsg) && (reaction.emoji.name == "⭐") && (user.id != message.author.id)) {
-		let valid = validate(reaction);
-		if (valid) {
-			if (stars.hasOwnProperty(message.author.id)) stars[message.author.id] -= 1;
-			else stars[message.author.id] = -1;
-		} else if (message.guild.roles.get(Module.config.roles.mod).members.has(user.id)) {
-			if (stars.hasOwnProperty(message.author.id)) stars[message.author.id] -= (reaction.users.size + 1);
-			else stars[message.author.id] = 0 - (reaction.users.size + 1);
-		}
-		if (valid || ((reaction.users.size >= threshold) && !Rank.excludeChannels.includes(message.channel.id)) || message.guild.roles.get(Module.config.roles.mod).members.has(user.id)) updateStarboard(reaction);
+	if (message.guild && (message.guild.id == Module.config.ldsg) && ((reaction.emoji.name == "⭐") || (reaction.emoji.name == "🌟")) && (user.id != message.author.id)) {
+		let {stars, superstars, valid} = validate(message);
+		if (valid || (((stars >= threshold) || (superstars >= threshold)) && !Rank.excludeChannels.includes(message.channel.id)))
+      updateStarboard(message);
 	}
 })
 .setClockwork(() => {
