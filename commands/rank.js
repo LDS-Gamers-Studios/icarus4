@@ -210,8 +210,8 @@ const Module = new Augur.Module()
       }
       active = [];
 
-      await Module.db.user.addStars(stars);
-      stars = {};
+      //await Module.db.user.addStars(stars);
+      //stars = {};
     } catch(e) { Module.handler.errorHandler(e); }
 	}, 60000, bot);
 });
