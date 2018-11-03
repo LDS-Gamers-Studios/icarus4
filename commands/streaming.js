@@ -223,7 +223,7 @@ function twitchEmbed(body) {
     channel = body.stream.channel;
     embed.setDescription(body.stream.channel.status)
       .setThumbnail(body.stream.preview.medium)
-      .addField('Playing', body.stream.game, true)
+      .addField('Playing', (body.stream.game ? body.stream.game : "Nothing"), true)
       .addField('Current Viewers', body.stream.viewers, true);
   } else {
     channel = body;
