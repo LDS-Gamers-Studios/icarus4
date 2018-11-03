@@ -6,7 +6,6 @@ const Augur = require("augurbot"),
 const starboard = "405405857099284490";
 
 var active = [],
-  stars = {},
   excludeUsers = [];
 
 function updateStarboard(message) {
