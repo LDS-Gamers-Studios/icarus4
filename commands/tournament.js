@@ -1,5 +1,6 @@
 const Augur = require("augurbot"),
-  u = require("../utils/utils");
+  u = require("../utils/utils"),
+  champions = require("../data/champions.json");
 
 const Module = new Augur.Module()
 .addCommand({name: "bracket",
@@ -47,7 +48,7 @@ const Module = new Augur.Module()
 		let reason = suffix.replace(/<@!?\d+>/g, "").trim();
 		if ((msg.mentions.members.size > 0) && (reason.length > 0)) {
 			msg.mentions.members.forEach(member => {
-				member.addRole(championRole);
+				member.addRole("490580944009297945");
 				champions[member.id] = new Date(Date.now() + (3 * 7 * 24 * 60 * 60 * 1000));
 			});
 			fs.writeFile(path.resolve(process.cwd, "./data/champions.json"), JSON.stringify(champions), (err) => {
