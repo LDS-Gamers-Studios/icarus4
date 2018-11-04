@@ -51,7 +51,7 @@ const Module = new Augur.Module()
 				member.addRole("490580944009297945");
 				champions[member.id] = new Date(Date.now() + (3 * 7 * 24 * 60 * 60 * 1000));
 			});
-			fs.writeFile(path.resolve(process.cwd, "./data/champions.json"), JSON.stringify(champions), (err) => {
+			fs.writeFile(path.resolve(process.cwd(), "./data/champions.json"), JSON.stringify(champions), (err) => {
 				if (err) console.error("ERROR UPDATING CHAMPIONS:", err);
 				else console.log("Champions update");
 			});
