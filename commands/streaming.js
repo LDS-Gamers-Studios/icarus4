@@ -76,7 +76,7 @@ function notificationEmbed(body, srv) {
 	if (srv == "twitch") {
 		let channel = body.stream.channel;
 		embed.setColor('#6441A4')
-			.setThumbnail(body.stream.preview.medium)
+			.setThumbnail(`${body.stream.preview.medium}?t=${Date.now()}`)
 			.setTitle(channel.status)
 			.setAuthor(channel.display_name + (body.stream.game ? ` playing ${body.stream.game}` : ""), channel.logo)
 			.setURL(channel.url);
@@ -222,7 +222,7 @@ function twitchEmbed(body) {
   if (body.stream) {
     channel = body.stream.channel;
     embed.setDescription(body.stream.channel.status)
-      .setThumbnail(body.stream.preview.medium)
+      .setThumbnail(`${body.stream.preview.medium}?t=${Date.now()}`)
       .addField('Playing', (body.stream.game ? body.stream.game : "Nothing"), true)
       .addField('Current Viewers', body.stream.viewers, true);
   } else {
