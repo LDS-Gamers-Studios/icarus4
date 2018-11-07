@@ -6,6 +6,7 @@ const Animation = require("./Animation.model"),
   Server = require("./Server.model"),
   Spoiler = require("./Spoiler.model"),
   Star = require("./Star.model"),
+  Tag = require("./Tag.model"),
   User = require("./User.model"),
   config = require("../config/config.json"),
   mongoose = require("mongoose");
