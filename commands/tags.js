@@ -5,8 +5,8 @@ const tags = new Map();
 
 function runTag(msg) {
   let cmd = u.parse(msg);
-  if (cmd && tags.get(msg.guild.id).has(cmd.tag)) {
-    let tag = tags.get(msg.guild.id).get(cmd.tag);
+  if (cmd && tags.get(msg.guild.id).has(cmd.command)) {
+    let tag = tags.get(msg.guild.id).get(cmd.command);
     if (tag.attachment) {
       msg.channel.send(
         tag.response,
@@ -19,7 +19,7 @@ function runTag(msg) {
       );
     } else msg.channel.send(tag.response);
     return true;
-  } else if (cmd && (cmd.tag == "help") && (tags.get(msg.guild.id).size > 0) && !cmd.suffix) {
+  } else if (cmd && (cmd.command == "help") && (tags.get(msg.guild.id).size > 0) && !cmd.suffix) {
     let embed = u.embed()
     .setTitle("Custom tags in " + msg.guild.name)
     .setThumbnail(msg.guild.iconURL);
