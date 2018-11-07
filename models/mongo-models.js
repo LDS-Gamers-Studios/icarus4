@@ -360,6 +360,7 @@ const models = {
             else {
               if (cmd.attachment) {
                 let fs = require("fs");
+                let request = require("request");
                 request(data.url).pipe(fs.createWriteStream(process.cwd() + "/storage/" + cmd._id));
               }
               fulfill(cmd);
