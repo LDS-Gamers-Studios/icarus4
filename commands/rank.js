@@ -116,7 +116,7 @@ const Module = new Augur.Module()
         let award = Math.round(rate * user.currentXP);
         Module.db.bank.addGhostBucks({
           discordId: user.discordId,
-          description: "Chat Rank Reset - " + new Date().toDateString(),
+          description: "Chat Rank Reset - " + (new Date()).toDateString(),
           value: award,
           mod: msg.author.id
         }).then(deposit => {
