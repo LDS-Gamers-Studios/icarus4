@@ -347,6 +347,46 @@ const models = {
       });
     }
   },
+  tags: {
+    addTag: (data) => {
+      return new Promise((fulfill, reject) => {
+        Tag.findOneAndUpdate(
+          {serverId: data.serverId, tag: data.tag},
+          {$set: {response: data.response, attachment: data.attachment}},
+          {upsert: true, new: true},
+          function (err, cmd) {
+            if (err) reject(err);
+            else {
+              if (cmd.attachment) {
+                let fs = require("fs");
+                request(data.url).pipe(fs.createWriteStream(process.cwd() + "/storage/" + cmd._id));
+              }
+              fulfill(cmd);
+            }
+          }
+        );
+      });
+    },
+    fetchTags: () => {
+      return new Promise((fulfill, reject) => {
+        Tag.find({}, function(err, cmds) {
+          if (err) reject(err);
+          else fulfill(cmds);
+        });
+      });
+    },
+    removeTag: (guild, tag) => {
+      return new Promise((fulfill, reject) => {
+        Tag.findOneAndRemove(
+          {serverId: guild.id, tag: tag},
+          function(err, cmd) {
+            if (err) reject(err);
+            else fulfill(cmd);
+          }
+        );
+      });
+    }
+  },
   user: {
     addGhostBucks: (user, bucks) => {
       return new Promise((fulfill, reject) => {
