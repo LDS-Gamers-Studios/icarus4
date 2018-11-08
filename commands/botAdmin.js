@@ -137,9 +137,12 @@ const Module = new Augur.Module()
   },
   permissions: (msg) => Module.config.adminId.includes(msg.author.id)
 })
-.setInit(() => {
-  Module.handler.client.guilds.get(Module.config.ldsg).fetchMembers();
-  u.errorLog.send(u.embed().setTimestamp().setDescription("Bot is ready!"));
-});
+.setInit((reload) => {
+  if (!reload) {
+    Module.handler.client.guilds.get(Module.config.ldsg).fetchMembers();
+    u.errorLog.send(u.embed().setTimestamp().setDescription("Bot is ready!"));
+  }
+})
+.setUnload(() => true);
 
 module.exports = Module;
