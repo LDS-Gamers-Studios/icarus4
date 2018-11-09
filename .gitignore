@@ -1,4 +1,5 @@
 node_modules
+storage
 config/*
 !config/*-example.json
 test.js
