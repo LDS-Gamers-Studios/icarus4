@@ -45,30 +45,31 @@ const models = {
     }
   },
   bank: {
-    getBalance: function(user) {
+    getBalance: function(user, currency = "gb") {
       return new Promise((fulfill, reject) => {
         if ((typeof user) != "string") user = user.id;
         Bank.aggregate(
           [
-            { $match: { discordId: user}},
+            { $match: { discordId: user, currency: currency }},
             { $group: { _id: null, balance: {$sum: "$value"}}}
           ],
           (err, record) => {
             if (err) reject(err);
-            else if (record && (record.length > 0)) fulfill({discordId: user, balance: record[0].balance});
-            else fulfill({discordId: user, balance: 0});
+            else if (record && (record.length > 0)) fulfill({discordId: user, currency: currency, balance: record[0].balance});
+            else fulfill({discordId: user, currency: currency, balance: 0});
           }
         );
       });
     },
-    getRegister: function(user) {
+    getRegister: function(user, currency = "gb") {
       return new Promise((fulfill, reject) => {
         if ((typeof user) != "string") user = user.id;
-        Bank.find({discordId: user}, (err, register) => {
+        Bank.find({discordId: user, currency: currency}, (err, register) => {
           if (err) reject(err);
           else {
             fulfill({
               discordId: user,
+              currency: currency,
               balance: register.reduce((c, r) => c + r.value, 0),
               register: register
             });
@@ -76,11 +77,13 @@ const models = {
         });
       });
     },
-    addGhostBucks: function(data) {
+    addCurrency: function(data, currency = "gb") {
+      if (data.currency) currency = data.currency;
       return new Promise((fulfill, reject) => {
         let record = new Bank({
           discordId: data.discordId,
           description: data.description,
+          currency: currency,
           value: data.value,
           mod: data.mod
         });
@@ -390,20 +393,6 @@ const models = {
     }
   },
   user: {
-    addGhostBucks: (user, bucks) => {
-      return new Promise((fulfill, reject) => {
-        if ((typeof user) != "string") user = user.id;
-        User.findOneAndUpdate(
-          { discordId: user },
-          { $inc: { ghostBucks: bucks } },
-          { new: true },
-          (err, newUser) => {
-            if (err) reject(err);
-            else fulfill(newUser);
-          }
-        );
-      });
-    },
     addStars: (stars) => {
       return new Promise((fulfill, reject) => {
         let updates = [];

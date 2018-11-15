@@ -9,6 +9,7 @@ var BankSchema = new Schema({
 	},
 	description: String,
 	value: Number,
+	currency: String,
 	mod: String
 });
 

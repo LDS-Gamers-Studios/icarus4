@@ -8,7 +8,6 @@ var UserSchema = new Schema({
 	posts: Number,
 	stars: Number,
 	preferences: Number,
-	ghostBucks: Number,
 	house: String,
 	excludeXP: {
 		type: Boolean,

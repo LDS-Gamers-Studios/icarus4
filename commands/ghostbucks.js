@@ -103,7 +103,7 @@ const Module = new Augur.Module()
 						Module.db.bank.getBalance(msg.author.id).then(balance => {
 							if (balance.balance >= game.cost) {
 
-								Module.db.bank.addGhostBucks({
+								Module.db.bank.addCurrency({
 									discordId: msg.author.id,
 									description: `${game.gametitle} (${game.system}) Game Key`,
 									value: -1 * game.cost,
@@ -182,7 +182,7 @@ const Module = new Augur.Module()
 						if (!admin && (bucks < 0)) {
 							msg.reply(`You can't just *take* ${gb}, silly.`).then(u.clean);
 						} else if (admin || (bucks <= account.balance)) {
-							Module.db.bank.addGhostBucks(deposit).then(receipt => {
+							Module.db.bank.addCurrency(deposit).then(receipt => {
 								let member = ldsg.members.get(user.id);
 								Module.db.bank.getBalance(user.id).then(balance => {
 									msg.channel.send(`${gb}${receipt.value} sent to ${member} for ${reason}`).then(u.clean);
@@ -196,7 +196,7 @@ const Module = new Augur.Module()
 										value: -bucks,
 										mod: msg.member.id
 									}
-									Module.db.bank.addGhostBucks(withdrawl).then(receipt => {
+									Module.db.bank.addCurrency(withdrawl).then(receipt => {
 										msg.member.send(`You just sent ${member.displayName} ${gb}${bucks} for ${reason}`);
 									});
 								}
@@ -243,7 +243,7 @@ const Module = new Augur.Module()
               value: (0 - amount),
               mod: msg.author.id
             };
-            let withdraw = await Module.db.bank.addGhostBucks(withdrawl);
+            let withdraw = await Module.db.bank.addCurrency(withdrawl);
             msg.author.send(`You have redeemed ${gb}${amount} for a $${discount.amount} discount code in the LDS Gamers Store! <http://ldsgamers.com/shop>\n\nUse code __**${discount.code}**__ at checkout to apply the discount. This code will be good for ${discount.maxNumberOfUsages} use. (Note that means that if you redeem a code and don't use its full value, the remaining value is lost.)\n\nYou now have ${gb}${balance.balance - amount}.`);
             msg.client.channels.get(modLogs).send(`**${msg.author.username}** just redeemed ${gb}${amount} for a store coupon code. They now have ${gb}${balance.balance - amount}.`);
           } else {

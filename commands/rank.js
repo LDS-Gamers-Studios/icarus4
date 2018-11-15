@@ -114,7 +114,7 @@ const Module = new Augur.Module()
 
       users.forEach(user => {
         let award = Math.round(rate * user.currentXP);
-        Module.db.bank.addGhostBucks({
+        Module.db.bank.addCurrency({
           discordId: user.discordId,
           description: "Chat Rank Reset - " + (new Date()).toDateString(),
           value: award,
