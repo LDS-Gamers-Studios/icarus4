@@ -1,16 +1,19 @@
 const Augur = require("augurbot"),
+  google = require("../config/google_api.json"),
+  GoogleSpreadsheet = require("google-spreadsheet"),
   Mixer = require("beam-client-node"),
   TwitchApi = require("twitch-api"),
   twitchConfig = require("../config/twitch.json"),
   u = require("../utils/utils");
 
-var yt;
+var yt, applicationCount = 0;
 
 const mixer = new Mixer.Client(new Mixer.DefaultRequestRunner()),
   mixerStatus = new Map(),
   twitch = new TwitchApi(twitchConfig),
   twitchStatus = new Map(),
-  ytStatus = new Map();
+  ytStatus = new Map(),
+  doc = new GoogleSpreadsheet(google.sheets.applications);
 
 function checkStreams(bot) {
   // Approved Streamers
@@ -28,6 +31,34 @@ function checkStreams(bot) {
       let channelName = encodeURIComponent(ign.ign);
       processMixer(bot, ign.discordId, channelName);
     });
+  });
+
+  // Check for new Approved Streamers applications
+  doc.useServiceAccountAuth(google.creds, (err) => {
+    if (err) u.alertError(err);
+    else {
+      doc.getRows(1, (err, applications) => {
+        if (applicationCount && applications.length > applicationCount) {
+          let newApplications = applications.slice(applicationCount);
+          newApplications.forEach(app => {
+            let embed = u.embed()
+            .setTitle("New Approved Streamer Application")
+            .setAuthor(app.whatsyourldsgamersdiscordusername)
+            .setColor('#325CBD')
+            .setTimestamp(new Date(app.timestamp))
+            .addField("Discord Username", app.whatsyourldsgamersdiscordusername)
+            .addField("Streaming Games", app.whatgameswouldyoubestreaming, true)
+            .addField("Streaming Platform", app.whatplatformswillyoubestreamingfrommostly, true)
+            .addField("Stream Links", app["inputthepubliclinksurlstoyourmainstreamingplatformstwitchyoutubegamingmixeretc.onelinkperline"], true)
+            .addField("Streaming Service", app["beinganapprovedstreamergrantsnotificationsintheldsgamersdiscordsgeneral.doyouwantthatnotificationtobefromtwitch.tvorbeam.proatthemomentthosearetheonlyserviceswecandonotificationsfor."], true)
+            .addField("Discord Commitment", app["beinganldsgamersapprovedstreamersignifiesyouhaveastrongcommitmenttobeingontheldsgamersdiscordserverhttpldsg.iochatandcommunicatingregularlythroughthere.doyouagreetodothis"], true)
+            .addField("Code Commitment", app.doyouagreetoourstreamingguidelinesandfollowourcodeofconductatalltimes, true);
+            Module.handler.client.channels.get("146289578674749440").send(embed);
+          });
+          applicationCount = applications.length;
+        }
+      });
+    }
   });
 
   // YOUTUBE LIVE TEST
@@ -573,8 +604,21 @@ const Module = new Augur.Module()
     data.twitchStatus.forEach((status, key) => twitchStatus.set(key, status));
     data.ytStatus.forEach((status, key) => ytStatus.set(key, status));
   }
+  if (data && data.applicationCount) applicationCount = data.applicationCount;
+  else {
+    // Check how many Approved Streamer applications there are.
+    doc.useServiceAccountAuth(google.creds, (err) => {
+      if (err) u.alertError(err);
+      else {
+        doc.getRows(1, (err, applications) => {
+          if (err) u.alertError(err);
+          else applicationCount = applications.length;
+        });
+      }
+    });
+  }
 })
-.setUnload(() => ({ mixerStatus, twitchStatus, ytStatus }))
+.setUnload(() => ({ mixerStatus, twitchStatus, ytStatus, applicationCount }))
 .setClockwork(() => {
   let bot = Module.handler.client;
   let interval = 5 * 60 * 1000;
