@@ -203,7 +203,7 @@ const Module = new Augur.Module()
 	}
 })
 .setInit(data => queue = (data ? data : new Map()))
-.setUnload(() => return queue)
+.setUnload(() => queue)
 .addEvent("voiceStateUpdate", (oldMember, newMember) => {
   if ((oldMember.guild.id == Module.config.ldsg) && (oldMember.voiceChannelID != newMember.voiceChannelID)) {
     if (oldMember.voiceChannel && (oldMember.voiceChannel.members.size == 0) && availableNames.includes(oldMember.voiceChannel.name)) {
