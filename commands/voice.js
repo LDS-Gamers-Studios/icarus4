@@ -87,14 +87,26 @@ const Module = new Augur.Module()
   }
 })
 .addCommand({name: "silent",
-  description: "Stop playing sounds",
+  description: "Stop playing songs and sounds",
   hidden: true,
   category: "Voice",
-  permissions: (msg) => (msg.guild && msg.guild.voiceConnection && msg.guild.voiceConnection.dispatcher && msg.member.roles.has(Module.config.roles.mod)),
+  permissions: (msg) => (msg.guild && msg.guild.voiceConnection && msg.guild.voiceConnection.dispatcher && (msg.member.roles.has(Module.config.roles.mod) || msg.member.roles.has(Module.config.roles.management))),
   process: async function(msg) {
     let guildQueue = queue.get(msg.guild.id).queue;
     guildQueue = [];
     msg.guild.voiceConnection.dispatcher.end();
+  }
+})
+.addCommand({name: "skip",
+  description: "Skip the current song",
+  hidden: true, aliases: ["next"],
+  category: "Voice",
+  permissions: (msg) => (msg.guild && msg.guild.voiceConnection && msg.guild.voiceConnection.dispatcher && (msg.member.roles.has(Module.config.roles.mod) || msg.member.roles.has(Module.config.roles.management))),
+  process: async function(msg) {
+    try {
+      msg.guild.voiceConnection.dispatcher.end();
+      msg.react("👌");
+    } catch(e) { u.alertError(e, msg); }
   }
 })
 .addCommand({name: "song",
