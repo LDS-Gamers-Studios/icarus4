@@ -1,6 +1,6 @@
 ## Icarus - Custom Discord bot for the [LDSG Community](https://ldsgamers.com)
 
-Icarus is built on the [Augur framework](https://bitbucket.org/Gaiwecoor/augurbot).
+Icarus is built in Node.js for the LDS Gamers community. It runs on the [Augur framework](https://bitbucket.org/Gaiwecoor/augurbot), utilizing the Discord.js library.
 
 Pull requests from the community are welcome.
 
@@ -51,7 +51,7 @@ Properties of the Handler class:
 
 * `aliases`: Collection of commands, keyed by alias.
 
-* `bot`: Instance of the Discord Client.
+* `client`: Instance of the Discord Client.
 
 * `clockwork`: Collection of intervals, keyed by command file.
 
