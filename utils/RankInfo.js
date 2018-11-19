@@ -6,7 +6,7 @@ const Rank = {
 		"269137380751966208", // discord rpg
 		"153309871297658880", // clip submissions
 		"203518149809799168", // bot lobby
-		"209046676781006849", // bot testing
+		"363020585988653057", // LDSG Team
 		"405405857099284490", // star board
 		"420653044326203402", // youth-antics
 		"356657507197779968", // outer-darkness
