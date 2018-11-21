@@ -41,7 +41,8 @@ function validate(message) {
   let stars = (message.reactions.has("⭐") ? message.reactions.get("⭐").users.size : 0);
   let superstars = (message.reactions.has("🌟") ? message.reactions.get("🌟").users.size : 0);
   let team = message.guild.roles.get(Module.config.roles.mod);
-  let valid = (superstars ? message.reactions.get("🌟").users.reduce((v, u) => v || team.members.has(u.id), false) : 0);
+  let management = message.guild.roles.get(Module.config.roles.management);
+  let valid = (superstars ? message.reactions.get("🌟").users.reduce((v, u) => v || team.members.has(u.id) || management.members.has(u.id), false) : 0);
   return {stars, superstars, valid};
 };
 
