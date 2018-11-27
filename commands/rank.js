@@ -87,7 +87,7 @@ const Module = new Augur.Module()
         .setURL("http://my.ldsgamers.com/leaderboard")
         .setFooter("http://my.ldsgamers.com/leaderboard");
       }
-      u.botSpam(msg).send(response);
+      u.send(response);
     } catch(e) {
       Module.handler.errorHandler(e, msg);
     }
