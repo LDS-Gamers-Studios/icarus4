@@ -39,7 +39,7 @@ async function reloadList(msg, game) {
       let embed = currentPlayers(msg, game);
       await msg.clearReactions();
       msg = await msg.edit(embed);
-      reload(msg, game);
+      reloadList(msg, game);
     } else msg.delete();
   } catch(e) { u.alertError(e); }
 }
