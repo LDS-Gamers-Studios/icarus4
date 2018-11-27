@@ -14,7 +14,7 @@ function currentPlayers(msg, game) {
   .setTitle(`${msg.guild.name} members currently playing ${game}`)
   .setTimestamp();
 
-  let players = guild.members
+  let players = msg.guild.members
   .filter(u => (u.presence.game && (u.presence.game.name.toLowerCase().startsWith(game.toLowerCase()))))
   .sort((a, b) => a.displayName.localeCompare(b.displayName))
   .map(user => `• ${u.escapeText(user.displayName)}`);
