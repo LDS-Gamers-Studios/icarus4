@@ -8,7 +8,7 @@ const Augur = require("augurbot"),
 var update = false,
   lfgChannel = null;
 
-function currentPlayers(game) {
+function currentPlayers(msg, game) {
   // List people playing the game
   let embed = u.embed()
   .setTitle(`${msg.guild.name} members currently playing ${suffix}`)
@@ -35,7 +35,7 @@ async function reloadList(msg, game) {
   );
 
   if (reactions.size > 0) {
-    let embed = currentPlayers(game);
+    let embed = currentPlayers(msg, game);
     await msg.clearReactions();
     await msg.edit(embed);
     reload(msg, game);
@@ -207,7 +207,7 @@ const Module = new Augur.Module()
       let guild = await msg.guild.fetchMembers();
 
       if (suffix) {
-        let embed = currentPlayers(suffix);
+        let embed = currentPlayers(msg, suffix);
         let m = msg.channel.send(embed);
         reloadList(m, suffix);
       } else {
