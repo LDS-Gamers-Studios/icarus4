@@ -28,18 +28,20 @@ function currentPlayers(msg, game) {
 }
 
 async function reloadList(msg, game) {
-  await msg.react("🔁");
-  let reactions = await msg.awaitReactions(
-    (reaction, user) => ((reaction.emoji.name == "🔁") && !user.bot),
-    {max: 1, time: 600000}
-  );
+  try {
+    await msg.react("🔁");
+    let reactions = await msg.awaitReactions(
+      (reaction, user) => ((reaction.emoji.name == "🔁") && !user.bot),
+      {max: 1, time: 600000}
+    );
 
-  if (reactions.size > 0) {
-    let embed = currentPlayers(msg, game);
-    await msg.clearReactions();
-    await msg.edit(embed);
-    reload(msg, game);
-  } else msg.delete();
+    if (reactions.size > 0) {
+      let embed = currentPlayers(msg, game);
+      await msg.clearReactions();
+      msg = await msg.edit(embed);
+      reload(msg, game);
+    } else msg.delete();
+  } catch(e) { u.alertError(e); }
 }
 
 function removePlayer(player, games) {
@@ -208,7 +210,7 @@ const Module = new Augur.Module()
 
       if (suffix) {
         let embed = currentPlayers(msg, suffix);
-        let m = msg.channel.send(embed);
+        let m = await msg.channel.send(embed);
         reloadList(m, suffix);
       } else {
         // List *all* games played
