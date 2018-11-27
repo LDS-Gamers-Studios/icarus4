@@ -11,7 +11,7 @@ var update = false,
 function currentPlayers(msg, game) {
   // List people playing the game
   let embed = u.embed()
-  .setTitle(`${msg.guild.name} members currently playing ${suffix}`)
+  .setTitle(`${msg.guild.name} members currently playing ${game}`)
   .setTimestamp();
 
   let players = guild.members
@@ -22,7 +22,7 @@ function currentPlayers(msg, game) {
   if (players.length > 0)
     embed.setDescription(players.join("\n"));
   else
-    embed.setDescription(`I couldn't find any members playing ${suffix}.`);
+    embed.setDescription(`I couldn't find any members playing ${game}.`);
 
   return embed;
 }
