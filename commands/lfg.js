@@ -8,6 +8,40 @@ const Augur = require("augurbot"),
 var update = false,
   lfgChannel = null;
 
+function currentPlayers(game) {
+  // List people playing the game
+  let embed = u.embed()
+  .setTitle(`${msg.guild.name} members currently playing ${suffix}`)
+  .setTimestamp();
+
+  let players = guild.members
+  .filter(u => (u.presence.game && (u.presence.game.name.toLowerCase().startsWith(game.toLowerCase()))))
+  .sort((a, b) => a.displayName.localeCompare(b.displayName))
+  .map(user => `• ${u.escapeText(user.displayName)}`);
+
+  if (players.length > 0)
+    embed.setDescription(players.join("\n"));
+  else
+    embed.setDescription(`I couldn't find any members playing ${suffix}.`);
+
+  return embed;
+}
+
+async function reloadList(msg, game) {
+  await msg.react("🔁");
+  let reactions = await msg.awaitReactions(
+    (reaction, user) => ((reaction.emoji.name == "🔁") && !user.bot),
+    {max: 1, time: 600000}
+  );
+
+  if (reactions.size > 0) {
+    let embed = currentPlayers(game);
+    await msg.clearReactions();
+    await msg.edit(embed);
+    reload(msg, game);
+  } else msg.delete();
+}
+
 function removePlayer(player, games) {
   if (games.length > 0) {
     games.forEach(game => {
@@ -166,26 +200,16 @@ const Module = new Augur.Module()
 	category: "LFG",
 	process: async function(msg, suffix) {
     try {
+      u.clean(msg);
+
       if (!suffix && gameDefaults[msg.channel.id]) suffix = gameDefaults[msg.channel.id];
 
       let guild = await msg.guild.fetchMembers();
 
       if (suffix) {
-        // List people playing the game
-        let players = guild.members
-        .filter(u => (u.presence.game && (u.presence.game.name.toLowerCase().startsWith(suffix.toLowerCase()))))
-        .sort((a, b) => a.displayName.localeCompare(b.displayName))
-        .map(user => `• ${u.escapeText(user.displayName)}`);
-
-        if (players.length > 0) {
-          let embed = u.embed()
-          .setTitle(`${msg.guild.name} members currently playing ${suffix}`)
-          .setDescription(players.join("\n"))
-          .setTimestamp();
-
-          u.botSpam(msg).send(embed);
-        } else
-        u.botSpam(msg).send(`I couldn't find any members playing ${suffix}.`);
+        let embed = currentPlayers(suffix);
+        let m = msg.channel.send(embed);
+        reloadList(m, suffix);
       } else {
         // List *all* games played
         let gameList = Array.from(
