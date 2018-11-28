@@ -41,7 +41,7 @@ const Module = new Augur.Module()
         }
         if (channel) {
           Module.db.server.saveSetting(msg.guild, 'botspam', channel.id);
-          msg.react("👌);
+          msg.react("👌");
         } else {
           msg.reply("you need to tell me which channel to use.")
           .then(u.clean).catch(console.error);
