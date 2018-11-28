@@ -30,7 +30,7 @@ const Module = new Augur.Module()
       } else if ((value == "none") || (value == "false")) {
         // REMOVE BOTSPAM
         Module.db.server.updateSetting(msg.guild, 'botspam', null);
-        msg.react("👌);
+        msg.react("👌");
       } else {
         // SAVE BY CHANNEL NAME
         let channel = null;
