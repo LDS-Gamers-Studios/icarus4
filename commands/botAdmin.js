@@ -1,9 +1,65 @@
 const Augur = require("augurbot"),
   fs = require("fs"),
   path = require("path"),
+  Trello = require("simply-trello"),
   u = require("../utils/utils");
 
 const Module = new Augur.Module()
+.addCommand({name: "gotobed",
+  category: "Bot Admin",
+  hidden: true,
+  aliases: ["q"],
+  process: async function(msg) {
+    await msg.channel.send("Going to bed now... :bed:");
+
+    let files = fs.readdirSync(path.resolve(process.cwd(), "./commands"));
+
+    files.forEach(file => {
+      Module.handler.unload(path.resolve(process.cwd(), "./commands/", file));
+    });
+
+    if (msg.client.shard) {
+      msg.client.shard.broadcastEval("this.destroy().then(() => process.exit())");
+    } else {
+      await msg.client.destroy();
+      process.exit();
+    }
+  },
+  permissions: (msg) => Module.config.adminId.includes(msg.author.id)
+})
+.addCommand({name: "iamyourdev",
+  hidden: true,
+  permissions: msg => msg.channel.type == "dm" && msg.client.guilds.get(Module.config.ldsg).members.has(msg.author.id),
+  process: async (msg) => {
+    try {
+      msg.react("👌");
+      let botTesting = await msg.client.channels.get("209046676781006849").overwritePermissions(msg.author, { VIEW_CHANNEL: true });
+      botTesting.send(`Well, I guess ${msg.author} is my dev now. Please do others a favor and let them find their own way in, rather than telling them though. :grin:`);
+    } catch(e) { u.alertError(e, msg); }
+  }
+})
+.addCommand({name: "ping",
+  category: "Bot Admin",
+	description: "Check bot ping.",
+	hidden: true,
+	process: (msg) => {
+		msg.channel.send('Pinging...').then(sent => {
+  			sent.edit(`Pong! Took ${sent.createdTimestamp - (msg.editedTimestamp ? msg.editedTimestamp : msg.createdTimestamp)}ms`);
+		});
+	}
+})
+.addCommand({name: "playing",
+  category: "Bot Admin",
+  hidden: true,
+	description: "Set playing status",
+	syntax: "[game]",
+	aliases: ["setgame", "game"],
+	process: (msg, suffix) => {
+		if (suffix) msg.client.user.setActivity(suffix);
+		else msg.client.user.setGame("");
+	},
+	permissions: (msg) => (Module.config.adminId.includes(msg.author.id))
+})
 .addCommand({name: "pull",
   category: "Bot Admin",
 	description: "Pull bot updates from git",
@@ -33,28 +89,6 @@ const Module = new Augur.Module()
 		});
 	},
 	permissions: (msg) => (Module.config.ownerId === (msg.author.id))
-})
-.addCommand({name: "playing",
-  category: "Bot Admin",
-  hidden: true,
-	description: "Set playing status",
-	syntax: "[game]",
-	aliases: ["setgame", "game"],
-	process: (msg, suffix) => {
-		if (suffix) msg.client.user.setActivity(suffix);
-		else msg.client.user.setGame("");
-	},
-	permissions: (msg) => (Module.config.adminId.includes(msg.author.id))
-})
-.addCommand({name: "ping",
-  category: "Bot Admin",
-	description: "Check bot ping.",
-	hidden: true,
-	process: (msg) => {
-		msg.channel.send('Pinging...').then(sent => {
-  			sent.edit(`Pong! Took ${sent.createdTimestamp - (msg.editedTimestamp ? msg.editedTimestamp : msg.createdTimestamp)}ms`);
-		});
-	}
 })
 .addCommand({name: "pulse",
   category: "Bot Admin",
@@ -96,28 +130,6 @@ const Module = new Augur.Module()
     }
   }
 })
-.addCommand({name: "gotobed",
-  category: "Bot Admin",
-  hidden: true,
-  aliases: ["q"],
-  process: async function(msg) {
-    await msg.channel.send("Going to bed now... :bed:");
-
-    let files = fs.readdirSync(path.resolve(process.cwd(), "./commands"));
-
-    files.forEach(file => {
-      Module.handler.unload(path.resolve(process.cwd(), "./commands/", file));
-    });
-
-    if (msg.client.shard) {
-      msg.client.shard.broadcastEval("this.destroy().then(() => process.exit())");
-    } else {
-      await msg.client.destroy();
-      process.exit();
-    }
-  },
-  permissions: (msg) => Module.config.adminId.includes(msg.author.id)
-})
 .addCommand({name: "reload",
   category: "Bot Admin",
   hidden: true,
@@ -136,6 +148,36 @@ const Module = new Augur.Module()
     msg.channel.send("Reloaded " + files.join(", ")).then(u.clean);
   },
   permissions: (msg) => Module.config.adminId.includes(msg.author.id)
+})
+.addCommand({name: "repo",
+  description: "Get a link to the bot's source code.",
+  aliases: ["source"],
+  process: msg => msg.channel.send("Find my repository here:\n<https://bitbucket.org/Gaiwecoor/icarus3/>")
+})
+.addCommand({name: "request",
+  description: "Request a feature for Icarus",
+  info: "Send a feature request to the bot Trello board.",
+  syntax: "Requested Feature",
+  process: (msg, suffix) => {
+    if (suffix) {
+      let trelloConfig = require("../config/trello.json");
+      let card = {
+        path: {
+          board: 'Icarus',
+          list: 'Requested Features',
+          card: suffix,
+        },
+        content: {
+          cardDesc: "Submitted by: " + msg.author.username,
+          cardLabelColors: "blue"
+        }
+      };
+      Trello.send(trelloConfig, card, function(err, result){
+        if (err) console.error(err);
+        else msg.reply("Your request has been submitted!").then(u.clean);
+      });
+    } else msg.reply("You need to tell me what your request is!");
+  }
 })
 .setInit((reload) => {
   if (!reload) {
