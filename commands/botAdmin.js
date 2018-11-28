@@ -8,9 +8,9 @@ const Module = new Augur.Module()
 .addCommand({name: "gotobed",
   category: "Bot Admin",
   hidden: true,
-  aliases: ["q"],
+  aliases: ["q", "restart"],
   process: async function(msg) {
-    await msg.channel.send("Going to bed now... :bed:");
+    await msg.react("🛏");
 
     let files = fs.readdirSync(path.resolve(process.cwd(), "./commands"));
 
@@ -34,7 +34,7 @@ const Module = new Augur.Module()
     try {
       msg.react("👌");
       let botTesting = await msg.client.channels.get("209046676781006849").overwritePermissions(msg.author, { VIEW_CHANNEL: true });
-      botTesting.send(`Well, I guess ${msg.author} is my dev now. Please do others a favor and let them find their own way in, rather than telling them though. :grin:`);
+      botTesting.send(`Well, I guess ${msg.author} is my dev now. Please do others a favor and let them find their own way in, rather than telling them. :grin:`);
     } catch(e) { u.alertError(e, msg); }
   }
 })
@@ -57,6 +57,7 @@ const Module = new Augur.Module()
 	process: (msg, suffix) => {
 		if (suffix) msg.client.user.setActivity(suffix);
 		else msg.client.user.setGame("");
+    msg.react("👌");
 	},
 	permissions: (msg) => (Module.config.adminId.includes(msg.author.id))
 })
@@ -145,7 +146,7 @@ const Module = new Augur.Module()
       Module.handler.reload(path.resolve(process.cwd(), "./commands/", file));
     });
 
-    msg.channel.send("Reloaded " + files.join(", ")).then(u.clean);
+    msg.reply("👌");
   },
   permissions: (msg) => Module.config.adminId.includes(msg.author.id)
 })
@@ -174,7 +175,7 @@ const Module = new Augur.Module()
       };
       Trello.send(trelloConfig, card, function(err, result){
         if (err) console.error(err);
-        else msg.reply("Your request has been submitted!").then(u.clean);
+        else msg.react("👌");
       });
     } else msg.reply("You need to tell me what your request is!");
   }

@@ -55,6 +55,7 @@ const Module = new Augur.Module()
 				if (err) console.error("ERROR UPDATING CHAMPIONS:", err);
 				else console.log("Champions update");
 			});
+      msg.react("👌");
 			msg.guild.channels.get("121752198731268099").send(`Congratulations to our new tournament champions, ${Array.from(msg.mentions.members.values()).join(", ")}!\n\nTheir performance landed them the champion slot in the ${reason}, and they'll hold on to the LDSG Tourney Champion role for a few weeks.`);
 		} else
       msg.reply("you need to tell me who to give the Tourney Champion role and the tournament name!").then(u.clean);
@@ -77,21 +78,15 @@ const Module = new Augur.Module()
 				msg.channel.bulkDelete(messages, true);
 			});
 
-			msg.channel.send("Removed all Tournament Participants").then(u.clean);
+			msg.react("👌");
 		} else if (msg.mentions.members.size == 0) {
 			 msg.reply("you need to tell me who to add or remove.").then(u.clean);
 		} else if (suffix.toLowerCase().startsWith("add")) {
-			msg.mentions.members.forEach(member => {
-				member.addRole(role).then(function(m) {
-					msg.channel.send("Added the role to " + m.displayName).then(u.clean);
-				});
-			});
+			msg.mentions.members.forEach(member => member.addRole(role));
+      msg.react("👌");
 		} else if (suffix.toLowerCase().startsWith("remove")) {
-			msg.mentions.members.forEach(member => {
-				member.removeRole(role).then(function(m) {
-					msg.channel.send("Removed the role from " + m.displayName).then(u.clean);
-				});
-			});
+			msg.mentions.members.forEach(member => member.removeRole(role));
+      msg.react("👌");
 		} else {
 			msg.reply("you need to tell me whether to add or remove the user to the channel.").then(u.clean);
 		}

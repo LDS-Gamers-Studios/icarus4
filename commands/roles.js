@@ -32,11 +32,11 @@ const aliases = {
 };
 
 const Module = new Augur.Module()
-.addCommand({name: "addchannel",
-  description: "Add a channel",
+.addCommand({name: "addrole",
+  description: "Add a role",
   syntax: Object.keys(roles).join(" | "),
-  aliases: ["addrole", "add"],
-  info: "Gives you one of the following roles/channels:\n```md\n* " + Object.keys(roles).join("\n* ") + "```",
+  aliases: ["addchannel", "add"],
+  info: "Gives you one of the following roles:\n```md\n* " + Object.keys(roles).join("\n* ") + "```",
   category: "Members",
   process: (msg, suffix) => {
     if (aliases[suffix.toLowerCase()]) suffix = aliases[suffix.toLowerCase()];
@@ -47,8 +47,8 @@ const Module = new Augur.Module()
 
       ldsg.fetchMember(msg.author.id).then(member => {
         if (member) member.addRole(role).then((member) => {
-          msg.reply(`Added the ${role.name} role! :thumbsup:`).then(u.clean);
-          modLogs.send(`**${member.displayName}** added the ${role.name} role.`);
+          msg.react("👌");
+          modLogs.send(`ℹ️ **${member.displayName}** added the ${role.name} role.`);
         });
       });
     } else {
@@ -71,7 +71,7 @@ const Module = new Augur.Module()
         msg.reply("I couldn't see a pingable role for this channel applied to you.");
       } else {
         await msg.member.removeRole(role);
-        msg.reply(`I removed the \`@${role.name}\` role!`).then(u.clean);
+        msg.react("👌");
       }
     } catch(e) {
       Module.handler.errorHandler(e, msg);
@@ -95,17 +95,17 @@ const Module = new Augur.Module()
         });
       }
       await msg.member.addRole(role);
-      msg.reply(`I gave you the pingable \`@${role.name}\` role!`).then(u.clean);
+      msg.react("👌");
     } catch(e) {
       Module.handler.errorHandler(e, msg);
     }
   }
 })
-.addCommand({name: "removechannel",
+.addCommand({name: "removerole",
   description: "Remove a channel",
   syntax: Object.keys(roles).join(" | "),
-  aliases: ["removerole", "remove"],
-  info: "Removes one of the following roles/channels:\n```md\n* " + Object.keys(roles).join("\n* ") + "```",
+  aliases: ["removechannel", "remove"],
+  info: "Removes one of the following roles:\n```md\n* " + Object.keys(roles).join("\n* ") + "```",
   category: "Members",
   process: (msg, suffix) => {
     if (aliases[suffix.toLowerCase()]) suffix = aliases[suffix.toLowerCase()];
@@ -116,8 +116,8 @@ const Module = new Augur.Module()
 
       ldsg.fetchMember(msg.author).then(member => {
         if (member) member.removeRole(role).then((member) => {
-          msg.reply(`Removed the ${role.name} role! :thumbsup:`).then(u.clean);
-          modLogs.send(`**${member.displayName}** removed the ${role.name} role.`);
+          msg.react("👌");
+          modLogs.send(`ℹ️ **${member.displayName}** removed the ${role.name} role.`);
         });
       });
     } else {
@@ -128,6 +128,7 @@ const Module = new Augur.Module()
 .addCommand({name: "role",
   description: "See who has a role.",
   syntax: "<role name>",
+  aliases: ["hasrole"],
   category: "Members",
   process: (msg, suffix) => {
     if (suffix) {

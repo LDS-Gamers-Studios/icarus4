@@ -26,13 +26,11 @@ const Module = new Augur.Module()
       if (msg.mentions.channels.size > 0) {
         // SAVE BY MENTION
         Module.db.server.saveSetting(msg.guild, 'botspam', msg.mentions.channels.first().id);
-        msg.channel.send("BotSpam settings saved! :thumbsup:")
-        .then(u.clean).catch(console.error);
+        msg.react("👌");
       } else if ((value == "none") || (value == "false")) {
         // REMOVE BOTSPAM
         Module.db.server.updateSetting(msg.guild, 'botspam', null);
-        msg.channel.send("BotSpam settings saved! :thumbsup:")
-        .then(u.clean).catch(console.error);
+        msg.react("👌);
       } else {
         // SAVE BY CHANNEL NAME
         let channel = null;
@@ -43,8 +41,7 @@ const Module = new Augur.Module()
         }
         if (channel) {
           Module.db.server.saveSetting(msg.guild, 'botspam', channel.id);
-          msg.channel.send("BotSpam settings saved! :thumbsup:")
-          .then(u.clean).catch(console.error);
+          msg.react("👌);
         } else {
           msg.reply("you need to tell me which channel to use.")
           .then(u.clean).catch(console.error);
@@ -57,15 +54,13 @@ const Module = new Augur.Module()
         msg.reply("you cannot set the command prefix to mention any user but me.").then(u.clean);
       } else {
         Module.db.server.saveSetting(msg.guild, 'prefix', value);
-        msg.channel.send("Prefix settings saved! :thumbsup:")
-        .then(u.clean).catch(console.error);
+        msg.react("👌");
       }
     } else if ((setting == 'language') || (setting == 'locale')) {
       let locales = ["EN"];
       if (locales.includes(value.toUpperCase())) {
         Module.db.server.saveSetting(msg.guild, "language", value.toUpperCase());
-        msg.channel.send("Language settings saved! :thumbsup:")
-        .then(u.clean).catch(console.error);
+        msg.react("👌");
       } else {
         msg.reply("Available languages include: " + locales.join(", "))
         .then(u.clean).catch(console.error);

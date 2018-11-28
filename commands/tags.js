@@ -60,13 +60,13 @@ const Module = new Augur.Module()
 
           if (!tags.has(cmd.serverId)) tags.set(cmd.serverId, new Map());
           tags.get(cmd.serverId).set(cmd.tag, cmd);
-          msg.channel.send(`I added the \`${u.prefix(msg)}${cmd.tag}\` command to your server!`).then(u.clean);
+          msg.react("👌");
         } catch(e) { u.alertError(e, msg); }
       } else if (tags.has(msg.guild.id) && tags.get(msg.guild.id).has(newTag)) {
         try {
           let cmd = await Module.db.tags.removeTag(msg.guild, newTag);
           tags.get(cmd.serverId).delete(cmd.tag);
-          msg.channel.send(`I removed the custom \`${u.prefix(msg)}${cmd.tag}\` command.`);
+          msg.react("👌");
         } catch(e) { u.alertError(e, msg); }
       } else
         msg.reply(`I couldn't find the command \`${u.prefix(msg)}${newTag}\` to alter.`);

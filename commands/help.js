@@ -7,6 +7,7 @@ const Module = new Augur.Module()
   syntax: "[command name]",
   aliases: ["commands"],
   process: (msg, suffix) => {
+    msg.react("👌");
     u.clean(msg);
 
     let prefix = u.prefix(msg);

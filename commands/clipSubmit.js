@@ -38,7 +38,7 @@ function processClips(msg1, msg2 = null) {
 					if (err) {
 						console.error(err);
 					} else {
-						msg.reply(`<${link}> has been submitted!`).then(u.clean);
+						msg.react("👌");
 					}
 				});
 			}

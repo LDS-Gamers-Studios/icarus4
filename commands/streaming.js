@@ -293,12 +293,13 @@ const Module = new Augur.Module()
     let bot = msg.client;
 
     if (u.userMentions(msg)) {
+      msg.reply("👌");
       u.userMentions(msg).forEach(user => {
         let member = bot.guilds.get(Module.config.ldsg).members.get(user.id);
         member.addRole("267038468474011650").then((streamer) => {
           streamer.send("Congratulations! You've been added to the Approved Streamers list in LDSG!\n\nWhile streaming, please remember the Streaming Guidelines ( https://goo.gl/Pm3mwS ) and LDSG Code of Conduct ( http://ldsgamers.com/code-of-conduct ). Also, please be aware that LDSG may make changes to the Approved Streamers list from time to time at its discretion.");
           msg.reply("I applied the role to " + streamer.displayName + "!").then(u.clean);
-          bot.channels.get("506575671242260490").send((msg.member ? msg.member.displayName : msg.author.username) + " has made " + streamer.displayName + " an Approved Streamer.");
+          bot.channels.get("506575671242260490").send(`ℹ️ ${(msg.member ? msg.member.displayName : msg.author.username)} has made ${streamer.displayName} an Approved Streamer.`);
         });
       });
     } else msg.reply("you need to tell me who to approve!").then(u.clean);
@@ -352,14 +353,14 @@ const Module = new Augur.Module()
       msg.delete();
       msg.reply("ok ... I guess. :cry:").then(u.clean);
       msg.member.removeRole(raider);
-      bot.channels.get("506575671242260490").send(msg.member.displayName + " is no longer a Twitch Raider. :cry:");
+      bot.channels.get("506575671242260490").send(`ℹ️ ${msg.member.displayName} is no longer a Twitch Raider. :cry:`);
     } else {
       let ldsg = bot.emojis.get("447251297033256962"); // Hex logo
 
       msg.member.addRole(raider);
       msg.reply("thanks for being a Twitch Raider! " + ldsg);
 
-      bot.channels.get("506575671242260490").send(msg.member.displayName + " has become a Twitch Raider!");
+      bot.channels.get("506575671242260490").send(`ℹ️ ${msg.member.displayName} has become a Twitch Raider!`);
     }
   },
   permissions: (msg) => (msg.guild && (msg.guild.id == "96335850576556032"))
@@ -535,12 +536,13 @@ const Module = new Augur.Module()
   process: (msg) => {
     u.clean(msg);
     if (u.userMentions(msg)) {
+      msg.react("")
       u.userMentions(msg).forEach(user => {
         let member = msg.guild.members.get(user.id);
         member.removeRole("267038468474011650").then((streamer) => {
           streamer.send("You've been removed from the Approved Streamers list in LDSG.");
-          msg.reply("I removed the role from " + streamer.displayName).then(u.clean);
-          bot.channels.get("506575671242260490").send((msg.member ? msg.member.displayName : msg.author.username) + " has removed " + streamer.displayName + " from Approved Streamers.");
+          msg.react("👌");
+          bot.channels.get("506575671242260490").send(`ℹ️ ${(msg.member ? msg.member.displayName : msg.author.username)} has removed ${streamer.displayName} from Approved Streamers.`);
         });
       });
     } else {

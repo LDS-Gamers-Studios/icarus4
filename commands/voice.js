@@ -78,9 +78,7 @@ const Module = new Augur.Module()
   			channelMods.push(channel.overwritePermissions(user, {CONNECT: true}));
   		});
 
-  		Promise.all(channelMods).then(() => {
-  			msg.channel.send(`${channel.name} locked to all users except ${users.filter(u => u.id !== msg.client.user.id).map(u => u.displayName).join(", ")}`);
-  		});
+  		Promise.all(channelMods).then(() => msg.react("🔒"));
   	} else {
   		msg.reply("you need to be in a community voice channel to use this command!").then(u.clean);
   	}
@@ -95,6 +93,7 @@ const Module = new Augur.Module()
     let guildQueue = queue.get(msg.guild.id).queue;
     guildQueue = [];
     msg.guild.voiceConnection.dispatcher.end();
+    msg.react("🔇");
   }
 })
 .addCommand({name: "skip",
@@ -105,7 +104,7 @@ const Module = new Augur.Module()
   process: async function(msg) {
     try {
       msg.guild.voiceConnection.dispatcher.end();
-      msg.react("👌");
+      msg.react("⏩");
     } catch(e) { u.alertError(e, msg); }
   }
 })
@@ -194,9 +193,7 @@ const Module = new Augur.Module()
 				if ((permission.id != muted) && (permission.id != msg.guild.id)) channelMods.push(permission.delete());
 			});
 
-			Promise.all(channelMods).then(() => {
-				msg.channel.send(`${channel.name} is now open to all users.`);
-			});
+			Promise.all(channelMods).then(() => msg.react("🔓"));
 		} else {
 			msg.reply("you need to be in a community voice channel to use this command!").then(u.clean);
 		}
