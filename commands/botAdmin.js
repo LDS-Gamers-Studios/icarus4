@@ -146,7 +146,7 @@ const Module = new Augur.Module()
       Module.handler.reload(path.resolve(process.cwd(), "./commands/", file));
     });
 
-    msg.reply("👌");
+    msg.react("👌");
   },
   permissions: (msg) => Module.config.adminId.includes(msg.author.id)
 })

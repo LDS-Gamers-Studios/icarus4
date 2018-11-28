@@ -293,7 +293,7 @@ const Module = new Augur.Module()
     let bot = msg.client;
 
     if (u.userMentions(msg)) {
-      msg.reply("👌");
+      msg.react("👌");
       u.userMentions(msg).forEach(user => {
         let member = bot.guilds.get(Module.config.ldsg).members.get(user.id);
         member.addRole("267038468474011650").then((streamer) => {
