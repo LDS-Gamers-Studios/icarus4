@@ -100,7 +100,7 @@ const Module = new Augur.Module()
     ];
     animate(msg, frames);
   }
-});
+})
 .setInit(async () => {
   try {
     let bot = Module.handler.client;
