@@ -108,7 +108,7 @@ const Module = new Augur.Module()
     for (let i = 0; i <= animations.length; i++) {
       let animation = animations[0];
       if (animation.channelId && bot.channels.has(animation.channelId)) {
-        let msg = await bot.channels.get(animation.channelId).fetchMessage(animation.spoilerId);
+        let msg = await bot.channels.get(animation.channelId).fetchMessage(animation.animationId);
         reload(msg);
       }
     }
