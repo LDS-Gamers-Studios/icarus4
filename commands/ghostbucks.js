@@ -270,8 +270,8 @@ const Module = new Augur.Module()
 })
 .setUnload(() => steamGameList)
 .addEvent("guildMemberUpdate", async (oldMember, newMember) => {
-  if ((newMember.guild.id == Module.config.ldsg) && (oldMember.roles.size != newMember.roles.size)) {
-    try {
+  try {
+    if ((newMember.guild.id == Module.config.ldsg) && (oldMember.roles.size != newMember.roles.size)) {
       let newLevel = discountLevel(newMember);
       if (discountLevel(oldMember).rate != newLevel.rate) {
         // Fetch user
@@ -307,8 +307,8 @@ const Module = new Augur.Module()
           }
         }
       }
-    } catch(e) { u.alertError(e); }
-  }
+    }
+  } catch(e) { u.alertError(e); }
 });
 
 module.exports = Module;

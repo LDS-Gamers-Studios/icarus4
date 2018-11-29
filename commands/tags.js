@@ -42,14 +42,14 @@ const Module = new Augur.Module()
   description: "Adds a custom command for your server.",
   info: "Adds a custom command for your server. If the command has the same name as one of the default commands, the custom command will override the default functionality.",
   process: async (msg, suffix) => {
-    if (suffix) {
-      let args = suffix.split(" ");
-      let newTag = args.shift().toLowerCase();
-      let response = args.join(" ");
-      let attachment = ((msg.attachments && (msg.attachments.size > 0)) ? msg.attachments.first() : null);
+    try {
+      if (suffix) {
+        let args = suffix.split(" ");
+        let newTag = args.shift().toLowerCase();
+        let response = args.join(" ");
+        let attachment = ((msg.attachments && (msg.attachments.size > 0)) ? msg.attachments.first() : null);
 
-      if (response || attachment) {
-        try {
+        if (response || attachment) {
           let cmd = await Module.db.tags.addTag({
             serverId: msg.guild.id,
             tag: newTag,
@@ -61,18 +61,15 @@ const Module = new Augur.Module()
           if (!tags.has(cmd.serverId)) tags.set(cmd.serverId, new Map());
           tags.get(cmd.serverId).set(cmd.tag, cmd);
           msg.react("👌");
-        } catch(e) { u.alertError(e, msg); }
-      } else if (tags.has(msg.guild.id) && tags.get(msg.guild.id).has(newTag)) {
-        try {
+        } else if (tags.has(msg.guild.id) && tags.get(msg.guild.id).has(newTag)) {
           let cmd = await Module.db.tags.removeTag(msg.guild, newTag);
           tags.get(cmd.serverId).delete(cmd.tag);
           msg.react("👌");
-        } catch(e) { u.alertError(e, msg); }
+        } else
+          msg.reply(`I couldn't find the command \`${u.prefix(msg)}${newTag}\` to alter.`);
       } else
-        msg.reply(`I couldn't find the command \`${u.prefix(msg)}${newTag}\` to alter.`);
-    } else {
-      msg.reply("you need to tell me the command name and the intended command response.").then(u.clean);
-    }
+        msg.reply("you need to tell me the command name and the intended command response.").then(u.clean);
+    } catch(e) { u.alertError(e, msg); }
   },
   permissions: (msg) => msg.guild && (msg.member.permissions.has("MANAGE_GUILD") || msg.member.permissions.has("ADMINISTRATOR") || Module.config.adminId.includes(msg.author.id))
 })

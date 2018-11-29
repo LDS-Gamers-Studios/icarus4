@@ -8,32 +8,34 @@ const Module = new Augur.Module()
 	aliases: ["tournament", "tournaments", "tourneys", "tourney", "challonge", "brackets"],
   category: "Tournaments",
 	process: async (msg) => {
-    let challonge = require("../utils/Challonge").init(Module.config.api.challonge);
-		let embed = u.embed();
+    try {
+      let challonge = require("../utils/Challonge").init(Module.config.api.challonge);
+      let embed = u.embed();
 
-		embed.setDescription("Upcoming and Current LDSG Tournaments");
+      embed.setDescription("Upcoming and Current LDSG Tournaments");
 
-    let responses = await Promise.all([
-      challonge.getTournamentsIndex({state: "pending", subdomain: "ldsg"}),
-      challonge.getTournamentsIndex({state: "in_progress", subdomain: "ldsg"})
-    ]);
+      let responses = await Promise.all([
+        challonge.getTournamentsIndex({state: "pending", subdomain: "ldsg"}),
+        challonge.getTournamentsIndex({state: "in_progress", subdomain: "ldsg"})
+      ]);
 
-		let now = new Date();
+      let now = new Date();
 
-    let tournaments = responses.reduce((full, response) => full.concat(response), []);
+      let tournaments = responses.reduce((full, response) => full.concat(response), []);
 
-		tournaments.sort((a, b) => (new Date(a.tournament.start_at)).valueOf() - (new Date(b.tournament.start_at).valueOf()));
+      tournaments.sort((a, b) => (new Date(a.tournament.start_at)).valueOf() - (new Date(b.tournament.start_at).valueOf()));
 
-		tournaments.forEach(function(tournament){
-			let displayDate = (tournament.tournament.start_at ? new Date(tournament.tournament.start_at.substr(0, tournament.tournament.start_at.indexOf("T"))) : "Unscheduled");
-      if (typeof displayDate != "string") displayDate = displayDate.toLocaleDateString("en-us");
+      tournaments.forEach(function(tournament){
+        let displayDate = (tournament.tournament.start_at ? new Date(tournament.tournament.start_at.substr(0, tournament.tournament.start_at.indexOf("T"))) : "Unscheduled");
+        if (typeof displayDate != "string") displayDate = displayDate.toLocaleDateString("en-us");
 
-			embed.addField(displayDate, `[${tournament.tournament.name}](${tournament.tournament.full_challonge_url})`);
-		});
+        embed.addField(displayDate, `[${tournament.tournament.name}](${tournament.tournament.full_challonge_url})`);
+      });
 
-		if (embed.fields.length == 0) embed.addField("Community Tournaments", "No upcoming community tournaments found.");
-		else embed.description += "\n\nCommunity Tournaments:";
-		msg.channel.send(embed);
+      if (embed.fields.length == 0) embed.addField("Community Tournaments", "No upcoming community tournaments found.");
+      else embed.description += "\n\nCommunity Tournaments:";
+      msg.channel.send(embed);
+    } catch(e) { u.alertError(e, msg); }
 	}
 })
 .addCommand({name: "champion",

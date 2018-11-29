@@ -162,12 +162,12 @@ async function processMixer(bot, key, channel) {
 };
 
 function processTwitch(bot, key, channel) {
-  let ldsg = bot.guilds.get(Module.config.ldsg),
-		liveRole = ldsg.roles.get("281135201407467520"),
-		notificationChannel = ldsg.channels.get(Module.config.ldsg), // #general
-		member = ldsg.members.get(key);
-
   try {
+    let ldsg = bot.guilds.get(Module.config.ldsg),
+  		liveRole = ldsg.roles.get("281135201407467520"),
+  		notificationChannel = ldsg.channels.get(Module.config.ldsg), // #general
+  		member = ldsg.members.get(key);
+
     twitch.getChannelStream(channel, function(error, body) {
       if (error) {
         if (error.status == 400) console.log("TWITCH:", channel);

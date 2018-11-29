@@ -50,9 +50,7 @@ const Module = new Augur.Module()
               Module.handler.execute("giphy", msg, suffix);
             } else msg.reply("I couldn't find any gifs for " + suffix).then(u.clean);
           } else msg.reply("I ran into an error:" + JSON.stringify(error)).then(u.clean);
-        } catch(e) {
-          Module.handler.errorHandler(e, msg);
-        }
+        } catch(e) { u.alertError(e, msg); }
 			});
 		} else msg.reply("I'm not going to search for that. :rolling_eyes:").then(u.clean);
 	}

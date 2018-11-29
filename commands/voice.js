@@ -90,10 +90,12 @@ const Module = new Augur.Module()
   category: "Voice",
   permissions: (msg) => (msg.guild && msg.guild.voiceConnection && msg.guild.voiceConnection.dispatcher && (msg.member.roles.has(Module.config.roles.mod) || msg.member.roles.has(Module.config.roles.management))),
   process: async function(msg) {
-    let guildQueue = queue.get(msg.guild.id).queue;
-    guildQueue = [];
-    msg.guild.voiceConnection.dispatcher.end();
-    msg.react("🔇");
+    try {
+      let guildQueue = queue.get(msg.guild.id).queue;
+      guildQueue = [];
+      msg.guild.voiceConnection.dispatcher.end();
+      msg.react("🔇");
+    } catch(e) { u.alertError(e, msg); }
   }
 })
 .addCommand({name: "skip",
@@ -103,7 +105,7 @@ const Module = new Augur.Module()
   permissions: (msg) => (msg.guild && msg.guild.voiceConnection && msg.guild.voiceConnection.dispatcher && (msg.member.roles.has(Module.config.roles.mod) || msg.member.roles.has(Module.config.roles.management))),
   process: async function(msg) {
     try {
-      msg.guild.voiceConnection.dispatcher.end();
+      await msg.guild.voiceConnection.dispatcher.end();
       msg.react("⏩");
     } catch(e) { u.alertError(e, msg); }
   }
