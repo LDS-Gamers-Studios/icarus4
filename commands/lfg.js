@@ -194,11 +194,11 @@ const Module = new Augur.Module()
   },
   permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && msg.member.permissions.has("MANAGE_MESSAGES"))
 })
-.addCommand({name: "whoisplaying",
+.addCommand({name: "wip",
 	description: "Find who is playing a game in the server or list all games being played.",
 	suffix: "<game name>",
   info: "Search for server members playing <game name>. If no game is provided, it will search for the applicable game in game specific channels or list the top 25 games, otherwise.",
-	aliases: ["who'splaying", "whosplaying", "whoson", "whoison", "who'son", "wip"],
+	aliases: ["who'splaying", "whosplaying", "whoson", "whoison", "who'son", "whoisplaying"],
 	category: "LFG",
 	process: async function(msg, suffix) {
     try {
