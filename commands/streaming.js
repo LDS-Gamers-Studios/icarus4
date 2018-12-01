@@ -118,6 +118,7 @@ function processApplications() {
           .setColor('#325CBD')
           .setTimestamp(new Date(app.timestamp))
           .addField("Discord Username", app.name)
+          .addField("Streaming Platforms", app.streamed_platforms.join("\n"))
           .addField("Streaming Games", app.streamed_games)
           .addField("Stream Links", app.streaming_platform_links)
           .addField("Discord Commitment", app.discord_commit)
