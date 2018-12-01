@@ -1,10 +1,10 @@
 const Augur = require("augurbot"),
-  google = require("../config/google_api.json"),
-  GoogleSpreadsheet = require("google-spreadsheet"),
+  fs = require("fs"),
   Mixer = require("beam-client-node"),
   TwitchApi = require("twitch-api"),
   twitchConfig = require("../config/twitch.json"),
-  u = require("../utils/utils");
+  u = require("../utils/utils"),
+  yaml = require("js-yaml");
 
 var yt, applicationCount = 0;
 
@@ -34,32 +34,7 @@ function checkStreams(bot) {
   });
 
   // Check for new Approved Streamers applications
-  doc.useServiceAccountAuth(google.creds, (err) => {
-    if (err) u.alertError(err);
-    else {
-      doc.getRows(1, (err, applications) => {
-        if (applicationCount && applications.length > applicationCount) {
-          let newApplications = applications.slice(applicationCount);
-          newApplications.forEach(app => {
-            let embed = u.embed()
-            .setTitle("New Approved Streamer Application")
-            .setAuthor(app.whatsyourldsgamersdiscordusername)
-            .setColor('#325CBD')
-            .setTimestamp(new Date(app.timestamp))
-            .addField("Discord Username", app.whatsyourldsgamersdiscordusername)
-            .addField("Streaming Games", app.whatgameswouldyoubestreaming, true)
-            .addField("Streaming Platform", app.whatplatformswillyoubestreamingfrommostly, true)
-            .addField("Stream Links", app["inputthepubliclinksurlstoyourmainstreamingplatformstwitchyoutubegamingmixeretc.onelinkperline"], true)
-            .addField("Streaming Service", app["beinganapprovedstreamergrantsnotificationsintheldsgamersdiscordsgeneral.doyouwantthatnotificationtobefromtwitch.tvorbeam.proatthemomentthosearetheonlyserviceswecandonotificationsfor."], true)
-            .addField("Discord Commitment", app["beinganldsgamersapprovedstreamersignifiesyouhaveastrongcommitmenttobeingontheldsgamersdiscordserverhttpldsg.iochatandcommunicatingregularlythroughthere.doyouagreetodothis"], true)
-            .addField("Code Commitment", app.doyouagreetoourstreamingguidelinesandfollowourcodeofconductatalltimes, true);
-            Module.handler.client.channels.get("146289578674749440").send(embed);
-          });
-          applicationCount = applications.length;
-        }
-      });
-    }
-  });
+  processApplications();
 
   // YOUTUBE LIVE TEST
   [
@@ -127,6 +102,36 @@ function notificationEmbed(body, srv) {
   }
 	return embed;
 };
+
+function processApplications() {
+  try {
+    let applications = fs.readdirSync(Module.config.streamApplications);
+
+    applications.forEach(application => {
+      if (application.endsWith(".yaml")) {
+        let path = `${Module.config.streamApplications}/${application}`;
+        let app = yaml.safeLoad(fs.readFileSync(path, "utf8"));
+        app.timestamp = new Date(fs.statSync(path).mtime);
+
+        let embed = u.embed()
+          .setTitle("New Approved Streamer Application")
+          .setAuthor(app.name)
+          .setColor('#325CBD')
+          .setTimestamp(new Date(app.timestamp))
+          .addField("Discord Username", app.name)
+          .addField("Streaming Games", app.streamed_games, true)
+          .addField("Stream Links", app.streaming_platform_links, true)
+          .addField("Discord Commitment", app.discord_commit, true)
+          .addField("Code Commitment", app.agree_to_conduct, true);
+
+        Module.handler.client.channels.get("146289578674749440")
+          .send(embed)
+          .then(() => fs.unlink(path))
+          .catch(u.alertError);
+      }
+    });
+  } catch(e) { u.alertError(e); }
+}
 
 async function processMixer(bot, key, channel) {
   try {
