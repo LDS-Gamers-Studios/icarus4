@@ -12,8 +12,7 @@ const mixer = new Mixer.Client(new Mixer.DefaultRequestRunner()),
   mixerStatus = new Map(),
   twitch = new TwitchApi(twitchConfig),
   twitchStatus = new Map(),
-  ytStatus = new Map(),
-  doc = new GoogleSpreadsheet(google.sheets.applications);
+  ytStatus = new Map();
 
 function checkStreams(bot) {
   // Approved Streamers
@@ -610,19 +609,6 @@ const Module = new Augur.Module()
     data.mixerStatus.forEach((status, key) => mixerStatus.set(key, status));
     data.twitchStatus.forEach((status, key) => twitchStatus.set(key, status));
     data.ytStatus.forEach((status, key) => ytStatus.set(key, status));
-  }
-  if (data && data.applicationCount) applicationCount = data.applicationCount;
-  else {
-    // Check how many Approved Streamer applications there are.
-    doc.useServiceAccountAuth(google.creds, (err) => {
-      if (err) u.alertError(err);
-      else {
-        doc.getRows(1, (err, applications) => {
-          if (err) u.alertError(err);
-          else applicationCount = applications.length;
-        });
-      }
-    });
   }
 })
 .setUnload(() => ({ mixerStatus, twitchStatus, ytStatus, applicationCount }))
