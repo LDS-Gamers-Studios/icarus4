@@ -118,10 +118,10 @@ function processApplications() {
           .setColor('#325CBD')
           .setTimestamp(new Date(app.timestamp))
           .addField("Discord Username", app.name)
-          .addField("Streaming Games", app.streamed_games, true)
-          .addField("Stream Links", app.streaming_platform_links, true)
-          .addField("Discord Commitment", app.discord_commit, true)
-          .addField("Code Commitment", app.agree_to_conduct, true);
+          .addField("Streaming Games", app.streamed_games)
+          .addField("Stream Links", app.streaming_platform_links)
+          .addField("Discord Commitment", app.discord_commit)
+          .addField("Code Commitment", app.agree_to_conduct);
 
         Module.handler.client.channels.get("146289578674749440")
           .send(embed)
