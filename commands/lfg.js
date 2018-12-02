@@ -257,18 +257,20 @@ const Module = new Augur.Module()
 })
 .setUnload(writeData)
 .setClockwork(() => {
-  // Set a timeout to clear existing LFG players, in case of reload.
-  lfgChannel = Module.handler.client.channels.get(lfgBoard.channel);
+  try {
+    // Set a timeout to clear existing LFG players, in case of reload.
+    lfgChannel = Module.handler.client.channels.get(lfgBoard.channel);
 
-  lfgBoard.games
-  .reduce((a, c) => a.concat(c.users), [])
-  .filter((u, i, all) => all.indexOf(u) == i)
-  .forEach(u => {
-    let games = lfgBoard.games.filter(g => g.users.includes(u));
-    setTimeout(removePlayer, lfgBoard.timeout, u, games);
-  });
+    lfgBoard.games
+    .reduce((a, c) => a.concat(c.users), [])
+    .filter((u, i, all) => all.indexOf(u) == i)
+    .forEach(u => {
+      let games = lfgBoard.games.filter(g => g.users.includes(u));
+      setTimeout(removePlayer, lfgBoard.timeout, u, games);
+    });
 
-  return setInterval(writeData, 60000);
+    return setInterval(writeData, 60000);
+  } catch(e) { u.alertError(e); }
 });
 
 module.exports = Module;

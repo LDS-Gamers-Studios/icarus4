@@ -15,31 +15,33 @@ const mixer = new Mixer.Client(new Mixer.DefaultRequestRunner()),
   ytStatus = new Map();
 
 function checkStreams(bot) {
-  // Approved Streamers
-  let	streamers = bot.guilds.get(Module.config.ldsg).roles.get("267038468474011650").members;
+  try {
+    // Approved Streamers
+    let	streamers = bot.guilds.get(Module.config.ldsg).roles.get("267038468474011650").members;
 
-  Module.db.ign.getList("twitch").then(igns => {
-    igns.filter(ign => streamers.has(ign.discordId)).forEach(ign => {
-      let channelName = encodeURIComponent(ign.ign);
-      processTwitch(bot, ign.discordId, channelName);
+    Module.db.ign.getList("twitch").then(igns => {
+      igns.filter(ign => streamers.has(ign.discordId)).forEach(ign => {
+        let channelName = encodeURIComponent(ign.ign);
+        processTwitch(bot, ign.discordId, channelName);
+      });
     });
-  });
 
-  Module.db.ign.getList("mixer").then(igns => {
-    igns.filter(ign => streamers.has(ign.discordId)).forEach(ign => {
-      let channelName = encodeURIComponent(ign.ign);
-      processMixer(bot, ign.discordId, channelName);
+    Module.db.ign.getList("mixer").then(igns => {
+      igns.filter(ign => streamers.has(ign.discordId)).forEach(ign => {
+        let channelName = encodeURIComponent(ign.ign);
+        processMixer(bot, ign.discordId, channelName);
+      });
     });
-  });
 
-  // Check for new Approved Streamers applications
-  processApplications();
+    // Check for new Approved Streamers applications
+    processApplications();
 
-  // YOUTUBE LIVE TEST
-  [
-    {discordId: "176849126317752320", ign: "adamandstevie"},
-    {discordId: "340645910130196482", ign: "CBWMechBot"}
-  ].forEach(ign => processYouTube(bot, ign.discordId, ign.ign));
+    // YOUTUBE LIVE TEST
+    [
+      {discordId: "176849126317752320", ign: "adamandstevie"},
+      {discordId: "340645910130196482", ign: "CBWMechBot"}
+    ].forEach(ign => processYouTube(bot, ign.discordId, ign.ign));
+  } catch(e) { u.alertError(e); }
 };
 
 function isPartnered(member) {
@@ -614,10 +616,12 @@ const Module = new Augur.Module()
 })
 .setUnload(() => ({ mixerStatus, twitchStatus, ytStatus, applicationCount }))
 .setClockwork(() => {
-  let bot = Module.handler.client;
-  let interval = 5 * 60 * 1000;
-  checkStreams(bot);
-  return setInterval(checkStreams, interval, bot);
+  try {
+    let bot = Module.handler.client;
+    let interval = 5 * 60 * 1000;
+    checkStreams(bot);
+    return setInterval(checkStreams, interval, bot);
+  } catch(e) { u.alertError(e); }
 });
 
 module.exports = Module;

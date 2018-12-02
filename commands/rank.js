@@ -185,36 +185,38 @@ const Module = new Augur.Module()
 	}
 })
 .setClockwork(() => {
-  let bot = Module.handler.client;
-  bot.channels.get(starboard).fetchMessages().then((messages) => { console.log(`Fetched ${messages.size} stars`)});
-	return setInterval(async function(bot) {
-    try {
-      let response = await Module.db.user.addXp(active);
-      if (response.users.length > 0) {
-        response.users.forEach(user => {
-          let oldXP = user.totalXP - response.xp;
-          let lvl = Rank.level(user.totalXP);
-          let oldLvl = Rank.level(oldXP);
+  try {
+    let bot = Module.handler.client;
+    bot.channels.get(starboard).fetchMessages().then((messages) => { console.log(`Fetched ${messages.size} stars`)});
+    return setInterval(async function(bot) {
+      try {
+        let response = await Module.db.user.addXp(active);
+        if (response.users.length > 0) {
+          response.users.forEach(user => {
+            let oldXP = user.totalXP - response.xp;
+            let lvl = Rank.level(user.totalXP);
+            let oldLvl = Rank.level(oldXP);
 
-          if (lvl != oldLvl) {
-            let member = bot.guilds.get(Module.config.ldsg).members.get(user.discordId);
-            let message = u.rand(Rank.messages) + " " + u.rand(Rank.levelPhrase).replace("%LEVEL%", lvl);
+            if (lvl != oldLvl) {
+              let member = bot.guilds.get(Module.config.ldsg).members.get(user.discordId);
+              let message = u.rand(Rank.messages) + " " + u.rand(Rank.levelPhrase).replace("%LEVEL%", lvl);
 
-            if (Rank.rewards.has(lvl)) {
-              let reward = bot.guilds.get(Module.config.ldsg).roles.get(Rank.rewards.get(lvl).id);
-              member.addRole(reward);
-              message += `\n\nYou have been awarded the ${reward.name} role!`;
+              if (Rank.rewards.has(lvl)) {
+                let reward = bot.guilds.get(Module.config.ldsg).roles.get(Rank.rewards.get(lvl).id);
+                member.addRole(reward);
+                message += `\n\nYou have been awarded the ${reward.name} role!`;
+              }
+              member.send(message);
             }
-            member.send(message);
-          }
-        });
-      }
-      active = [];
+          });
+        }
+        active = [];
 
-      //await Module.db.user.addStars(stars);
-      //stars = {};
-    } catch(e) { Module.handler.errorHandler(e); }
-	}, 60000, bot);
+        //await Module.db.user.addStars(stars);
+        //stars = {};
+      } catch(e) { u.alertError(e); }
+    }, 60000, bot);
+  } catch(e) { u.alertError(e); }
 });
 
 module.exports = Module;

@@ -14,7 +14,7 @@
   "license": "MIT",
   "homepage": "https://bitbucket.org/Gaiwecoor/icarus3#readme",
   "dependencies": {
-    "augurbot": "^1.1.4",
+    "augurbot": "^1.1.5",
     "beam-client-node": "^2.0.0",
     "body-parser": "^1.18.3",
     "cheerio": "^1.0.0-rc.2",
