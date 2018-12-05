@@ -215,7 +215,7 @@ const Module = new Augur.Module()
 })
 .addCommand({name: "redeem",
 	syntax: "amount",
-	description: "Redeem Ghost Bucks for an LDSG store code",
+	description: "Redeem Ghost Bucks for an LDSG store code $1/100 GB",
 	category: "Ghost Bucks",
 	process: async (msg, suffix) => {
     try {
