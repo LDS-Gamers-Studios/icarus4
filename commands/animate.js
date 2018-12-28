@@ -105,8 +105,8 @@ const Module = new Augur.Module()
   try {
     let bot = Module.handler.client;
     let animations = await Module.db.animation.fetchAll();
-    for (let i = 0; i <= animations.length; i++) {
-      let animation = animations[0];
+    for (let i = 0; i < animations.length; i++) {
+      let animation = animations[i];
       if (animation.channelId && bot.channels.has(animation.channelId)) {
         let msg = await bot.channels.get(animation.channelId).fetchMessage(animation.animationId);
         reload(msg);
