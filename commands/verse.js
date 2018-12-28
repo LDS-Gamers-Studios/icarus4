@@ -187,7 +187,7 @@ const Module = new Augur.Module()
 						.setTitle(`${books[scripture.book].title} ${scripture.chapter}${(scripture.verse ? (":" + scripture.verse) : "")}`)
 						.setColor(0x012b57)
 						.setURL(link)
-						.setDescription((scripture.text.length > 1000 ? scripture.text.slice(0, 1000) + "..." : scripture.text));
+						.setDescription((scripture.text.length > 2048 ? scripture.text.slice(0, 2000) + "..." : scripture.text));
 						msg.channel.send(embed);
 					} else msg.channel.send(`**${books[scripture.book].title} ${scripture.chapter}${(scripture.verse ? (":" + scripture.verse) : "")}**\n<${link}>`);
         } else msg.reply("sorry, I couldn't understand that reference.").then(u.clean);
