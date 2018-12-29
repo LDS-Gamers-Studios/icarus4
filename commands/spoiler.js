@@ -37,7 +37,7 @@ const Module = new Augur.Module()
   permissions: (msg) => (msg.guild && msg.channel.permissionsFor(msg.client.user).has("MANAGE_MESSAGES")),
 	process: async (msg, suffix) => {
     try {
-      u.clean(msg, 0);
+      u.clean(msg, 100);
 
       let file = ((msg.attachments.size > 0) ? { "file": msg.attachments.first().url } : null);
       let topicTag = suffix.indexOf("##");
@@ -61,24 +61,27 @@ const Module = new Augur.Module()
     } catch(e) { u.alertError(e, msg); }
 	}
 })
-.setInit(() => {
-  setTimeout(async () => {
-    try {
-      let bot = Module.handler.client;
-      let spoilers = await Module.db.spoiler.fetchAll();
-      spoilers = spoilers.filter(s => bot.channels.has(s.channelId));
-      spoilers.forEach(async spoiler => {
-        try {
-          let msg = await bot.channels.get(spoiler.channelId).fetchMessage(spoiler.spoilerId);
-          collector(msg);
-        } catch(err) {
-          Module.handler.errorHandler(e);
-        }
-      });
-    } catch(e) {
-      Module.handler.errorHandler(e);
-    }
-  }, 5000);
-});
+.setInit((reload) => {
+  if (!reload) {
+    setTimeout(async () => {
+      try {
+        let bot = Module.handler.client;
+        let spoilers = await Module.db.spoiler.fetchAll();
+        spoilers = spoilers.filter(s => bot.channels.has(s.channelId));
+        spoilers.forEach(async spoiler => {
+          try {
+            let msg = await bot.channels.get(spoiler.channelId).fetchMessage(spoiler.spoilerId);
+            collector(msg);
+          } catch(err) {
+            Module.handler.errorHandler(e);
+          }
+        });
+      } catch(e) {
+        Module.handler.errorHandler(e);
+      }
+    }, 5000);
+  }
+})
+.setUnload(() => true);
 
 module.exports = Module;
