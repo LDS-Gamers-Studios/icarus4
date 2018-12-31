@@ -2,12 +2,12 @@ const Augur = require("augurbot"),
   Ign = require("../utils/IgnInfo"),
   u = require("../utils/utils");
 
-function embedIGN(member, igns) {
+function embedIGN(user, igns) {
 	if (igns.length > 0) {
     let embed = u.embed()
-    .setAuthor((member ? member.displayName : user.username), user.displayAvatarURL);
+    .setAuthor(user.name, user.avatar);
 
-    if (igns.length > 1) embed.setTitle('IGNs for ' + (member ? member.displayName : user.username));
+    if (igns.length > 1) embed.setTitle('IGNs for ' + user.name);
 
 		let hasLink = /(http(s?):\/\/)?(\w+\.)+\w+\//ig;
 
@@ -48,7 +48,7 @@ const Module = new Augur.Module()
       systems = (systems ? systems.split(' ').map(s => (Ign.aliases[s] ? Ign.aliases[s] : s)) : null);
       let igns = await Module.db.ign.find(user.id, systems);
 
-      let embed = embedIGN(member, igns);
+      let embed = embedIGN({name: (member ? member.displayName : user.username), avatar: user.displayAvatarURL}, igns);
 
       if (embed) msg.channel.send({embed: embed});
       else msg.channel.send("It looks like " + (member ? member.displayName : user.username) + " hasn't saved an IGN with `!addign` yet.").then(u.clean);
