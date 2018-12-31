@@ -2,8 +2,13 @@ const Augur = require("augurbot"),
   Ign = require("../utils/IgnInfo"),
   u = require("../utils/utils");
 
-function addIgnFields(embed, igns) {
+function embedIGN(igns) {
 	if (igns.length > 0) {
+    let embed = u.embed()
+    .setAuthor((member ? member.displayName : user.username), user.displayAvatarURL);
+
+    if (igns.length > 1) embed.setTitle('IGNs for ' + (member ? member.displayName : user.username));
+
 		let hasLink = /(http(s?):\/\/)?(\w+\.)+\w+\//ig;
 
     Ign.categories.forEach(category => {
@@ -43,11 +48,7 @@ const Module = new Augur.Module()
       systems = (systems ? systems.split(' ').map(s => (Ign.aliases[s] ? Ign.aliases[s] : s)) : null);
       let igns = await Module.db.ign.find(user.id, systems);
 
-      let embed = u.embed()
-      .setTitle('IGNs for ' + (member ? member.displayName : user.username))
-      .setAuthor((member ? member.displayName : user.username), user.displayAvatarURL);
-
-      embed = addIgnFields(embed, igns);
+      let embed = embedIGN(igns);
 
       if (embed) msg.channel.send({embed: embed});
       else msg.channel.send("It looks like " + (member ? member.displayName : user.username) + " hasn't saved an IGN with `!addign` yet.").then(u.clean);
@@ -105,9 +106,10 @@ const Module = new Augur.Module()
 .addCommand({name: "whoplays",
   description: "List members who have stored an IGN for a given system.",
 	syntax: "<system>",
-	info: "Lists members who have saved IGNs for a given system.\n" + Ign.helpList(),
+	info: "Lists server members who have saved IGNs for a given system.\n" + Ign.helpList(),
 	aliases: ["whohas", "whoison"],
 	category: "IGN",
+  permissions: (msg) => msg.guild,
 	process: async function(msg, suffix) {
     try {
       if (!suffix) {
