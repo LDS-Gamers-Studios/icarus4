@@ -68,7 +68,7 @@ const Module = new Augur.Module()
         let bot = Module.handler.client;
         let spoilers = await Module.db.spoiler.fetchAll();
         spoilers = spoilers.filter(s => bot.channels.has(s.channelId));
-        for (let i = 0; i < spoiler.length; i++) {
+        for (let i = 0; i < spoilers.length; i++) {
           let spoiler = spoilers[i];
           let msg = await bot.channels.get(spoiler.channelId).fetchMessage(spoiler.spoilerId);
           collector(msg);
