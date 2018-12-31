@@ -104,7 +104,7 @@ const Module = new Augur.Module()
 	}
 })
 .addCommand({name: "whoplays",
-  description: "List members who have stored an IGN for a given system.",
+  description: "List server members who have stored an IGN for a given system.",
 	syntax: "<system>",
 	info: "Lists server members who have saved IGNs for a given system.\n" + Ign.helpList(),
 	aliases: ["whohas", "whoison"],
