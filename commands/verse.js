@@ -187,7 +187,7 @@ const Module = new Augur.Module()
         scripture.book = scripture.book.replace(/ /g, "-").toLowerCase();
         if (alias[scripture.book]) scripture.book = alias[scripture.book];
         if (books[scripture.book]) {
-          let link = `https://www.lds.org/scriptures/${books[scripture.book].work}/${scripture.book}/${scripture.chapter}${(scripture.verse ? ("." + scripture.verse + "#p" + scripture.start) : "")}`;
+          let link = `https://www.lds.org/scriptures/${books[scripture.book].work}/${scripture.book}/${scripture.chapter}${(scripture.verse ? ("." + scripture.verse + "?lang=eng#p" + scripture.start) : "?lang=eng")}`;
 					if (scripture.text) {
 						let embed = u.embed()
 						.setTitle(`${books[scripture.book].title} ${scripture.chapter}${(scripture.verse ? (":" + scripture.verse) : "")}`)
