@@ -14,8 +14,7 @@ const scriptureTest = /([\w &]+) ((\d+)(\s?:\s?(\d+)\s?(-\s?\d+)?)?)/i,
 	request = require("request"),
 	cheerio = require("cheerio");
 
-const searchKeys = [],
-  searchExp = new RegExp(`\\b(${searchKeys.join("|")})\\s*(\\d+)\\s?:\\s?(\\d+)(-\\s?\\d+)?`, "i");
+const searchKeys = [];
 
 function nb(title, abbr, work, aliases = []) {
 	if (!Array.isArray(aliases))
@@ -171,6 +170,8 @@ nb("Abraham", "abr", "pgp");
 nb("Joseph Smith - Matthew", "js m", "pgp", ["jsm", "joseph smith matthew"]);
 nb("Joseph Smith - History", "js h", "pgp", ["jsh", "joseph smith history"]);
 nb("Articles of Faith", "a of f", "pgp", "aof");
+
+const searchExp = new RegExp(`\\b(${searchKeys.join("|")})\\s*(\\d+)\\s?:\\s?(\\d+)(-\\s?\\d+)?`, "i");
 
 const Module = new Augur.Module()
 .addCommand({name: "verse",
