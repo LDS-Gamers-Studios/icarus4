@@ -222,12 +222,9 @@ const Module = new Augur.Module()
   }
 })
 .addEvent("message", (msg) => {
-  if ((msg.channel.id == "193042027066163200") && !u.parse(msg)) {
+  if ((msg.channel.id == "114944876763807751") && !u.parse(msg)) {
     let match = searchExp.exec(msg.cleanContent);
-    if (match) {
-      console.log(match);
-      Module.handler.execute("verse", msg, match[0]);
-    }
+    if (match) Module.handler.execute("verse", msg, match[0]);
   }
 });
 
