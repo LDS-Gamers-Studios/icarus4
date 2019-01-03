@@ -14,6 +14,9 @@ const scriptureTest = /([\w &]+) ((\d+)(\s?:\s?(\d+)\s?(-\s?\d+)?)?)/i,
 	request = require("request"),
 	cheerio = require("cheerio");
 
+const searchKeys = [],
+  searchExp = new RegExp(`\\b(${searchKeys.join("|")})\\s*(\\d+)\\s?:\\s?(\\d+)(-\\s?\\d+)?`, "i");
+
 function nb(title, abbr, work, aliases = []) {
 	if (!Array.isArray(aliases))
 		aliases = [aliases.toLowerCase()];
@@ -31,8 +34,10 @@ function nb(title, abbr, work, aliases = []) {
 	if (aliases.length > 0) {
 		aliases.forEach(a => {
 			alias[a.toLowerCase().replace(/ /g, "-")] = abbr;
+      searchKeys.push(a.toLowerCase());
 		});
 	}
+  searchKeys.push(title.toLowerCase(), abbr.toLowerCase());
 }
 
 function parseScripture(string) {
@@ -213,6 +218,12 @@ const Module = new Augur.Module()
         else msg.reply("I couldn't find any results for that.").then(u.clean);
       }
     });
+  }
+})
+.addEvent("message", (msg) => {
+  if ((msg.channel.id == "193042027066163200") && !u.parse(msg)) {
+    let match = searchExp.exec(msg.cleanContent);
+    if (match) Module.handler.execute("verse", msg, match[0]);
   }
 });
 
