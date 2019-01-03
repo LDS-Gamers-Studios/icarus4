@@ -37,7 +37,7 @@ function nb(title, abbr, work, aliases = []) {
       searchKeys.push(a.toLowerCase());
 		});
 	}
-  searchKeys.push(title.toLowerCase(), abbr.toLowerCase());
+  searchKeys.push(abbr.toLowerCase());
 }
 
 function parseScripture(string) {
@@ -223,7 +223,10 @@ const Module = new Augur.Module()
 .addEvent("message", (msg) => {
   if ((msg.channel.id == "193042027066163200") && !u.parse(msg)) {
     let match = searchExp.exec(msg.cleanContent);
-    if (match) Module.handler.execute("verse", msg, match[0]);
+    if (match) {
+      console.log(match);
+      Module.handler.execute("verse", msg, match[0]);
+    }
   }
 });
 
