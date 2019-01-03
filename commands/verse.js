@@ -171,7 +171,7 @@ nb("Joseph Smith - Matthew", "js m", "pgp", ["jsm", "joseph smith matthew"]);
 nb("Joseph Smith - History", "js h", "pgp", ["jsh", "joseph smith history"]);
 nb("Articles of Faith", "a of f", "pgp", "aof");
 
-const searchExp = new RegExp(`\\b(${searchKeys.join("|")})\\s*(\\d+)\\s?:\\s?(\\d+)(-\\s?\\d+)?`, "i");
+const searchExp = new RegExp(`\\b(${searchKeys.join("|")})\\s*(\\d+)\\s?:\\s?(\\d+)(-\\s?\\d+)?`, "ig");
 
 const Module = new Augur.Module()
 .addCommand({name: "verse",
@@ -223,8 +223,9 @@ const Module = new Augur.Module()
 })
 .addEvent("message", (msg) => {
   if ((msg.channel.id == "114944876763807751") && !u.parse(msg)) {
-    let match = searchExp.exec(msg.cleanContent);
-    if (match) Module.handler.execute("verse", msg, match[0]);
+    let match = null;
+    while (match = searchExp.exec(msg.cleanContent))
+      Module.handler.execute("verse", msg, match[0]);
   }
 });
 
