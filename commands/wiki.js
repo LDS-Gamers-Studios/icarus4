@@ -31,7 +31,7 @@ const Module = new Augur.Module()
             let $ = cheerio.load(body);
             let img = $(".infobox img");
             if (img.length > 0) {
-              embed.setImage("https://" + img.first().attr("src"));
+              embed.setImage("https:" + img.first().attr("src"));
             }
           }
           msg.channel.send(embed);
