@@ -8,7 +8,7 @@ const Module = new Augur.Module()
 .addCommand({name: "wiki",
   description: "Search Wikipedia for a term.",
   syntax: "Term",
-  permissions: (msg) => (msg.guild && msg.channel.permissionsFor(msg.member).has(["EMBED_LINKS", "ATTACH_FILES"]) && msg.channel.permissionsFor(msg.client.user).has("ATTACH_FILES")),
+  permissions: (msg) => (!msg.guild || (msg.channel.permissionsFor(msg.member).has(["EMBED_LINKS", "ATTACH_FILES"]) && msg.channel.permissionsFor(msg.client.user).has("ATTACH_FILES"))),
   process: async (msg, suffix) => {
     try {
       const pf = new profanityFilter();
@@ -29,6 +29,7 @@ const Module = new Augur.Module()
           } else {
             let body = await request(wiki[3][0]);
             let $ = cheerio.load(body);
+
             let img = $(".infobox img");
             if (img.length > 0) {
               embed.setImage("https:" + img.first().attr("src"));
