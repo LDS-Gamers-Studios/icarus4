@@ -6,7 +6,7 @@ const Augur = require("augurbot"),
 const starboard = "405405857099284490";
 
 const active = new Set();
-  excludeUsers = new Set();
+const excludeUsers = new Set();
 
 function updateStarboard(message) {
   let bot = message.client;
