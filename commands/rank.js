@@ -5,8 +5,8 @@ const Augur = require("augurbot"),
 
 const starboard = "405405857099284490";
 
-var active = [],
-  excludeUsers = [];
+const active = new Set();
+  excludeUsers = new Set();
 
 function updateStarboard(message) {
   let bot = message.client;
@@ -50,7 +50,9 @@ const Module = new Augur.Module()
 .setInit(() => {
   Module.db.user.getUsers({excludeXP: true})
   .then(users => {
-    excludeUsers = users.map(u => u.discordId);
+    for (let i = 0; i < users.length; i++) {
+      excludeUsers.add(user.discordId);
+    }
   });
 })
 .addCommand({name: "leaderboard",
@@ -67,7 +69,7 @@ const Module = new Augur.Module()
 
       let member = msg.client.guilds.get(Module.config.ldsg).members.get(user.id);
       let response = null;
-      if (excludeUsers.includes(member.id) || member.user.bot) {
+      if (excludeUsers.has(member.id) || member.user.bot) {
         let snark = [
           "don't got time for dat.",
           "ain't interested in no XP gettin'.",
@@ -139,21 +141,21 @@ const Module = new Augur.Module()
     if (suffix == "true") {
       Module.db.user.update(msg.author, {excludeXP: false})
       .then((user) => {
-        if (excludeUsers.includes(user.discordId)) excludeUsers = excludeUsers.filter(u => u != user.discordId);
+        if (excludeUsers.has(user.discordId)) excludeUsers.delete(user.discordId);
         msg.reply("I'll keep track of your chat XP!");
       });
     } else if (suffix == "false") {
       Module.db.user.update(msg.author, {excludeXP: true})
       .then((user) => {
-        if (!excludeUsers.includes(user.discordId)) excludeUsers.push(user.discordId);
+        if (!excludeUsers.has(user.discordId)) excludeUsers.add(user.discordId);
         msg.reply("I won't track your chat XP anymore!");
       });
     } else msg.reply("you need to tell me `true` or `false` for tracking your chat XP!");
   }
 })
 .addEvent("message", (msg) => {
-  if (msg.guild && (msg.guild.id == Module.config.ldsg) && !active.includes(msg.author.id) && !(Rank.excludeChannels.includes(msg.channel.id) || Rank.excludeChannels.includes(msg.channel.parentID)) && !u.parse(msg) && !excludeUsers.includes(msg.author.id) && !msg.author.bot)
-		active.push(msg.author.id);
+  if (msg.guild && (msg.guild.id == Module.config.ldsg) && !active.has(msg.author.id) && !(Rank.excludeChannels.includes(msg.channel.id) || Rank.excludeChannels.includes(msg.channel.parentID)) && !u.parse(msg) && !excludeUsers.has(msg.author.id) && !msg.author.bot)
+		active.add(msg.author.id);
 })
 .addEvent("messageReactionAdd", (reaction, user) => {
   let message = reaction.message;
@@ -206,11 +208,11 @@ const Module = new Augur.Module()
                 member.addRole(reward);
                 message += `\n\nYou have been awarded the ${reward.name} role!`;
               }
-              member.send(message);
+              member.send(message).catch(u.alertError);
             }
           });
         }
-        active = [];
+        active.clear();
 
         //await Module.db.user.addStars(stars);
         //stars = {};

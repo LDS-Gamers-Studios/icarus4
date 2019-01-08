@@ -416,6 +416,7 @@ const models = {
       });
     },
     addXp: (users) => {
+      users = Array.from(users.values());
       let response = { users: [], xp: 0 };
       if (users.length == 0) return Promise.resolve(response);
       else return new Promise((fulfill, reject) => {
