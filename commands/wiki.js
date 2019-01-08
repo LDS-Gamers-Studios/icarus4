@@ -24,7 +24,7 @@ const Module = new Augur.Module()
 
           if (wiki[2][0].endsWith("may refer to:")) {
             for (let i = 1; i < wiki[1].length; i++) {
-              embed.addField(`[${wiki[1][i]}](${wiki[3][i]})`, wiki[2][i]);
+              embed.addField(wiki[1][i], wiki[2][i] + `\n[[Link]](${wiki[3][i]})`);
             }
           } else {
             let body = await request(wiki[3][0]);
