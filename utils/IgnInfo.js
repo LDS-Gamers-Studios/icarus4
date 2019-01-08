@@ -39,6 +39,7 @@ var gameids = new Map()
 	.set("elite", new system({system: "elite", name: "Elite: Dangerous CMDR Name"}))
 	.set("epic", new system({system: "epic", name: "Epic Games Battletag"}))
 	.set("gog", new system({system: "gog", name: "GOG Galaxy", link: "https://www.gog.com/u/"}))
+  .set("guildwars", new system({system: "guildwars", name: "Guild Wars"}))
 	.set("hirez", new system({system: "hirez", name: "Hi Rez (Smite / Paladins)"}))
 	.set("lol", new system({system: "lol", name: "League of Legends"}))
 	.set("minecraft", new system({system: "minecraft", name: "Minecraft Name"}))
@@ -85,6 +86,8 @@ const aliases = {
 	"blizzard": "battlenet",
 	"bliz": "battlenet",
 	"blizz": "battlenet",
+  "arenanet": "guildwars",
+  "arena.net": "guildwars",
 	"pokemongo": "pokego",
 	"nintendo": "nnid",
 	"wiiu": "nnid",
