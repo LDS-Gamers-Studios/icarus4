@@ -33,6 +33,7 @@
     "profanity-matcher": "^1.0.1",
     "pug": "^2.0.3",
     "request": "^2.87.0",
+    "request-promise-native": "^1.0.5",
     "simple-oauth2": "^2.2.1",
     "simply-trello": "0.0.9",
     "socket.io": "^2.1.1",
