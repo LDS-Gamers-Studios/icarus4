@@ -51,7 +51,7 @@ const Module = new Augur.Module()
   Module.db.user.getUsers({excludeXP: true})
   .then(users => {
     for (let i = 0; i < users.length; i++) {
-      excludeUsers.add(user.discordId);
+      excludeUsers.add(users[i].discordId);
     }
   });
 })
