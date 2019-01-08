@@ -146,7 +146,7 @@ const Module = new Augur.Module()
     let path = require("path");
     let files = (suffix ? suffix.split(" ") : fs.readdirSync(path.resolve(process.cwd(), "./commands")));
 
-    files.forEach(file => {
+    files.filter(f => f.endsWith(".js")).forEach(file => {
       Module.handler.reload(path.resolve(process.cwd(), "./commands/", file));
     });
 
