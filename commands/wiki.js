@@ -20,7 +20,7 @@ const Module = new Augur.Module()
           .setTitle(wiki[1][0])
           .setDescription(wiki[2][0])
           .setURL(wiki[3][0])
-          .setThumbnail("https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Wikipedia-logo-v2.svg/103px-Wikipedia-logo-v2.svg.png");
+          .setAuthor("Wikipedia", "https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Wikipedia-logo-v2.svg/103px-Wikipedia-logo-v2.svg.png");
 
           if (wiki[2][0].endsWith("may refer to:")) {
             for (let i = 1; i < wiki[1].length; i++) {
@@ -32,7 +32,7 @@ const Module = new Augur.Module()
 
             let img = $("table.infobox img");
             if (img.length > 0) {
-              embed.setImage("https:" + img.first().attr("src"));
+              embed.setThumbnail("https:" + img.first().attr("src"));
             }
           }
           msg.channel.send(embed);
