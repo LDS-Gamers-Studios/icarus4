@@ -208,7 +208,7 @@ const Module = new Augur.Module()
                 member.addRole(reward);
                 message += `\n\nYou have been awarded the ${reward.name} role!`;
               }
-              member.send(message).catch(u.alertError);
+              member.send(message).catch(u.alertError).catch(u.alertError);
             }
           });
         }

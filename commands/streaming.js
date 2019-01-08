@@ -598,10 +598,10 @@ const Module = new Augur.Module()
 .addEvent("guildMemberUpdate", (oldMember, newMember) => {
   let twitchSub = "338056125062578176";
   if (oldMember.roles.has(twitchSub) && !newMember.roles.has(twitchSub)) {
-    newMember.send("It looks like your Twitch subscription to LDS Gamers has expired!\n\nTwitch Prime subscriptions need to be resubbed on a monthly basis. If this was unintentional, please consider resubbing at <https://www.twitch.tv/ldsgamers>. It helps keep the website and various game servers running. Thanks for the support! <:hexlogo:447251297033256962>");
+    newMember.send("It looks like your Twitch subscription to LDS Gamers has expired!\n\nTwitch Prime subscriptions need to be resubbed on a monthly basis. If this was unintentional, please consider resubbing at <https://www.twitch.tv/ldsgamers>. It helps keep the website and various game servers running. Thanks for the support! <:hexlogo:447251297033256962>").catch(u.alertError);
     newMember.client.channels.get("506575671242260490").send(`**${newMember.displayName}**'s Twitch Sub has expired!`);
   } else if (!oldMember.roles.has(twitchSub) && newMember.roles.has(twitchSub)) {
-    newMember.send("Thanks for becoming an LDS Gamers Twitch Subscriber! People like you help keep the website and various game servers running. If you subscribed with a Twitch Prime sub, those need to be renewed monthly. You'll get a notification if I notice it lapse. Thanks for the support! <:hexlogo:447251297033256962>");
+    newMember.send("Thanks for becoming an LDS Gamers Twitch Subscriber! People like you help keep the website and various game servers running. If you subscribed with a Twitch Prime sub, those need to be renewed monthly. You'll get a notification if I notice it lapse. Thanks for the support! <:hexlogo:447251297033256962>").catch(u.alertError);
     newMember.client.channels.get("506575671242260490").send(`**${newMember.displayName}** has become a Twitch Sub!`);
   }
 })

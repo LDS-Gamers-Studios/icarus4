@@ -30,7 +30,7 @@ function runTag(msg) {
     let list = Array.from(tags.get(msg.guild.id).values()).map(c => prefix + c.tag).sort();
 
     embed.setDescription(list.join("\n"));
-    msg.author.send(embed);
+    msg.author.send(embed).catch(u.alertError);
   }
 }
 

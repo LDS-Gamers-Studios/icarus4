@@ -62,7 +62,7 @@ const Module = new Augur.Module()
 						.setDescription(`Redeem ${gb} for game codes with the \`!gameredeem code\` command.`);
 					games.forEach((game, i) => {
 						if (((i + 1) % 25) == 0) {
-							msg.author.send(embed);
+							msg.author.send(embed).catch(u.alertError);
 							embed = u.embed()
 							  .setTitle("Games Available to Redeem")
 								.setDescription(`Redeem ${gb} for game codes with the \`!gameredeem code\` command.`);
@@ -73,7 +73,7 @@ const Module = new Augur.Module()
 
 						embed.addField(`${game.gametitle} (${game.system})${(game.rating ? ` [${game.rating}]` : "")}`, `${gb}${game.cost}${(steamApp ? ` [[Steam Store Page]](https://store.steampowered.com/app/${steamApp.appid})` : "")}\n\`!gameredeem ${game.code}\``);
 					});
-					msg.author.send(embed);
+					msg.author.send(embed).catch(u.alertError);
 		    });
 		  }
 		});
@@ -127,7 +127,7 @@ const Module = new Augur.Module()
 									game.recipient = msg.author.username;
 									game.date = new Date();
 									game.save();
-									msg.author.send(embed);
+									msg.author.send(embed).catch(u.alertError);
 									msg.client.channels.get(modLogs).send(`${msg.author.username} just redeemed ${gb}${game.cost} for a ${game.gametitle} (${game.system}) key.`);
 								});
 
@@ -187,7 +187,7 @@ const Module = new Augur.Module()
 								Module.db.bank.getBalance(user.id).then(balance => {
 									msg.channel.send(`${gb}${receipt.value} sent to ${member} for ${reason}`).then(u.clean);
 									msg.client.channels.get(modLogs).send(`**${msg.member.displayName}** gave **${member.displayName}** ${gb}${receipt.value} for ${reason}.`);
-									member.send(`You were just awarded ${gb}${receipt.value} from ${msg.member.displayName} for ${reason}! 💸\nYou now have a total of ${gb}${balance.balance} in your LDSG account.`);
+									member.send(`You were just awarded ${gb}${receipt.value} from ${msg.member.displayName} for ${reason}! 💸\nYou now have a total of ${gb}${balance.balance} in your LDSG account.`).catch(u.alertError);
 								});
 								if (!admin) {
 									let withdrawl = {
@@ -197,7 +197,7 @@ const Module = new Augur.Module()
 										mod: msg.member.id
 									}
 									Module.db.bank.addCurrency(withdrawl).then(receipt => {
-										msg.member.send(`You just sent ${member.displayName} ${gb}${bucks} for ${reason}`);
+										msg.member.send(`You just sent ${member.displayName} ${gb}${bucks} for ${reason}`).catch(u.alertError);
 									});
 								}
 							});
@@ -244,7 +244,7 @@ const Module = new Augur.Module()
               mod: msg.author.id
             };
             let withdraw = await Module.db.bank.addCurrency(withdrawl);
-            msg.author.send(`You have redeemed ${gb}${amount} for a $${discount.amount} discount code in the LDS Gamers Store! <http://ldsgamers.com/shop>\n\nUse code __**${discount.code}**__ at checkout to apply the discount. This code will be good for ${discount.maxNumberOfUsages} use. (Note that means that if you redeem a code and don't use its full value, the remaining value is lost.)\n\nYou now have ${gb}${balance.balance - amount}.`);
+            msg.author.send(`You have redeemed ${gb}${amount} for a $${discount.amount} discount code in the LDS Gamers Store! <http://ldsgamers.com/shop>\n\nUse code __**${discount.code}**__ at checkout to apply the discount. This code will be good for ${discount.maxNumberOfUsages} use. (Note that means that if you redeem a code and don't use its full value, the remaining value is lost.)\n\nYou now have ${gb}${balance.balance - amount}.`).catch(u.alertError);
             msg.client.channels.get(modLogs).send(`**${msg.author.username}** just redeemed ${gb}${amount} for a store coupon code. They now have ${gb}${balance.balance - amount}.`);
           } else {
             msg.reply("Sorry, something went wrong. Please try again.").then(u.clean);
@@ -288,7 +288,7 @@ const Module = new Augur.Module()
             discount.name = `${newMember.user.username} ${role}`;
             discount.rate = newLevel.rate;
             discount = await snipcart.editDiscount(discount);
-            newMember.send(`Thanks for joining the ${role} ranks! As a thank you, you get a ${discount.rate}% discount on purchases in the shop by using code \`${discount.code}\`. This discount will apply as long as you keep the ${role} role.\nhttps://ldsgamers.com/shop`);
+            newMember.send(`Thanks for joining the ${role} ranks! As a thank you, you get a ${discount.rate}% discount on purchases in the shop by using code \`${discount.code}\`. This discount will apply as long as you keep the ${role} role.\nhttps://ldsgamers.com/shop`).catch(u.alertError);
           } else if (discount && (newLevel.rate == 0)) {
             // Discount no longer applies. Delete.
             snipcart.deleteDiscount(discount);
@@ -303,7 +303,7 @@ const Module = new Augur.Module()
             };
 
             await snipcart.newDiscount(discount);
-            newMember.send(`Thanks for joining the ${role} ranks! As a thank you, you get a ${discount.rate}% discount on purchases in the shop by using code \`${discount.code}\`. This discount will apply as long as you keep the ${role} role.\nhttps://ldsgamers.com/shop`);
+            newMember.send(`Thanks for joining the ${role} ranks! As a thank you, you get a ${discount.rate}% discount on purchases in the shop by using code \`${discount.code}\`. This discount will apply as long as you keep the ${role} role.\nhttps://ldsgamers.com/shop`).catch(u.alertError);
           }
         }
       }
