@@ -11,7 +11,7 @@ const Module = new Augur.Module()
       if (wiki && wiki[1].length > 0) {
         let embed = u.embed()
         .setTitle(wiki[1][0])
-        .setDescription(wiki[2][0]);
+        .setDescription(wiki[2][0])
         .setURL(wiki[3][0])
         .setThumbnail("https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Wikipedia-logo-v2.svg/103px-Wikipedia-logo-v2.svg.png");
 
