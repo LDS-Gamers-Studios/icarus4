@@ -30,7 +30,7 @@ const Module = new Augur.Module()
             let body = await request(wiki[3][0]);
             let $ = cheerio.load(body);
 
-            let img = $(".infobox img");
+            let img = $("table.infobox img");
             if (img.length > 0) {
               embed.setImage("https:" + img.first().attr("src"));
             }
