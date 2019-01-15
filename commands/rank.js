@@ -1,7 +1,7 @@
 const Augur = require("augurbot"),
   Rank = require("../utils/RankInfo"),
   u = require("../utils/utils"),
-  threshold = 4;
+  threshold = 5;
 
 const starboard = "405405857099284490";
 
@@ -174,7 +174,7 @@ const Module = new Augur.Module()
 })
 .addEvent("messageReactionRemove", (reaction, user) => {
   let message = reaction.message;
-	if (message.guild && (message.guild.id == Module.config.ldsg) && ((reaction.emoji.name == "⭐") || (reaction.emoji.name == "🌟")) && (user.id != message.author.id)) {
+	if (message.guild && (message.guild.id == Module.config.ldsg)) {
 		let {count, valid} = validate(message);
 		if ((valid || (count >= threshold)) && !Rank.excludeChannels.includes(message.channel.id))
       updateStarboard(message);
