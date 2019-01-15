@@ -1,6 +1,17 @@
 {
-  "token": "",
-  "homePage": "https://bitbucket.org/Gaiwecoor/icarus3/",
+  "adminId": [],
+  "api": {
+    "challonge": "",
+    "freesound": "",
+    "mw": {
+      "dictionary": "",
+      "thesaurus": ""
+    },
+    "snipcart": "",
+    "steam": "",
+    "youtube": ""
+  },
+  "color": [248, 154, 34],
   "db": {
     "model": "models/mongo-models.js",
     "db": "",
@@ -9,42 +20,35 @@
 			"pass": ""
 		}
   },
-  "prefix": "!",
-  "ownerId": "",
-  "adminId": [],
-  "api": {
-    "challonge": "",
-    "steam": "",
-    "freesound": "",
-    "mw": {
-      "dictionary": "",
-      "thesaurus": ""
-    },
-    "snipcart": "",
-    "youtube": ""
-  },
-  "color": [248, 154, 34],
   "error": {
     "id": "",
     "token": ""
   },
+  "events": [
+    "channelCreate",
+    "disconnect",
+    "error",
+    "guildBanAdd",
+    "guildMemberAdd",
+    "guildMemberRemove",
+    "guildMemberUpdate",
+    "messageReactionAdd",
+    "messageReactionRemove",
+    "presenceUpdate",
+    "raw",
+    "voiceStateUpdate"
+  ],
+  "homePage": "https://bitbucket.org/Gaiwecoor/icarus3/src/master/README.md",
+  "ldsg": "96335850576556032",
+  "ownerId": "",
+  "prefix": "!",
   "roles": {
     "management": "96360253850935296",
+    "mod": "503066022912196608",
     "muted": "210909249218281474",
     "team": "96345401078087680",
     "trusted": "210912511514509312"
   },
-  "ldsg": "96335850576556032",
-  "events": [
-		"channelCreate",
-		"disconnect",
-		"error",
-		"guildBanAdd",
-		"guildDelete",
-		"guildMemberAdd",
-		"guildMemberRemove",
-		"guildMemberUpdate",
-		"messageReactionAdd",
-		"presenceUpdate"
-	]
+  "streamApplications": "",
+  "token": ""
 }
