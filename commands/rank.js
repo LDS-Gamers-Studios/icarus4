@@ -43,7 +43,8 @@ function validate(message) {
   let team = message.guild.roles.get(Module.config.roles.mod);
   let management = message.guild.roles.get(Module.config.roles.management);
   let valid = (superstars ? message.reactions.get("🌟").users.reduce((v, u) => v || team.members.has(u.id) || management.members.has(u.id), false) : 0);
-  return {stars, superstars, valid};
+  let count = Math.max(stars, superstars);
+  return {count, valid};
 };
 
 const Module = new Augur.Module()
@@ -160,29 +161,23 @@ const Module = new Augur.Module()
 .addEvent("messageReactionAdd", (reaction, user) => {
   let message = reaction.message;
   if (message.guild && (message.guild.id == Module.config.ldsg) && !message.author.bot) {
-    if ((reaction.emoji.name == "⭐") || (reaction.emoji.name == "🌟")) {
-      if (user.id != message.author.id) {
-        let {stars, superstars, valid} = validate(message);
-        if (valid || (((stars >= threshold) || (superstars >= threshold)) && !Rank.excludeChannels.includes(message.channel.id)))
-          updateStarboard(message);
-      } else {
-        reaction.remove(user);
-        message.reply("you can't star your own message, silly.");
-      }
-    }
-    else if (reaction.emoji.name == "🚫" && (message.channel.id == starboard) && (message.guild.roles.get(Module.config.roles.mod).members.has(user.id))) {
+    if (reaction.emoji.name == "🚫" && (message.channel.id == starboard) && (message.guild.roles.get(Module.config.roles.mod).members.has(user.id))) {
       if (message.embeds[0].color == null) {
         message.delete();
         Module.db.starboard.denyStar(message);
       }
+    } else {
+      let {count, valid} = validate(message);
+      if ((valid || (count >= threshold)) && !Rank.excludeChannels.includes(message.channel.id))
+        updateStarboard(message);
     }
   }
 })
 .addEvent("messageReactionRemove", (reaction, user) => {
   let message = reaction.message;
 	if (message.guild && (message.guild.id == Module.config.ldsg) && ((reaction.emoji.name == "⭐") || (reaction.emoji.name == "🌟")) && (user.id != message.author.id)) {
-		let {stars, superstars, valid} = validate(message);
-		if (valid || (((stars >= threshold) || (superstars >= threshold)) && !Rank.excludeChannels.includes(message.channel.id)))
+		let {count, valid} = validate(message);
+		if ((valid || (count >= threshold)) && !Rank.excludeChannels.includes(message.channel.id))
       updateStarboard(message);
 	}
 })
