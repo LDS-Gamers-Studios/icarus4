@@ -12,8 +12,8 @@ async function updateStarboard(message) {
   try {
     let bot = message.client;
     let {count, valid} = validate(message);
-
-    for (const reaction of message.reactions.filter(r => (!r.emoji.guild || (r.emoji.guild.id == Module.config.ldsg))).size) {
+    const reactions = message.reactions.filter(r => (!r.emoji.guild || (r.emoji.guild.id == Module.config.ldsg)));
+    for (const reaction of reactions) {
       let users = await reaction.fetchUsers();
       reaction.count = users.size;
     };
@@ -25,7 +25,7 @@ async function updateStarboard(message) {
     .setColor((valid ? "DARK_GOLD" : null))
     .addField("Channel", message.channel.name)
     .addField("Jump to post", message.url)
-    .setFooter(message.reactions.filter(r => (!r.emoji.guild || (r.emoji.guild.id == Module.config.ldsg))).map(r => `${r.emoji.name} ${r.count}`).join(" | "));
+    .setFooter(reactions.map(r => `${r.emoji.name} ${r.count}`).join(" | "));
 
     if (message.attachments && (message.attachments.size > 0))
     embed.setImage(message.attachments.first().url);
