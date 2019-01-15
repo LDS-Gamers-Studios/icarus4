@@ -13,6 +13,11 @@ async function updateStarboard(message) {
     let bot = message.client;
     let {count, valid} = validate(message);
 
+    for (const reaction of message.reactions.filter(r => (!r.emoji.guild || (r.emoji.guild.id == Module.config.ldsg))).size) {
+      let users = await reaction.fetchUsers();
+      reaction.count = users.size;
+    };
+
     let embed = u.embed()
     .setAuthor(message.member.displayName, message.author.displayAvatarURL)
     .setTimestamp(message.createdAt)
@@ -21,7 +26,6 @@ async function updateStarboard(message) {
     .addField("Channel", message.channel.name)
     .addField("Jump to post", message.url)
     .setFooter(message.reactions.filter(r => (!r.emoji.guild || (r.emoji.guild.id == Module.config.ldsg))).map(r => `${r.emoji.name} ${r.count}`).join(" | "));
-    //.addField("Reactions", message.reactions.filter(r => (!r.emoji.guild || bot.guilds.has(r.emoji.guild.id))).map(r => `${r.emoji} ${r.count}`).join(" | "));
 
     if (message.attachments && (message.attachments.size > 0))
     embed.setImage(message.attachments.first().url);
