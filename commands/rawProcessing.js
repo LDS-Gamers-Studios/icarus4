@@ -17,7 +17,7 @@ const Module = new Augur.Module()
       const reaction = message.reactions.get(emoji);
 
       for (const [id, react] of message.reactions) {
-        react.users = await reaction.fetchUsers();
+        react.users = await react.fetchUsers();
         react.count = react.users.size;
       };
 
