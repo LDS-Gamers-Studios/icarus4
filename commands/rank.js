@@ -1,55 +1,9 @@
 const Augur = require("augurbot"),
   Rank = require("../utils/RankInfo"),
-  u = require("../utils/utils"),
-  threshold = 5;
-
-const starboard = "405405857099284490";
+  u = require("../utils/utils");
 
 const active = new Set();
 const excludeUsers = new Set();
-
-async function updateStarboard(message) {
-  try {
-    let bot = message.client;
-    let {count, valid} = validate(message);
-    const reactions = message.reactions.filter(r => (!r.emoji.guild || (r.emoji.guild.id == Module.config.ldsg)));
-    for (const [id, reaction] of reactions) {
-      let users = await reaction.fetchUsers();
-      reaction.count = users.size;
-    };
-
-    let embed = u.embed()
-    .setAuthor(message.member.displayName, message.author.displayAvatarURL)
-    .setTimestamp(message.createdAt)
-    .setDescription(message.cleanContent)
-    .setColor((valid ? "DARK_GOLD" : null))
-    .addField("Channel", message.channel.name)
-    .addField("Jump to post", message.url)
-    .setFooter(reactions.map(r => `${r.emoji.name} ${r.count}`).join(" | "));
-
-    if (message.attachments && (message.attachments.size > 0))
-    embed.setImage(message.attachments.first().url);
-
-    let star = await Module.db.starboard.fetchStar(message.id);
-    if (star && !star.deny) {
-      let m = await bot.channels.get(starboard).fetchMessage(star.starId);
-      m.edit(embed);
-    } else {
-      let m = await bot.channels.get(starboard).send(embed);
-      Module.db.starboard.saveStar(message, m);
-    }
-  } catch(e) { u.alertError(e); }
-};
-
-function validate(message) {
-  let stars = (message.reactions.has("⭐") ? message.reactions.get("⭐").users.size : 0);
-  let superstars = (message.reactions.has("🌟") ? message.reactions.get("🌟").users.size : 0);
-  let team = message.guild.roles.get(Module.config.roles.mod);
-  let management = message.guild.roles.get(Module.config.roles.management);
-  let valid = (superstars ? message.reactions.get("🌟").users.reduce((v, u) => v || team.members.has(u.id) || management.members.has(u.id), false) : 0);
-  let count = Math.max(stars, superstars);
-  return {count, valid};
-};
 
 const Module = new Augur.Module()
 .setInit(() => {
@@ -162,29 +116,6 @@ const Module = new Augur.Module()
   if (msg.guild && (msg.guild.id == Module.config.ldsg) && !active.has(msg.author.id) && !(Rank.excludeChannels.includes(msg.channel.id) || Rank.excludeChannels.includes(msg.channel.parentID)) && !u.parse(msg) && !excludeUsers.has(msg.author.id) && !msg.author.bot)
 		active.add(msg.author.id);
 })
-.addEvent("messageReactionAdd", (reaction, user) => {
-  let message = reaction.message;
-  if (message.guild && (message.guild.id == Module.config.ldsg) && !message.author.bot) {
-    if (reaction.emoji.name == "🚫" && (message.channel.id == starboard) && (message.guild.roles.get(Module.config.roles.mod).members.has(user.id))) {
-      if (message.embeds[0].color == null) {
-        message.delete();
-        Module.db.starboard.denyStar(message);
-      }
-    } else {
-      let {count, valid} = validate(message);
-      if ((valid || (count >= threshold)) && !Rank.excludeChannels.includes(message.channel.id))
-        updateStarboard(message);
-    }
-  }
-})
-.addEvent("messageReactionRemove", (reaction, user) => {
-  let message = reaction.message;
-	if (message.guild && (message.guild.id == Module.config.ldsg)) {
-		let {count, valid} = validate(message);
-		if ((valid || (count >= threshold)) && !Rank.excludeChannels.includes(message.channel.id))
-      updateStarboard(message);
-	}
-})
 .setClockwork(() => {
   try {
     let bot = Module.handler.client;
@@ -211,9 +142,6 @@ const Module = new Augur.Module()
           });
         }
         active.clear();
-
-        //await Module.db.user.addStars(stars);
-        //stars = {};
       } catch(e) { u.alertError(e); }
     }, 60000, bot);
   } catch(e) { u.alertError(e); }
