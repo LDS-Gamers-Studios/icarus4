@@ -20,7 +20,8 @@ async function updateStarboard(message) {
     .setColor((valid ? "DARK_GOLD" : null))
     .addField("Channel", message.channel.name)
     .addField("Jump to post", message.url)
-    .addField("Reactions", message.reactions.filter(r => (!r.emoji.guild || bot.guilds.has(r.emoji.guild.id))).map(r => `${r.emoji} ${r.count}`).join(" | "));
+    .setFooter(message.reactions.filter(r => !r.emoji.guild).map(r => `${r.emoji} ${r.count}`).join(" | "));
+    //.addField("Reactions", message.reactions.filter(r => (!r.emoji.guild || bot.guilds.has(r.emoji.guild.id))).map(r => `${r.emoji} ${r.count}`).join(" | "));
 
     if (message.attachments && (message.attachments.size > 0))
     embed.setImage(message.attachments.first().url);
