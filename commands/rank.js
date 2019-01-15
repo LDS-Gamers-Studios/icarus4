@@ -18,9 +18,9 @@ async function updateStarboard(message) {
     .setTimestamp(message.createdAt)
     .setDescription(message.cleanContent)
     .setColor((valid ? "DARK_GOLD" : null))
-    .setFooter(message.reactions.filter(r => !r.emoji.guild).map(r => `${r.emoji} ${r.count}`).join(" | "))
     .addField("Channel", message.channel.name)
-    .addField("Jump to post", message.url);
+    .addField("Jump to post", message.url)
+    .addField("Reactions", message.reactions.map(r => `${r.emoji} ${r.count}`).join(" | "));
 
     if (message.attachments && (message.attachments.size > 0))
     embed.setImage(message.attachments.first().url);
