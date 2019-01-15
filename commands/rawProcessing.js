@@ -18,7 +18,7 @@ const Module = new Augur.Module()
 
       for (const [id, react] of message.reactions) {
         react.users = await reaction.fetchUsers();
-        react.count = users.size;
+        react.count = react.users.size;
       };
 
       if (packet.t === 'MESSAGE_REACTION_ADD') {
