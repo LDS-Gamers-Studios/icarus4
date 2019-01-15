@@ -8,33 +8,32 @@ const starboard = "405405857099284490";
 const active = new Set();
 const excludeUsers = new Set();
 
-function updateStarboard(message) {
-  let bot = message.client;
-  let {stars, superstars, valid} = validate(message);
+async function updateStarboard(message) {
+  try {
+    let bot = message.client;
+    let {count, valid} = validate(message);
 
-	let embed = u.embed()
-		.setAuthor(message.member.displayName, message.author.displayAvatarURL)
-		.setTimestamp(message.createdAt)
-		.setDescription(message.cleanContent)
+    let embed = u.embed()
+    .setAuthor(message.member.displayName, message.author.displayAvatarURL)
+    .setTimestamp(message.createdAt)
+    .setDescription(message.cleanContent)
     .setColor((valid ? "DARK_GOLD" : null))
     .setFooter(message.reactions.filter(r => !r.emoji.animated).map(r => `${r.emoji} ${r.count}`).join(" | "))
-		.addField("Channel", message.channel.name)
+    .addField("Channel", message.channel.name)
     .addField("Jump to post", message.url);
 
-	if (message.attachments && (message.attachments.size > 0))
-		embed.setImage(message.attachments.first().url);
+    if (message.attachments && (message.attachments.size > 0))
+    embed.setImage(message.attachments.first().url);
 
-	Module.db.starboard.fetchStar(message.id).then(star => {
-		if (star && !star.deny) {
-			bot.channels.get(starboard).fetchMessage(star.starId).then(m => {
-				m.edit(embed);
-			});
-		} else {
-			bot.channels.get(starboard).send(embed).then(m => {
-				Module.db.starboard.saveStar(message, m);
-			});
-		}
-	}).catch(console.error);
+    let star = await Module.db.starboard.fetchStar(message.id);
+    if (star && !star.deny) {
+      let m = bot.channels.get(starboard).fetchMessage(star.starId);
+      m.edit(embed);
+    } else {
+      let m = await bot.channels.get(starboard).send(embed);
+      Module.db.starboard.saveStar(message, m);
+    }
+  } catch(e) { u.alertError(e); }
 };
 
 function validate(message) {
