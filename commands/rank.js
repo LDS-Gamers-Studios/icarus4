@@ -18,7 +18,7 @@ async function updateStarboard(message) {
     .setTimestamp(message.createdAt)
     .setDescription(message.cleanContent)
     .setColor((valid ? "DARK_GOLD" : null))
-    .setFooter(message.reactions.filter(r => !r.emoji.animated).map(r => `${r.emoji} ${r.count}`).join(" | "))
+    .setFooter(message.reactions.filter(r => !r.emoji.guild).map(r => `${r.emoji} ${r.count}`).join(" | "))
     .addField("Channel", message.channel.name)
     .addField("Jump to post", message.url);
 
