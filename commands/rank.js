@@ -27,7 +27,7 @@ async function updateStarboard(message) {
 
     let star = await Module.db.starboard.fetchStar(message.id);
     if (star && !star.deny) {
-      let m = bot.channels.get(starboard).fetchMessage(star.starId);
+      let m = await bot.channels.get(starboard).fetchMessage(star.starId);
       m.edit(embed);
     } else {
       let m = await bot.channels.get(starboard).send(embed);
