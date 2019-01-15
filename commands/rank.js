@@ -13,7 +13,7 @@ async function updateStarboard(message) {
     let bot = message.client;
     let {count, valid} = validate(message);
     const reactions = message.reactions.filter(r => (!r.emoji.guild || (r.emoji.guild.id == Module.config.ldsg)));
-    for (const reaction of reactions) {
+    for (const [id, reaction] of reactions) {
       let users = await reaction.fetchUsers();
       reaction.count = users.size;
     };
