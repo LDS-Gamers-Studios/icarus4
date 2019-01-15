@@ -7,6 +7,9 @@ const starboard = "405405857099284490",
 
 async function updateStarboard(message) {
   try {
+    // Don't post bot messages, silly
+    if (message.author.bot || message.author.id == message.client.user.id) return false;
+
     let bot = message.client;
     let {count, valid} = validate(message);
     const reactions = message.reactions.filter(r => (!r.emoji.guild || (r.emoji.guild.id == Module.config.ldsg)));
@@ -40,17 +43,20 @@ function validate(message) {
   let count = 0;
   let valid = false;
 
-  for (const [__, reaction] of message.reactions) {
-    if (reaction.count > count) count = reaction.count;
-    if (reaction.emoji.name == "🌟") {
-      for (const [userId, user] of reaction.users) {
-        if (team.members.has(userId) || management.members.has(userId)) {
-          valid = true;
-          break;
+  if (!message.author.bot) {
+    for (const [__, reaction] of message.reactions) {
+      if (reaction.count > count) count = reaction.count;
+      if (reaction.emoji.name == "🌟") {
+        for (const [userId, user] of reaction.users) {
+          if (team.members.has(userId) || management.members.has(userId)) {
+            valid = true;
+            break;
+          }
         }
       }
     }
   }
+
   return {count, valid};
 };
 
