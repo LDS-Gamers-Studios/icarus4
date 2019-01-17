@@ -2,7 +2,7 @@ const Discord = require("discord.js"),
   config = require("./config/config.json"),
   bot = new Discord.Client();
 
-bot.on("ready", () => ldsg = bot.guilds.get(config.ldsg));
+bot.on("ready", () => console.log("Ready!"));
 
 bot.login(config.token);
 
