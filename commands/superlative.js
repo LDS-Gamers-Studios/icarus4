@@ -64,16 +64,12 @@ const Module = new Augur.Module()
 .addEvent("messageReactionAdd", (reaction, user) => {
   let message = reaction.message;
   if (message.guild && (message.guild.id == Module.config.ldsg) && !message.author.bot) {
-    if ((message.channel.id == starboard) && reaction.emoji.name == "🚫" && (message.guild.roles.get(Module.config.roles.mod).members.has(user.id))) {
-      if (message.embeds[0].color == null) {
-        message.delete();
-        Module.db.starboard.denyStar(message);
-      }
-    } else {
-      let {count, valid} = validate(message);
-      if ((valid || (count >= threshold)) && !Rank.excludeChannels.includes(message.channel.id))
-        updateStarboard(message);
-    }
+    let {count, valid} = validate(message);
+    if ((valid || (count >= threshold)) && !Rank.excludeChannels.includes(message.channel.id))
+      updateStarboard(message);
+  } else if ((message.channel.id == starboard) && reaction.emoji.name == "🚫" && (message.guild.roles.get(Module.config.roles.mod).members.has(user.id)) && message.embeds[0].color == null) {
+      message.delete();
+      Module.db.starboard.denyStar(message);
   }
 })
 .addEvent("messageReactionRemove", (reaction, user) => {
