@@ -3,7 +3,7 @@ const Augur = require("augurbot"),
   u = require("../utils/utils");
 
 const starboard = "405405857099284490",
-  threshold = 5;
+  threshold = 10;
 
 async function updateStarboard(message) {
   try {
@@ -45,7 +45,8 @@ function validate(message) {
 
   if (!message.author.bot) {
     for (const [__, reaction] of message.reactions) {
-      if (reaction.count > count) count = reaction.count;
+      let rcount = (["🌟", "⭐"].includes(reaction.emoji.name) ? reaction.count * 2 : reaction.count);
+      if (rcount > count) count = rcount;
       if (reaction.emoji.name == "🌟") {
         for (const [userId, user] of reaction.users) {
           if (team.members.has(userId) || management.members.has(userId)) {
