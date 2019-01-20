@@ -66,7 +66,7 @@ const Module = new Augur.Module()
   let message = reaction.message;
   if (message.guild && (message.guild.id == Module.config.ldsg) && !message.author.bot) {
     let {count, valid} = validate(message);
-    if ((valid || (count >= threshold)) && !Rank.excludeChannels.includes(message.channel.id))
+    if (valid || ((count >= threshold) && !Rank.excludeChannels.includes(message.channel.id)))
       updateStarboard(message);
   } else if ((message.channel.id == starboard) && reaction.emoji.name == "🚫" && (message.guild.roles.get(Module.config.roles.mod).members.has(user.id)) && message.embeds[0].color == null) {
       message.delete();
@@ -77,7 +77,7 @@ const Module = new Augur.Module()
   let message = reaction.message;
 	if (message.guild && (message.guild.id == Module.config.ldsg)) {
 		let {count, valid} = validate(message);
-		if ((valid || (count >= threshold)) && !Rank.excludeChannels.includes(message.channel.id))
+		if (valid || ((count >= threshold) && !Rank.excludeChannels.includes(message.channel.id)))
       updateStarboard(message);
 	}
 });
