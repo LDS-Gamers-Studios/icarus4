@@ -1,40 +1,13 @@
 const Augur = require("augurbot"),
   u = require("../utils/utils");
 
-async function collector(msg) {
-  try {
-    let existing = (msg.reactions.get("💬") ? msg.reactions.get("💬").users.keyArray() : []);
-    let bot = msg.client;
-    let reactions = await msg.awaitReactions(
-      (reaction, user) => ((reaction.emoji.name == "💬") && !user.bot),
-      {max: 1}
-    );
-    let user = reactions.first().users.find(u => !existing.includes(u.id));
-    let spoiler = await Module.db.spoiler.fetch(msg.id);
-    if (spoiler && user) {
-      let author = await bot.fetchUser(spoiler.authorId)
-      let embed = u.embed();
-      embed.setAuthor(spoiler.authorName, author.displayAvatarURL)
-      .setColor(Module.config.color)
-      .setDescription(spoiler.content)
-      .setTimestamp(spoiler.timestamp)
-      .setTitle(`Spoiler${(spoiler.channelName ? (" in #" + spoiler.channelName) : "")}${(spoiler.topic ? " about " + spoiler.topic : "")}:`);
-
-      user.send(embed);
-    }
-    collector(msg);
-  } catch(e) {
-    u.alertError(e);
-  }
-}
-
 const Module = new Augur.Module()
 .addCommand({name: "spoiler",
 	description: "Hide your spoilers",
 	syntax: "Spoiler Text [## Spoiler Topic]",
 	info: "Hides your spoilers, so others can choose whether to see it.",
 	aliases: ["spoil", "spoilers"],
-  permissions: (msg) => (msg.guild && msg.channel.permissionsFor(msg.client.user).has("MANAGE_MESSAGES")),
+	permissions: (msg) => (msg.guild && msg.channel.permissionsFor(msg.client.user).has("MANAGE_MESSAGES")),
 	process: async (msg, suffix) => {
     try {
       u.clean(msg, 150);
@@ -57,27 +30,29 @@ const Module = new Augur.Module()
       };
       await Module.db.spoiler.save(spoiler);
       await m.react("💬");
-      collector(m);
     } catch(e) { u.alertError(e, msg); }
-	}
-})
-.setInit((reload) => {
-  if (!reload) {
-    setTimeout(async () => {
-      try {
-        let bot = Module.handler.client;
-        let spoilers = await Module.db.spoiler.fetchAll();
-        spoilers = spoilers.filter(s => bot.channels.has(s.channelId));
-        for (let i = 0; i < spoilers.length; i++) {
-          let spoiler = spoilers[i];
-          let msg = await bot.channels.get(spoiler.channelId).fetchMessage(spoiler.spoilerId);
-          collector(msg);
-        }
-      } catch(e) {
-        u.alertError(e);
-      }
-    }, 5000);
   }
+})
+.addEvent("messageReactionAdd", (reaction, user) => {
+  try {
+    if (reaction.emoji.name == "💬") {
+      let message = reaction.message;
+      let spoiler = await Module.db.spoiler.fetch(message.id);
+
+      if (spoiler && !user.bot) {
+        let bot = Module.handler.client;
+        let author = await bot.fetchUser(spoiler.authorId)
+        let embed = u.embed();
+        embed.setAuthor(spoiler.authorName, author.displayAvatarURL)
+        .setColor(Module.config.color)
+        .setDescription(spoiler.content)
+        .setTimestamp(spoiler.timestamp)
+        .setTitle(`Spoiler${(spoiler.channelName ? (" in #" + spoiler.channelName) : "")}${(spoiler.topic ? " about " + spoiler.topic : "")}:`);
+
+        user.send(embed);
+      }
+    }
+  } catch(e) { u.alertError(e, msg); }
 })
 .setUnload(() => true);
 
