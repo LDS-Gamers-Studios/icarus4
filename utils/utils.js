@@ -92,6 +92,7 @@ const Utils = {
     return foundUser;
   },
   init: (Handler) => db.init(Handler),
+  ignoreError: (e) => {},
   parse: function(msg) {
     let prefix = Utils.prefix(msg);
     let message = msg.content;

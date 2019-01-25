@@ -82,7 +82,7 @@ const Module = new Augur.Module()
           value: award,
           mod: msg.author.id
         }).then(deposit => {
-          guild.members.get(deposit.discordId).send(`${guild.name} Chat Ranks have been reset! You've been awarded ${gb}${deposit.value} for your participation this season!`);
+          guild.members.get(deposit.discordId).send(`${guild.name} Chat Ranks have been reset! You've been awarded ${gb}${deposit.value} for your participation this season!`).catch(u.ignoreError);
         });
       });
 
@@ -137,7 +137,7 @@ const Module = new Augur.Module()
                 member.addRole(reward);
                 message += `\n\nYou have been awarded the ${reward.name} role!`;
               }
-              member.send(message).catch(u.alertError).catch(u.alertError);
+              member.send(message).catch(u.ignoreError);
             }
           });
         }

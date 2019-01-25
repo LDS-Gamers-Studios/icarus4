@@ -187,7 +187,7 @@ const Module = new Augur.Module()
 								Module.db.bank.getBalance(user.id).then(balance => {
 									msg.channel.send(`${gb}${receipt.value} sent to ${member} for ${reason}`).then(u.clean);
 									msg.client.channels.get(modLogs).send(`**${msg.member.displayName}** gave **${member.displayName}** ${gb}${receipt.value} for ${reason}.`);
-									member.send(`You were just awarded ${gb}${receipt.value} from ${msg.member.displayName} for ${reason}! 💸\nYou now have a total of ${gb}${balance.balance} in your LDSG account.`).catch(u.alertError);
+									member.send(`You were just awarded ${gb}${receipt.value} from ${msg.member.displayName} for ${reason}! 💸\nYou now have a total of ${gb}${balance.balance} in your LDSG account.`).catch(u.ignoreError);
 								});
 								if (!admin) {
 									let withdrawl = {
@@ -197,7 +197,7 @@ const Module = new Augur.Module()
 										mod: msg.member.id
 									}
 									Module.db.bank.addCurrency(withdrawl).then(receipt => {
-										msg.member.send(`You just sent ${member.displayName} ${gb}${bucks} for ${reason}`).catch(u.alertError);
+										msg.member.send(`You just sent ${member.displayName} ${gb}${bucks} for ${reason}`).catch(u.ignoreError);
 									});
 								}
 							});

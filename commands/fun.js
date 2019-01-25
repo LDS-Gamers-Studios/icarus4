@@ -38,10 +38,10 @@ function testBirthdays(bot) {
             bot.guilds.get(ldsg).fetchMember(birthday.discordId).then(member => {
               bot.channels.get(ldsg).send(":birthday: :confetti_ball: :tada: Happy Birthday, " + member + "! :tada: :confetti_ball: :birthday:").then(() => {
                 var birthdayLangs = require("../data/birthday.json");
-                let msgs = birthdayLangs.map(lang => member.send(flair[Math.floor(Math.random() * flair.length)] + " " + lang).catch(u.alertError));
+                let msgs = birthdayLangs.map(lang => member.send(flair[Math.floor(Math.random() * flair.length)] + " " + lang));
                 Promise.all(msgs).then(() => {
-                  member.send(":birthday: :confetti_ball: :tada: A very happy birthday to you, from LDS Gamers! :tada: :confetti_ball: :birthday:").catch(u.alertError);
-                });
+                  member.send(":birthday: :confetti_ball: :tada: A very happy birthday to you, from LDS Gamers! :tada: :confetti_ball: :birthday:").catch(u.ignoreError);
+                }).catch(u.ignoreError);
               });
             });
           }
@@ -105,8 +105,8 @@ const Module = new Augur.Module()
         let msgs = birthdayLangs.map(lang => birthday.send(flair[Math.floor(Math.random() * flair.length)] + " " + lang));
 
         Promise.all(msgs).then(() => {
-          birthday.send(":birthday: :confetti_ball: :tada: A very happy birthday to you, from LDS Gamers! :tada: :confetti_ball: :birthday:");
-        });
+          birthday.send(":birthday: :confetti_ball: :tada: A very happy birthday to you, from LDS Gamers! :tada: :confetti_ball: :birthday:").catch(u.ignoreError);
+        }).catch(u.ignoreError);
       });
     } else {
       msg.reply("you need to tell me who to celebrate!");
@@ -227,15 +227,14 @@ const Module = new Augur.Module()
         .then(u.clean).catch(console.error);
       msg.mentions.users.forEach(function(user) {
         msg.client.fetchUser(user.id).then((user) => {
-          //u.dmChannel.send(`Incoming hug from ${msg.author}!`, {"file": {"attachment": "http://24.media.tumblr.com/72f1025bdbc219e38ea4a491639a216b/tumblr_mo6jla4wPo1qe89guo1_1280.gif", "name": "hug.gif"}})
           let hugs = [
             "http://24.media.tumblr.com/72f1025bdbc219e38ea4a491639a216b/tumblr_mo6jla4wPo1qe89guo1_1280.gif",
             "https://cdn.discordapp.com/attachments/96335850576556032/344202091776049152/hug.gif"
           ];
           let hug = hugs[Math.floor(Math.random() * hugs.length)];
           user.send(`Incoming hug from **${msg.author.username}**!`, {"file": {"attachment": hug, "name": "hug.gif"}})
-            .catch(console.error);
-        }).catch(console.error);
+            .catch(u.ignoreError);
+        }).catch(e => u.alertError(e, msg));
       });
     } else {
       msg.reply("who do you want to hug?")
