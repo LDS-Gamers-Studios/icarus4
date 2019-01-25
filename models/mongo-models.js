@@ -187,11 +187,16 @@ const models = {
       return new Promise((fulfill, reject) => {
         if (typeof mod != "string") mod = mod.id;
         if (typeof flag != "string") flag = flag.id;
-        Infraction.findOneAndDelete({flag, mod}, (err, doc) => {
+        Infraction.findOne({flag, mod}, (err, inf) => {
           if (err) reject(err);
-          else fulfill(doc);
+          else if (inf) {
+            Infraction.findOneAndDelete({flag, mod}, (err, doc) => {
+              if (err) reject(err);
+              else fulfill(inf);
+            });
+          } else fulfill(inf);
         });
-      })
+      });
     },
     update: (id, data) => {
       return new Promise((fulfill, reject) => {
