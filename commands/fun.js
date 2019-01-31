@@ -221,13 +221,13 @@ const Module = new Augur.Module()
   info: "Sends someone a hug via direct message.",
   category: "Silly",
   permissions: msg => msg.guild,
-	process: (msg, suffix) => {
+    process: (msg, suffix) => {
     u.clean(msg);
     if (msg.mentions.users && (msg.mentions.users.size > 0)) {
       msg.channel.send("Hug" + ((msg.mentions.users.size > 1) ? "s" : "") + " on the way!").then(u.clean);
       msg.mentions.users.forEach(async function(user) {
         try {
-          let user = await msg.client.fetchUser(user.id);
+          user = await msg.client.fetchUser(user.id);
           let hugs = [
             "http://24.media.tumblr.com/72f1025bdbc219e38ea4a491639a216b/tumblr_mo6jla4wPo1qe89guo1_1280.gif",
             "https://cdn.discordapp.com/attachments/96335850576556032/344202091776049152/hug.gif"
