@@ -220,25 +220,27 @@ const Module = new Augur.Module()
   syntax: "<@user(s)>",
   info: "Sends someone a hug via direct message.",
   category: "Silly",
+  permissions: msg => msg.guild,
 	process: (msg, suffix) => {
     u.clean(msg);
     if (msg.mentions.users && (msg.mentions.users.size > 0)) {
-      msg.channel.send("Hug" + ((msg.mentions.users.size > 1) ? "s" : "") + " on the way!")
-        .then(u.clean).catch(console.error);
-      msg.mentions.users.forEach(function(user) {
-        msg.client.fetchUser(user.id).then((user) => {
+      msg.channel.send("Hug" + ((msg.mentions.users.size > 1) ? "s" : "") + " on the way!").then(u.clean);
+      msg.mentions.users.forEach(async function(user) {
+        try {
+          let user = await msg.client.fetchUser(user.id);
           let hugs = [
             "http://24.media.tumblr.com/72f1025bdbc219e38ea4a491639a216b/tumblr_mo6jla4wPo1qe89guo1_1280.gif",
             "https://cdn.discordapp.com/attachments/96335850576556032/344202091776049152/hug.gif"
           ];
           let hug = hugs[Math.floor(Math.random() * hugs.length)];
           user.send(`Incoming hug from **${msg.author.username}**!`, {"file": {"attachment": hug, "name": "hug.gif"}})
-            .catch(u.ignoreError);
-        }).catch(e => u.alertError(e, msg));
+          .catch(e => {
+            msg.reply(`I couldn't send a hug to ${msg.guild.members.get(user.id).displayName}. Maybe they blocked me? :shrug:`).then(u.clean);
+          });
+        } catch(e) { u.alertError(e, msg); }
       });
     } else {
-      msg.reply("who do you want to hug?")
-        .then(u.clean).catch(console.error);
+      msg.reply("who do you want to hug?").then(u.clean);
     }
   }
 })
