@@ -225,6 +225,10 @@ const Module = new Augur.Module()
     u.clean(msg);
     if (msg.mentions.users && (msg.mentions.users.size > 0)) {
       msg.channel.send("Hug" + ((msg.mentions.users.size > 1) ? "s" : "") + " on the way!").then(u.clean);
+
+      // Include this for bug-hunting.
+      msg.client.channels.get("209046676781006849").send(`Hugs being sent from ${msg.author.username} to: ${msg.mentions.users.map(u => u).join(", ")}`).catch(e => u.alertError(e, msg));
+
       msg.mentions.users.forEach(async function(user) {
         try {
           user = await msg.client.fetchUser(user.id);
