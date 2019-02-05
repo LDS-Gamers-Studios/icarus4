@@ -2,8 +2,9 @@ const Augur = require("augurbot");
 
 async function reload(msg) {
   try {
+    let reactions;
     do {
-      let reactions = await msg.awaitReactions(
+      reactions = await msg.awaitReactions(
         (reaction, user) => ((reaction.emoji.name == "🔁") && !user.bot),
         {max: 1}
       );
@@ -25,7 +26,7 @@ async function animate(msg, frames, delay = 1000) {
     let store = frames.map(f => f);
     let m = await msg.channel.send(frames.shift());
     Module.db.animation.save({animationId: m.id, channelId: m.channel.id, frames: store});
-    
+
     if (frames.length > 0) nextFrame(m, frames, delay);
     else m.react("🔁");
     reload(m);
