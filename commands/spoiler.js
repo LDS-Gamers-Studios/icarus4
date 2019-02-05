@@ -35,11 +35,11 @@ const Module = new Augur.Module()
 })
 .addEvent("messageReactionAdd", (reaction, user) => {
   try {
-    if (reaction.emoji.name == "💬") {
+    if (reaction.emoji.name == "💬" && !user.bot) {
       let message = reaction.message;
       let spoiler = await Module.db.spoiler.fetch(message.id);
 
-      if (spoiler && !user.bot) {
+      if (spoiler) {
         let bot = Module.handler.client;
         let author = await bot.fetchUser(spoiler.authorId)
         let embed = u.embed();
