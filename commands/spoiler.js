@@ -33,7 +33,7 @@ const Module = new Augur.Module()
     } catch(e) { u.alertError(e, msg); }
   }
 })
-.addEvent("messageReactionAdd", (reaction, user) => {
+.addEvent("messageReactionAdd", async (reaction, user) => {
   try {
     if (reaction.emoji.name == "💬" && !user.bot) {
       let message = reaction.message;
