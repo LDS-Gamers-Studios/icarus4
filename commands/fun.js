@@ -76,7 +76,7 @@ async function testBirthdays(bot) {
             // Announce if active
             let user = await Module.db.user.fetchUser(member.id);
             if (user.currentXP > 0) {
-              bot.channels.get(ldsg).send(`${member} has been with us for ${years} ${(years > 1 ? "years" : "year")}! Glad you're with us!`);
+              bot.channels.get(ldsg).send(`${member} has been part of the server for ${years} ${(years > 1 ? "years" : "year")}! Glad you're with us!`);
             }
           }
         } catch(e) { u.alertError(e); }
