@@ -19,34 +19,59 @@ function quickText(msg, text) {
   msg.channel.send(text).catch(console.error);
 }
 
-function testBirthdays(bot) {
+async function testBirthdays(bot) {
   try {
     let curDate = new Date();
     let ldsg = Module.config.ldsg;
     if (curDate.getHours() == 20) {
-      Module.db.ign.getList("birthday").then(birthdays => {
-        birthdays.forEach(birthday => {
-          let date = new Date(birthday.ign);
-          if (date.getMonth() == curDate.getMonth() && date.getDate() == curDate.getDate()) {
-            let flair = [
-              ":tada: ",
-              ":confetti_ball: ",
-              ":birthday: ",
-              ":gift: ",
-              ":cake: "
-            ];
-            bot.guilds.get(ldsg).fetchMember(birthday.discordId).then(member => {
-              bot.channels.get(ldsg).send(":birthday: :confetti_ball: :tada: Happy Birthday, " + member + "! :tada: :confetti_ball: :birthday:").then(() => {
-                var birthdayLangs = require("../data/birthday.json");
-                let msgs = birthdayLangs.map(lang => member.send(flair[Math.floor(Math.random() * flair.length)] + " " + lang));
-                Promise.all(msgs).then(() => {
-                  member.send(":birthday: :confetti_ball: :tada: A very happy birthday to you, from LDS Gamers! :tada: :confetti_ball: :birthday:").catch(u.ignoreError);
-                }).catch(u.ignoreError);
-              });
-            });
+      // Birthday Blast
+      let birthdays = await Module.db.ign.getList("birthday");
+      for (let b = 0; b < birthdays.length; b++) {
+        let birthday = birthdays[b];
+        let date = new Date(birthday.ign);
+        if (date.getMonth() == curDate.getMonth() && date.getDate() == curDate.getDate()) {
+          let flair = [
+            ":tada: ",
+            ":confetti_ball: ",
+            ":birthday: ",
+            ":gift: ",
+            ":cake: "
+          ];
+          let member = await bot.guilds.get(ldsg).fetchMember(birthday.discordId);
+          await bot.channels.get(ldsg).send(":birthday: :confetti_ball: :tada: Happy Birthday, " + member + "! :tada: :confetti_ball: :birthday:");
+          var birthdayLangs = require("../data/birthday.json");
+          let msgs = birthdayLangs.map(lang => member.send(flair[Math.floor(Math.random() * flair.length)] + " " + lang));
+          Promise.all(msgs).then(() => {
+            member.send(":birthday: :confetti_ball: :tada: A very happy birthday to you, from LDS Gamers! :tada: :confetti_ball: :birthday:").catch(u.ignoreError);
+          }).catch(u.ignoreError);
+        }
+      }
+
+      // LDSG Cake Day
+      let roles = [
+        null,
+        "375047444599275543",
+        "375047691253579787",
+        "375047792487432192",
+        "543065980096741386"
+      ];
+      let members = bot.guilds.get(ldsg).members;
+      let apicall = 0;
+      for (let [key, member] of members) {
+        try {
+          let join = member.joinedAt;
+          if (join && (join.getMonth() == curDate.getMonth()) && (join.getDate() == curDate.getDate()) && (join.getFullYear() < curDate.getFullYear())) {
+            let years = curDate.getFullYear() - join.getFullYear();
+            for (let i = 1; i <= years; i++) {
+              if (!member.roles.has(roles[i])) {
+                setTimeout((member, role) => {
+                  member.addRole(roles);
+                }, 1200 * apicall++, member, roles[i]);
+              }
+            }
           }
-        });
-      });
+        } catch(e) { u.alertError(e); }
+      }
     }
   } catch(e) { u.alertError(e); }
 }
