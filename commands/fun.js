@@ -63,11 +63,20 @@ async function testBirthdays(bot) {
           if (join && (join.getMonth() == curDate.getMonth()) && (join.getDate() == curDate.getDate()) && (join.getFullYear() < curDate.getFullYear())) {
             let years = curDate.getFullYear() - join.getFullYear();
             for (let i = 1; i <= years; i++) {
-              if (!member.roles.has(roles[i])) {
+              if (i == years && !member.roles.has(roles[i])) {
                 setTimeout((member, role) => {
-                  member.addRole(roles);
+                  member.addRole(role);
+                }, 1200 * apicall++, member, roles[i]);
+              } else if (member.roles.has(roles[i])) {
+                setTimeout((member, role) => {
+                  member.removeRole(role);
                 }, 1200 * apicall++, member, roles[i]);
               }
+            }
+            // Announce if active
+            let user = await Module.db.user.fetchUser(member.id);
+            if (user.currentXP > 0) {
+              bot.channels.get(ldsg).send(`${member} has been with us for ${years} ${(years > 1 ? "years" : "year")}! Glad you're with us!`);
             }
           }
         } catch(e) { u.alertError(e); }
