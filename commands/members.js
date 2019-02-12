@@ -4,13 +4,15 @@ const Augur = require("augurbot"),
   u = require("../utils/utils");
 
 function userEmbed(member) {
-	let roles = member.roles.map(role => role.name);
+	let roles = member.roles.filter(r => r.id != member.guild.id).map(role => role.name);
+  let roleString = roles.join(", ");
+  if (roleString.length > 1024) roleString = roleString.substr(0, roleString.indexOf(", ", 1000)) + " ...";
 	let embed = u.embed()
 		.setTitle(member.displayName)
 		.addField("ID", member.id, true)
 		.addField("Joined", member.joinedAt.toUTCString(), true)
 		.addField("Account Created", member.user.createdAt.toUTCString(), true)
-		.addField("Roles", roles.join(", "), true);
+		.addField("Roles", roleString, true);
 
 	if (member.user.displayAvatarURL) embed.setThumbnail(member.user.displayAvatarURL);
 
