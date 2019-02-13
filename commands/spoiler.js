@@ -33,26 +33,24 @@ const Module = new Augur.Module()
     } catch(e) { u.alertError(e, msg); }
   }
 })
-.addEvent("messageReactionAdd", async (reaction, user) => {
-  try {
-    if (reaction.emoji.name == "💬" && !user.bot) {
-      let message = reaction.message;
-      let spoiler = await Module.db.spoiler.fetch(message.id);
-
+.addEvent("messageReactionAdd", (reaction, user) => {
+  if (reaction.emoji.name == "💬" && !user.bot) {
+    let message = reaction.message;
+    Module.db.spoiler.fetch(message.id).then(spoiler => {
       if (spoiler) {
         let bot = Module.handler.client;
-        let author = await bot.fetchUser(spoiler.authorId)
-        let embed = u.embed();
-        embed.setAuthor(spoiler.authorName, author.displayAvatarURL)
-        .setColor(Module.config.color)
-        .setDescription(spoiler.content)
-        .setTimestamp(spoiler.timestamp)
-        .setTitle(`Spoiler${(spoiler.channelName ? (" in #" + spoiler.channelName) : "")}${(spoiler.topic ? " about " + spoiler.topic : "")}:`);
+        bot.fetchUser(spoiler.authorId).then(author => {
+          let embed = u.embed()
+          .setAuthor(spoiler.authorName, author.displayAvatarURL)
+          .setDescription(spoiler.content)
+          .setTimestamp(spoiler.timestamp)
+          .setTitle(`Spoiler${(spoiler.channelName ? (" in #" + spoiler.channelName) : "")}${(spoiler.topic ? " about " + spoiler.topic : "")}:`);
 
-        user.send(embed);
+          user.send(embed);
+        }).catch(u.alertError);
       }
-    }
-  } catch(e) { u.alertError(e, msg); }
+    }).catch(u.alertError);
+  }
 })
 .setUnload(() => true);
 
