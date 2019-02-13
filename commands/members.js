@@ -4,7 +4,7 @@ const Augur = require("augurbot"),
   u = require("../utils/utils");
 
 function userEmbed(member) {
-	let roles = member.roles.filter(r => r.id != member.guild.id).map(role => role.name);
+	let roles = member.roles.map(role => role.name);
   let roleString = roles.join(", ");
   if (roleString.length > 1024) roleString = roleString.substr(0, roleString.indexOf(", ", 1000)) + " ...";
 	let embed = u.embed()
