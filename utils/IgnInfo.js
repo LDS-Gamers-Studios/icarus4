@@ -51,6 +51,7 @@ var gameids = new Map()
 	.set("poke-tcgo", new system({system: "poke-tcgo", name: "Pokémon TCGO"}))
 	.set("ps", new system({system: "ps", name: "PSN Name", link: "https://my.playstation.com/"}))
 	.set("pubg", new system({system: "pubg", name: "PUBG User Name"}))
+  .set("rocketid", new system({system: "rocketid", name: "Rocket League ID"}))
 	.set("runescape", new system({system: "runescape", name: "Runescape Name"}))
 	.set("steam", new system({system: "steam", name: "Steam Name", link: "http://steamcommunity.com/search/users/#text="}))
 	.set("uplay", new system({system: "uplay", name: "Uplay"}))
@@ -91,6 +92,8 @@ const aliases = {
 	"pokemongo": "pokego",
 	"nintendo": "nnid",
 	"wiiu": "nnid",
+  "rocket": "rocketid",
+  "rocketleague": "rocketid",
 	"smite": "hirez",
 	"paladins": "hirez",
 	"paladin": "hirez",
@@ -103,9 +106,4 @@ const aliases = {
 	"city": "location"
 };
 
-module.exports = {
-	categories: categories,
-	helpList: helpList,
-	aliases: aliases,
-	gameids: gameids
-};
+module.exports = {categories,	helpList,	aliases,	gameids};
