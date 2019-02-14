@@ -15,7 +15,7 @@
   "homepage": "https://bitbucket.org/Gaiwecoor/icarus3#readme",
   "dependencies": {
     "@google-cloud/translate": "^2.1.3",
-    "augurbot": "^1.1.6",
+    "augurbot": "^1.1.7",
     "beam-client-node": "^2.0.0",
     "body-parser": "^1.18.3",
     "cheerio": "^1.0.0-rc.2",
