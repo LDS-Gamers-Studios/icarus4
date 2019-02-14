@@ -182,10 +182,7 @@ const Module = new Augur.Module()
 
       const arm = "https://cdn.discordapp.com/attachments/488887953939103775/545672817354735636/509442648080121857.png";
       const target = (msg.mentions.users.size > 0 ? msg.mentions.users.first() : msg.author);
-
-      const static = /\/(\d+)\/(?:a_)?(\w+)\.(?:gif|png)$/i;
-      let match = static.exec(target.displayAvatarURL);
-      const staticURL = `https://cdn.discordapp.com/avatars/${match[1]}/${match[2]}.png`;
+      const staticURL = `https://cdn.discordapp.com/avatars/${target.id}/${target.avatar.replace("a_", "")}.png`;
 
       const right = await Jimp.read(arm);
       if (Math.random() > 0.5) right.flip(false, true);
@@ -196,8 +193,8 @@ const Module = new Augur.Module()
       avatar.blit(left, 0, 4);
       avatar.blit(right, 248, 4);
 
-      msg.channel.send(await avatar.getBufferAsync(Jimp.MIME_PNG));
-    } catch(e) { console.error(e); }
+      await msg.channel.send({files: [await avatar.getBufferAsync(Jimp.MIME_PNG)]});
+    } catch(e) { u.alertError(e, msg); }
   }
 })
 .addCommand({name: "fine",
