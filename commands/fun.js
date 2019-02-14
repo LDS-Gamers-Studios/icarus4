@@ -173,6 +173,33 @@ const Module = new Augur.Module()
     quickText(msg, ":fire: :fire: :fire:");
   }
 })
+.addCommand({name: "flex",
+  description: "Show it off.",
+  category: "Silly",
+  process: async (msg) => {
+    try {
+      const Jimp = require("jimp");
+
+      const arm = "https://cdn.discordapp.com/attachments/488887953939103775/545672817354735636/509442648080121857.png";
+      const target = (msg.mentions.users.size > 0 ? msg.mentions.users.first() : msg.author);
+
+      const static = /\/(\d+)\/(?:a_)?(\w+)\.(?:gif|png)$/i;
+      let match = static.exec(target.displayAvatarURL);
+      const staticURL = `https://cdn.discordapp.com/avatars/${match[1]}/${match[2]}.png`;
+
+      const right = await Jimp.read(arm);
+      if (Math.random() > 0.5) right.flip(false, true);
+      const left = right.clone().flip(true, (Math.random() > 0.5));
+
+      const avatar = await Jimp.read(staticURL);
+      avatar.contain(368, 128);
+      avatar.blit(left, 0, 4);
+      avatar.blit(right, 248, 4);
+
+      msg.channel.send(await avatar.getBufferAsync(Jimp.MIME_PNG));
+    } catch(e) { console.error(e); }
+  }
+})
 .addCommand({name: "fine",
   description: "You're fined.",
   syntax: "<@user>", hidden: true,
