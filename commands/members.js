@@ -97,6 +97,52 @@ const Module = new Augur.Module()
     msg.channel.send(response).catch(console.error);
   }
 })
+.addCommand({name: "profilecard",
+  hidden: true,
+  description: "Display a user's profile card",
+  syntax: "[@user]",
+  category: "Members",
+  permissions: (msg) => msg.guild && msg.guild.id == Module.config.ldsg,
+  process: async (msg) => {
+    try {
+      const badgeData = require("../utils/badges"),
+        RankInfo = require("../utils/RankInfo"),
+        Jimp = require("jimp");
+      const badgePath = "../site/public/images/badges/";
+      const font = await Jimp.loadFont(Jimp.FONT_SANS_16_WHITE);
+      const card = await Jimp.read("../storage/background.jpg");
+
+      const target = (msg.mentions.members.size > 0 ? msg.mentions.users.first() : msg.author);
+
+      const rank = await Module.db.user.findXPRank(target);
+      const badges = badgeData(target.roles);
+
+      const avatar = await Jimp.read(target.user.avatarURL + "?size=64");
+
+      card.blit(avatar, 8, 8)
+      .print(font, 80, 8, target.displayName.replace(/[^\x00-\x7F]/g, ""), 212)
+      .print(font, 80, 28, "Joined: " + target.joinedAt.toLocaleDateString("en-US", { year: 'numeric', month: 'long', day: 'numeric' }), 212);
+
+      let rankOffset = (rank.excludeXP ? 80 : 168);
+      if (!rank.excludeXP) {
+        let level = RankInfo.level(rank.totalXP);
+        card.print(font, 8, 80, `Current Level: ${level} (${rank.totalXP.toLocaleString()} XP)`, 284)
+        .print(font, 8, 100, `Next Level: ${RankInfo.minXp(level + 1).toLocaleString()} XP`, 284)
+        .print(font, 8, 128, `Season Rank: ${rank.currentRank}/${msg.guild.memberCount}`, 138)
+        .print(font, 154, 128, `Lifetime Rank: ${rank.lifeRank}/${msg.guild.memberCount}`, 138);
+      }
+
+      for (let i = 0; i < badges.length; i++) {
+        let badge = await Jimp.read(badgePath + badges[i].image);
+        card.blit(badge.resize(48, 48), 10 + (58 * (i % 5)), rankOffset + (58 * Math.floor(i / 5)));
+      }
+
+      card.crop(0, 0, 300, Math.min(rankOffset + 58 * Math.ceil((badges.length) / 5), 533));
+
+      await msg.channel.send({files: [await card.getBufferAsync(Jimp.MIME_PNG)]});
+    } catch(e) { u.alertError(e, msg); }
+  }
+})
 .addCommand({name: "spotlight",
   description: "Get the current member spotlight",
   category: "Members",
