@@ -279,7 +279,7 @@ const Module = new Augur.Module()
   info: "Sends someone a hug via direct message.",
   category: "Silly",
   permissions: msg => msg.guild,
-    process: (msg, suffix) => {
+  process: (msg, suffix) => {
     u.clean(msg);
     if (msg.mentions.users && (msg.mentions.users.size > 0)) {
       msg.channel.send("Hug" + ((msg.mentions.users.size > 1) ? "s" : "") + " on the way!").then(u.clean);
