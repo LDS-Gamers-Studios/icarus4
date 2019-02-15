@@ -108,11 +108,11 @@ const Module = new Augur.Module()
       const badgeData = require("../utils/badges"),
         RankInfo = require("../utils/RankInfo"),
         Jimp = require("jimp");
-      const badgePath = "../site/public/images/badges/";
+      const badgePath = "./site/public/images/badges/";
       const font = await Jimp.loadFont(Jimp.FONT_SANS_16_WHITE);
-      const card = await Jimp.read("../storage/background.jpg");
+      const card = await Jimp.read("./storage/background.jpg");
 
-      const target = (msg.mentions.members.size > 0 ? msg.mentions.users.first() : msg.author);
+      const target = (msg.mentions.members.size > 0 ? msg.mentions.users.first() : msg.member);
 
       const rank = await Module.db.user.findXPRank(target);
       const badges = badgeData(target.roles);
