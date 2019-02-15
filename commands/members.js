@@ -134,10 +134,11 @@ const Module = new Augur.Module()
 
       for (let i = 0; i < badges.length; i++) {
         let badge = await Jimp.read(badgePath + badges[i].image);
-        card.blit(badge.resize(48, 48), 10 + (58 * (i % 5)), rankOffset + (58 * Math.floor(i / 5)));
+        // card.blit(badge.resize(48, 48), 10 + (58 * (i % 5)), rankOffset + (58 * Math.floor(i / 5)));
+        card.blit(badge.resize(61, 61), 10 + (73 * (i % 4)), rankOffset + (73 * Math.floor(i / 4)));
       }
 
-      card.crop(0, 0, 300, Math.min(rankOffset + 58 * Math.ceil((badges.length) / 5), 533));
+      card.crop(0, 0, 300, Math.min(rankOffset + 73 * Math.ceil((badges.length) / 4), 533));
 
       await msg.channel.send({files: [await card.getBufferAsync(Jimp.MIME_PNG)]});
     } catch(e) { u.alertError(e, msg); }
