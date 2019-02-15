@@ -112,12 +112,12 @@ const Module = new Augur.Module()
       const font = await Jimp.loadFont(Jimp.FONT_SANS_16_WHITE);
       const card = await Jimp.read("./storage/background.jpg");
 
-      const target = (msg.mentions.members.size > 0 ? msg.mentions.users.first() : msg.member);
+      const target = (msg.mentions.members.size > 0 ? msg.mentions.members.first() : msg.member);
 
       const rank = await Module.db.user.findXPRank(target);
       const badges = badgeData(target.roles);
 
-      const avatar = await Jimp.read(target.user.avatarURL + "?size=64");
+      const avatar = await Jimp.read(target.user.avatarURL.replace(/\?size=\d+/, "") + "?size=64");
 
       card.blit(avatar, 8, 8)
       .print(font, 80, 8, target.displayName.replace(/[^\x00-\x7F]/g, ""), 212)
