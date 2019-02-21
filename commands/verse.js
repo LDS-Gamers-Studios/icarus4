@@ -202,23 +202,27 @@ const Module = new Augur.Module()
   }
 })
 .addCommand({name: "conference",
-  descritpion: "Searches for the best matching conference talk.",
+  description: "Searches for the best matching conference talk.",
   syntax: "Search terms",
   aliases: ["conf"],
   category: "Gospel",
   process: (msg, suffix) => {
-    let url = `https://www.lds.org/search?lang=eng&collection=general-conference&query=${encodeURIComponent(suffix)}`;
+  	if (suffix) {
+	    let url = `https://www.lds.org/search?lang=eng&collection=general-conference&query=${encodeURIComponent(suffix)}`;
 
-    request(url, (err, response, body) => {
-      if (err) {
-        console.error(err);
-      } else {
-        $ = cheerio.load(body);
-        let link = $("section.results a").first().attr("href");
-        if (link) msg.channel.send(link);
-        else msg.reply("I couldn't find any results for that.").then(u.clean);
-      }
-    });
+	    request(url, (err, response, body) => {
+	      if (err) {
+	        console.error(err);
+	      } else {
+	        $ = cheerio.load(body);
+	        let link = $("section.results a").first().attr("href");
+	        if (link) msg.channel.send(link);
+	        else msg.reply("I couldn't find any results for that.").then(u.clean);
+	      }
+	    });
+	} else {
+		msg.reply("you need to tell me what you want to search!");
+	}
   }
 })
 .addEvent("message", (msg) => {
