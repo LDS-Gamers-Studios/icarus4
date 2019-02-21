@@ -41,8 +41,8 @@ function nb(title, abbr, work, aliases = []) {
 
 function getRandomScriptureMastery() {
 	let scriptureMastery = require("../data/scripture-mastery-reference.json");
-	let entryNumber = Math.floor(Math.random() * scriptureMastery.list.length);
-	let verse = scriptureMastery["list"][entryNumber];
+	let entryNumber = Math.floor(Math.random() * scriptureMastery.length);
+	let verse = scriptureMastery[entryNumber];
 	return parseScripture(verse);
 }
 
@@ -190,24 +190,23 @@ const Module = new Augur.Module()
   process: (msg, suffix) => {
   	if (!suffix || suffix == "random" || suffix == "rand" || suffix == "r")
   	  suffix = getRandomScriptureMastery();
-  	if (suffix) {
-      let scripture = parseScripture(suffix.replace(".", ""));
-      if (scripture) {
-        scripture.book = scripture.book.replace(/ /g, "-").toLowerCase();
-        if (alias[scripture.book]) scripture.book = alias[scripture.book];
-        if (books[scripture.book]) {
-          let link = `https://www.lds.org/scriptures/${books[scripture.book].work}/${scripture.book}/${scripture.chapter}${(scripture.verse ? ("." + scripture.verse + "?lang=eng#p" + scripture.start) : "?lang=eng")}`;
-					if (scripture.text) {
-						let embed = u.embed()
-						.setTitle(`${books[scripture.book].title} ${scripture.chapter}${(scripture.verse ? (":" + scripture.verse) : "")}`)
-						.setColor(0x012b57)
-						.setURL(link)
-						.setDescription((scripture.text.length > 2048 ? scripture.text.slice(0, 2000) + "..." : scripture.text));
-						msg.channel.send(embed);
-					} else msg.channel.send(`**${books[scripture.book].title} ${scripture.chapter}${(scripture.verse ? (":" + scripture.verse) : "")}**\n<${link}>`);
-        } else msg.reply("sorry, I couldn't understand that reference.").then(u.clean);
+
+    let scripture = parseScripture(suffix.replace(".", ""));
+    if (scripture) {
+      scripture.book = scripture.book.replace(/ /g, "-").toLowerCase();
+      if (alias[scripture.book]) scripture.book = alias[scripture.book];
+      if (books[scripture.book]) {
+        let link = `https://www.lds.org/scriptures/${books[scripture.book].work}/${scripture.book}/${scripture.chapter}${(scripture.verse ? ("." + scripture.verse + "?lang=eng#p" + scripture.start) : "?lang=eng")}`;
+				if (scripture.text) {
+					let embed = u.embed()
+					.setTitle(`${books[scripture.book].title} ${scripture.chapter}${(scripture.verse ? (":" + scripture.verse) : "")}`)
+					.setColor(0x012b57)
+					.setURL(link)
+					.setDescription((scripture.text.length > 2048 ? scripture.text.slice(0, 2000) + "..." : scripture.text));
+					msg.channel.send(embed);
+				} else msg.channel.send(`**${books[scripture.book].title} ${scripture.chapter}${(scripture.verse ? (":" + scripture.verse) : "")}**\n<${link}>`);
       } else msg.reply("sorry, I couldn't understand that reference.").then(u.clean);
-    } else msg.reply("you need to tell me which scripture to find!").then(u.clean);
+    } else msg.reply("sorry, I couldn't understand that reference.").then(u.clean);
   }
 })
 .addCommand({name: "conference",
