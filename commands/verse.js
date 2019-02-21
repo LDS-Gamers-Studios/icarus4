@@ -43,7 +43,7 @@ function getRandomScriptureMastery() {
 	let scriptureMastery = require("../data/scripture-mastery-reference.json");
 	let entryNumber = Math.floor(Math.random() * scriptureMastery.length);
 	let verse = scriptureMastery[entryNumber];
-	return parseScripture(verse);
+	return verse;
 }
 
 function parseScripture(string) {
