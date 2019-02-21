@@ -40,7 +40,7 @@ function nb(title, abbr, work, aliases = []) {
 }
 
 function getRandomScriptureMastery() {
-	let scriptureMastery = require("../data/scripture-mastery.json");
+	let scriptureMastery = require("../data/scripture-mastery-reference.json");
 	let entryNumber = Math.floor(Math.random() * scriptureMastery.list.length);
 	let verse = scriptureMastery["list"][entryNumber];
 	return parseScripture(verse);
