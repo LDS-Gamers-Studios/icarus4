@@ -7,6 +7,7 @@ const Augur = require("augurbot"),
   session = require("express-session")(site.session);
 
 const app = new Express();
+var server;
 
 const Module = new Augur.Module()
 .setInit(() => {
@@ -49,14 +50,14 @@ const Module = new Augur.Module()
     });
   });
 
-  const server = app.listen(site.port, (err) => {
+  server = app.listen(site.port, (err) => {
     if (err) console.error(err);
     else console.log("Listening on port", site.port);
   });
 
 })
 .setUnload(() => {
-  http.close();
+  server.close();
 
   let routerPath = path.resolve(process.cwd(), "./site/private");
   let routers = fs.readdirSync(routerPath);

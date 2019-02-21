@@ -112,6 +112,7 @@ const Module = new Augur.Module()
   permissions: (msg) => msg.guild
 })
 .setUnload(() => {
+  const path = require("path");
   delete require.cache[require.respolve(path.resolve(process.cwd(), "./data/roles.json"))];
 });
 
