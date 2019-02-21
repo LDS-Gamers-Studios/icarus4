@@ -39,6 +39,13 @@ function nb(title, abbr, work, aliases = []) {
   searchKeys.push(abbr.toLowerCase());
 }
 
+function getRandomScriptureMastery() {
+	let scriptureMastery = require("../data/scripture-mastery-reference.json");
+	let entryNumber = Math.floor(Math.random() * scriptureMastery.list.length);
+	let verse = scriptureMastery["list"][entryNumber];
+	return parseScripture(verse);
+}
+
 function parseScripture(string) {
 	if (string.indexOf(":") == -1)
 		string += ":0";
@@ -181,7 +188,9 @@ const Module = new Augur.Module()
   aliases: ["sw", "v"],
   category: "Gospel",
   process: (msg, suffix) => {
-    if (suffix) {
+  	if (!suffix || suffix == "random" || suffix == "rand" || suffix == "r")
+  	  suffix = getRandomScriptureMastery();
+  	if (suffix) {
       let scripture = parseScripture(suffix.replace(".", ""));
       if (scripture) {
         scripture.book = scripture.book.replace(/ /g, "-").toLowerCase();
@@ -202,23 +211,27 @@ const Module = new Augur.Module()
   }
 })
 .addCommand({name: "conference",
-  descritpion: "Searches for the best matching conference talk.",
+  description: "Searches for the best matching conference talk.",
   syntax: "Search terms",
   aliases: ["conf"],
   category: "Gospel",
   process: (msg, suffix) => {
-    let url = `https://www.lds.org/search?lang=eng&collection=general-conference&query=${encodeURIComponent(suffix)}`;
+  	if (suffix) {
+	    let url = `https://www.lds.org/search?lang=eng&collection=general-conference&query=${encodeURIComponent(suffix)}`;
 
-    request(url, (err, response, body) => {
-      if (err) {
-        console.error(err);
-      } else {
-        $ = cheerio.load(body);
-        let link = $("section.results a").first().attr("href");
-        if (link) msg.channel.send(link);
-        else msg.reply("I couldn't find any results for that.").then(u.clean);
-      }
-    });
+	    request(url, (err, response, body) => {
+	      if (err) {
+	        console.error(err);
+	      } else {
+	        $ = cheerio.load(body);
+	        let link = $("section.results a").first().attr("href");
+	        if (link) msg.channel.send(link);
+	        else msg.reply("I couldn't find any results for that.").then(u.clean);
+	      }
+	    });
+	} else {
+		msg.reply("you need to tell me what you want to search!");
+	}
   }
 })
 .addEvent("message", (msg) => {
