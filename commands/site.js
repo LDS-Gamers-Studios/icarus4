@@ -32,7 +32,7 @@ const Module = new Augur.Module()
   .filter(r => r.endsWith(".js"))
   .map(f => f.slice(0, -3))
   .forEach(route => {
-    let router = require(path.resolve(routerPath, route));
+    let router = require(path.resolve(process.cwd(), "./site/private", route));
     if (route == "root") route = "";
     app.use(`/${route}`, router);
   });
