@@ -188,7 +188,7 @@ const Module = new Augur.Module()
   aliases: ["sw", "v"],
   category: "Gospel",
   process: (msg, suffix) => {
-  	if (suffix == "random" || suffix == "rand" || suffix == "r")
+  	if (!suffix || suffix == "random" || suffix == "rand" || suffix == "r")
   	  suffix = getRandomScriptureMastery();
   	if (suffix) {
       let scripture = parseScripture(suffix.replace(".", ""));
