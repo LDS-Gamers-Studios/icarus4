@@ -39,6 +39,13 @@ function nb(title, abbr, work, aliases = []) {
   searchKeys.push(abbr.toLowerCase());
 }
 
+function getRandomScriptureMastery() {
+	let scriptureMastery = require("../data/scripture-mastery.json");
+	let entryNumber = Math.floor(Math.random() * 100);
+	let verse = scriptureMastery["list"][entryNumber];
+	return parseScripture(verse);
+}
+
 function parseScripture(string) {
 	if (string.indexOf(":") == -1)
 		string += ":0";
@@ -181,7 +188,9 @@ const Module = new Augur.Module()
   aliases: ["sw", "v"],
   category: "Gospel",
   process: (msg, suffix) => {
-    if (suffix) {
+  	if (suffix == "random" || suffix == "rand" || suffix == "r")
+  	  suffix = getRandomScriptureMastery();
+  	if (suffix) {
       let scripture = parseScripture(suffix.replace(".", ""));
       if (scripture) {
         scripture.book = scripture.book.replace(/ /g, "-").toLowerCase();
