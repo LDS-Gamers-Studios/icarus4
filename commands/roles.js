@@ -113,7 +113,7 @@ const Module = new Augur.Module()
 })
 .setUnload(() => {
   const path = require("path");
-  delete require.cache[require.respolve(path.resolve(process.cwd(), "./data/roles.json"))];
+  delete require.cache[require.resolve(path.resolve(process.cwd(), "./data/roles.json"))];
 });
 
 module.exports = Module;

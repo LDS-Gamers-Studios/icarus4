@@ -68,7 +68,7 @@ const Module = new Augur.Module()
   });
 
   ["./data/roles.json", "./utils/IgnInfo.js"].forEach(file => {
-    delete require.cache[require.respolve(path.resolve(process.cwd(), file))];
+    delete require.cache[require.resolve(path.resolve(process.cwd(), file))];
   });
 });
 

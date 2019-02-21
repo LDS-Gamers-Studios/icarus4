@@ -146,7 +146,7 @@ const Module = new Augur.Module()
 })
 .setUnload(() => {
   const path = require("path");
-  delete require.cache[require.respolve(path.resolve(process.cwd(), "./utils/IgnInfo.js"))];
+  delete require.cache[require.resolve(path.resolve(process.cwd(), "./utils/IgnInfo.js"))];
 });
 
 module.exports = Module;
