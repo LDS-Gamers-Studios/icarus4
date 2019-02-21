@@ -9,4 +9,5 @@ data/*
 !data/birthday.json
 !data/buttermelon.json
 !data/whoisplaying.json
+!data/roles.json
 site/*

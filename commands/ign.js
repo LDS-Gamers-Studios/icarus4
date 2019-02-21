@@ -143,6 +143,9 @@ const Module = new Augur.Module()
       Module.handler.errorHandler(e, msg);
     }
 	}
+})
+.setUnload(() => {
+  delete require.cache[require.respolve(path.resolve(process.cwd(), "./utils/IgnInfo.js"))];
 });
 
 module.exports = Module;

@@ -15,7 +15,8 @@
   "db": {
     "model": "models/mongo-models.js",
     "db": "",
-		"auth": {
+		"settings": {
+      "useNewUrlParser": true,
 			"user": "",
 			"pass": ""
 		}

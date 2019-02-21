@@ -1,5 +1,6 @@
 const Augur = require("augurbot"),
-  u = require("../utils/utils");
+  u = require("../utils/utils"),
+  {roles, aliases} = require("../data/roles.json");
 
 const roles = {
 	"firearms": "348136185106923521",
@@ -139,6 +140,9 @@ const Module = new Augur.Module()
     } else msg.reply("you need to tell me a role to find!").then(u.clean);
   },
   permissions: (msg) => msg.guild
+})
+.setUnload(() => {
+  delete require.cache[require.respolve(path.resolve(process.cwd(), "./data/roles.json"))];
 });
 
 module.exports = Module;

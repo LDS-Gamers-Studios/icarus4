@@ -13,7 +13,7 @@ const Animation = require("./Animation.model"),
 
 const serverSettings = new Map();
 
-mongoose.connect(config.db.db, config.db.auth);
+mongoose.connect(config.db.db, config.db.settings);
 
 const models = {
   animation: {

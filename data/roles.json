@@ -1,0 +1,50 @@
+{
+  "roles": {
+    "firearms": "348136185106923521",
+    "rhythm": "360444518190940163",
+    "twitch raider": "309889486521892865",
+
+    "rated m": "281708645161631745",
+    "rated t": "281708630104080394",
+    "rated e": "281708450822750208",
+
+    "halocodes": "434470406167199745",
+    
+    "pc": "281709365856043008",
+    "tabletop": "281713726606802945",
+    "nintendo": "281709384139276288",
+    "playstation": "281709339843100673",
+    "xbox": "281709298256576512"
+  },
+  "aliases": {
+  	"firearm": "firearms",
+  	"gun": "firearms",
+  	"guns": "firearms",
+  	"m": "rated m",
+  	"mature": "rated m",
+  	"t": "rated t",
+  	"teen": "rated t",
+  	"e": "rated e",
+  	"e10": "rated e",
+  	"rated e10": "rated e",
+  	"everyone": "rated e",
+
+  	"raider": "twitch raider",
+  	"twitch": "twitch raider",
+  	"twitchraider": "twitch raider",
+
+  	"halo": "halocodes",
+
+    "platform pc": "pc",
+    "platform tabletop": "tabletop",
+    "platform playstation": "playstation",
+    "platform ps": "playstation",
+    "ps": "playstation",
+    "platform xbox": "xbox",
+    "platform xb": "xbox",
+    "xb": "xbox",
+    "platform nintendo": "nintendo",
+    "platform nin": "nintendo",
+    "nin": "nintendo"
+  }
+}
