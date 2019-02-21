@@ -2,36 +2,6 @@ const Augur = require("augurbot"),
   u = require("../utils/utils"),
   {roles, aliases} = require("../data/roles.json");
 
-const roles = {
-	"firearms": "348136185106923521",
-	"rhythm": "360444518190940163",
-	"twitch raider": "309889486521892865",
-	"rated m": "281708645161631745",
-	"rated t": "281708630104080394",
-	"rated e": "281708450822750208",
-	"halocodes": "434470406167199745"
-};
-
-const aliases = {
-	"firearm": "firearms",
-	"gun": "firearms",
-	"guns": "firearms",
-	"m" : "rated m",
-	"mature" : "rated m",
-	"t" : "rated t",
-	"teen" : "rated t",
-	"e" : "rated e",
-	"e10" : "rated e",
-	"rated e10" : "rated e",
-	"everyone": "rated e",
-
-	"raider": "twitch raider",
-	"twitch": "twitch raider",
-	"twitchraider": "twitch raider",
-
-	"halo": "halocodes"
-};
-
 const Module = new Augur.Module()
 .addCommand({name: "addrole",
   description: "Add a role",
