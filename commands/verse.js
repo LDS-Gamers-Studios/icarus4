@@ -40,10 +40,22 @@ function nb(title, abbr, work, aliases = []) {
 }
 
 function getRandomScriptureMastery() {
-	let scriptureMastery = require("../data/scripture-mastery-reference.json");
+	const fs = require("fs");
+	let scriptureMastery = JSON.parse(fs.readFileSync(require("../data/scripture-mastery-reference.json")));
 	let entryNumber = Math.floor(Math.random() * scriptureMastery.length);
 	let verse = scriptureMastery[entryNumber];
 	return verse;
+}
+
+function addVerse(verse) {
+	if (parseScripture(verse)) {
+		const fs = require("fs");
+		let scriptureMastery = JSON.parse(fs.readFileSync("../data/scripture-mastery-reference.json"));
+		scriptureMastery.push(verse);
+		fs.writeFileSync("../data/scripture-mastery-reference.json", JSON.stringify(scriptureMastery));
+	} else {
+		throw new Error();
+	}
 }
 
 function parseScripture(string) {
