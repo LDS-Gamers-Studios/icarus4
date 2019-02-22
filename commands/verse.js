@@ -203,6 +203,21 @@ const Module = new Augur.Module()
   	if (!suffix || suffix == "random" || suffix == "rand" || suffix == "r")
   	  suffix = getRandomScriptureMastery();
 
+  	let splitSuffix = suffix.split(" ");
+  	if (splitSuffix[0] == "add") {
+  	  if (splitSuffix.length > 1) {
+  	  	let verse = splitSuffix.slice(1).join(" ");
+  	    try {
+		  addVerse(verse);
+		  msg.reply("it's done!");
+  	    } catch (e) {
+  	  	  msg.reply("sorry, I couldn't understand that reference.");
+  	    }
+  	  } else {
+  	  	msg.reply("you need to tell me what to add!");
+  	  }
+  	}
+
     let scripture = parseScripture(suffix.replace(".", ""));
     if (scripture) {
       scripture.book = scripture.book.replace(/ /g, "-").toLowerCase();
