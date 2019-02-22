@@ -1,6 +1,5 @@
 const Augur = require("augurbot"),
   google = require("../config/google_api.json"),
-  request = require("request"),
   u = require("../utils/utils"),
   GoogleSpreadsheet = require("google-spreadsheet");
 
