@@ -45,7 +45,7 @@ const Module = new Augur.Module()
       }
 
       let member = ((msg.guild) ? (msg.guild.members.get(user.id)): null);
-      systems = (systems ? systems.split(' ').map(s => (Ign.aliases[s] ? Ign.aliases[s] : s)) : null);
+      systems = (systems ? systems.toLowerCase().split(' ').map(s => (Ign.aliases[s] ? Ign.aliases[s] : s)) : null);
       let igns = await Module.db.ign.find(user.id, systems);
 
       let embed = embedIGN({name: (member ? member.displayName : user.username), avatar: user.displayAvatarURL}, igns);
