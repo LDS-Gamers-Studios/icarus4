@@ -346,7 +346,7 @@ const Module = new Augur.Module()
     }
   }
 })
-.addCommand({name: "multitwitch", {
+.addCommand({name: "multitwitch",
   desription: "Links to multi-stream pages on Multistre.am",
   syntax: "@user(s) stream(s)",
   category: "Streaming",
@@ -363,7 +363,7 @@ const Module = new Augur.Module()
       msg.channel.send(`View the Multistre.am for ${list.replace(/\//g, ", ")} here:\nhttps://multistre.am/${list}`);
     } else msg.reply("you need to tell me which streams to watch!").then(u.clean);
   }
-}})
+})
 .addCommand({name: "raider",
   description: "Show your support for LDSG on Twitch!",
   info: "Assigns you the Twitch Raiders role, showing your support for LDSG Streaming.",
