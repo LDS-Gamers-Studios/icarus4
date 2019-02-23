@@ -112,7 +112,8 @@ const models = {
         let query = null;
 
         if (system && Array.isArray(system)) query = Ign.find({discordId: userId, system: {$in: system} });
-        else if (system) query = Ign.findOne({discordId: userId, system: system });
+        else if (system && typeof userId == "string") query = Ign.findOne({discordId: userId, system: system });
+        else if (system && Array.isArray(userId)) query = Ign.find({discordId: {$in: userId}, system: system });
         else query = Ign.find({discordId: userId});
 
         query.exec((err, igns) => {
