@@ -356,7 +356,7 @@ const Module = new Augur.Module()
       let list = suffix.replace(/<@!?\d+>/g, "")
       if (msg.mentions.users.size > 0) {
         let mentions = msg.mentions.users.map(u => u.id);
-        let igns = (await Module.db.igns.find(mentions, "twitch")).map(ign => ign.ign);
+        let igns = (await Module.db.ign.find(mentions, "twitch")).map(ign => ign.ign);
         list += " " + igns.join(" ");
       }
       list = list.trim().replace(/ +/g, "/");
