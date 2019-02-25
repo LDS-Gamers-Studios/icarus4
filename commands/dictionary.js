@@ -1,62 +1,52 @@
 const Augur = require("augurbot"),
-  parseXML = require("xml2js").parseString,
   u = require("../utils/utils"),
-  request = require("request");
+  {CollegiateDictionary, WordNotFoundError} = require("mw-dict");
 
-function stringify(text) {
-  if (typeof text == "string")
-    return text;
-  else if (Array.isArray(text))
-    return text.join(", ");
-  else if (typeof text == "object")
-    return text._;
-}
+var dict;
 
 const Module = new Augur.Module()
 .addCommand({name: "define",
   description: "Define a word",
   syntax: "<word>",
   alisases: ["dictionary"],
-  process: (msg, suffix) => {
+  process: async (msg, suffix) => {
+    suffix = suffix.replace(/\?/g, "").trim();
     if (!suffix) msg.reply("you need to give me a word to define!");
     else {
-      let url = "https://www.dictionaryapi.com/api/v1/references/collegiate/xml/" + encodeURIComponent(suffix) + "?key=" + Module.config.api.mw.dictionary;
-      request(url, (error, response, body) => {
-        if (!error && response && response.statusCode == 200) {
-          parseXML(body, (err, xml) => {
-            if (err) u.alertError(err, msg);
-            else if (xml.entry_list.entry && xml.entry_list.entry.length > 0) {
-              let entries = xml.entry_list.entry.filter(e => e.ew && stringify(e.ew).toLowerCase() == suffix.toLowerCase());
+      try {
+        let defs = (await dict.lookup(suffix)).filter(d => d.word == suffix);
+        let description = "";
+        let embed = u.embed()
+        .setColor([38, 120, 206])
+        .setThumbnail("https://www.dictionaryapi.com/images/info/branding-guidelines/mw-logo-dark-background-100x100.png")
+        .setFooter("Provided by Merriam-Webster's Collegiate® Dictionary");
 
-              if (entries.length > 0) {
-                let description = "";
-                let embed = u.embed()
-                .setColor([38, 120, 206])
-                .setThumbnail("https://www.dictionaryapi.com/images/info/branding-guidelines/mw-logo-dark-background-100x100.png")
-                .setFooter("Provided by Merriam-Webster's Collegiate® Dictionary");
+        for (let i = 0; i < defs.length; i++) {
+          let entry = defs[i];
+          description += `\n\n**${entry.word}** (${entry.functional_label})\n`;
+          if (entry.etymology) description += `From: ${entry.etymology}\n`;
 
-                entries.forEach(entry => {
-                  if (entry.def) {
-                    let defs = entry.def[0].dt;
-                    if (defs.length > 0) {
-                      let info = [];
-                      ["hw", "pr"].forEach(e => { if (entry[e]) info.push(entry[e][0]); });
+          for (let j = 0; j < entry.definition.length; j++) {
+            let def = entry.definition[j];
+            if (def.meanings) description += "\n" + (def.number ? def.number : "") + def.meanings.join("\n");
+            if (def.senses && def.senses.length > 0) {
+              for (let k = 0; k < def.senses.length; k++) description += "\n" + (def.number ? def.number : "") + (def.senses[k].number ? def.senses[k].number : "") + def.senses[k].meanings.join("\n");
+            }
+          }
+        }
 
-                      description += `\n\n**${stringify(entry.ew)}** *(${entry.fl})*\n` + info.map(i => `\`${stringify(i)}\``).join(" | ") + "\n";
-                      defs.forEach((def, i) => description += `\n**${i + 1}**${stringify(def)}`);
-                    }
-                  }
-                });
-
-                embed.setDescription(description.trim().slice(0, 2000));
-                msg.channel.send(embed);
-              } else msg.reply(`I couldn't find a definition for **${suffix}**`);
-            }  else msg.reply(`I couldn't find a definition for **${suffix}**`);
-          });
-        } else u.alertError(error, msg);
-      });
+        embed.setDescription(description.trim().slice(0, 2000));
+        msg.channel.send(embed);
+      } catch(e) {
+        if (e instanceof WordNotFoundError) {
+          msg.channel.send(`I couldn't find a definition for ${suffix}.${e.suggestions.length > 0 ? " Did you mean one of these?\n" + e.suggestions.join(", ") : ""}`);
+        } else u.alertError(e, msg);
+      }
     }
   }
+})
+.setInit(() => {
+  dict = new CollegiateDictionary(Module.config.api.mw.dictionary);
 });
 
 module.exports = Module;

@@ -31,6 +31,7 @@
     "libsodium-wrappers": "^0.7.4",
     "markdown": "^0.5.0",
     "mongoose": "^5.4.14",
+    "mw-dict": "^3.0.0",
     "opusscript": "0.0.6",
     "profanity-matcher": "^1.0.1",
     "pug": "^2.0.3",
