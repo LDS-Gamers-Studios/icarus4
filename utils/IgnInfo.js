@@ -64,6 +64,7 @@ var gameids = new Map()
 	.set("youtube", new system({system: "youtube", name: "YouTube", category: "Streaming", link: "https://www.youtube.com/user/"}))
 	.set("credly", new system({ system: "credly", name: "Credly User ID", category: "Social", link: "https://credly.com/u/", display: false}))
 	.set("fb", new system({system: "facebook", name: "Facebook", category: "Social", link: "https://www.facebook.com/"}))
+  .set("playerme", new system({system: "playerme", name: "Player.me", category: "Social", link: "https://player.me/"}))
 	.set("reddit", new system({system: "reddit", name: "Reddit", category: "Social", link: "https://www.reddit.com/user/"}))
 	.set("skype", new system({system: "skype", name: "Skype", category: "Social"}))
 	.set("twitter", new system({system: "twitter", name: "Twitter", category: "Social", link: "https://twitter.com/"}))
@@ -101,6 +102,7 @@ const aliases = {
 	"paladin": "hirez",
 	"facebook": "fb",
 	"beam": "mixer",
+  "player.me": "playerme",
 	"profession": "job",
 	"work": "job",
 	"birfday": "birthday",
