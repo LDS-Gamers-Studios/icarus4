@@ -42,7 +42,7 @@ function nb(title, abbr, work, aliases = []) {
 
 function addVerse(verse) {
   let reference = parseScripture(verse);
-  if (reference && reference.verse) {
+  if (reference && reference.text) {
     const fs = require("fs");
     highlights.push(verse);
     fs.writeFileSync("./data/scripture-mastery-reference.json", JSON.stringify(highlights, null, "\t"));
