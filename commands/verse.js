@@ -197,7 +197,7 @@ const Module = new Augur.Module()
     if (!suffix || suffix == "random" || suffix == "rand" || suffix == "r")
       suffix = highlights[Math.floor(Math.random() * highlights.length)];
 
-    if (suffix.toLowerCase().startsWith("add ") && msg.guild && (msg.guild.id == config.ldsg) && (msg.member.roles.has(Module.config.roles.mod) || msg.member.roles.has(Module.config.roles.management))) {
+    if (suffix.toLowerCase().startsWith("add ") && msg.guild && (msg.guild.id == Module.config.ldsg) && (msg.member.roles.has(Module.config.roles.mod) || msg.member.roles.has(Module.config.roles.management))) {
       let verse = suffix.substr(4).trim();
       if (addVerse(verse)) {
         suffix = verse;
