@@ -258,7 +258,7 @@ const Module = new Augur.Module()
 })
 .setInit(() => {
   const fs = require("fs");
-  highlights = fs.readFileSync("./data/scripture-mastery-reference.json", "utf8");
+  highlights = JSON.parse(fs.readFileSync("./data/scripture-mastery-reference.json", "utf8"));
 });
 
 module.exports = Module;
