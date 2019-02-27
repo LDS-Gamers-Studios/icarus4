@@ -204,6 +204,7 @@ const Module = new Augur.Module()
         msg.react("👌");
       } else {
         msg.reply("I need a full reference with book, chapter, and verse.").then(u.clean);
+        return;
       }
     }
 
