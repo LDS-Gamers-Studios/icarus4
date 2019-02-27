@@ -1,101 +1,95 @@
 const Augur = require("augurbot");
 
 const scriptureTest = /([\w &]+) ((\d+)(\s?:\s?(\d+)\s?(-\s?\d+)?)?)/i,
-	alias = {},
-	books = {},
-	works = {
-		ot: "old-testament",
-		nt: "new-testament",
-		bofm: "book-of-mormon",
-		"dc-testament": "doctrine-and-covenants",
-		pgp: "pearl-of-great-price"
-	},
-	u = require("../utils/utils"),
-	request = require("request"),
-	cheerio = require("cheerio");
+  alias = {},
+  books = {},
+  works = {
+    ot: "old-testament",
+    nt: "new-testament",
+    bofm: "book-of-mormon",
+    "dc-testament": "doctrine-and-covenants",
+    pgp: "pearl-of-great-price"
+  },
+  u = require("../utils/utils"),
+  request = require("request"),
+  cheerio = require("cheerio");
 
 const searchKeys = [];
+var highlights;
 
 function nb(title, abbr, work, aliases = []) {
-	if (!Array.isArray(aliases))
-		aliases = [aliases.toLowerCase()];
+  if (!Array.isArray(aliases))
+    aliases = [aliases.toLowerCase()];
 
-	abbr = abbr.toLowerCase().replace(/ /g, "-");
+  abbr = abbr.toLowerCase().replace(/ /g, "-");
 
-	books[abbr] = {
-		title: title,
-		work: work
-	}
+  books[abbr] = {
+    title: title,
+    work: work
+  }
 
-	if (title.toLowerCase().replace(/ /g, "-") != abbr)
-		aliases.push(title);
+  if (title.toLowerCase().replace(/ /g, "-") != abbr)
+    aliases.push(title);
 
-	if (aliases.length > 0) {
-		aliases.forEach(a => {
-			alias[a.toLowerCase().replace(/ /g, "-")] = abbr;
+  if (aliases.length > 0) {
+    aliases.forEach(a => {
+      alias[a.toLowerCase().replace(/ /g, "-")] = abbr;
       searchKeys.push(a.toLowerCase());
-		});
-	}
+    });
+  }
   searchKeys.push(abbr.toLowerCase());
 }
 
-function getRandomScriptureMastery() {
-	const fs = require("fs");
-	let scriptureMastery = JSON.parse(fs.readFileSync(require("../data/scripture-mastery-reference.json")));
-	let entryNumber = Math.floor(Math.random() * scriptureMastery.length);
-	let verse = scriptureMastery[entryNumber];
-	return verse;
-}
-
 function addVerse(verse) {
-	if (parseScripture(verse)) {
-		const fs = require("fs");
-		let scriptureMastery = JSON.parse(fs.readFileSync("../data/scripture-mastery-reference.json"));
-		scriptureMastery.push(verse);
-		fs.writeFileSync("../data/scripture-mastery-reference.json", JSON.stringify(scriptureMastery));
-	} else {
-		throw new Error();
-	}
+  let reference = parseScripture(verse);
+  if (reference && reference.verse) {
+    const fs = require("fs");
+    highlights.push(verse);
+    fs.writeFileSync("./data/scripture-mastery-reference.json", JSON.stringify(highlights, null, "\t"));
+    return true;
+  } else return false;
 }
 
 function parseScripture(string) {
-	if (string.indexOf(":") == -1)
-		string += ":0";
+  string = string.replace(/\./g, "");
 
-	var info = scriptureTest.exec(string);
-	/* 1 - book, 3 - Chapter, 4 - Verse expansion, 5 - Starting Verse */
+  if (string.indexOf(":") == -1)
+    string += ":0";
 
-	let response = (info ? {
-		book: info[1],
-		chapter: info[3],
-		verse: ((!info[4] || (info[4] == ":0")) ? null : info[4].replace(/(:|\s)/g, "")),
-		start: ((!info[4] || (info[4] == ":0")) ? null : info[5])
-	} : null);
+  var info = scriptureTest.exec(string);
+  /* 1 - book, 3 - Chapter, 4 - Verse expansion, 5 - Starting Verse */
 
-	if (response && response.verse) {
-		response.book = response.book.replace(/ /g, "-").toLowerCase();
-		if (alias[response.book]) response.book = alias[response.book];
-		if (books[response.book]) {
-			let fullText = require(`../data/${works[books[response.book].work]}-reference.json`);
-			let range = response.verse.split("-").map(v => parseInt(v, 10));
+  let response = (info ? {
+    book: info[1],
+    chapter: info[3],
+    verse: ((!info[4] || (info[4] == ":0")) ? null : info[4].replace(/(:|\s)/g, "")),
+    start: ((!info[4] || (info[4] == ":0")) ? null : info[5])
+  } : null);
 
-			if (fullText[books[response.book].title] && fullText[books[response.book].title][response.chapter]) {
-				response.text = [];
-				if (range.length > 1) {
-					for (var v = Math.min(...range); v <= Math.max(...range); v++) {
-						if (fullText[books[response.book].title][response.chapter][v.toString()])
-							response.text.push(`${v}  ` + fullText[books[response.book].title][response.chapter][v.toString()]);
-					}
-				} else {
-					if (fullText[books[response.book].title][response.chapter][response.verse.toString()])
-						response.text.push(`${response.verse}  ` + fullText[books[response.book].title][response.chapter][response.verse.toString()]);
-				}
-				response.text = response.text.join("\n\n");
-			}
-		}
-	}
+  if (response && response.verse) {
+    response.book = response.book.replace(/ /g, "-").toLowerCase();
+    if (alias[response.book]) response.book = alias[response.book];
+    if (books[response.book]) {
+      let fullText = require(`../data/${works[books[response.book].work]}-reference.json`);
+      let range = response.verse.split("-").map(v => parseInt(v, 10));
 
-	return response;
+      if (fullText[books[response.book].title] && fullText[books[response.book].title][response.chapter]) {
+        response.text = [];
+        if (range.length > 1) {
+          for (var v = Math.min(...range); v <= Math.max(...range); v++) {
+            if (fullText[books[response.book].title][response.chapter][v.toString()])
+              response.text.push(`${v}  ` + fullText[books[response.book].title][response.chapter][v.toString()]);
+          }
+        } else {
+          if (fullText[books[response.book].title][response.chapter][response.verse.toString()])
+            response.text.push(`${response.verse}  ` + fullText[books[response.book].title][response.chapter][response.verse.toString()]);
+        }
+        response.text = response.text.join("\n\n");
+      }
+    }
+  }
+
+  return response;
 }
 
 nb("Genesis", "gen", "ot");
@@ -200,38 +194,33 @@ const Module = new Augur.Module()
   aliases: ["sw", "v"],
   category: "Gospel",
   process: (msg, suffix) => {
-  	if (!suffix || suffix == "random" || suffix == "rand" || suffix == "r")
-  	  suffix = getRandomScriptureMastery();
+    if (!suffix || suffix == "random" || suffix == "rand" || suffix == "r")
+      suffix = highlights[Math.floor(Math.random() * highlights.length)];
 
-  	let splitSuffix = suffix.split(" ");
-  	if (splitSuffix[0] == "add") {
-  	  if (splitSuffix.length > 1) {
-  	  	let verse = splitSuffix.slice(1).join(" ");
-  	    try {
-		  addVerse(verse);
-		  msg.reply("it's done!");
-  	    } catch (e) {
-  	  	  msg.reply("sorry, I couldn't understand that reference.");
-  	    }
-  	  } else {
-  	  	msg.reply("you need to tell me what to add!");
-  	  }
-  	}
+    if (suffix.toLowerCase().startsWith("add ") && msg.guild && (msg.guild.id == config.ldsg) && (msg.member.roles.has(Module.config.roles.mod) || msg.member.roles.has(Module.config.roles.management))) {
+      let verse = suffix.substr(4).trim();
+      if (addVerse(verse)) {
+        suffix = verse;
+        msg.react("👌");
+      } else {
+        msg.reply("I need a full reference with book, chapter, and verse.").then(u.clean);
+      }
+    }
 
-    let scripture = parseScripture(suffix.replace(".", ""));
+    let scripture = parseScripture(suffix);
     if (scripture) {
       scripture.book = scripture.book.replace(/ /g, "-").toLowerCase();
       if (alias[scripture.book]) scripture.book = alias[scripture.book];
       if (books[scripture.book]) {
         let link = `https://www.lds.org/scriptures/${books[scripture.book].work}/${scripture.book}/${scripture.chapter}${(scripture.verse ? ("." + scripture.verse + "?lang=eng#p" + scripture.start) : "?lang=eng")}`;
-				if (scripture.text) {
-					let embed = u.embed()
-					.setTitle(`${books[scripture.book].title} ${scripture.chapter}${(scripture.verse ? (":" + scripture.verse) : "")}`)
-					.setColor(0x012b57)
-					.setURL(link)
-					.setDescription((scripture.text.length > 2048 ? scripture.text.slice(0, 2000) + "..." : scripture.text));
-					msg.channel.send(embed);
-				} else msg.channel.send(`**${books[scripture.book].title} ${scripture.chapter}${(scripture.verse ? (":" + scripture.verse) : "")}**\n<${link}>`);
+        if (scripture.text) {
+          let embed = u.embed()
+          .setTitle(`${books[scripture.book].title} ${scripture.chapter}${(scripture.verse ? (":" + scripture.verse) : "")}`)
+          .setColor(0x012b57)
+          .setURL(link)
+          .setDescription((scripture.text.length > 2048 ? scripture.text.slice(0, 2000) + "..." : scripture.text));
+          msg.channel.send(embed);
+        } else msg.channel.send(`**${books[scripture.book].title} ${scripture.chapter}${(scripture.verse ? (":" + scripture.verse) : "")}**\n<${link}>`);
       } else msg.reply("sorry, I couldn't understand that reference.").then(u.clean);
     } else msg.reply("sorry, I couldn't understand that reference.").then(u.clean);
   }
@@ -242,22 +231,22 @@ const Module = new Augur.Module()
   aliases: ["conf"],
   category: "Gospel",
   process: (msg, suffix) => {
-  	if (suffix) {
-	    let url = `https://www.lds.org/search?lang=eng&collection=general-conference&query=${encodeURIComponent(suffix)}`;
+    if (suffix) {
+      let url = `https://www.lds.org/search?lang=eng&collection=general-conference&query=${encodeURIComponent(suffix)}`;
 
-	    request(url, (err, response, body) => {
-	      if (err) {
-	        console.error(err);
-	      } else {
-	        $ = cheerio.load(body);
-	        let link = $("section.results a").first().attr("href");
-	        if (link) msg.channel.send(link);
-	        else msg.reply("I couldn't find any results for that.").then(u.clean);
-	      }
-	    });
-	} else {
-		msg.reply("you need to tell me what you want to search!");
-	}
+      request(url, (err, response, body) => {
+        if (err) {
+          console.error(err);
+        } else {
+          $ = cheerio.load(body);
+          let link = $("section.results a").first().attr("href");
+          if (link) msg.channel.send(link);
+          else msg.reply("I couldn't find any results for that.").then(u.clean);
+        }
+      });
+  } else {
+    msg.reply("you need to tell me what you want to search!");
+  }
   }
 })
 .addEvent("message", (msg) => {
@@ -266,6 +255,10 @@ const Module = new Augur.Module()
     while (match = searchExp.exec(msg.cleanContent))
       Module.handler.execute("verse", msg, match[0]);
   }
+})
+.setInit(() => {
+  const fs = require("fs");
+  highlights = fs.readFileSync("./data/scripture-mastery-reference.json", "utf8");
 });
 
 module.exports = Module;
