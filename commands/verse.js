@@ -42,10 +42,13 @@ function nb(title, abbr, work, aliases = []) {
 
 function addVerse(verse) {
   let reference = parseScripture(verse);
-  if (reference && reference.text) {
+
+  if (reference && reference.text && (!highlights.find(v => v.toLowerCase() == verse.toLowerCase()))) {
     const fs = require("fs");
     highlights.push(verse);
     fs.writeFileSync("./data/scripture-mastery-reference.json", JSON.stringify(highlights, null, "\t"));
+    return true;
+  } else if (reference && reference.text && highlights.find(v => v.toLowerCase() == verse.toLowerCase())) {
     return true;
   } else return false;
 }
