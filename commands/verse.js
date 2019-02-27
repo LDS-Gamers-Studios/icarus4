@@ -40,10 +40,22 @@ function nb(title, abbr, work, aliases = []) {
 }
 
 function getRandomScriptureMastery() {
-	let scriptureMastery = require("../data/scripture-mastery-reference.json");
+	const fs = require("fs");
+	let scriptureMastery = JSON.parse(fs.readFileSync(require("../data/scripture-mastery-reference.json")));
 	let entryNumber = Math.floor(Math.random() * scriptureMastery.length);
 	let verse = scriptureMastery[entryNumber];
 	return verse;
+}
+
+function addVerse(verse) {
+	if (parseScripture(verse)) {
+		const fs = require("fs");
+		let scriptureMastery = JSON.parse(fs.readFileSync("../data/scripture-mastery-reference.json"));
+		scriptureMastery.push(verse);
+		fs.writeFileSync("../data/scripture-mastery-reference.json", JSON.stringify(scriptureMastery));
+	} else {
+		throw new Error();
+	}
 }
 
 function parseScripture(string) {
@@ -190,6 +202,21 @@ const Module = new Augur.Module()
   process: (msg, suffix) => {
   	if (!suffix || suffix == "random" || suffix == "rand" || suffix == "r")
   	  suffix = getRandomScriptureMastery();
+
+  	let splitSuffix = suffix.split(" ");
+  	if (splitSuffix[0] == "add") {
+  	  if (splitSuffix.length > 1) {
+  	  	let verse = splitSuffix.slice(1).join(" ");
+  	    try {
+		  addVerse(verse);
+		  msg.reply("it's done!");
+  	    } catch (e) {
+  	  	  msg.reply("sorry, I couldn't understand that reference.");
+  	    }
+  	  } else {
+  	  	msg.reply("you need to tell me what to add!");
+  	  }
+  	}
 
     let scripture = parseScripture(suffix.replace(".", ""));
     if (scripture) {
