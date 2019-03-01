@@ -1,5 +1,5 @@
-const request = require("request");
-const userToChannelId = new Map();
+const request = require("request"),
+  userToChannelId = new Map();
 var key;
 
 function yt(api_key) {
