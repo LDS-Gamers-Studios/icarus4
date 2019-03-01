@@ -3,42 +3,42 @@ const Augur = require("augurbot"),
 
 function parseMission(str) {
   let date = new RegExp("(" + [
-		"january", "jan",
-		"february", "feb",
-		"march", "mar",
-		"april", "apr",
-		"may",
-		"june", "jun",
-		"july", "jul",
-		"august", "aug",
-		"september", "sept", "sep",
-		"october", "oct",
-		"november", "nov",
-		"december", "dec"
-	].join("|") + ") 20\\d\\d", "i");
+    "january", "jan",
+    "february", "feb",
+    "march", "mar",
+    "april", "apr",
+    "may",
+    "june", "jun",
+    "july", "jul",
+    "august", "aug",
+    "september", "sept", "sep",
+    "october", "oct",
+    "november", "nov",
+    "december", "dec"
+  ].join("|") + ") 20\\d\\d", "i");
 
-	let email = /\w+(\.?\w+)*@\w+(\.\w+)+/;
-	let discord = /<@!?(\d+)>/;
+  let email = /\w+(\.?\w+)*@\w+(\.\w+)+/;
+  let discord = /<@!?(\d+)>/;
 
-	let discordId = discord.exec(str);
-	if (discordId) discordId = discordId[1];
-	else return {error: "I couldn't find a Discord ID"};
+  let discordId = discord.exec(str);
+  if (discordId) discordId = discordId[1];
+  else return {error: "I couldn't find a Discord ID"};
 
-	let address = email.exec(str);
-	if (address) address = address[0];
-	else return {error: "I couldn't find an email address"};
+  let address = email.exec(str);
+  if (address) address = address[0];
+  else return {error: "I couldn't find an email address"};
 
-	let homecoming = date.exec(str);
-	if (homecoming) homecoming = u.properCase(homecoming[0]);
+  let homecoming = date.exec(str);
+  if (homecoming) homecoming = u.properCase(homecoming[0]);
 
-	let mission = u.properCase(str.replace(discord, "").replace(date, "").replace(email, "").trim());
+  let mission = u.properCase(str.replace(discord, "").replace(date, "").replace(email, "").trim());
 
-	return {
-		discordId: discordId,
-		email: address,
-		mission: mission,
-		returns: homecoming
-	};
+  return {
+    discordId: discordId,
+    email: address,
+    mission: mission,
+    returns: homecoming
+  };
 };
 
 const Module = new Augur.Module()

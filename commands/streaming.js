@@ -17,7 +17,7 @@ const mixer = new Mixer.Client(new Mixer.DefaultRequestRunner()),
 function checkStreams(bot) {
   try {
     // Approved Streamers
-    let	streamers = bot.guilds.get(Module.config.ldsg).roles.get("267038468474011650").members;
+    let streamers = bot.guilds.get(Module.config.ldsg).roles.get("267038468474011650").members;
 
     Module.db.ign.getList("twitch").then(igns => {
       igns.filter(ign => streamers.has(ign.discordId)).forEach(ign => {
@@ -80,20 +80,20 @@ function mixerEmbed(res) {
 function notificationEmbed(body, srv) {
   let embed = u.embed()
     .setTimestamp();
-	if (srv == "twitch") {
-		let channel = body.stream.channel;
-		embed.setColor('#6441A4')
-			.setThumbnail(`${body.stream.preview.medium}?t=${Date.now()}`)
-			.setTitle(channel.status)
-			.setAuthor(channel.display_name + (body.stream.game ? ` playing ${body.stream.game}` : ""), channel.logo)
-			.setURL(channel.url);
-	} else if (srv == "mixer") {
-		embed.setColor('#0078d7')
-			.setThumbnail(body.type.coverUrl)
-			.setTitle(body.name)
-			.setAuthor(body.user.username + ((body.type && body.type.name) ? ` playing ${body.type.name}` : ""), body.user.avatarUrl)
-			.setURL(`https://mixer.com/${body.token}`);
-	} else if (srv == "youtube") {
+  if (srv == "twitch") {
+    let channel = body.stream.channel;
+    embed.setColor('#6441A4')
+      .setThumbnail(`${body.stream.preview.medium}?t=${Date.now()}`)
+      .setTitle(channel.status)
+      .setAuthor(channel.display_name + (body.stream.game ? ` playing ${body.stream.game}` : ""), channel.logo)
+      .setURL(channel.url);
+  } else if (srv == "mixer") {
+    embed.setColor('#0078d7')
+      .setThumbnail(body.type.coverUrl)
+      .setTitle(body.name)
+      .setAuthor(body.user.username + ((body.type && body.type.name) ? ` playing ${body.type.name}` : ""), body.user.avatarUrl)
+      .setURL(`https://mixer.com/${body.token}`);
+  } else if (srv == "youtube") {
     let content = body.content[0].snippet;
     embed.setColor("#ff0000")
       .setThumbnail(content.thumbnails.default.url)
@@ -101,7 +101,7 @@ function notificationEmbed(body, srv) {
       .setAuthor(content.channelTitle)
       .setURL(`https://www.youtube.com/watch?v=${body.content[0].id.videoId}`);
   }
-	return embed;
+  return embed;
 };
 
 function processApplications() {
@@ -144,7 +144,7 @@ async function processMixer(bot, key, channel) {
     let res = await mixer.request("GET", `channels/${channel}`);
     res = res.body;
 
-    if (res.online) {	// STREAM IS LIVE
+    if (res.online) { // STREAM IS LIVE
       let status = mixerStatus.get(key);
       if (!status || ((status.status == "offline") && ((Date.now() - status.since) >= (30 * 60 * 1000)))) {
         mixerStatus.set(key, {
@@ -156,7 +156,7 @@ async function processMixer(bot, key, channel) {
           if (isPartnered(member)) member.addRole(liveRole);
         }
       }
-    } else if (mixerStatus.has(key) && (mixerStatus.get(key).status == "online")) {	// STREAM IS OFFLINE
+    } else if (mixerStatus.has(key) && (mixerStatus.get(key).status == "online")) { // STREAM IS OFFLINE
       mixerStatus.set(key, {
         status: "offline",
         since: Date.now()
@@ -171,9 +171,9 @@ async function processMixer(bot, key, channel) {
 function processTwitch(bot, key, channel) {
   try {
     let ldsg = bot.guilds.get(Module.config.ldsg),
-  		liveRole = ldsg.roles.get("281135201407467520"),
-  		notificationChannel = ldsg.channels.get(Module.config.ldsg), // #general
-  		member = ldsg.members.get(key);
+      liveRole = ldsg.roles.get("281135201407467520"),
+      notificationChannel = ldsg.channels.get(Module.config.ldsg), // #general
+      member = ldsg.members.get(key);
 
     twitch.getChannelStream(channel, function(error, body) {
       if (error) {
@@ -239,7 +239,7 @@ async function processYouTube(bot, key, channel) {
         notificationChannel.send(notificationEmbed(info, "youtube"));
         if (isPartnered(member)) member.addRole(liveRole);
       }
-    } else if (ytStatus.has(key) && (ytStatus.get(key).status == "online")) {	// STREAM IS OFFLINE
+    } else if (ytStatus.has(key) && (ytStatus.get(key).status == "online")) { // STREAM IS OFFLINE
       ytStatus.set(key, {
         status: "offline",
         since: Date.now()

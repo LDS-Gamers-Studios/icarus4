@@ -4,19 +4,19 @@ const Augur = require("augurbot"),
   u = require("../utils/utils");
 
 function userEmbed(member) {
-	let roles = member.roles.map(role => role.name);
+  let roles = member.roles.map(role => role.name);
   let roleString = roles.join(", ");
   if (roleString.length > 1024) roleString = roleString.substr(0, roleString.indexOf(", ", 1000)) + " ...";
-	let embed = u.embed()
-		.setTitle(member.displayName)
-		.addField("ID", member.id, true)
-		.addField("Joined", member.joinedAt.toUTCString(), true)
-		.addField("Account Created", member.user.createdAt.toUTCString(), true)
-		.addField("Roles", roleString, true);
+  let embed = u.embed()
+    .setTitle(member.displayName)
+    .addField("ID", member.id, true)
+    .addField("Joined", member.joinedAt.toUTCString(), true)
+    .addField("Account Created", member.user.createdAt.toUTCString(), true)
+    .addField("Roles", roleString, true);
 
-	if (member.user.displayAvatarURL) embed.setThumbnail(member.user.displayAvatarURL);
+  if (member.user.displayAvatarURL) embed.setThumbnail(member.user.displayAvatarURL);
 
-	return embed;
+  return embed;
 }
 
 const Module = new Augur.Module()
@@ -85,8 +85,8 @@ const Module = new Augur.Module()
   category: "Members",
   permissions: (msg) => msg.guild,
   process: (msg) => {
-    let	members = msg.guild.members;
-    let	online = 0;
+    let members = msg.guild.members;
+    let online = 0;
 
     members.forEach(function(member) {
       if (member.presence.status != "offline")

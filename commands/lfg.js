@@ -59,8 +59,8 @@ function updateBoard(system) {
   update = true;
 
   lfgChannel.fetchMessage(lfgBoard[system].message).then(message => {
-		let sys = lfgBoard[system];
-		let embed = u.embed()
+    let sys = lfgBoard[system];
+    let embed = u.embed()
       .setColor(sys.color)
       .setTitle(`LFG - ${sys.system}`)
       .setDescription(`Currently Looking for Game on ${sys.system}`)
@@ -73,8 +73,8 @@ function updateBoard(system) {
     .forEach(game => {
       embed.addField(game.title, game.users.map(u => channel.guild.members.get(u).displayName).join("\n"), true);
     });
-		message.edit(embed);
-	});
+    message.edit(embed);
+  });
 };
 
 function writeData() {
@@ -91,7 +91,7 @@ const Module = new Augur.Module()
   description: "Add yourself to the Looking for Game wall!",
   syntax: `(${lfgBoard.systems.join("/")}) Game Name`,
   category: "LFG",
-	process: (msg, suffix) => {
+  process: (msg, suffix) => {
     let args = suffix.trim().toLowerCase().replace(/\s\s+/, " ").split(" ");
     if (suffix && (args.length > 1)) {
       let system = args.shift();
@@ -129,7 +129,7 @@ const Module = new Augur.Module()
   syntax: `(${lfgBoard.systems.join("/")}) Game Name`,
   hidden: true,
   category: "LFG",
-	process: (msg, suffix) => {
+  process: (msg, suffix) => {
     let args = suffix.trim().toLowerCase().replace(/\s\s+/, " ").split(" ");
     if (!suffix) {
       // Remove all
@@ -167,7 +167,7 @@ const Module = new Augur.Module()
   syntax: `(${lfgBoard.systems.join("/")}) Game Name`,
   hidden: true,
   category: "LFG",
-	process: (msg, suffix) => {
+  process: (msg, suffix) => {
     let args = suffix.trim().toLowerCase().replace(/\s\s+/, " ").split(" ");
 
     if (suffix && (args.length > 1)) {
@@ -195,12 +195,12 @@ const Module = new Augur.Module()
   permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && msg.member.permissions.has("MANAGE_MESSAGES"))
 })
 .addCommand({name: "wip",
-	description: "Find who is playing a game in the server or list all games being played.",
-	suffix: "<game name>",
+  description: "Find who is playing a game in the server or list all games being played.",
+  suffix: "<game name>",
   info: "Search for server members playing <game name>. If no game is provided, it will search for the applicable game in game specific channels or list the top 25 games, otherwise.",
-	aliases: ["who'splaying", "whosplaying", "whoson", "whoison", "who'son", "whoisplaying"],
-	category: "LFG",
-	process: async function(msg, suffix) {
+  aliases: ["who'splaying", "whosplaying", "whoson", "whoison", "who'son", "whoisplaying"],
+  category: "LFG",
+  process: async function(msg, suffix) {
     try {
       u.clean(msg);
 
@@ -249,8 +249,8 @@ const Module = new Augur.Module()
     } catch(e) {
       Module.handler.errorHandler(e, msg);
     }
-	},
-	permissions: (msg) => msg.guild
+  },
+  permissions: (msg) => msg.guild
 })
 .addEvent("message", (msg) => {
   if (msg.channel.id == lfgBoard.channel) msg.delete();

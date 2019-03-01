@@ -3,13 +3,13 @@ const Augur = require("augurbot"),
   u = require("../utils/utils");
 
 function embedIGN(user, igns) {
-	if (igns.length > 0) {
+  if (igns.length > 0) {
     let embed = u.embed()
     .setAuthor(user.name, user.avatar);
 
     if (igns.length > 1) embed.setTitle('IGNs for ' + user.name);
 
-		let hasLink = /(http(s?):\/\/)?(\w+\.)+\w+\//ig;
+    let hasLink = /(http(s?):\/\/)?(\w+\.)+\w+\//ig;
 
     Ign.categories.forEach(category => {
       igns
@@ -23,17 +23,17 @@ function embedIGN(user, igns) {
       });
     });
 
-		return embed;
-	} else return false;
+    return embed;
+  } else return false;
 };
 
 const Module = new Augur.Module()
 .addCommand({name: "ign",
-	description: "View an IGN",
-	syntax: "[@user] [system]",
-	info: "Displays various game system IGNs or social network names that have been added via the `!addign` command. Use the `!whoplays` command to view all people who have saved IGNs for a particular system.\n" + Ign.helpList(),
-	category: "IGN",
-	process: async function(msg, suffix) {
+  description: "View an IGN",
+  syntax: "[@user] [system]",
+  info: "Displays various game system IGNs or social network names that have been added via the `!addign` command. Use the `!whoplays` command to view all people who have saved IGNs for a particular system.\n" + Ign.helpList(),
+  category: "IGN",
+  process: async function(msg, suffix) {
     try {
       let userMentions = u.userMentions(msg);
       if (userMentions) {
@@ -55,15 +55,15 @@ const Module = new Augur.Module()
     } catch(e) {
       Module.handler.errorHandler(e, msg);
     }
-	}
+  }
 })
 .addCommand({name: "addign",
-	description: "Save an IGN",
-	syntax: "<system> <ign>",
-	info: "Saves various game system IGNs or social network names. User IGNs are visible with the `!ign` command, and lists of users with the `!whoplays` command.\n" + Ign.helpList(),
-	aliases: ["adding"],
-	category: "IGN",
-	process: async function(msg, suffix) {
+  description: "Save an IGN",
+  syntax: "<system> <ign>",
+  info: "Saves various game system IGNs or social network names. User IGNs are visible with the `!ign` command, and lists of users with the `!whoplays` command.\n" + Ign.helpList(),
+  aliases: ["adding"],
+  category: "IGN",
+  process: async function(msg, suffix) {
     try {
       if (!suffix) {
         msg.channel.send("You need to tell me a system and a name.").then(u.clean);
@@ -101,16 +101,16 @@ const Module = new Augur.Module()
     } catch(e) {
       Module.handler.errorHandler(e, msg);
     }
-	}
+  }
 })
 .addCommand({name: "whoplays",
   description: "List server members who have stored an IGN for a given system.",
-	syntax: "<system>",
-	info: "Lists server members who have saved IGNs for a given system.\n" + Ign.helpList(),
-	aliases: ["whohas", "whoison"],
-	category: "IGN",
+  syntax: "<system>",
+  info: "Lists server members who have saved IGNs for a given system.\n" + Ign.helpList(),
+  aliases: ["whohas", "whoison"],
+  category: "IGN",
   permissions: (msg) => msg.guild,
-	process: async function(msg, suffix) {
+  process: async function(msg, suffix) {
     try {
       if (!suffix) {
         msg.reply("you need to tell me a supported system to search.").then(u.clean);
@@ -142,7 +142,7 @@ const Module = new Augur.Module()
     } catch(e) {
       Module.handler.errorHandler(e, msg);
     }
-	}
+  }
 })
 .setUnload(() => {
   const path = require("path");

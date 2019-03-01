@@ -20,9 +20,9 @@ const Module = new Augur.Module()
   process: (msg) => msg.channel.send("LDSG Chat Leaderboard:\nhttp://my.ldsgamers.com/leaderboard")
 })
 .addCommand({name: "rank",
-	description: "View your chat rank",
-	syntax: "[@user]",
-	process: async function (msg) {
+  description: "View your chat rank",
+  syntax: "[@user]",
+  process: async function (msg) {
     try {
       let user = (u.userMentions(msg) ? u.userMentions(msg).first() : msg.author);
 
@@ -52,7 +52,7 @@ const Module = new Augur.Module()
     } catch(e) {
       Module.handler.errorHandler(e, msg);
     }
-	}
+  }
 })
 .addCommand({name: "rankreset",
   description: "Reset the LDSG chat ranks!",
@@ -114,7 +114,7 @@ const Module = new Augur.Module()
 })
 .addEvent("message", (msg) => {
   if (msg.guild && (msg.guild.id == Module.config.ldsg) && !active.has(msg.author.id) && !(Rank.excludeChannels.includes(msg.channel.id) || Rank.excludeChannels.includes(msg.channel.parentID)) && !u.parse(msg) && !excludeUsers.has(msg.author.id) && !msg.author.bot)
-		active.add(msg.author.id);
+    active.add(msg.author.id);
 })
 .setClockwork(() => {
   try {
