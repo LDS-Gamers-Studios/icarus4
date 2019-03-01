@@ -1,6 +1,6 @@
 {
-	"clientId": "",
-	"clientSecret": "",
-	"redirectUri": "http://ldsgamers.com",
-	"scopes": []
+  "clientId": "",
+  "clientSecret": "",
+  "redirectUri": "http://ldsgamers.com",
+  "scopes": []
 }

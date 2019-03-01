@@ -5,7 +5,7 @@ const u = require("../utils/utils"),
   ytdl = require("ytdl-core");
 
 const availableNames = [
-	"Room Buttermelon",
+  "Room Buttermelon",
   "Room Slothmare",
   "Room Handicorn",
   "Room Manahands",
@@ -18,7 +18,7 @@ const availableNames = [
   "Room Fry Sauce",
   "Room Goat",
   "Room Ink",
-	"Room Potato",
+  "Room Potato",
   "Room Trogdor",
 ];
 var queue;
@@ -60,28 +60,28 @@ const Module = new Augur.Module()
   category: "Voice",
   permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && msg.member.voiceChannel && availableNames.includes(msg.member.voiceChannel.name)),
   process: (msg) => {
-  	let channel = msg.member.voiceChannel;
-  	if (channel && availableNames.includes(channel.name)) {
-  		let users = Array.from(channel.members.values()).concat(Array.from(msg.mentions.members.values()));
+    let channel = msg.member.voiceChannel;
+    if (channel && availableNames.includes(channel.name)) {
+      let users = Array.from(channel.members.values()).concat(Array.from(msg.mentions.members.values()));
       users.push(msg.client.user);
 
-  		let channelMods = [];
-  		let muted = Module.config.roles.muted;
+      let channelMods = [];
+      let muted = Module.config.roles.muted;
 
-  		channelMods.push(channel.overwritePermissions(msg.guild.id, {CONNECT: false}));
+      channelMods.push(channel.overwritePermissions(msg.guild.id, {CONNECT: false}));
 
-  		channel.permissionOverwrites.forEach(permission => {
-  			if ((permission.id != muted) && (permission.id != msg.guild.id) && !users.map(u => u.id).includes(permission.id)) channelMods.push(permission.delete());
-  		});
+      channel.permissionOverwrites.forEach(permission => {
+        if ((permission.id != muted) && (permission.id != msg.guild.id) && !users.map(u => u.id).includes(permission.id)) channelMods.push(permission.delete());
+      });
 
-  		users.forEach(user => {
-  			channelMods.push(channel.overwritePermissions(user, {CONNECT: true}));
-  		});
+      users.forEach(user => {
+        channelMods.push(channel.overwritePermissions(user, {CONNECT: true}));
+      });
 
-  		Promise.all(channelMods).then(() => msg.react("🔒"));
-  	} else {
-  		msg.reply("you need to be in a community voice channel to use this command!").then(u.clean);
-  	}
+      Promise.all(channelMods).then(() => msg.react("🔒"));
+    } else {
+      msg.reply("you need to be in a community voice channel to use this command!").then(u.clean);
+    }
   }
 })
 .addCommand({name: "silent",
@@ -181,25 +181,25 @@ const Module = new Augur.Module()
   }
 })
 .addCommand({name: "unlock",
-	description: "Unlocks your current voice channel for new users",
+  description: "Unlocks your current voice channel for new users",
   category: "Voice",
   hidden: true,
-	permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && msg.member.voiceChannel && availableNames.includes(msg.member.voiceChannel.name)),
-	process: (msg) => {
-		let channel = msg.member.voiceChannel;
-		if (channel && availableNames.includes(channel.name)) {
-			let channelMods = [];
-			let muted = Module.config.roles.muted;
-			channelMods.push(channel.overwritePermissions(msg.guild.id, {CONNECT: null}));
-			channel.permissionOverwrites.forEach(permission => {
-				if ((permission.id != muted) && (permission.id != msg.guild.id)) channelMods.push(permission.delete());
-			});
+  permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && msg.member.voiceChannel && availableNames.includes(msg.member.voiceChannel.name)),
+  process: (msg) => {
+    let channel = msg.member.voiceChannel;
+    if (channel && availableNames.includes(channel.name)) {
+      let channelMods = [];
+      let muted = Module.config.roles.muted;
+      channelMods.push(channel.overwritePermissions(msg.guild.id, {CONNECT: null}));
+      channel.permissionOverwrites.forEach(permission => {
+        if ((permission.id != muted) && (permission.id != msg.guild.id)) channelMods.push(permission.delete());
+      });
 
-			Promise.all(channelMods).then(() => msg.react("🔓"));
-		} else {
-			msg.reply("you need to be in a community voice channel to use this command!").then(u.clean);
-		}
-	}
+      Promise.all(channelMods).then(() => msg.react("🔓"));
+    } else {
+      msg.reply("you need to be in a community voice channel to use this command!").then(u.clean);
+    }
+  }
 })
 .setInit(data => queue = (data ? data : new Map()))
 .setUnload(() => queue)

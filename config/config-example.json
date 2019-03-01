@@ -15,11 +15,11 @@
   "db": {
     "model": "models/mongo-models.js",
     "db": "",
-		"settings": {
+    "settings": {
       "useNewUrlParser": true,
-			"user": "",
-			"pass": ""
-		}
+      "user": "",
+      "pass": ""
+    }
   },
   "error": {
     "id": "",

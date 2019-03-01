@@ -68,20 +68,20 @@ const Module = new Augur.Module()
 .addEvent("guildMemberRemove", (member) => {
   if (member.guild.id == Module.config.ldsg) {
     Module.db.user.updateRoles(member);
-		Module.db.user.findXPRank(member.id).then(rank => {
-			let response = [
-				`**${member.displayName}** has left the server.`,
-				"Joined: " + member.joinedAt.toLocaleDateString(),
-				"Lifetime XP: " + rank.totalXP
-			];
-			member.client.channels.get(mod_log).send(response.join("\n"));
-		});
-	}
+    Module.db.user.findXPRank(member.id).then(rank => {
+      let response = [
+        `**${member.displayName}** has left the server.`,
+        "Joined: " + member.joinedAt.toLocaleDateString(),
+        "Lifetime XP: " + rank.totalXP
+      ];
+      member.client.channels.get(mod_log).send(response.join("\n"));
+    });
+  }
 })
 .addEvent("guildMemberUpdate", (oldMember, newMember) => {
   if (newMember.guild.id == Module.config.ldsg && (oldMember.roles.size != newMember.roles.size)) {
-		Module.db.user.updateRoles(newMember);
-	}
+    Module.db.user.updateRoles(newMember);
+  }
 });
 
 module.exports = Module;
