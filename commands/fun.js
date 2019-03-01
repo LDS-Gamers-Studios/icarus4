@@ -90,7 +90,7 @@ const Module = new Augur.Module()
   description: "Get a random 3-5 letter acronym. For science.",
   aliases: ["word"],
   category: "Silly",
-	process: (msg) => {
+  process: (msg) => {
     let alphabet = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "Y", "Z"];
     let len = Math.floor(Math.random() * 3) + 3;
     let profanityFilter = require("profanity-matcher");
@@ -115,7 +115,7 @@ const Module = new Augur.Module()
   description: "ALL THE _____!",
   syntax: "something",
   category: "Silly",
-	process: (msg, suffix) => {
+  process: (msg, suffix) => {
     u.clean(msg, 0);
     if (suffix) msg.channel.send(`${(msg.member ? msg.member.displayName : msg.author.username)}:\nALL THE ${suffix.toUpperCase()}!`, {files: ["https://cdn.discordapp.com/emojis/250348426817044482.png"]});
   }
@@ -124,7 +124,7 @@ const Module = new Augur.Module()
   description: "It's your birthday!?",
   syntax: "<@user>", hidden: true,
   category: "Silly",
-	process: (msg) => {
+  process: (msg) => {
     if (msg.mentions.users && msg.mentions.users.size > 0) {
       let birthday = msg.mentions.users.first();
       let flair = [
@@ -151,14 +151,14 @@ const Module = new Augur.Module()
 .addCommand({name: "chaos",
   description: "IT'S MADNESS!",
   category: "Silly",
-	process: (msg) => {
+  process: (msg) => {
     quickFile(msg, "https://cdn.discordapp.com/attachments/96335850576556032/452153983931383808/FireGifLDSG.gif", "fire.gif");
   }
 })
 .addCommand({name: "disagree",
   description: "I'm not sure I agree...",
   category: "Silly",
-	process: (msg) => {
+  process: (msg) => {
     quickFile(msg, [
       "https://cdn.discordapp.com/attachments/136577505418018826/274593594256523284/2FNHWnX.png",
       "http://i.imgur.com/eBHIyVA.png"
@@ -169,7 +169,7 @@ const Module = new Augur.Module()
   description: "Set an explosion",
   aliases: ["explode"],
   category: "Silly",
-	process: (msg) => {
+  process: (msg) => {
     quickText(msg, ":fire: :fire: :fire:");
   }
 })
@@ -201,7 +201,7 @@ const Module = new Augur.Module()
   description: "You're fined.",
   syntax: "<@user>", hidden: true,
   category: "Silly",
-	process: (msg) => {
+  process: (msg) => {
     if (msg.mentions.users.size > 0) {
       msg.mentions.users.forEach(function(user) {
         quickText(msg, `${user} You are fined one credit for a violation of the Verbal Morality Statute. Reason Code: 2DANK`);
@@ -215,14 +215,14 @@ const Module = new Augur.Module()
 .addCommand({name: "fire",
   description: "Light a fire",
   category: "Silly",
-	process: (msg) => {
+  process: (msg) => {
     quickText(msg, "*lights a small fire in the corner*\nNothing to see here, citizens. Return to your homes.");
   }
 })
 .addCommand({name: "guilty",
   description: "Guilty as charged",
   category: "Silly",
-	process: (msg) => {
+  process: (msg) => {
     quickFile(msg, "https://cdn.discordapp.com/attachments/228688325169512450/280196904279736320/ezgif.com-1f661bc6b6.gif", "guilty.gif");
   }
 })
@@ -230,7 +230,7 @@ const Module = new Augur.Module()
   description: "Happy Dance!",
   aliases: ["happy"],
   category: "Silly",
-	process: (msg) => {
+  process: (msg) => {
     quickFile(msg, [
       "https://media.giphy.com/media/pa37AAGzKXoek/giphy.gif", // Carlton
       "https://media.giphy.com/media/DGSlkymXSnc4g/giphy.gif", // TGWTG
@@ -241,14 +241,14 @@ const Module = new Augur.Module()
 .addCommand({name: "handicorn",
   description: "HANDICORN BATTLE!",
   category: "Silly",
-	process: (msg) => msg.channel.send("https://youtu.be/rlxHJsSsUGk")
+  process: (msg) => msg.channel.send("https://youtu.be/rlxHJsSsUGk")
 })
 .addCommand({name: "hbs",
   description: "Handicorn, Buttermelon, Sloth!",
   syntax: "handicorn | buttermelon | sloth",
   aliases: ["rps", "bhs", "sbh", "bsh", "hsb", "shb"],
   category: "Silly",
-	process: (msg, suffix) => {
+  process: (msg, suffix) => {
     if (suffix && (suffix.toLowerCase().startsWith("b") || suffix.toLowerCase().startsWith("h") || suffix.toLowerCase().startsWith("s"))) {
       let userPick = suffix.toLowerCase()[0];
       let icarusPick = ["b", "h", "s"][Math.floor(Math.random() * 3)];
@@ -311,7 +311,7 @@ const Module = new Augur.Module()
   aliases: ["hypetrain"],
   info: "Dispatching Hype Train",
   category: "Silly",
-	process: (msg) => {
+  process: (msg) => {
     //quickText(msg, ":steam_locomotive: :regional_indicator_h: :train: :regional_indicator_y: :train: :regional_indicator_p: :train: :regional_indicator_e: :train:");
     quickText(msg, ":steam_locomotive: 🇭 :train: 🇾 :train: 🇵 :train: 🇪 :train:");
   }
@@ -320,7 +320,7 @@ const Module = new Augur.Module()
   description: "I see what you did there!",
   aliases: ["whatyoudid", "whatudid"],
   category: "Silly",
-	process: (msg) => {
+  process: (msg) => {
     quickFile(msg, [
       "https://cdn.discordapp.com/attachments/323176568060903424/324925456337862656/Ep6ndWe.png", // Pie Chart
       "https://media.giphy.com/media/5gw0VWGbgNm8w/giphy.gif", // Gyllenhaal
@@ -332,7 +332,7 @@ const Module = new Augur.Module()
 .addCommand({name: "itsgreat",
   description: "It's great! Except...",
   category: "Silly",
-	process: (msg) => {
+  process: (msg) => {
     quickFile(msg, "https://cdn.discordapp.com/attachments/96335850576556032/294187421648551936/image.jpg");
   }
 })
@@ -340,10 +340,10 @@ const Module = new Augur.Module()
   description: "Oh, snap!",
   aliases: ["snap"],
   category: "Silly",
-	process: (msg) => {
+  process: (msg) => {
     quickFile(msg, [
       "https://cdn.discordapp.com/attachments/154625360514777088/281635879238369280/giphy-9.gif", // Andy Dwyer
-      "https://media.giphy.com/media/3o6ozztbjcHUN5V7B6/giphy.gif",	// Fresh Prince
+      "https://media.giphy.com/media/3o6ozztbjcHUN5V7B6/giphy.gif",  // Fresh Prince
       "https://media.giphy.com/media/xUPGcoUeohKhIesT5K/giphy.gif", // Cohn
       "https://media.giphy.com/media/3oEduNITi4GfwxY1Fu/giphy.gif" // Fallon
     ], "ohsnap.gif");
@@ -352,14 +352,14 @@ const Module = new Augur.Module()
 .addCommand({name: "poke",
   description: "Poke it with a stick.",
   category: "Silly",
-	process: (msg) => {
+  process: (msg) => {
     quickFile(msg, "https://cdn.discordapp.com/attachments/209046676781006849/279365238699327490/image.gif");
   }
 })
 .addCommand({name: "popcorn",
   description: "Popcorn",
   category: "Silly",
-	process: (msg) => {
+  process: (msg) => {
     quickFile(msg, [
       "https://media.giphy.com/media/tFK8urY6XHj2w/giphy.gif", // Colbert
       "https://media.giphy.com/media/t3dLl0TGHCxTG/giphy.gif", // Lansbury
@@ -374,7 +374,7 @@ const Module = new Augur.Module()
   description: "Care Bear Stare",
   aliases: ["carebearstare"],
   category: "Silly",
-	process: (msg) => {
+  process: (msg) => {
     quickFile(msg, "https://cdn.discordapp.com/attachments/193042027066163200/288769459764854795/carebearstare.png", "carebearstare.png", false);
   }
 })
@@ -382,7 +382,7 @@ const Module = new Augur.Module()
   description: "Salty",
   aliases: ["salt"],
   category: "Silly",
-	process: (msg) => {
+  process: (msg) => {
     quickFile(msg, [
       "https://cdn.discordapp.com/attachments/209046676781006849/294937224137670656/salty.gif", // Ice age
       "https://media.giphy.com/media/mxKdIoeskbqE/giphy.gif", // Salty much?
@@ -393,7 +393,7 @@ const Module = new Augur.Module()
 .addCommand({name: "shrug",
   description: "¯\_(ツ)_/¯",
   category: "Silly",
-	process: (msg) => {
+  process: (msg) => {
     quickFile(msg, [
       "https://cdn.discordapp.com/attachments/193042027066163200/301729544618901514/giphy.gif", // Compilation
       "https://cdn.discordapp.com/attachments/193042027066163200/301729459172802562/giphy.gif", // Power Rangers
@@ -410,14 +410,14 @@ const Module = new Augur.Module()
 .addCommand({name: "troll",
   description: "Trollery detected.",
   category: "Silly",
-	process: (msg) => {
+  process: (msg) => {
     quickText(msg, "**Trollery Detected.**\nDispatching Troll Train.\n\n:train: :train: :train:");
   }
 })
 .addCommand({name: "questions",
   description: "I now have additional questions.",
   category: "Silly",
-	process: (msg) => {
+  process: (msg) => {
     quickFile(msg, "http://i.imgur.com/SeHYADn.gif", "questions.gif");
   }
 })
@@ -425,7 +425,7 @@ const Module = new Augur.Module()
   description: "Wut?",
   aliases: ["what", "odd", "huh", "wat"],
   category: "Silly",
-	process: (msg) => {
+  process: (msg) => {
     quickFile(msg, [
       "https://media.giphy.com/media/cxMhIIoe5aXfO/giphy.gif", // Walk away
       //"https://cdn.discordapp.com/attachments/154625360514777088/322424415625412609/E7HwlPc_-_Imgur.gif", // Girl

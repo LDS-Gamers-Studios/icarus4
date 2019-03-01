@@ -10,18 +10,18 @@ const pf = new profanityFilter();
 
 const Module = new Augur.Module()
 .addCommand({name: "giphy",
-	description: "Post a gif reaction. Powered by GIPHY.",
-	syntax: "<reaction>",
-	aliases: ["gif", "react"],
+  description: "Post a gif reaction. Powered by GIPHY.",
+  syntax: "<reaction>",
+  aliases: ["gif", "react"],
   permissions: (msg) => (msg.guild && msg.channel.permissionsFor(msg.member).has(["EMBED_LINKS", "ATTACH_FILES"]) && msg.channel.permissionsFor(msg.client.user).has("ATTACH_FILES")),
-	process: (msg, suffix) => {
-		u.clean(msg, 0);
+  process: (msg, suffix) => {
+    u.clean(msg, 0);
     if (!suffix) return msg.reply("you need to tell me what kind of reaction to search!").then(u.clean);
     let bot = msg.client;
-		if (pf.scan(suffix.toLowerCase()).length == 0) {
+    if (pf.scan(suffix.toLowerCase()).length == 0) {
       let url = `https://api.giphy.com/v1/gifs/translate?api_key=${config.apiKey}&s=${encodeURIComponent(suffix)}`;
 
-			request(url, async function(error, response, body) {
+      request(url, async function(error, response, body) {
         try {
           if (!error && response.statusCode == 200) {
             body = JSON.parse(body);
@@ -51,9 +51,9 @@ const Module = new Augur.Module()
             } else msg.reply("I couldn't find any gifs for " + suffix).then(u.clean);
           } else msg.reply("I ran into an error:" + JSON.stringify(error)).then(u.clean);
         } catch(e) { u.alertError(e, msg); }
-			});
-		} else msg.reply("I'm not going to search for that. :rolling_eyes:").then(u.clean);
-	}
+      });
+    } else msg.reply("I'm not going to search for that. :rolling_eyes:").then(u.clean);
+  }
 })
 .setUnload(() => {
   delete require.cache[require.resolve(process.cwd() + "/config/giphy.json")];

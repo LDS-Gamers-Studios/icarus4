@@ -42,56 +42,56 @@ const Module = new Augur.Module()
 })
 .addCommand({name: "ping",
   category: "Bot Admin",
-	description: "Check bot ping.",
-	hidden: true,
-	process: (msg) => {
-		msg.channel.send('Pinging...').then(sent => {
-  			sent.edit(`Pong! Took ${sent.createdTimestamp - (msg.editedTimestamp ? msg.editedTimestamp : msg.createdTimestamp)}ms`);
-		});
-	}
+  description: "Check bot ping.",
+  hidden: true,
+  process: (msg) => {
+    msg.channel.send('Pinging...').then(sent => {
+      sent.edit(`Pong! Took ${sent.createdTimestamp - (msg.editedTimestamp ? msg.editedTimestamp : msg.createdTimestamp)}ms`);
+    });
+  }
 })
 .addCommand({name: "playing",
   category: "Bot Admin",
   hidden: true,
-	description: "Set playing status",
-	syntax: "[game]",
-	aliases: ["setgame", "game"],
-	process: (msg, suffix) => {
-		if (suffix) msg.client.user.setActivity(suffix);
-		else msg.client.user.setGame("");
+  description: "Set playing status",
+  syntax: "[game]",
+  aliases: ["setgame", "game"],
+  process: (msg, suffix) => {
+    if (suffix) msg.client.user.setActivity(suffix);
+    else msg.client.user.setGame("");
     msg.react("👌");
-	},
-	permissions: (msg) => (Module.config.adminId.includes(msg.author.id))
+  },
+  permissions: (msg) => (Module.config.adminId.includes(msg.author.id))
 })
 .addCommand({name: "pull",
   category: "Bot Admin",
-	description: "Pull bot updates from git",
-	hidden: true,
-	process: (msg) => {
+  description: "Pull bot updates from git",
+  hidden: true,
+  process: (msg) => {
     let spawn = require("child_process").spawn;
 
-		u.clean(msg);
+    u.clean(msg);
 
-		let cmd = spawn("git", ["pull"], {cwd: process.cwd()});
-		let stdout = [];
-		let stderr = [];
+    let cmd = spawn("git", ["pull"], {cwd: process.cwd()});
+    let stdout = [];
+    let stderr = [];
 
-		cmd.stdout.on("data", data => {
-			stdout.push(data);
-		});
+    cmd.stdout.on("data", data => {
+      stdout.push(data);
+    });
 
-		cmd.stderr.on("data", data => {
-			stderr.push(data);
-		});
+    cmd.stderr.on("data", data => {
+      stderr.push(data);
+    });
 
-		cmd.on("close", code => {
-			if (code == 0)
-				msg.channel.send(stdout.join("\n") + "\n\nCompleted with code: " + code).then(u.clean);
-			else
-				msg.channel.send(`ERROR CODE ${code}:\n${stderr.join("\n")}`).then(u.clean);
-		});
-	},
-	permissions: (msg) => (Module.config.ownerId === (msg.author.id))
+    cmd.on("close", code => {
+      if (code == 0)
+        msg.channel.send(stdout.join("\n") + "\n\nCompleted with code: " + code).then(u.clean);
+      else
+        msg.channel.send(`ERROR CODE ${code}:\n${stderr.join("\n")}`).then(u.clean);
+    });
+  },
+  permissions: (msg) => (Module.config.ownerId === (msg.author.id))
 })
 .addCommand({name: "pulse",
   category: "Bot Admin",
