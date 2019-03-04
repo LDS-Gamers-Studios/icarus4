@@ -37,8 +37,10 @@ async function testBirthdays(bot) {
             ":gift: ",
             ":cake: "
           ];
-          let member = await bot.guilds.get(ldsg).fetchMember(birthday.discordId);
-          await bot.channels.get(ldsg).send(":birthday: :confetti_ball: :tada: Happy Birthday, " + member + "! :tada: :confetti_ball: :birthday:");
+          try {
+            let member = await bot.guilds.get(ldsg).fetchMember(birthday.discordId);
+            await bot.channels.get(ldsg).send(":birthday: :confetti_ball: :tada: Happy Birthday, " + member + "! :tada: :confetti_ball: :birthday:");
+          } catch (e) { continue; }
           var birthdayLangs = require("../data/birthday.json");
           let msgs = birthdayLangs.map(lang => member.send(flair[Math.floor(Math.random() * flair.length)] + " " + lang));
           Promise.all(msgs).then(() => {
@@ -74,7 +76,9 @@ async function testBirthdays(bot) {
               }
             }
             // Announce if active
-            let user = await Module.db.user.fetchUser(member.id);
+            try {            
+              let user = await Module.db.user.fetchUser(member.id);
+            } catch (e) { continue; }
             if (user.currentXP > 0) {
               bot.channels.get(ldsg).send(`${member} has been part of the server for ${years} ${(years > 1 ? "years" : "year")}! Glad you're with us!`);
             }
