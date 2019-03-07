@@ -90,6 +90,40 @@ async function testBirthdays(bot) {
 }
 
 const Module = new Augur.Module()
+.addCommand({name: "8ball",
+  description: "Get an answer from the Magic 8-ball.",
+  aliases: ["🎱"],
+  category: "Silly",
+  process: (msg, suffix) => {
+    if (!suffix || !suffix.endsWith("?")) {
+      msg.reply("you need to ask me a question, silly.").then(u.clean);
+    } else {
+      const outcomes = [
+        "It is certain.",
+        "It is decidedly so.",
+        "Without a doubt.",
+        "Yes - definitely.",
+        "You may rely on it.",
+        "As I see it, yes.",
+        "Most likely.",
+        "Outlook good.",
+        "Yes.",
+        "Signs point to yes.",
+        "Reply hazy, try again.",
+        "Ask again later.",
+        "Better not tell you now.",
+        "Cannot predict now.",
+        "Concentrate and ask again.",
+        "Don't count on it.",
+        "My reply is no.",
+        "My sources say no.",
+        "Outlook not so good.",
+        "Very doubtful."
+      ];
+      msg.reply(outcomes[Math.floor(Math.random() * outcomes.length)]);
+    }
+  }
+})
 .addCommand({name: "acronym",
   description: "Get a random 3-5 letter acronym. For science.",
   aliases: ["word"],
