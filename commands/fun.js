@@ -37,8 +37,10 @@ async function testBirthdays(bot) {
             ":gift: ",
             ":cake: "
           ];
-          let member = await bot.guilds.get(ldsg).fetchMember(birthday.discordId);
-          await bot.channels.get(ldsg).send(":birthday: :confetti_ball: :tada: Happy Birthday, " + member + "! :tada: :confetti_ball: :birthday:");
+          try {
+            let member = await bot.guilds.get(ldsg).fetchMember(birthday.discordId);
+            await bot.channels.get(ldsg).send(":birthday: :confetti_ball: :tada: Happy Birthday, " + member + "! :tada: :confetti_ball: :birthday:");
+          } catch (e) { continue; }
           var birthdayLangs = require("../data/birthday.json");
           let msgs = birthdayLangs.map(lang => member.send(flair[Math.floor(Math.random() * flair.length)] + " " + lang));
           Promise.all(msgs).then(() => {
@@ -74,7 +76,9 @@ async function testBirthdays(bot) {
               }
             }
             // Announce if active
-            let user = await Module.db.user.fetchUser(member.id);
+            try {            
+              let user = await Module.db.user.fetchUser(member.id);
+            } catch (e) { continue; }
             if (user.currentXP > 0) {
               bot.channels.get(ldsg).send(`${member} has been part of the server for ${years} ${(years > 1 ? "years" : "year")}! Glad you're with us!`);
             }
@@ -86,6 +90,40 @@ async function testBirthdays(bot) {
 }
 
 const Module = new Augur.Module()
+.addCommand({name: "8ball",
+  description: "Get an answer from the Magic 8-ball.",
+  aliases: ["🎱"],
+  category: "Silly",
+  process: (msg, suffix) => {
+    if (!suffix || !suffix.endsWith("?")) {
+      msg.reply("you need to ask me a question, silly.").then(u.clean);
+    } else {
+      const outcomes = [
+        "It is certain.",
+        "It is decidedly so.",
+        "Without a doubt.",
+        "Yes - definitely.",
+        "You may rely on it.",
+        "As I see it, yes.",
+        "Most likely.",
+        "Outlook good.",
+        "Yes.",
+        "Signs point to yes.",
+        "Reply hazy, try again.",
+        "Ask again later.",
+        "Better not tell you now.",
+        "Cannot predict now.",
+        "Concentrate and ask again.",
+        "Don't count on it.",
+        "My reply is no.",
+        "My sources say no.",
+        "Outlook not so good.",
+        "Very doubtful."
+      ];
+      msg.reply(outcomes[Math.floor(Math.random() * outcomes.length)]);
+    }
+  }
+})
 .addCommand({name: "acronym",
   description: "Get a random 3-5 letter acronym. For science.",
   aliases: ["word"],
