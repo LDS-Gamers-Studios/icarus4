@@ -11,7 +11,10 @@ var InfractionSchema = new Schema({
     default: Date.now
   },
   description: String,
-  value: Number,
+  value: {
+    type: Number,
+    default: 0
+  },
   mod: String
 });
 
