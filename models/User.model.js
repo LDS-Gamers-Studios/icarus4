@@ -3,11 +3,26 @@ var mongoose = require('mongoose'),
 
 var UserSchema = new Schema({
   discordId: String,
-  currentXP: Number,
-  totalXP: Number,
-  posts: Number,
-  stars: Number,
-  preferences: Number,
+  currentXP: {
+    type: Number,
+    default: 0
+  },
+  totalXP: {
+    type: Number,
+    default: 0
+  },
+  posts: {
+    type: Number,
+    default: 0
+  },
+  stars: {
+    type: Number,
+    default: 0
+  },
+  preferences: {
+    type: Number,
+    default: 0
+  },
   house: String,
   excludeXP: {
     type: Boolean,
