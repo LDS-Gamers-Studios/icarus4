@@ -77,6 +77,7 @@ const Module = new Augur.Module()
   process: (msg, suffix) => {
     Module.handler.execute("info", msg, suffix);
     Module.handler.execute("rank", msg, suffix);
+    Module.handler.execute("infractionsummary", msg, suffix);
   },
   permissions: (msg) => msg.guild
 })
