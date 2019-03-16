@@ -15,7 +15,9 @@ const Utils = {
     .setTimestamp()
     .setTitle(error.name);
 
-    if (msg) {
+    if (typeof msg == "string") {
+      errorInfo.addField("Message", msg);
+    } else if (msg) {
       let bot = msg.client;
       if (bot.shard) errorInfo.addField("Shard", bot.shard.id, true);
 
