@@ -254,7 +254,7 @@ const Module = new Augur.Module()
   }
 })
 .addEvent("message", (msg) => {
-  if ((msg.channel.id == "114944876763807751") && !u.parse(msg)) {
+  if ((msg.channel.id == "114944876763807751") && !u.parse(msg) && !msg.author.bot) {
     let match = null;
     while (match = searchExp.exec(msg.cleanContent))
       Module.handler.execute("verse", msg, match[0]);
