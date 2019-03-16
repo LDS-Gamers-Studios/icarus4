@@ -203,8 +203,9 @@ const Module = new Augur.Module()
 })
 .setInit(data => queue = (data ? data : new Map()))
 .setUnload(() => queue)
-.addEvent("voiceStateUpdate", (oldMember, newMember) => {
-  if ((oldMember.guild.id == Module.config.ldsg) && (oldMember.voiceChannelID != newMember.voiceChannelID)) {
+.addEvent("voiceStateUpdate", async (oldMember, newMember) => {
+  let guild = oldMember.guild;
+  if ((guild.id == Module.config.ldsg) && (oldMember.voiceChannelID != newMember.voiceChannelID)) {
     if (oldMember.voiceChannel && (oldMember.voiceChannel.members.size == 0) && availableNames.includes(oldMember.voiceChannel.name)) {
       // REMOVE OLD VOICE CHANNEL
       oldMember.voiceChannel.delete().catch(console.error);
@@ -213,12 +214,19 @@ const Module = new Augur.Module()
       // CREATE NEW VOICE CHANNEL
       let name = "";
       for (var i = 0; (i < availableNames.length && !name); i++) {
-        if (!newMember.guild.channels.find(c => c.name == availableNames[i])) name = availableNames[i];
+        if (!guild.channels.find(c => c.name == availableNames[i])) {
+          name = availableNames[i];
+          break;
+        }
       }
       if (!name) name = availableNames[0];
-      newMember.guild.createChannel(name, "voice").then(channel => {
+      try {
+        let channel = await guild.createChannel(name, "voice", [{
+          memberOrRole: Module.config.roles.muted,
+          denied: ["VIEW_CHANNEL", "CONNECT", "SPEAK"]
+        }]);
         channel.setParent("363014069533540362");
-      });
+      } catch(e) { u.alertError(e, "Voice message creation error."); }
     }
   }
 });
