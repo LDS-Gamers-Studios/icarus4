@@ -220,11 +220,13 @@ const Module = new Augur.Module()
         }
       }
       if (!name) name = availableNames[0];
-      let channel = await guild.createChannel(name, "voice", [{
-        memberOrRole: Module.config.roles.muted,
-        denied: ["VIEW_CHANNEL", "CONNECT", "SPEAK"]
-      }]);
-      channel.setParent("363014069533540362");
+      try {
+        let channel = await guild.createChannel(name, "voice", [{
+          memberOrRole: Module.config.roles.muted,
+          denied: ["VIEW_CHANNEL", "CONNECT", "SPEAK"]
+        }]);
+        channel.setParent("363014069533540362");
+      } catch(e) { u.alertError(e, "Voice message creation error."); }
     }
   }
 });
