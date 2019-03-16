@@ -38,7 +38,8 @@ const Utils = {
     errorLog.send(errorInfo);
 
     console.error(Date());
-    if (msg) console.error(`${msg.author.username} in ${(msg.guild ? (msg.guild.name + " > " + msg.channel.name) : "DM")}: ${msg.cleanContent}`);
+    if (typeof msg == "string") console.error(msg);
+    else if (msg) console.error(`${msg.author.username} in ${(msg.guild ? (msg.guild.name + " > " + msg.channel.name) : "DM")}: ${msg.cleanContent}`);
     console.trace(error);
   },
   botSpam: function(msg) {
