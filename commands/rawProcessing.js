@@ -1,4 +1,5 @@
-﻿const Augur = require("augurbot");
+﻿const Augur = require("augurbot"),
+  Discord = require("discord.js");
 
 const Module = new Augur.Module()
 .addEvent("raw", packet => {
@@ -15,6 +16,15 @@ const Module = new Augur.Module()
     try {
       const emoji = packet.d.emoji.id ? `${packet.d.emoji.name}:${packet.d.emoji.id}` : packet.d.emoji.name;
       const reaction = message.reactions.get(emoji);
+      if (!reaction) {
+        reaction = {
+          count: 0,
+          emoji: packet.d.emoji.id ? client.emojis.get(packet.d.emoji.id) : packet.d.emoji.name,
+          me: packet.d.user_id == client.user.id,
+          message: message,
+          users: new Discord.Collection(),
+        };
+      }
 
       for (const [id, react] of message.reactions) {
         react.users = await react.fetchUsers();
