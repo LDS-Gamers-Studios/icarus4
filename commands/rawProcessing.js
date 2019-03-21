@@ -15,7 +15,7 @@ const Module = new Augur.Module()
   channel.fetchMessage(packet.d.message_id).then(async (message) => {
     try {
       const emoji = packet.d.emoji.id ? `${packet.d.emoji.name}:${packet.d.emoji.id}` : packet.d.emoji.name;
-      const reaction = message.reactions.get(emoji);
+      let reaction = message.reactions.get(emoji);
       if (!reaction) {
         reaction = {
           count: 0,
