@@ -74,11 +74,13 @@ const Module = new Augur.Module()
   }
 })
 .addEvent("messageReactionRemove", (reaction, user) => {
-  let message = reaction.message;
-  if (message.guild && (message.guild.id == Module.config.ldsg)) {
-    let {count, valid} = validate(message);
-    if (valid || ((count >= threshold) && !Rank.excludeChannels.includes(message.channel.id)))
+  if (reaction && reaction.message) {
+    let message = reaction.message;
+    if (message.guild && (message.guild.id == Module.config.ldsg)) {
+      let {count, valid} = validate(message);
+      if (valid || ((count >= threshold) && !Rank.excludeChannels.includes(message.channel.id)))
       updateStarboard(message);
+    }
   }
 });
 
