@@ -201,6 +201,20 @@ const Module = new Augur.Module()
     }
   }
 })
+.addCommand({name: "voicecleanup",
+  description: "Removes extra voice channels",
+  category: "Voice",
+  permissions: (msg) => (msg.guild && msg.guild.id == Module.config.ldsg && msg.member.roles.has(Module.config.roles.mod)),
+  process: (msg) => {
+    let channels = msg.guild.channels
+      .filter(c => c.parentID == "363014069533540362" && c.type == "voice" && availableNames.includes(c.name) && c.members.size == 0);
+    if (channels.size > 2) {
+      let del = channels.first(channels.size - 2);
+      del.forEach(async channel => await channel.delete("Too many channels"));
+    }
+    msg.react("👌");
+  }
+})
 .setInit(data => queue = (data ? data : new Map()))
 .setUnload(() => queue)
 .addEvent("voiceStateUpdate", async (oldMember, newMember) => {
