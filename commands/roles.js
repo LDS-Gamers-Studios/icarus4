@@ -66,7 +66,8 @@ const Module = new Augur.Module()
         });
       }
       await msg.member.addRole(role);
-      msg.react("👌");
+      await msg.react("👌");
+      u.clean(msg);
     } catch(e) {
       Module.handler.errorHandler(e, msg);
     }
