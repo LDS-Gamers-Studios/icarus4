@@ -55,9 +55,9 @@ const Module = new Augur.Module()
     suffix = suffix.replace(/\?/g, "").trim();
     if (!suffix) msg.reply("you need to give me a word to define!");
     else {
-      oxford.find(suffix, (err, def) => {
+      oxford.find(suffix, (err, defs) => {
         if (err) return u.alertError(err, msg);
-        def = def.results.filter(d => d.word.toLowerCase() == suffix.toLowerCase());
+        defs = defs.results.filter(d => d.word.toLowerCase() == suffix.toLowerCase());
 
         let embed = u.embed()
         .setTitle(suffix)
