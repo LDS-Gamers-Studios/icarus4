@@ -2,7 +2,9 @@ const Augur = require("augurbot"),
   u = require("../utils/utils"),
   {CollegiateDictionary, WordNotFoundError} = require("mw-dict");
 
-var dict;
+const Oxford = require("oxford-dictionary-api");
+
+var dict, oxford;
 
 const Module = new Augur.Module()
 .addCommand({name: "define",
@@ -45,8 +47,55 @@ const Module = new Augur.Module()
     }
   }
 })
+.addCommand({name: "oxford",
+  description: "Define a word",
+  syntax: "<word>",
+  alisases: ["dictionary"],
+  process: async (msg, suffix) => {
+    suffix = suffix.replace(/\?/g, "").trim();
+    if (!suffix) msg.reply("you need to give me a word to define!");
+    else {
+      try {
+        let def = (await oxford.lookup(suffix)).results.filter(d => d.word.toLowerCase() == suffix.toLowerCase());
+        let embed = u.embed()
+        .setTitle(suffix)
+        .setColor(0x00dbf2)
+        .setFooter("Powered by Oxford Dictionaries");
+
+        if (defs.length > 0) {
+          for (let d = 0; d < defs.length; d++) {
+            let def = defs[d];
+            for (let l = 0; l < def.lexicalEntries.length; l++) {
+              let lentry = def.lexicalEntries[l];
+              let title = `${lentry.text} (${lentry.lexicalCategory})`;
+              let description = [];
+              for (let e = 0; e < lentry.entries.length; e++) {
+                let entry = lentry.entries[e];
+                for (let s = 0; s < entry.senses.length; s++) {
+                  let sense = entry.senses[s];
+                  description.push(`${s + 1}: ${sense.definitions.join("\n   ")}`);
+                  for (let ss = 0; ss < sense.subsenses.length; ss++) {
+                    description.push(`   ${s + 1}.${ss + 1}: ${subsense.definitions.join("\n     ")}`);
+                  }
+                }
+              }
+              embed.addField(title, description.join("\n"));
+            }
+          }
+        } else embed.setDescription(`No results found for ${suffix}.`);
+
+        msg.channel.send({embed});
+      } catch(e) { u.alertError(e, msg); }
+    }
+  }
+})
 .setInit(() => {
+  const nu = require("utils");
+
   dict = new CollegiateDictionary(Module.config.api.mw.dictionary);
+
+  oxford = new Oxford(Module.api.oxford.id, Module.api.oxford.key);
+  oxford.lookup = nu.promisify(oxford.find);
 });
 
 module.exports = Module;
