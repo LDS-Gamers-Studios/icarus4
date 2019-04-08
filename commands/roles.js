@@ -68,17 +68,19 @@ const Module = new Augur.Module()
       let roles = [];
 
       for (const [key, channel] of channels) {
-        let channelName = channel.name.toLowerCase().replace(/(general)|(lfg)/ig, "").replace(/\-+/g, " ").trim();
-        channelName = (channelName ? u.properCase(channelName) : "LDSGamer");
-        let role = msg.guild.roles.find(r => r.name.toLowerCase() == channelName.toLowerCase());
-        if (!role) {
-          role = await msg.guild.createRole({
-            name: channelName,
-            permissions: [],
-            mentionable: true
-          });
+        if (channel.permissionsFor(msg.member).has("VIEW_CHANNEL")) {
+          let channelName = channel.name.toLowerCase().replace(/(general)|(lfg)/ig, "").replace(/\-+/g, " ").trim();
+          channelName = (channelName ? u.properCase(channelName) : "LDSGamer");
+          let role = msg.guild.roles.find(r => r.name.toLowerCase() == channelName.toLowerCase());
+          if (!role) {
+            role = await msg.guild.createRole({
+              name: channelName,
+              permissions: [],
+              mentionable: true
+            });
+          }
+          roles.push(role);
         }
-        roles.push(role);
       }
 
       roles = roles.filter(r => !msg.member.roles.has(r.id));
