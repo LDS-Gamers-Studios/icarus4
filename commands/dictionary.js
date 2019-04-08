@@ -93,7 +93,7 @@ const Module = new Augur.Module()
 })
 .setInit(() => {
   dict = new CollegiateDictionary(Module.config.api.mw.dictionary);
-  oxford = new Oxford(Module.api.oxford.id, Module.api.oxford.key);
+  oxford = new Oxford(Module.config.api.oxford.id, Module.config.api.oxford.key);
 });
 
 module.exports = Module;
