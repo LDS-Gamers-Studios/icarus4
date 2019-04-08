@@ -42,8 +42,7 @@ const Module = new Augur.Module()
       u.clean(msg);
 
       for (const [key, channel] of channels) {
-
-        let channelName = msg.channel.name.toLowerCase().replace(/(general)|(lfg)/ig, "").replace(/\-+/g, " ").trim();
+        let channelName = channel.name.toLowerCase().replace(/(general)|(lfg)/ig, "").replace(/\-+/g, " ").trim();
         channelName = (channelName ? u.properCase(channelName) : "LDSGamer");
         let role = msg.member.roles.find(r => r.name.toLowerCase() == channelName.toLowerCase());
 
