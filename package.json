@@ -33,6 +33,7 @@
     "mongoose": "^5.4.14",
     "mw-dict": "^3.0.0",
     "opusscript": "0.0.6",
+    "oxford-dictionary-api": "^1.0.1",
     "profanity-matcher": "^1.0.1",
     "pug": "^2.0.3",
     "request": "^2.88.0",
