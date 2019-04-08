@@ -48,10 +48,8 @@ const Module = new Augur.Module()
 
         if (role) roles.push(role);
       }
-      if (roles) {
-        await msg.member.removeRoles(roles);
-        msg.react("👌");
-      }
+      if (roles.length > 0) await msg.member.removeRoles(roles);
+      msg.react("👌");
     } catch(e) {
       Module.handler.errorHandler(e, msg);
     }
@@ -83,7 +81,8 @@ const Module = new Augur.Module()
         roles.push(role);
       }
 
-      await msg.member.addRoles(roles);
+      roles = roles.filter(r => !msg.member.roles.has(r.id));
+      if (roles.length > 0) await msg.member.addRoles(roles);
       await msg.react("👌");
       u.clean(msg);
     } catch(e) {
