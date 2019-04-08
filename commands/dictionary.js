@@ -76,9 +76,11 @@ const Module = new Augur.Module()
                 for (let s = 0; s < entry.senses.length; s++) {
                   let sense = entry.senses[s];
                   description.push(`${s + 1}: ${sense.definitions.join("\n   ")}`);
-                  for (let ss = 0; ss < sense.subsenses.length; ss++) {
-                    let subsense = sense.subsenses[ss];
-                    description.push(`   ${s + 1}.${ss + 1}: ${subsense.definitions.join("\n     ")}`);
+                  if (sense.subsenses) {
+                    for (let ss = 0; ss < sense.subsenses.length; ss++) {
+                      let subsense = sense.subsenses[ss];
+                      description.push(`   ${s + 1}.${ss + 1}: ${subsense.definitions.join("\n     ")}`);
+                    }
                   }
                 }
               }
