@@ -51,12 +51,14 @@ const Module = new Augur.Module()
   description: "Define a word",
   syntax: "<word>",
   alisases: ["dictionary"],
-  process: async (msg, suffix) => {
+  process: (msg, suffix) => {
     suffix = suffix.replace(/\?/g, "").trim();
     if (!suffix) msg.reply("you need to give me a word to define!");
     else {
-      try {
-        let def = (await oxford.lookup(suffix)).results.filter(d => d.word.toLowerCase() == suffix.toLowerCase());
+      oxford.find(suffix, (err, def) => {
+        if (err) return u.alertError(err, msg);
+        def = def.results.filter(d => d.word.toLowerCase() == suffix.toLowerCase());
+
         let embed = u.embed()
         .setTitle(suffix)
         .setColor(0x00dbf2)
@@ -85,17 +87,13 @@ const Module = new Augur.Module()
         } else embed.setDescription(`No results found for ${suffix}.`);
 
         msg.channel.send({embed});
-      } catch(e) { u.alertError(e, msg); }
+      });
     }
   }
 })
 .setInit(() => {
-  const nu = require("utils");
-
   dict = new CollegiateDictionary(Module.config.api.mw.dictionary);
-
   oxford = new Oxford(Module.api.oxford.id, Module.api.oxford.key);
-  oxford.lookup = nu.promisify(oxford.find);
 });
 
 module.exports = Module;
