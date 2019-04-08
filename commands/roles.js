@@ -30,18 +30,27 @@ const Module = new Augur.Module()
 .addCommand({name: "nopings",
   description: "Remove a pingable role for your current channel",
   permissions: (msg) => msg.guild && msg.guild.id == "96335850576556032",
+  syntax: "[#channel(s)]",
   category: "Members",
   hidden: true,
   process: async (msg) => {
     try {
+      let channels = msg.mentions.channels;
+      if (channels.size == 0) channels.set(msg.channel.id, msg.channel);
+      let roles = [];
+
       u.clean(msg);
-      let channel = msg.channel.name.toLowerCase().replace(/(general)|(lfg)/ig, "").replace(/\-+/g, " ").trim();
-      channel = (channel ? u.properCase(channel) : "LDSGamer");
-      let role = msg.member.roles.find(r => r.name.toLowerCase() == channel.toLowerCase());
-      if (!role) {
-        msg.reply("I couldn't see a pingable role for this channel applied to you.");
-      } else {
-        await msg.member.removeRole(role);
+
+      for (const [key, channel] of channels) {
+
+        let channelName = msg.channel.name.toLowerCase().replace(/(general)|(lfg)/ig, "").replace(/\-+/g, " ").trim();
+        channelName = (channelName ? u.properCase(channelName) : "LDSGamer");
+        let role = msg.member.roles.find(r => r.name.toLowerCase() == channelName.toLowerCase());
+
+        if (role) roles.push(role);
+      }
+      if (roles) {
+        await msg.member.removeRoles(roles);
         msg.react("👌");
       }
     } catch(e) {
@@ -52,20 +61,30 @@ const Module = new Augur.Module()
 .addCommand({name: "pingme",
   description: "Add a pingable role for your current channel",
   permissions: (msg) => msg.guild && msg.guild.id == "96335850576556032",
+  syntax: "[#channel(s)]",
   category: "Members",
   process: async (msg) => {
     try {
-      let channel = msg.channel.name.toLowerCase().replace(/(general)|(lfg)/ig, "").replace(/\-+/g, " ").trim();
-      channel = (channel ? u.properCase(channel) : "LDSGamer");
-      let role = msg.guild.roles.find(r => r.name.toLowerCase() == channel.toLowerCase());
-      if (!role) {
-        role = await msg.guild.createRole({
-          name: channel,
-          permissions: [],
-          mentionable: true
-        });
+      let channels = msg.mentions.channels;
+      if (channels.size == 0) channels.set(msg.channel.id, msg.channel);
+
+      let roles = [];
+
+      for (const [key, channel] of channels) {
+        let channelName = channel.name.toLowerCase().replace(/(general)|(lfg)/ig, "").replace(/\-+/g, " ").trim();
+        channelName = (channelName ? u.properCase(channelName) : "LDSGamer");
+        let role = msg.guild.roles.find(r => r.name.toLowerCase() == channelName.toLowerCase());
+        if (!role) {
+          role = await msg.guild.createRole({
+            name: channelName,
+            permissions: [],
+            mentionable: true
+          });
+        }
+        roles.push(role);
       }
-      await msg.member.addRole(role);
+
+      await msg.member.addRoles(roles);
       await msg.react("👌");
       u.clean(msg);
     } catch(e) {
