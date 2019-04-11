@@ -218,7 +218,7 @@ const Module = new Augur.Module()
           guild.members
           .reduce((games, m) => {
             if (!m.user.bot) {
-              let game = (m.presence.game ? m.presence.game.name : null);
+              let game = (m.presence.game && m.presence.game.type==0 ? m.presence.game.name : null);
               if (game && !games.has(game)) games.set(game, {game: game, players: 0});
               if (game) games.get(game).players++;
             }
