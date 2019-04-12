@@ -12,7 +12,8 @@ const mixer = new Mixer.Client(new Mixer.DefaultRequestRunner()),
   mixerStatus = new Map(),
   twitch = new TwitchApi(twitchConfig),
   twitchStatus = new Map(),
-  ytStatus = new Map();
+  ytStatus = new Map(),
+  bonusStreams = require("../data/streams.json");
 
 function checkStreams(bot) {
   try {
@@ -20,14 +21,18 @@ function checkStreams(bot) {
     let streamers = bot.guilds.get(Module.config.ldsg).roles.get("267038468474011650").members;
 
     Module.db.ign.getList("twitch").then(igns => {
-      igns.filter(ign => streamers.has(ign.discordId)).forEach(ign => {
+      igns.filter(ign => streamers.has(ign.discordId))
+      .concat(bonusStreams.twitch.map(c => ({ign: c, discordId: c})))
+      .forEach(ign => {
         let channelName = encodeURIComponent(ign.ign);
         processTwitch(bot, ign.discordId, channelName);
       });
     });
 
     Module.db.ign.getList("mixer").then(igns => {
-      igns.filter(ign => streamers.has(ign.discordId)).forEach(ign => {
+      igns.filter(ign => streamers.has(ign.discordId))
+      .concat(bonusStreams.mixer.map(c => ({ign: c, discordId: c})))
+      .forEach(ign => {
         let channelName = encodeURIComponent(ign.ign);
         processMixer(bot, ign.discordId, channelName);
       });
@@ -36,12 +41,7 @@ function checkStreams(bot) {
     // Check for new Approved Streamers applications
     processApplications();
 
-    // YOUTUBE LIVE TEST
-    [
-      {discordId: "176849126317752320", ign: "adamandstevie"},
-      {discordId: "340645910130196482", ign: "CBWMechBot"}
-    ].forEach(ign => processYouTube(bot, ign.discordId, ign.ign));
-  } catch(e) { u.alertError(e); }
+  } catch(e) { u.alertError(e, "Stream Check"); }
 };
 
 function isPartnered(member) {
@@ -132,7 +132,7 @@ function processApplications() {
           .catch(u.alertError);
       }
     });
-  } catch(e) { u.alertError(e); }
+  } catch(e) { u.alertError(e, "Streaming Application Check"); }
 }
 
 async function processMixer(bot, key, channel) {
@@ -153,7 +153,7 @@ async function processMixer(bot, key, channel) {
         });
         if (!(res.audience == "18+") && !(res.audience == "mature")) {
           notificationChannel.send(notificationEmbed(res, "mixer"));
-          if (isPartnered(member)) member.addRole(liveRole);
+          if (member && isPartnered(member)) member.addRole(liveRole);
         }
       }
     } else if (mixerStatus.has(key) && (mixerStatus.get(key).status == "online")) { // STREAM IS OFFLINE
@@ -161,10 +161,10 @@ async function processMixer(bot, key, channel) {
         status: "offline",
         since: Date.now()
       });
-      if (liveRole.members.has(member.id)) member.removeRole(liveRole);
+      if (member && liveRole.members.has(member.id)) member.removeRole(liveRole);
     }
   } catch(e) {
-    u.alertError(e);
+    u.alertError(e, "Process Mixer");
   }
 };
 
@@ -198,7 +198,7 @@ function processTwitch(bot, key, channel) {
           });
           if (!body.stream.channel.mature) {
             notificationChannel.send(notificationEmbed(body, "twitch"));
-            if (isPartnered(member)) member.addRole(liveRole);
+            if (member && isPartnered(member)) member.addRole(liveRole);
           }
         }
       } else if (twitchStatus.has(key) && (twitchStatus.get(key).status == "online")) {
@@ -206,7 +206,7 @@ function processTwitch(bot, key, channel) {
         if (channel.toLowerCase() == "ldsgamers") {
           bot.user.setGame("");
         }
-        if (liveRole.members.has(member.id)) member.removeRole(liveRole);
+        if (member && liveRole.members.has(member.id)) member.removeRole(liveRole);
 
         twitchStatus.set(key, {
           status: "offline",
@@ -215,7 +215,7 @@ function processTwitch(bot, key, channel) {
       }
     });
   } catch(e) {
-    u.alertError(e);
+    u.alertError(e, "Process Twitch");
   }
 };
 
@@ -247,7 +247,7 @@ async function processYouTube(bot, key, channel) {
       if (liveRole.members.has(member.id)) member.removeRole(liveRole);
     }
   } catch(e) {
-    u.alertError(e);
+    u.alertError(e, "Process YouTube");
   }
 };
 
@@ -576,6 +576,42 @@ const Module = new Augur.Module()
   },
   permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && msg.member.roles.has(Module.config.roles.team))
 })
+.addCommand({name: "watchchannel",
+  description: "Add a non-member's channel to notifications.",
+  syntax: "twitch/mixer channel",
+  category: "Streaming",
+  permissions: (msg) => (msg.guild && msg.guild.id == Module.config.ldsg && msg.member.roles.has(Module.config.roles.management)),
+  process: (msg, suffix) => {
+    try {
+      suffix = suffix.toLowerCase().split(" ");
+      let platform = suffix.shift();
+      if (["mixer", "twitch"].includes(platform)) {
+        bonusStreams[platform] = bonusStreams[platform].concat(suffix);
+        msg.react("👌");
+        fs.writeFileSync("./data/streams.json", JSON.stringify(bonusStreams, null, "\t"));
+        u.clean(msg);
+      } else return msg.reply("you need to tell me a platform (twitch/mixer) and at least one channel to watch!").then(u.clean);
+    } catch(e) { u.alertError(e, msg); }
+  }
+})
+.addCommand({name: "unwatchchannel",
+  description: "remove a non-member's channel to notifications.",
+  syntax: "twitch/mixer channel",
+  category: "Streaming",
+  permissions: (msg) => (msg.guild && msg.guild.id == Module.config.ldsg && msg.member.roles.has(Module.config.roles.management)),
+  process: (msg, suffix) => {
+    try {
+      suffix = suffix.toLowerCase().split(" ");
+      let platform = suffix.shift();
+      if (["mixer", "twitch"].includes(platform)) {
+        bonusStreams[platform] = bonusStreams[platform].filter(s => !suffix.includes(s.toLowerCase()));
+        msg.react("👌");
+        fs.writeFileSync("./data/streams.json", JSON.stringify(bonusStreams, null, "\t"));
+        u.clean(msg);
+      } else return msg.reply("you need to tell me a platform (twitch/mixer) and at least one channel to unwatch!").then(u.clean);
+    } catch(e) { u.alertError(e, msg); }
+  }
+})
 .addCommand({name: "youtube",
   description: "Show a user's recent videos",
   syntax: "<youtube user name> | <@user>",
@@ -639,7 +675,7 @@ const Module = new Augur.Module()
     let interval = 5 * 60 * 1000;
     checkStreams(bot);
     return setInterval(checkStreams, interval, bot);
-  } catch(e) { u.alertError(e); }
+  } catch(e) { u.alertError(e, "Streaming Clockwork"); }
 });
 
 module.exports = Module;
