@@ -9,7 +9,7 @@ function userEmbed(member) {
   let roleString = roles.join(", ");
   if (roleString.length > 1024) roleString = roleString.substr(0, roleString.indexOf(", ", 1000)) + " ...";
   let embed = u.embed()
-    .setTitle(Discord.Util.escapeMarkdown(member.displayName))
+    .setTitle(u.escapeText(member.displayName))
     .addField("ID", member.id, true)
     .addField("Joined", member.joinedAt.toUTCString(), true)
     .addField("Account Created", member.user.createdAt.toUTCString(), true)
