@@ -1,14 +1,15 @@
 const Augur = require("augurbot"),
   request = require("request"),
   cheerio = require("cheerio"),
-  u = require("../utils/utils");
+  u = require("../utils/utils"),
+  Discord = require("discord.js");
 
 function userEmbed(member) {
   let roles = member.roles.map(role => role.name);
   let roleString = roles.join(", ");
   if (roleString.length > 1024) roleString = roleString.substr(0, roleString.indexOf(", ", 1000)) + " ...";
   let embed = u.embed()
-    .setTitle(member.displayName)
+    .setTitle(Discord.Util.escapeMarkdown(member.displayName))
     .addField("ID", member.id, true)
     .addField("Joined", member.joinedAt.toUTCString(), true)
     .addField("Account Created", member.user.createdAt.toUTCString(), true)
