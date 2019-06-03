@@ -173,7 +173,7 @@ const Module = new Augur.Module()
           card: suffix,
         },
         content: {
-          cardDesc: "Submitted by: " + msg.author.username,
+          cardDesc: `Submitted by ${msg.author.username} in ${msg.channel.name}.`,
           cardLabelColors: "blue"
         }
       };
