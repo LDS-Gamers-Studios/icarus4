@@ -1,8 +1,9 @@
 ﻿const Augur = require("augurbot"),
-  Discord = require("discord.js");
+  Discord = require("discord.js"),
+  u = require("../utils/utils");
 
 const Module = new Augur.Module()
-.addEvent("raw", packet => {
+.addEvent("raw", async (packet) => {
   // Catch raw reaction events & convert into a non-raw event if needed
 
   if (!['MESSAGE_REACTION_ADD', 'MESSAGE_REACTION_REMOVE'].includes(packet.t)) return;
@@ -12,7 +13,9 @@ const Module = new Augur.Module()
   const channel = client.channels.get(packet.d.channel_id);
   if (channel.messages.has(packet.d.message_id)) return;
 
-  channel.fetchMessage(packet.d.message_id).then(async (message) => {
+  try {
+    let message = await channel.fetchMessage(packet.d.message_id);
+
     try {
       const emoji = packet.d.emoji.id ? `${packet.d.emoji.name}:${packet.d.emoji.id}` : packet.d.emoji.name;
       let reaction = message.reactions.get(emoji);
@@ -37,8 +40,11 @@ const Module = new Augur.Module()
       if (packet.t === 'MESSAGE_REACTION_REMOVE') {
         client.emit('messageReactionRemove', reaction, client.users.get(packet.d.user_id));
       }
-    } catch(e) { Module.handler.errorHandler(e); }
-  });
+    } catch(e) { u.alertError(e, "Error in rawProcessing.js after fetching "); }
+  } catch(e) {
+    u.alertError(e, "Couldn't fetch message during raw event processing.");
+  }
+
 });
 
 module.exports = Module;
