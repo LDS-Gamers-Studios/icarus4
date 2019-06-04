@@ -28,8 +28,10 @@ async function updateStarboard(message) {
 
     let star = await Module.db.starboard.fetchStar(message.id);
     if (star && !star.deny) {
-      let m = await bot.channels.get(starboard).fetchMessage(star.starId);
-      m.edit(embed);
+      try {
+        let m = await bot.channels.get(starboard).fetchMessage(star.starId);
+        m.edit(embed);
+      } catch (e) { u.alertError(e, "Could not fetch/edit card for starred message.");
     } else {
       let m = await bot.channels.get(starboard).send(embed);
       Module.db.starboard.saveStar(message, m);
