@@ -18,7 +18,7 @@ const availableNames = [
   "Room Fry Sauce",
   "Room Goat",
   "Room Ink",
-  "Room Potato",
+  "Room Potat",
   "Room Trogdor",
 ];
 var queue;
