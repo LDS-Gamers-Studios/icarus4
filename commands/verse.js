@@ -193,7 +193,7 @@ const Module = new Augur.Module()
 .addCommand({name: "verse",
   description: "Link to a chapter or verse in the standard works",
   syntax: "Scripture Reference (John 10:11)",
-  info: "Links to and highlights a scripture on LDS.org",
+  info: "Links to and highlights a scripture on ChurchOfJesusChrist.org",
   aliases: ["sw", "v"],
   category: "Gospel",
   process: (msg, suffix) => {
@@ -216,7 +216,7 @@ const Module = new Augur.Module()
       scripture.book = scripture.book.replace(/ /g, "-").toLowerCase();
       if (alias[scripture.book]) scripture.book = alias[scripture.book];
       if (books[scripture.book]) {
-        let link = `https://www.lds.org/scriptures/${books[scripture.book].work}/${scripture.book}/${scripture.chapter}${(scripture.verse ? ("." + scripture.verse + "?lang=eng#p" + scripture.start) : "?lang=eng")}`;
+        let link = `https://www.churchofjesuschrist.org/study/scriptures/${books[scripture.book].work}/${scripture.book}/${scripture.chapter}${(scripture.verse ? ("." + scripture.verse + "?lang=eng#p" + scripture.start) : "?lang=eng")}`;
         if (scripture.text) {
           let embed = u.embed()
           .setTitle(`${books[scripture.book].title} ${scripture.chapter}${(scripture.verse ? (":" + scripture.verse) : "")}`)
@@ -237,7 +237,7 @@ const Module = new Augur.Module()
   category: "Gospel",
   process: (msg, suffix) => {
     if (suffix) {
-      let url = `https://www.lds.org/search?lang=eng&collection=general-conference&query=${encodeURIComponent(suffix)}`;
+      let url = `https://www.churchofjesuschrist.org/search?lang=eng&facet=general-conference&query=${encodeURIComponent(suffix)}`;
 
       request(url, (err, response, body) => {
         if (err) {
