@@ -1,13 +1,13 @@
 const Augur = require("augurbot"),
   hasLink = /http(s)?:\/\/(\w+(-\w+)*\.)+\w+/,
   affiliateLinks = {
-    amazon: {
-      site: "Amazon",
-      affiliate: "Amazon Affiliate",
-      test: /amazon\.(com|co\.uk)\/(\w+(\-\w+)*\/)?(gp\/product|dp)\/(\w+)/i,
-      tag: /tag=ldsgamers\-20/,
-      link: (match) =>`https://www.${match[0]}?tag=ldsgamers-20`
-    },
+    //amazon: {
+    //  site: "Amazon",
+    //  affiliate: "Amazon Affiliate",
+    //  test: /amazon\.(com|co\.uk)\/(\w+(\-\w+)*\/)?(gp\/product|dp)\/(\w+)/i,
+    //  tag: /tag=ldsgamers\-20/,
+    //  link: (match) =>`https://www.${match[0]}?tag=ldsgamers-20`
+    //},
     cdkeys: {
       site: "CDKeys.com",
       affiliate: "CDKeys Affiliate",
