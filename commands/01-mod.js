@@ -187,7 +187,7 @@ async function processCardReaction(reaction, mod, infraction) {
         embed.fields[3].value = `${user.username} retracted the warning.`;
 
         message.edit(embed);
-      });
+      }
     } else if (reaction == cardReactions[0]) {
       /********************
       **  Ignore a flag  **
