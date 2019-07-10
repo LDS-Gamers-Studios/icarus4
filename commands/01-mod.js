@@ -232,6 +232,8 @@ async function processCardReaction(reaction, mod, infraction) {
 
       let inf = await Module.db.infraction.update(infraction._id, infraction);
 
+      let infractionSummary = await Module.db.infraction.getSummary(member.id);
+
       let quote = u.embed()
       .setAuthor(Util.escapeMarkdown(message.member.displayName), message.author.displayAvatarURL)
       .setDescription(message.cleanContent + (message.editedAt ? "\n*[Edited]*" : ""))
