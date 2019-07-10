@@ -170,21 +170,21 @@ async function warnCard(msg, filtered = null, call = false) {
 
 async function processCardReaction(reaction, mod, infraction) {
   try {
-    if (reaction.users.filter(u => !u.bot).size > 0) return;
+    if (reaction.users.filter(u => !u.bot).size > 1) return;
     let message = reaction.message;
     reaction = reaction.emoji.name;
     let embed = message.embeds[0];
 
-    if ((reaction == "⏪") && (user.id == infraction.mod)) {
+    if ((reaction == "⏪") && (mod.id == infraction.mod)) {
       /***********************
       **  Retract a warning **
       ***********************/
-      let retraction = await Module.db.infraction.retract(message.id, user.id);
+      let retraction = await Module.db.infraction.retract(message.id, mod.id);
       if (retraction) {
         let infractionSummary = await Module.db.infraction.getSummary(retraction.discordId);
         embed.color = 0x00ff00;
         embed.fields[2].value = `Infractions: ${infractionSummary.count}\nPoints: ${infractionSummary.points}`;
-        embed.fields[3].value = `${user.username} retracted the warning.`;
+        embed.fields[3].value = `${mod.username} retracted the warning.`;
 
         message.edit(embed);
       }
@@ -199,7 +199,7 @@ async function processCardReaction(reaction, mod, infraction) {
       embed.fields = embed.fields.filter(f => !f.name.startsWith("Jump"));
       await message.clearReactions();
       message.edit(embed);
-    } else {
+    } else if (cardReactions.includes(reaction)) {
       /**************************
       **  Warn as appropriate  **
       **************************/
@@ -207,18 +207,18 @@ async function processCardReaction(reaction, mod, infraction) {
       if (msg) u.clean(msg, 0);
 
       embed.setColor("#0000FF");
-      infraction.mod = user.id;
+      infraction.mod = mod.id;
       let member = message.guild.members.get(infraction.discordId);
 
       if (reaction == cardReactions[1]) {         // Minor infraction
         infraction.value = 1;
-        embed.addField("Resolved", user.username + " issued a 1 point warning.");
+        embed.addField("Resolved", mod.username + " issued a 1 point warning.");
       } else if (reaction == cardReactions[2]) {  // Moderate infraction
         infraction.value = 5;
-        embed.addField("Resolved", user.username + " issued a 5 point warning.");
+        embed.addField("Resolved", mod.username + " issued a 5 point warning.");
       } else if (reaction == cardReactions[3]) {  // Major infraction
         infraction.value = 10;
-        embed.addField("Resolved", user.username + " issued a 10 point warning.");
+        embed.addField("Resolved", mod.username + " issued a 10 point warning.");
       } else if (reaction == cardReactions[4]) {  // Mute
         infraction.value = 10;
         if (!member.roles.has(Module.config.roles.muted)) {
@@ -227,7 +227,7 @@ async function processCardReaction(reaction, mod, infraction) {
           await member.setMute(true);
           message.client.channels.get("356657507197779968").send(`${member}, you have been muted in ${message.guild.name}. Please review our Code of Conduct. A member of the management team will be available to discuss more details.\n\nhttp://ldsgamers.com/code-of-conduct`);
         }
-        embed.addField("Resolved", user.username + " muted the member.");
+        embed.addField("Resolved", mod.username + " muted the member.");
       }
 
       let inf = await Module.db.infraction.update(infraction._id, infraction);
