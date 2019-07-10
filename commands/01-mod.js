@@ -224,7 +224,7 @@ async function processCardReaction(reaction, mod, infraction) {
         if (!member.roles.has(Module.config.roles.muted)) {
           // Only mute them if they weren't already muted.
           await member.addRole(Module.config.roles.muted);
-          await member.setMute(true);
+          if (member.voiceChannel) await member.setMute(true);
           message.client.channels.get("356657507197779968").send(`${member}, you have been muted in ${message.guild.name}. Please review our Code of Conduct. A member of the management team will be available to discuss more details.\n\nhttp://ldsgamers.com/code-of-conduct`);
         }
         embed.addField("Resolved", mod.username + " muted the member.");
@@ -454,14 +454,14 @@ Module
           let member = await msg.guild.fetchMember(user);
           if (member && !member.roles.has(Module.config.roles.muted)) {
             member.addRole(Module.config.roles.muted);
-            member.setMute(true);
+            if (member.voiceChannel) member.setMute(true);
             msg.client.channels.get(modLogs).send(`ℹ️ **${Util.escapeMarkdown(msg.member.displayName)}** muted **${Util.escapeMarkdown(member.displayName)}**`);
             msg.client.channels.get("356657507197779968").send(`${member}, you have been muted in ${msg.guild.name}. Please review our Code of Conduct. A member of the management team will be available to discuss more details.\n\nhttp://ldsgamers.com/code-of-conduct`);
           }
           if (duration) {
             setTimeout(function(unlucky) {
               unlucky.removeRole(Module.config.roles.muted);
-              unlucky.setMute(false);
+              if (unlucky.voiceChannel) unlucky.setMute(false);
             }, (duration * 60000), member);
           }
         } catch(e) { u.alertError(e, msg); }
@@ -623,7 +623,7 @@ Module
       u.userMentions(msg).forEach(function(userId) {
         msg.guild.fetchMember(userId).then(member => {
           member.removeRole(Module.config.roles.muted);
-          member.setMute(false);
+          if (member.voiceChannel) member.setMute(false);
           msg.client.channels.get(modLogs).send(`ℹ️ **${Util.escapeMarkdown(msg.member.displayName)}** unmuted **${Util.escapeMarkdown(member.displayName)}**`);
         });
       });
