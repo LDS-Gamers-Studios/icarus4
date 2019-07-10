@@ -2,7 +2,7 @@ const Augur = require("augurbot"),
   banned = require("../data/banned.json"),
   profanityFilter = require("profanity-matcher"),
   u = require("../utils/utils"),
-  {Util} = require("discord.js");
+  {RichEmbed, Util} = require("discord.js");
 
 const bannedWords = new RegExp(banned.words.join("|"), "i"),
   bannedLinks = new RegExp(`\\b(${banned.links.join("|").replace(".", "\.")})`, "i"),
@@ -173,7 +173,7 @@ async function processCardReaction(reaction, mod, infraction) {
     if (reaction.users.filter(u => !u.bot).size > 1) return;
     let message = reaction.message;
     reaction = reaction.emoji.name;
-    let embed = message.embeds[0];
+    let embed = new RichEmbed(message.embeds[0]);
 
     if ((reaction == "⏪") && (mod.id == infraction.mod)) {
       /***********************
@@ -182,11 +182,11 @@ async function processCardReaction(reaction, mod, infraction) {
       let retraction = await Module.db.infraction.retract(message.id, mod.id);
       if (retraction) {
         let infractionSummary = await Module.db.infraction.getSummary(retraction.discordId);
-        embed.color = 0x00ff00;
+        embed.setColor(0x00ff00);
         embed.fields[2].value = `Infractions: ${infractionSummary.count}\nPoints: ${infractionSummary.points}`;
         embed.fields[3].value = `${mod.username} retracted the warning.`;
 
-        message.edit(embed);
+        message.edit({embed});
       }
     } else if (reaction == cardReactions[0]) {
       /********************
@@ -194,11 +194,11 @@ async function processCardReaction(reaction, mod, infraction) {
       ********************/
       await Module.db.infraction.retract(message.id, infraction.mod);
 
-      embed.color = 0x00FF00;
-      embed.fields.push({name: "Resolved", value: mod.username + " cleared the flag."});
+      embed.setColor(0x00FF00);
+      embed.addField("Resolved", mod.username + " cleared the flag.");
       embed.fields = embed.fields.filter(f => !f.name.startsWith("Jump"));
       await message.clearReactions();
-      message.edit(embed);
+      message.edit({embed});
     } else if (cardReactions.includes(reaction)) {
       /**************************
       **  Warn as appropriate  **
@@ -206,19 +206,19 @@ async function processCardReaction(reaction, mod, infraction) {
       let msg = await message.guild.channels.get(infraction.channel).fetchMessage(infraction.message);
       if (msg) u.clean(msg, 0);
 
-      embed.color = 0x0000FF;
+      embed.setColor(0x0000FF);
       infraction.mod = mod.id;
       let member = message.guild.members.get(infraction.discordId);
 
       if (reaction == cardReactions[1]) {         // Minor infraction
         infraction.value = 1;
-        embed.fields.push({name: "Resolved", value: mod.username + " issued a 1 point warning."});
+        embed.addField("Resolved", mod.username + " issued a 1 point warning.");
       } else if (reaction == cardReactions[2]) {  // Moderate infraction
         infraction.value = 5;
-        embed.fields.push({name: "Resolved", value: mod.username + " issued a 5 point warning."});
+        embed.addField("Resolved", mod.username + " issued a 5 point warning.");
       } else if (reaction == cardReactions[3]) {  // Major infraction
         infraction.value = 10;
-        embed.fields.push({name: "Resolved", value: mod.username + " issued a 10 point warning."});
+        embed.addField("Resolved", mod.username + " issued a 10 point warning.");
       } else if (reaction == cardReactions[4]) {  // Mute
         infraction.value = 10;
         if (!member.roles.has(Module.config.roles.muted)) {
@@ -227,7 +227,7 @@ async function processCardReaction(reaction, mod, infraction) {
           await member.setMute(true);
           message.client.channels.get("356657507197779968").send(`${member}, you have been muted in ${message.guild.name}. Please review our Code of Conduct. A member of the management team will be available to discuss more details.\n\nhttp://ldsgamers.com/code-of-conduct`);
         }
-        embed.fields.push({name: "Resolved", value: mod.username + " muted the member."});
+        embed.addField("Resolved", mod.username + " muted the member.");
       }
 
       let inf = await Module.db.infraction.update(infraction._id, infraction);
@@ -250,7 +250,7 @@ async function processCardReaction(reaction, mod, infraction) {
       embed.fields.find(f => f.name && f.name.startsWith("Infraction")).value = `Infractions: ${infractionSummary.count + 1}\nPoints: ${infractionSummary.points + inf.value}`;
 
       await message.clearReactions();
-      message.edit(embed);
+      message.edit({embed});
     }
 
   } catch(e) { u.alertError(e, "Mod Card Reaction"); }
