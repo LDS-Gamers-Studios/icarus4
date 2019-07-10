@@ -55,7 +55,7 @@ const Utils = {
   clean: function(msg, t = 20000) {
     if (msg.deletable && !msg.deleted) msg.delete(t).catch(() => {});
   },
-  embed: () => new Discord.RichEmbed().setColor(config.color),
+  embed: (data) => new Discord.RichEmbed(data).setColor(config.color),
   errorLog: errorLog,
   escapeText: Discord.Util.escapeMarkdown,
   getUser: function(msg, user, strict = false) {
