@@ -129,7 +129,7 @@ function processApplications() {
         Module.handler.client.channels.get("146289578674749440")
           .send(embed)
           .then(() => fs.unlink(path))
-          .catch(u.alertError);
+          .catch(e => u.alertError(e, "Delete Approved Streamer Application Error"));
       }
     });
   } catch(e) { u.alertError(e, "Streaming Application Check"); }
@@ -342,7 +342,7 @@ const Module = new Augur.Module()
         msg.channel.send(mixerEmbed(res));
       }
     } catch(e) {
-      Module.handler.errorHandler(e, msg);
+      u.alertError(e, msg);
     }
   }
 })
@@ -492,7 +492,7 @@ const Module = new Augur.Module()
       u.botSpam(msg).send(embed);
 
     } catch (e) {
-      Module.handler.errorHandler(e, msg);
+      u.alertError(e, msg);
     }
   },
   permissions: (msg) => msg.guild
@@ -542,7 +542,7 @@ const Module = new Augur.Module()
         }
       });
     } catch(e) {
-      Module.handler.errorHandler(e, msg);
+      u.alertError(e, msg);
     }
   }
 })
@@ -646,7 +646,7 @@ const Module = new Augur.Module()
       } else {
         msg.channel.send(`I couldn't find channel info for YouTube user \`${name}\``).then(u.clean);
       }
-    } catch(e) { Module.handler.errorHandler(e, msg); }
+    } catch(e) { u.alertError(e, msg); }
   }
 })
 .addEvent("guildMemberUpdate", (oldMember, newMember) => {

@@ -50,7 +50,7 @@ const Module = new Augur.Module()
       }
       msg.channel.send(response);
     } catch(e) {
-      Module.handler.errorHandler(e, msg);
+      u.alertError(e, msg);
     }
   }
 })
@@ -89,7 +89,7 @@ const Module = new Augur.Module()
       msg.guild.channels.get("121752198731268099").send(`__**CHAT RANK RESET!!**__\n\nAnother chat season has come to a close! In the most recent season, the three most active members were:\n${top3}\n\n${gb}${dist} have been distributed among *all* LDSG members who participated in chat this season!`);
 
       Module.db.user.resetXP();
-    } catch(e) { Module.handler.errorHandler(e); }
+    } catch(e) { u.alertError(e, msg); }
   }
 })
 .addCommand({name: "trackxp",
@@ -142,9 +142,9 @@ const Module = new Augur.Module()
           });
         }
         active.clear();
-      } catch(e) { u.alertError(e); }
+      } catch(e) { u.alertError(e, "Rank clockwork update"); }
     }, 60000, bot);
-  } catch(e) { u.alertError(e); }
+  } catch(e) { u.alertError(e, "Rank outer clockwork"); }
 });
 
 module.exports = Module;

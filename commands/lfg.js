@@ -41,7 +41,7 @@ async function reloadList(msg, game) {
       msg = await msg.edit(embed);
       reloadList(msg, game);
     } else msg.delete();
-  } catch(e) { u.alertError(e); }
+  } catch(e) { u.alertError(e, "LFG Reload Error"); }
 }
 
 function removePlayer(player, games) {
@@ -247,7 +247,7 @@ const Module = new Augur.Module()
         u.botSpam(msg).send(embed);
       }
     } catch(e) {
-      Module.handler.errorHandler(e, msg);
+      u.alertError(e, msg);
     }
   },
   permissions: (msg) => msg.guild
@@ -270,7 +270,7 @@ const Module = new Augur.Module()
     });
 
     return setInterval(writeData, 60000);
-  } catch(e) { u.alertError(e); }
+  } catch(e) { u.alertError(e, "LFG Clockwork Error"); }
 });
 
 module.exports = Module;

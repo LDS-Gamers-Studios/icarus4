@@ -49,7 +49,7 @@ async function playSound(guildId) {
       });
     }
   } catch(e) {
-    u.alertError(e);
+    u.alertError(e, "Voice playSound() error");
   }
 }
 
@@ -133,7 +133,7 @@ const Module = new Augur.Module()
         }
       } else msg.reply(`\`${song}\` isn't a valid YouTube URL.`);
     } catch(e) {
-      Module.handler.errorHandler(e, msg);
+      u.alertError(e, msg);
     }
   }
 })
@@ -241,7 +241,7 @@ const Module = new Augur.Module()
           CONNECT: false,
           SEND_MESSAGES: false,
           SPEAK: false
-        }).catch(u.alertError);
+        }).catch(e => u.alertError(e, "Set permissions for Muted on dynamic voice create."));
         await channel.setParent("363014069533540362");
       } catch(e) { u.alertError(e, "Voice message creation error."); }
     }

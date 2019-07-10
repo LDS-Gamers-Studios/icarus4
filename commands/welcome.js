@@ -63,7 +63,7 @@ const Module = new Augur.Module()
         modLogs.send(`:tada: :confetti_ball: We're now at ${milestone} members! :confetti_ball: :tada:\n*pinging for effect: <@96335658997526528> <@111232201848295424>*`);
       }
     }
-  } catch(e) { u.alertError(e); }
+  } catch(e) { u.alertError(e, "New Member Add"); }
 })
 .addEvent("guildMemberRemove", (member) => {
   if (member.guild.id == Module.config.ldsg) {

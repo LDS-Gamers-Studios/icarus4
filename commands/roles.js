@@ -51,7 +51,7 @@ const Module = new Augur.Module()
       if (roles.length > 0) await msg.member.removeRoles(roles);
       msg.react("👌");
     } catch(e) {
-      Module.handler.errorHandler(e, msg);
+      u.alertError(e, msg);
     }
   }
 })
@@ -88,7 +88,7 @@ const Module = new Augur.Module()
       await msg.react("👌");
       u.clean(msg);
     } catch(e) {
-      Module.handler.errorHandler(e, msg);
+      u.alertError(e, msg);
     }
   }
 })

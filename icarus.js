@@ -21,10 +21,10 @@ Handler.start().then(loadCommands);
 
 // LAST DITCH ERROR HANDLING
 process.on("unhandledRejection", (error, p) => {
-  u.alertError(error, null, p);
+  u.alertError(error, "Unhandled Rejection");
 });
 process.on("uncaughtException", (error) => {
-  u.alertError(error);
+  u.alertError(error, "Uncaught Exception");
 });
 
 module.exports = {Handler: Handler, bot: Handler.client};

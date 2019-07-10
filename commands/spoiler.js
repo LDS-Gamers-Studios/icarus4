@@ -47,9 +47,9 @@ const Module = new Augur.Module()
           .setTitle(`Spoiler${(spoiler.channelName ? (" in #" + spoiler.channelName) : "")}${(spoiler.topic ? " about " + spoiler.topic : "")}:`);
 
           user.send(embed);
-        }).catch(u.alertError);
+        }).catch(u.alertError(e, "Send spoiler to user error"));
       }
-    }).catch(u.alertError);
+    }).catch(e => u.alertError(e, "Fetch spoiler error"));
   }
 })
 .setUnload(() => true);

@@ -183,7 +183,7 @@ const Module = new Augur.Module()
           msg.channel.send({embed: embed});
 
         }
-      } catch(e) { Module.handler.errorHandler(e, msg); }
+      } catch(e) { u.alertError(e, msg); }
     });
   }
 });

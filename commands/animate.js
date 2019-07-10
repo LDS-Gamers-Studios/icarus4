@@ -1,4 +1,5 @@
-const Augur = require("augurbot");
+const Augur = require("augurbot"),
+  u = require("../utils/utils");
 
 async function reload(msg) {
   try {
@@ -18,7 +19,7 @@ async function reload(msg) {
         }
       }
     } while (reactions.size > 0)
-  } catch(e) { Module.handler.errorHandler(e); }
+  } catch(e) { u.alertError(e, "Animation Reload Error"); }
 }
 
 async function animate(msg, frames, delay = 1000) {
@@ -30,7 +31,7 @@ async function animate(msg, frames, delay = 1000) {
     if (frames.length > 0) nextFrame(m, frames, delay);
     else m.react("🔁");
     reload(m);
-  } catch(e) { Module.handler.errorHandler(e); }
+  } catch(e) { u.alertError(e, "Animate Error"); }
 }
 
 function nextFrame(msg, frames, delay = 1000) {
@@ -39,7 +40,7 @@ function nextFrame(msg, frames, delay = 1000) {
       let m = await msg.edit(frames.shift());
       if (frames.length > 0) nextFrame(m, frames, delay);
       else m.react("🔁");
-    } catch(e) { Module.handler.errorHandler(e); }
+    } catch(e) { u.alertError(e, "Animate nextFrame Error"); }
   }, delay);
 };
 
@@ -111,7 +112,7 @@ const Module = new Augur.Module()
         reload(msg);
       }
     }
-  } catch(e) { Module.handler.errorHandler(e); }
+  } catch(e) { u.alertError(e, "Animation Load Error"); }
 });
 
 module.exports = Module;

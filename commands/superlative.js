@@ -36,7 +36,7 @@ async function updateStarboard(message) {
       let m = await bot.channels.get(starboard).send(embed);
       Module.db.starboard.saveStar(message, m);
     }
-  } catch(e) { u.alertError(e); }
+  } catch(e) { u.alertError(e, "Update Starboard Error"); }
 };
 
 function validate(message) {

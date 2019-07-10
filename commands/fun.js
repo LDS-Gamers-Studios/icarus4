@@ -76,17 +76,17 @@ async function testBirthdays(bot) {
               }
             }
             // Announce if active
-            try {            
+            try {
               let user = await Module.db.user.fetchUser(member.id);
               if (user.currentXP > 0) {
                 bot.channels.get(ldsg).send(`${member} has been part of the server for ${years} ${(years > 1 ? "years" : "year")}! Glad you're with us!`);
               }
-            } catch (e) { continue; }
+            } catch (e) { u.alertError(e, "Announce Cake Day Error"); continue; }
           }
-        } catch(e) { u.alertError(e); }
+        } catch(e) { u.alertError(e, "Fetch Cake Day Error"); }
       }
     }
-  } catch(e) { u.alertError(e); }
+  } catch(e) { u.alertError(e, "Cake Day Error"); }
 }
 
 const Module = new Augur.Module()
@@ -482,7 +482,7 @@ const Module = new Augur.Module()
     let bot = Module.handler.client;
     testBirthdays(bot);
     return setInterval(testBirthdays, 60 * 60 * 1000, bot);
-  } catch(e) { u.alertError(e); }
+  } catch(e) { u.alertError(e, "Birthday Clockwork Error"); }
 });
 
 module.exports = Module;
