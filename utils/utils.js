@@ -96,6 +96,42 @@ const Utils = {
   },
   init: (Handler) => db.init(Handler),
   ignoreError: (e) => {},
+  paginator: async function(msg, pager, elements, page = 0, perPage = 1) {
+    try {
+      let totalPages = Math.ceil(elements.length / perPage);
+      if (totalPages > 1) {
+        let embed = pager(elements, page, msg)
+        .setFooter(`Page ${page + 1} / ${totalPages}. React with ⏪ and ⏩ to navigate.`);
+        let m = await msg.channel.send({embed});
+        await m.react("⏪");
+        await m.react("⏩");
+        let reactions;
+
+        do {
+          reactions = await m.awaitReactions(
+            (reaction, user) => (user.id == msg.author.id) && ["⏪", "⏩"].includes(reaction.emoji.name),
+            { time: 300000, max: 1 }
+          );
+          if (reactions.size > 0) {
+            let react = reactions.first().emoji.name;
+            if (react == "⏪") page--;
+            else if (react == "⏩") page++;
+            if (page < 0 || page >= totalPages) page = (page + totalPages) % totalPages;
+
+            reactions.first().remove(msg.author.id);
+
+            embed = pager(elements, page, msg)
+            .setFooter(`Page ${page + 1} / ${totalPages}. React with ⏪ and ⏩ to navigate.`);
+            m = await m.edit({embed});
+          }
+        } while (reactions.size > 0);
+
+        embed.setFooter(`Page ${page + 1} / ${totalPages}`);
+        m.edit({embed});
+        m.reactions.filter(r => r.me).forEach(r => r.remove());
+      } else await msg.channel.send({embed: pager(elements, page, msg)});
+    } catch(e) { Utils.alertError(e, msg); }
+  },
   parse: function(msg) {
     let prefix = Utils.prefix(msg);
     let message = msg.content;
