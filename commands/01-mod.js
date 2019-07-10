@@ -581,24 +581,29 @@ Module
   category: "Mod",
   hidden: true,
   permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && (msg.member.roles.has(Module.config.roles.mod) || msg.member.roles.has(Module.config.roles.management))),
-  process: (msg) => {
-    var ldsg = msg.guild;
-    var User = require("../models/User.model");
+  process: (msg, suffix) => {
+    try {
+      let threshold = parseInt(suffix, 10);
+      if (!threshold) threshold = 100;
 
-    User.find({currentXP: {$gt: 100}}, (err, users) => {
-      if (err) {
-        msg.reply("I ran into an error: " + err).then(u.clean);
-      } else {
-        let response = [];
-        users.forEach(user => {
-          let member = ldsg.members.get(user.discordId);
-          if (member && !member.roles.has(Module.config.roles.trusted)) {
-            response.push({member: member, xp: user.currentXP});
-          }
-        });
-        msg.channel.send(response.sort((a, b) => b.xp - a.xp).map(m => `${m.member}: ${m.xp} XP, joined ${m.member.joinedAt.toLocaleDateString()}`).join("\n"), {split: true});
-      }
-    });
+      var ldsg = msg.guild;
+      var User = require("../models/User.model");
+
+      User.find({currentXP: {$gt: threshold}}, (err, users) => {
+        if (err) {
+          msg.reply("I ran into an error: " + err).then(u.clean);
+        } else {
+          let response = [];
+          users.forEach(user => {
+            let member = ldsg.members.get(user.discordId);
+            if (member && !member.roles.has(Module.config.roles.trusted)) {
+              response.push({member: member, xp: user.currentXP});
+            }
+          });
+          msg.channel.send(response.sort((a, b) => b.xp - a.xp).map(m => `${m.member}: ${m.xp} XP, joined ${m.member.joinedAt.toLocaleDateString()}`).join("\n"), {split: true});
+        }
+      });
+    } catch(e) { u.alertError(e, msg); }
   }
 })
 .addCommand({name: "unfilter",
