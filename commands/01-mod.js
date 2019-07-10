@@ -194,8 +194,8 @@ async function processCardReaction(reaction, mod, infraction) {
       ********************/
       await Module.db.infraction.retract(message.id, infraction.mod);
 
-      embed.setColor("#00FF00")
-      .addField("Resolved", mod.username + " cleared the flag.");
+      embed.color = 0x00FF00;
+      embed.fields.push({title: "Resolved", value: mod.username + " cleared the flag."});
       embed.fields = embed.fields.filter(f => !f.name.startsWith("Jump"));
       await message.clearReactions();
       message.edit(embed);
