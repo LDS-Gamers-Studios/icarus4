@@ -600,7 +600,9 @@ Module
               response.push({member: member, xp: user.currentXP});
             }
           });
-          msg.channel.send(response.sort((a, b) => b.xp - a.xp).map(m => `${m.member}: ${m.xp} XP, joined ${m.member.joinedAt.toLocaleDateString()}`).join("\n"), {split: true});
+          if (response.length > 0)
+            msg.channel.send(response.sort((a, b) => b.xp - a.xp).map(m => `${m.member}: ${m.xp} XP, joined ${m.member.joinedAt.toLocaleDateString()}`).join("\n"), {split: true});
+          else msg.channel.send(`No untrusted users with ${threshold} XP found.`);
         }
       });
     } catch(e) { u.alertError(e, msg); }
