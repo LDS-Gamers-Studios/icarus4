@@ -166,6 +166,15 @@ const models = {
         });
       });
     },
+    getByFlag: (flag) => {
+      return new Promise((fulfill, reject) => {
+        if (typeof flag !== "string") flag = flag.id;
+        Infraction.findOne({flag}, (err, inf) => {
+          if (err) reject(err);
+          else fulfill(inf);
+        });
+      });
+    },
     save: (data) => {
       return new Promise((fulfill, reject) => {
         let record = new Infraction({
