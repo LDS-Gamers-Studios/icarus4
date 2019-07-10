@@ -463,6 +463,7 @@ Module
             setTimeout(function(unlucky) {
               unlucky.removeRole(Module.config.roles.muted);
               if (unlucky.voiceChannel) unlucky.setMute(false);
+              msg.client.channels.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** has automatically been unmuted after ${duration} minutes.`);
             }, (duration * 60000), member);
           }
         } catch(e) { u.alertError(e, msg); }
