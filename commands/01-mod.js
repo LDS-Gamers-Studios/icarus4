@@ -244,8 +244,8 @@ async function processCardReaction(reaction, mod, infraction) {
         member.send(`${response}\n\n**${mod.username}** has issued this warning.`, quote)
         .catch(e => u.alertError(e, "Warning DM"));
 
-      embed.fields = embed.fields.filter(f => !f.name.startsWith("Jump"));
-      embed.fields.find(f => f.name.startsWith("Infraction")).value = `Infractions: ${infractionSummary.count + 1}\nPoints: ${infractionSummary.points + inf.value}`;
+      embed.fields = embed.fields.filter(f => !f.name || !f.name.startsWith("Jump"));
+      embed.fields.find(f => f.name && f.name.startsWith("Infraction")).value = `Infractions: ${infractionSummary.count + 1}\nPoints: ${infractionSummary.points + inf.value}`;
 
       await card.clearReactions();
       card.edit(embed);
