@@ -141,6 +141,7 @@ async function warnCard(msg, filtered = null, call = false) {
       } else {
         if (!msg.member.roles.has(Module.config.roles.muted)) {
           await msg.member.addRole(ldsg.roles.get(Module.config.roles.muted));
+          if (msg.member.voiceChannel) msg.member.setMute(true);
           ldsg.channels.get("356657507197779968").send(`${msg.member}, you have been auto-muted in ${msg.guild.name}. Please review our Code of Conduct. A member of the management team will be available to discuss more details.\n\nhttp://ldsgamers.com/code-of-conduct`);
         }
         callToArms.push("The mute role has been applied and message deleted.");
