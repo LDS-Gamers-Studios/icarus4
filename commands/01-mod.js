@@ -2,8 +2,7 @@ const Augur = require("augurbot"),
   banned = require("../data/banned.json"),
   profanityFilter = require("profanity-matcher"),
   u = require("../utils/utils"),
-  {USet} = require("../utils/tools"),
-  {RichEmbed, Util} = require("discord.js");
+  {USet} = require("../utils/tools");
 
 const bannedWords = new RegExp(banned.words.join("|"), "i"),
   bannedLinks = new RegExp(`\\b(${banned.links.join("|").replace(".", "\.")})`, "i"),
@@ -175,7 +174,7 @@ async function processCardReaction(reaction, mod, infraction) {
     if (reaction.users.filter(u => !u.bot).size > 1) return;
     let message = reaction.message;
     reaction = reaction.emoji.name;
-    let embed = new RichEmbed(message.embeds[0]);
+    let embed = u.embed(message.embeds[0]);
 
     if ((reaction == "⏪") && (mod.id == infraction.mod)) {
       /***********************
