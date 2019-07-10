@@ -2,6 +2,7 @@ const Augur = require("augurbot"),
   banned = require("../data/banned.json"),
   profanityFilter = require("profanity-matcher"),
   u = require("../utils/utils"),
+  {USet} = require("../utils/tools"),
   {RichEmbed, Util} = require("discord.js");
 
 const bannedWords = new RegExp(banned.words.join("|"), "i"),
@@ -29,7 +30,7 @@ function filter(msg, text) {
 async function toEnglish(msg) {
   try {
     const [translation, data] = await translate.translate(msg.cleanContent, "en");
-    msg.client.channels.get("543147492275912724").send(`${Util.escapeMarkdown(msg.member.displayName)} (${data.data.translations[0].detectedSourceLanguage})${(msg.editedAt ? " [Edited]" : "")}: ${translation}`);
+    msg.client.channels.get("543147492275912724").send(`${u.escapeText(msg.member.displayName)} (${data.data.translations[0].detectedSourceLanguage})${(msg.editedAt ? " [Edited]" : "")}: ${translation}`);
     return (translation ? translation : "");
   } catch(e) { u.alertError(e, msg); return ""; }
 }
@@ -236,7 +237,7 @@ async function processCardReaction(reaction, mod, infraction) {
       let infractionSummary = await Module.db.infraction.getSummary(member.id);
 
       let quote = u.embed()
-      .setAuthor(Util.escapeMarkdown(message.member.displayName), message.author.displayAvatarURL)
+      .setAuthor(u.escapeText(message.member.displayName), message.author.displayAvatarURL)
       .setDescription(message.cleanContent + (message.editedAt ? "\n*[Edited]*" : ""))
       .addField("Channel", `#${message.channel.name}`)
       .setTimestamp((message.editedAt ? message.editedAt : message.createdAt));
@@ -309,7 +310,7 @@ Module
             await member.send(`You were banned from ${msg.guild.name} for violating our code of conduct.${(reason ? ("\n" + reason) : "")}`);
             bans.add(member.id);
             await member.ban({days: 2, reason: reason});
-            msg.client.channels.get(modLogs).send(`ℹ️ **${Util.escapeMarkdown(msg.member.displayName)}** banned **${Util.escapeMarkdown(member.displayName)}**${(reason ? (" for " + reason) : "")}`);
+            msg.client.channels.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** banned **${u.escapeText(member.displayName)}**${(reason ? (" for " + reason) : "")}`);
           } else msg.reply("That user is no longer part of the server.").then(u.clean);
         } catch(e) { u.alertError(e, msg); }
       });
@@ -370,7 +371,7 @@ Module
         let time = parseInt(suffix.replace(/<@!?\d+>/ig, '').trim(), 10);
         if (!Number.isInteger(time)) time = 28;
         let data = await Module.db.infraction.getSummary(member.id, time);
-        let response = [`**${Util.escapeMarkdown(member.displayName)}** has had **${data.count}** infraction(s) in the last **${data.time}** day(s), totaling **${data.points}** points.`];
+        let response = [`**${u.escapeText(member.displayName)}** has had **${data.count}** infraction(s) in the last **${data.time}** day(s), totaling **${data.points}** points.`];
 
         if ((data.count > 0) && (data.detail.length > 0)) {
           data.detail.forEach(record => {
@@ -410,7 +411,7 @@ Module
           if (member) {
             await member.send(`You were kicked from ${ldsg.name} for ${reason ? reason : "violating our code of conduct"}.`);
             await member.kick(reason);
-            msg.client.channels.get(modLogs).send(`ℹ️ **${Util.escapeMarkdown(msg.member.displayName)}** kicked **${Util.escapeMarkdown(member.displayName)}**${reason ? (" for " + reason) : ""}`);
+            msg.client.channels.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** kicked **${u.escapeText(member.displayName)}**${reason ? (" for " + reason) : ""}`);
           }
         } catch(e) { u.alertError(e, msg); }
       });
@@ -432,7 +433,7 @@ Module
       u.userMentions(msg).forEach(function(userId) {
         msg.guild.fetchMember(userId).then(member => {
           member.addRole("253214700446285825");
-          msg.client.channels.get(modLogs).send(`ℹ️ **${Util.escapeMarkdown(msg.member.displayName)}** added **${Util.escapeMarkdown(member.displayName)}** to the LDSG Lady group.`);
+          msg.client.channels.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** added **${u.escapeText(member.displayName)}** to the LDSG Lady group.`);
         });
       });
     } else {
@@ -456,7 +457,7 @@ Module
           if (member && !member.roles.has(Module.config.roles.muted)) {
             member.addRole(Module.config.roles.muted);
             if (member.voiceChannel) member.setMute(true);
-            msg.client.channels.get(modLogs).send(`ℹ️ **${Util.escapeMarkdown(msg.member.displayName)}** muted **${Util.escapeMarkdown(member.displayName)}**`);
+            msg.client.channels.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** muted **${u.escapeText(member.displayName)}**`);
             msg.client.channels.get("356657507197779968").send(`${member}, you have been muted in ${msg.guild.name}. Please review our Code of Conduct. A member of the management team will be available to discuss more details.\n\nhttp://ldsgamers.com/code-of-conduct`);
           }
           if (duration) {
@@ -497,7 +498,7 @@ Module
 
           let card = u.embed()
           .setColor("#0000FF")
-          .setAuthor(Util.escapeMarkdown(member.displayName), member.user.displayAvatarURL)
+          .setAuthor(u.escapeText(member.displayName), member.user.displayAvatarURL)
           .setDescription(comment)
           .addField("Resolved", `${msg.author.username} added a note.`)
           .addField(`Infraction Summary (${summary.time} Days) `, `Infractions: ${summary.count}\nPoints: ${summary.points}`)
@@ -524,7 +525,7 @@ Module
           num -= 100;
         }
         if (num > 0) await msg.channel.bulkDelete(num);
-        msg.client.channels.get(modLogs).send(`ℹ️ **${Util.escapeMarkdown(msg.member.displayName)}** purged ${purge} messages in ${msg.channel}`);
+        msg.client.channels.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** purged ${purge} messages in ${msg.channel}`);
       } else {
         msg.reply("you need to tell me how many to delete.").then(u.clean);
       }
@@ -566,7 +567,7 @@ Module
         msg.guild.fetchMember(userId).then(member => {
           member.addRole(Module.config.roles.trusted);
           member.send("You have been marked as \"Trusted\" in " + msg.guild.name + ". This means you are now permitted to post images and links in chat. Please remember to follow the Code of Conduct when doing so.\n<http://ldsgamers.com/code-of-conduct>");
-          msg.client.channels.get(modLogs).send(`ℹ️ **${Util.escapeMarkdown(msg.member.displayName)}** trusted **${Util.escapeMarkdown(member.displayName)}**`);
+          msg.client.channels.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** trusted **${u.escapeText(member.displayName)}**`);
         });
       });
     } else {
@@ -625,7 +626,7 @@ Module
         msg.guild.fetchMember(userId).then(member => {
           member.removeRole(Module.config.roles.muted);
           if (member.voiceChannel) member.setMute(false);
-          msg.client.channels.get(modLogs).send(`ℹ️ **${Util.escapeMarkdown(msg.member.displayName)}** unmuted **${Util.escapeMarkdown(member.displayName)}**`);
+          msg.client.channels.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** unmuted **${u.escapeText(member.displayName)}**`);
         });
       });
     } else {
@@ -646,7 +647,7 @@ Module
         msg.guild.fetchMember(userId).then(member => {
           member.removeRole(Module.config.roles.trusted);
           member.send("You have been removed from \"Trusted\" in " + msg.guild.name + ". This means you no longer have the ability to post images. Please remember to follow the Code of Conduct when posting images or links.\n<http://ldsgamers.com/code-of-conduct>");
-          msg.client.channels.get(modLogs).send(`ℹ️ **${Util.escapeMarkdown(msg.member.displayName)}** untrusted **${Util.escapeMarkdown(member.displayName)}**`);
+          msg.client.channels.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** untrusted **${u.escapeText(member.displayName)}**`);
         });
       });
     } else {
@@ -693,7 +694,7 @@ Module
 
           let card = u.embed()
           .setColor("#0000FF")
-          .setAuthor(Util.escapeMarkdown(member.displayName), member.user.displayAvatarURL)
+          .setAuthor(u.escapeText(member.displayName), member.user.displayAvatarURL)
           .setDescription(comment)
           .addField("Resolved", `${msg.author.username} issued a ${value} point warning.`)
           .addField(`Infraction Summary (${summary.time} Days) `, `Infractions: ${summary.count}\nPoints: ${summary.points}`)
