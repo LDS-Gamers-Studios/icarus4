@@ -456,15 +456,15 @@ Module
           if (member && !member.roles.has(Module.config.roles.muted)) {
             member.addRole(Module.config.roles.muted);
             if (member.voiceChannel) member.setMute(true);
-            msg.client.channels.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** muted **${u.escapeText(member.displayName)}**`);
+            msg.client.channels.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** muted **${u.escapeText(member.displayName)}**${(duration ? " for " + duration + " minutes." : "")}`);
             msg.client.channels.get("356657507197779968").send(`${member}, you have been muted in ${msg.guild.name}. Please review our Code of Conduct. A member of the management team will be available to discuss more details.\n\nhttp://ldsgamers.com/code-of-conduct`);
           }
           if (duration) {
-            setTimeout(function(unlucky) {
+            setTimeout(function(unlucky, timeout) {
               unlucky.removeRole(Module.config.roles.muted);
               if (unlucky.voiceChannel) unlucky.setMute(false);
-              msg.client.channels.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** has automatically been unmuted after ${duration} minutes.`);
-            }, (duration * 60000), member);
+              msg.client.channels.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** has automatically been unmuted after ${timeout} minutes.`);
+            }, (duration * 60000), member, duration);
           }
         } catch(e) { u.alertError(e, msg); }
       });
