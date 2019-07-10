@@ -206,19 +206,19 @@ async function processCardReaction(reaction, mod, infraction) {
       let msg = await message.guild.channels.get(infraction.channel).fetchMessage(infraction.message);
       if (msg) u.clean(msg, 0);
 
-      embed.setColor("#0000FF");
+      embed.color = 0x0000FF;
       infraction.mod = mod.id;
       let member = message.guild.members.get(infraction.discordId);
 
       if (reaction == cardReactions[1]) {         // Minor infraction
         infraction.value = 1;
-        embed.addField("Resolved", mod.username + " issued a 1 point warning.");
+        embed.fields.push({title: "Resolved", value: mod.username + " issued a 1 point warning."});
       } else if (reaction == cardReactions[2]) {  // Moderate infraction
         infraction.value = 5;
-        embed.addField("Resolved", mod.username + " issued a 5 point warning.");
+        embed.fields.push({title: "Resolved", value: mod.username + " issued a 5 point warning."});
       } else if (reaction == cardReactions[3]) {  // Major infraction
         infraction.value = 10;
-        embed.addField("Resolved", mod.username + " issued a 10 point warning.");
+        embed.fields.push({title: "Resolved", value: mod.username + " issued a 10 point warning."});
       } else if (reaction == cardReactions[4]) {  // Mute
         infraction.value = 10;
         if (!member.roles.has(Module.config.roles.muted)) {
@@ -227,7 +227,7 @@ async function processCardReaction(reaction, mod, infraction) {
           await member.setMute(true);
           message.client.channels.get("356657507197779968").send(`${member}, you have been muted in ${message.guild.name}. Please review our Code of Conduct. A member of the management team will be available to discuss more details.\n\nhttp://ldsgamers.com/code-of-conduct`);
         }
-        embed.addField("Resolved", mod.username + " muted the member.");
+        embed.fields.push({title: "Resolved", value: mod.username + " muted the member."});
       }
 
       let inf = await Module.db.infraction.update(infraction._id, infraction);
