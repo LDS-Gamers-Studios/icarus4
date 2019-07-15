@@ -203,7 +203,7 @@ const Module = new Augur.Module()
           const sheets = r.worksheets;
           Module.config.sheets = new Map();
           for (let i = 0; i < sheets.length; i++) {
-            Module.config.sheets.set(sheets[i].title) = sheets[i];
+            Module.config.sheets.set(sheets[i].title, sheets[i]);
           }
         }
       });

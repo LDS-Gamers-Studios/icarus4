@@ -255,7 +255,7 @@ const Module = new Augur.Module()
 .addEvent("message", (msg) => {
   if (msg.channel.id == lfgBoard.channel) msg.delete();
 })
-.setLoad(() => {
+.setInit(() => {
   Module.config.sheets.get("WIP Channel Defaults").getRows((e, rows) => {
     if (e) u.alertError(e, "Error loading WIP channel defaults.");
     else {
