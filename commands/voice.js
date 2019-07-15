@@ -228,7 +228,7 @@ const Module = new Augur.Module()
       // REMOVE OLD VOICE CHANNEL
       oldMember.voiceChannel.delete().catch(e => u.alertError(e, "Could not delete empty voice channel."));
     }
-    if (newMember.voiceChannelID && (newMember.voiceChannel.members.size == 1) && isCommunityVoice(newMember.voiceChannel)) {
+    if (newMember.voiceChannelID && (newMember.voiceChannel.members.size == 1) && isCommunityVoice(newMember.voiceChannel) && (newMember.voiceChannelID != "598664383530401812")) {
       // CREATE NEW VOICE CHANNEL
       const bitrate = newMember.voiceChannel.bitrate;
       let name = "";
