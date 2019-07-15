@@ -21,6 +21,10 @@ const availableNames = [
   "Room Potat",
   "Room Trogdor",
 ];
+
+const communityVoice = "363014069533540362";
+const isCommunityVoice = (channel) => ((channel.parentID == communityVoice) && (channel.name != "AFK"));
+
 var queue;
 
 async function playSound(guildId) {
@@ -220,29 +224,30 @@ const Module = new Augur.Module()
 .addEvent("voiceStateUpdate", async (oldMember, newMember) => {
   let guild = oldMember.guild;
   if ((guild.id == Module.config.ldsg) && (oldMember.voiceChannelID != newMember.voiceChannelID)) {
-    if (oldMember.voiceChannel && (oldMember.voiceChannel.members.size == 0) && availableNames.includes(oldMember.voiceChannel.name)) {
+    if (oldMember.voiceChannel && (oldMember.voiceChannel.members.size == 0) && isCommunityVoice(oldMember.voiceChannel)) {
       // REMOVE OLD VOICE CHANNEL
-      oldMember.voiceChannel.delete().catch(console.error);
+      oldMember.voiceChannel.delete().catch(e => u.alertError(e, "Could not delete empty voice channel."));
     }
-    if (newMember.voiceChannelID && (newMember.voiceChannel.members.size == 1) && availableNames.includes(newMember.voiceChannel.name)) {
+    if (newMember.voiceChannelID && (newMember.voiceChannel.members.size == 1) && isCommunityVoice(newMember.voiceChannel)) {
       // CREATE NEW VOICE CHANNEL
+      const bitrate = newMember.voiceChannel.bitrate;
       let name = "";
       for (var i = 0; (i < availableNames.length && !name); i++) {
-        if (!guild.channels.find(c => c.name == availableNames[i])) {
-          name = availableNames[i];
+        if (!guild.channels.find(c => c.name.startsWith(availableNames[i]))) {
+          name = `${availableNames[i]} (${bitrate} kbps)`;
           break;
         }
       }
-      if (!name) name = availableNames[0];
+      if (!name) name = `${availableNames[0]} (${bitrate} kbps)`;
       try {
-        let channel = await guild.createChannel(name, "voice");
-        await channel.overwritePermissions(Module.config.roles.muted, {
-          VIEW_CHANNEL: false,
-          CONNECT: false,
-          SEND_MESSAGES: false,
-          SPEAK: false
-        }).catch(e => u.alertError(e, "Set permissions for Muted on dynamic voice create."));
-        await channel.setParent("363014069533540362");
+        await guild.createChannel(name, {
+          type: "voice",
+          bitrate,
+          parent: communityVoice
+        }, [{
+          id: Module.config.roles.muted,
+          deny: ["VIEW_CHANNEL", "CONNECT", "SEND_MESSAGES", "SPEAK"]
+        }]);
       } catch(e) { u.alertError(e, "Voice message creation error."); }
     }
   }
