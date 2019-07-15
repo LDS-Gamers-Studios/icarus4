@@ -242,7 +242,7 @@ const Module = new Augur.Module()
       try {
         await guild.createChannel(name, {
           type: "voice",
-          bitrate,
+          bitrate: bitrate * 1000,
           parent: communityVoice
         }, [{
           id: Module.config.roles.muted,
