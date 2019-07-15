@@ -2,7 +2,7 @@ const Augur = require("augurbot"),
   path = require("path")
   fs = require("fs"),
   lfgBoard = require("../data/lfgboard.json"),
-  gameDefaults = require("../data/whoisplaying.json"),
+  gameDefaults = new Map(),
   u = require("../utils/utils");
 
 var update = false,
@@ -204,7 +204,7 @@ const Module = new Augur.Module()
     try {
       u.clean(msg);
 
-      if (!suffix && gameDefaults[msg.channel.id]) suffix = gameDefaults[msg.channel.id];
+      if (!suffix && gameDefaults.has(msg.channel.id)) suffix = gameDefaults.get(msg.channel.id);
 
       let guild = await msg.guild.fetchMembers();
 
@@ -254,6 +254,15 @@ const Module = new Augur.Module()
 })
 .addEvent("message", (msg) => {
   if (msg.channel.id == lfgBoard.channel) msg.delete();
+})
+.setLoad(() => {
+  Module.config.sheets.get("WIP Channel Defaults").getRows((e, rows) => {
+    if (e) u.alertError(e, "Error loading WIP channel defaults.");
+    else {
+      for (let i = 0; i < rows.length; i++)
+        gameDefaults.set(rows[i].channelid, rows[i].gamename);
+    }
+  })
 })
 .setUnload(writeData)
 .setClockwork(() => {

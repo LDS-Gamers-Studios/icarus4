@@ -1,20 +1,20 @@
 const Augur = require("augurbot"),
-  u = require("../utils/utils"),
-  {roles, aliases} = require("../data/roles.json");
+  u = require("../utils/utils");
+
+const roles = new Map();
 
 const Module = new Augur.Module()
-.addCommand({name: "addrole",
-  description: "Add a role",
+.addCommand({name: "add",
+  description: "Add an opt-in role",
   syntax: Object.keys(roles).join(" | "),
-  aliases: ["addchannel", "add"],
-  info: "Gives you one of the following roles:\n```md\n* " + Object.keys(roles).join("\n* ") + "```",
+  aliases: ["addchannel", "addrole"],
+  info: "Gives you one of the following roles:\n```md\n* " + Array.from(roles.keys()).join("\n* ") + "```",
   category: "Members",
   process: (msg, suffix) => {
-    if (aliases[suffix.toLowerCase()]) suffix = aliases[suffix.toLowerCase()];
-    if (roles[suffix.toLowerCase()]) {
+    if (roles.has(suffix.toLowerCase())) {
       let ldsg = msg.client.guilds.get(Module.config.ldsg);
       let modLogs = msg.client.channels.get("506575671242260490");
-      let role = ldsg.roles.get(roles[suffix.toLowerCase()]);
+      let role = ldsg.roles.get(roles.get(suffix.toLowerCase()));
 
       ldsg.fetchMember(msg.author.id).then(member => {
         if (member) member.addRole(role).then((member) => {
@@ -27,83 +27,17 @@ const Module = new Augur.Module()
     }
   }
 })
-.addCommand({name: "nopings",
-  description: "Remove a pingable role for your current channel",
-  permissions: (msg) => msg.guild && msg.guild.id == "96335850576556032",
-  syntax: "[#channel(s)]",
-  category: "Members",
-  hidden: true,
-  process: async (msg) => {
-    try {
-      let channels = msg.mentions.channels;
-      if (channels.size == 0) channels.set(msg.channel.id, msg.channel);
-      let roles = [];
-
-      u.clean(msg);
-
-      for (const [key, channel] of channels) {
-        let channelName = channel.name.toLowerCase().replace(/(general)|(lfg)/ig, "").replace(/\-+/g, " ").trim();
-        channelName = (channelName ? u.properCase(channelName) : "LDSGamer");
-        let role = msg.member.roles.find(r => r.name.toLowerCase() == channelName.toLowerCase());
-
-        if (role) roles.push(role);
-      }
-      if (roles.length > 0) await msg.member.removeRoles(roles);
-      msg.react("👌");
-    } catch(e) {
-      u.alertError(e, msg);
-    }
-  }
-})
-.addCommand({name: "pingme",
-  description: "Add a pingable role for your current channel",
-  permissions: (msg) => msg.guild && msg.guild.id == "96335850576556032",
-  syntax: "[#channel(s)]",
-  category: "Members",
-  process: async (msg) => {
-    try {
-      let channels = msg.mentions.channels;
-      if (channels.size == 0) channels.set(msg.channel.id, msg.channel);
-
-      let roles = [];
-
-      for (const [key, channel] of channels) {
-        if (channel.permissionsFor(msg.member).has("VIEW_CHANNEL")) {
-          let channelName = channel.name.toLowerCase().replace(/(general)|(lfg)/ig, "").replace(/\-+/g, " ").trim();
-          channelName = (channelName ? u.properCase(channelName) : "LDSGamer");
-          let role = msg.guild.roles.find(r => r.name.toLowerCase() == channelName.toLowerCase());
-          if (!role) {
-            role = await msg.guild.createRole({
-              name: channelName,
-              permissions: [],
-              mentionable: true
-            });
-          }
-          roles.push(role);
-        }
-      }
-
-      roles = roles.filter(r => !msg.member.roles.has(r.id));
-      if (roles.length > 0) await msg.member.addRoles(roles);
-      await msg.react("👌");
-      u.clean(msg);
-    } catch(e) {
-      u.alertError(e, msg);
-    }
-  }
-})
-.addCommand({name: "removerole",
-  description: "Remove a channel",
+.addCommand({name: "remove",
+  description: "Remove an opt-in role",
   syntax: Object.keys(roles).join(" | "),
-  aliases: ["removechannel", "remove"],
-  info: "Removes one of the following roles:\n```md\n* " + Object.keys(roles).join("\n* ") + "```",
+  aliases: ["removechannel", "removerole"],
+  info: "Removes one of the following roles:\n```md\n* " + Array.from(roles.keys()).join("\n* ") + "```",
   category: "Members",
   process: (msg, suffix) => {
-    if (aliases[suffix.toLowerCase()]) suffix = aliases[suffix.toLowerCase()];
-    if (roles[suffix.toLowerCase()]) {
+    if (roles.has(suffix.toLowerCase())) {
       let ldsg = msg.client.guilds.get(Module.config.ldsg);
       let modLogs = msg.client.channels.get("506575671242260490");
-      let role = ldsg.roles.get(roles[suffix.toLowerCase()]);
+      let role = ldsg.roles.get(roles.get(suffix.toLowerCase()));
 
       ldsg.fetchMember(msg.author).then(member => {
         if (member) member.removeRole(role).then((member) => {
@@ -131,9 +65,29 @@ const Module = new Augur.Module()
   },
   permissions: (msg) => msg.guild
 })
-.setUnload(() => {
-  const path = require("path");
-  delete require.cache[require.resolve(path.resolve(process.cwd(), "./data/roles.json"))];
+.addCommand({name: "roleid",
+  description: "Get a role ID",
+  syntax: "<role name>",
+  category: "Admin",
+  hidden: true,
+  process: (msg, suffix) => {
+    if (!suffix) msg.reply("you need to tell me a role name!").then(u.clean);
+    else {
+      let role = msg.guild.roles.find(r => r.name.toLowerCase() == suffix.toLowerCase());
+      if (!role) msg.reply(`I couldn't find a role named ${suffix}.`);
+      else msg.channel.send(`${role.name}: ${role.id}`, {code: true});
+    }
+  },
+  permissions: (msg) => msg.guild
+})
+.setInit(() => {
+  Module.config.sheets.get("Opt-In Roles").getRows((e, rows) => {
+    if (e) u.alertError(e, "Error loading opt-in roles.");
+    else {
+      for (let i = 0; i < rows.length; i++)
+        roles.set(rows[i].roletag, rows[i].roleid);
+    }
+  })
 });
 
 module.exports = Module;

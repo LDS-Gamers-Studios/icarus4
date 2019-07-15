@@ -2,7 +2,11 @@ const Augur = require("augurbot"),
   fs = require("fs"),
   path = require("path"),
   Trello = require("simply-trello"),
-  u = require("../utils/utils");
+  u = require("../utils/utils"),
+  google = require("../config/google_api.json"),
+  GoogleSpreadsheet = require("google-spreadsheet");
+
+const doc = new GoogleSpreadsheet(google.sheets.config);
 
 const Module = new Augur.Module()
 .addCommand({name: "gotobed",
@@ -189,6 +193,22 @@ const Module = new Augur.Module()
     Module.handler.client.guilds.get(Module.config.ldsg).fetchMembers();
     u.errorLog.send(u.embed().setTimestamp().setDescription("Bot is ready!"));
   }
+
+  doc.useServiceAccountAuth(google.creds, (err) => {
+    if (err) u.alertError(err, "Google Authentication - Config Sheet");
+    else {
+      doc.getInfo((e, r) => {
+        if (e) u.alertError(e, "Fetch Google Config Sheet Error");
+        else {
+          const sheets = r.worksheets;
+          Module.config.sheets = new Map();
+          for (let i = 0; i < sheets.length; i++) {
+            Module.config.sheets.set(sheets[i].title) = sheets[i];
+          }
+        }
+      });
+    }
+  });
 })
 .setUnload(() => true);
 
