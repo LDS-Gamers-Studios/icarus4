@@ -4,7 +4,7 @@ const u = require("../utils/utils"),
   request = require("request"),
   ytdl = require("ytdl-core");
 
-const availableNames = [
+const roomList = [
   "Room Buttermelon",
   "Room Slothmare",
   "Room Handicorn",
@@ -21,6 +21,8 @@ const availableNames = [
   "Room Potat",
   "Room Trogdor",
 ];
+
+const availableNames = new Set(roomList);
 
 const communityVoice = "363014069533540362";
 const isCommunityVoice = (channel) => ((channel.parentID == communityVoice) && (channel.id != "123477839696625664"));
@@ -62,10 +64,10 @@ const Module = new Augur.Module()
   syntax: "[@additionalUser(s)]",
   description: "Locks your current voice channel to new users",
   category: "Voice",
-  permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && msg.member.voiceChannel && availableNames.includes(msg.member.voiceChannel.name)),
+  permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && msg.member.voiceChannel && isCommunityVoice(msg.member.voiceChannel)),
   process: (msg) => {
     let channel = msg.member.voiceChannel;
-    if (channel && availableNames.includes(channel.name)) {
+    if (channel && isCommunityVoice(channel)) {
       let users = Array.from(channel.members.values()).concat(Array.from(msg.mentions.members.values()));
       users.push(msg.client.user);
 
@@ -188,10 +190,10 @@ const Module = new Augur.Module()
   description: "Unlocks your current voice channel for new users",
   category: "Voice",
   hidden: true,
-  permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && msg.member.voiceChannel && availableNames.includes(msg.member.voiceChannel.name)),
+  permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && msg.member.voiceChannel && isCommunityVoice(msg.member.voiceChannel)),
   process: (msg) => {
     let channel = msg.member.voiceChannel;
-    if (channel && availableNames.includes(channel.name)) {
+    if (channel && isCommunityVoice(channel)) {
       let channelMods = [];
       let muted = Module.config.roles.muted;
       channelMods.push(channel.overwritePermissions(msg.guild.id, {CONNECT: null}));
@@ -211,7 +213,7 @@ const Module = new Augur.Module()
   permissions: (msg) => (msg.guild && msg.guild.id == Module.config.ldsg && msg.member.roles.has(Module.config.roles.mod)),
   process: (msg) => {
     let channels = msg.guild.channels
-      .filter(c => c.parentID == "363014069533540362" && c.type == "voice" && availableNames.includes(c.name) && c.members.size == 0);
+      .filter(c => c.parentID == "363014069533540362" && c.type == "voice" && isCommunityVoice(c) && c.members.size == 0);
     if (channels.size > 2) {
       let del = channels.first(channels.size - 2);
       del.forEach(async channel => await channel.delete("Too many channels"));
@@ -219,7 +221,14 @@ const Module = new Augur.Module()
     msg.react("👌");
   }
 })
-.setInit(data => queue = (data ? data : new Map()))
+.setInit((data) => {
+  queue = (data ? data : new Map());
+
+  let ldsg = Module.handler.client.guilds.get(Module.config.ldsg);
+  for (let i = 0; i < roomList.length; i++) {
+    if (ldsg.channels.find(c => c.name.startsWith(roomList[i]))) availableNames.delete(roomList[i]);
+  }
+})
 .setUnload(() => queue)
 .addEvent("voiceStateUpdate", async (oldMember, newMember) => {
   let guild = oldMember.guild;
@@ -227,18 +236,18 @@ const Module = new Augur.Module()
     if (oldMember.voiceChannel && (oldMember.voiceChannel.members.size == 0) && isCommunityVoice(oldMember.voiceChannel)) {
       // REMOVE OLD VOICE CHANNEL
       oldMember.voiceChannel.delete().catch(e => u.alertError(e, "Could not delete empty voice channel."));
+      let name = roomList.find(room => oldMember.voiceChannel.name.startsWith(room));
+      if (name && !guild.channels.find(c => c.name.startsWith(name))) availableNames.add(name);
     }
     if (newMember.voiceChannelID && (newMember.voiceChannel.members.size == 1) && isCommunityVoice(newMember.voiceChannel)) {
       // CREATE NEW VOICE CHANNEL
       const bitrate = newMember.voiceChannel.bitrate;
-      let name = "";
-      for (var i = 0; (i < availableNames.length && !name); i++) {
-        if (!guild.channels.find(c => c.name.startsWith(availableNames[i]))) {
-          name = `${availableNames[i]} (${bitrate} kbps)`;
-          break;
-        }
-      }
-      if (!name) name = `${availableNames[0]} (${bitrate} kbps)`;
+
+      const pool = (availableNames.size > 0 ? [...availableNames] : roomList);
+      let name = pool[Math.floor(Math.random() * pool.length)];
+      availableNames.delete(name);
+      name += ` (${bitrate} kbps)`;
+
       try {
         await guild.createChannel(name, {
           type: "voice",
