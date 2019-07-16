@@ -23,7 +23,7 @@ const availableNames = [
 ];
 
 const communityVoice = "363014069533540362";
-const isCommunityVoice = (channel) => ((channel.parentID == communityVoice) && (channel.name != "AFK"));
+const isCommunityVoice = (channel) => ((channel.parentID == communityVoice) && (channel.id != "123477839696625664"));
 
 var queue;
 
@@ -228,7 +228,7 @@ const Module = new Augur.Module()
       // REMOVE OLD VOICE CHANNEL
       oldMember.voiceChannel.delete().catch(e => u.alertError(e, "Could not delete empty voice channel."));
     }
-    if (newMember.voiceChannelID && (newMember.voiceChannel.members.size == 1) && isCommunityVoice(newMember.voiceChannel) && (newMember.voiceChannelID != "598664383530401812")) {
+    if (newMember.voiceChannelID && (newMember.voiceChannel.members.size == 1) && isCommunityVoice(newMember.voiceChannel)) {
       // CREATE NEW VOICE CHANNEL
       const bitrate = newMember.voiceChannel.bitrate;
       let name = "";
