@@ -416,6 +416,19 @@ const Module = new Augur.Module()
     quickFile(msg, "https://cdn.discordapp.com/attachments/193042027066163200/288769459764854795/carebearstare.png", "carebearstare.png", false);
   }
 })
+.addCommand({name: "repost",
+  description: "That's a repost.",
+  category: "Silly",
+  process: (msg) => {
+    u.clean(msg, 0);
+    const repost = msg.channel.messages
+      .filter(m => m.attachments.size > 0)
+      .sort((a, b) => b.timestamp - a.timestamp)
+      .first()
+      .attachments.first().url;
+    msg.channel.send({files: [repost]});
+  }
+})
 .addCommand({name: "salty",
   description: "Salty",
   aliases: ["salt"],
