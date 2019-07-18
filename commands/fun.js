@@ -423,7 +423,7 @@ const Module = new Augur.Module()
     u.clean(msg, 0);
     const repost = msg.channel.messages
       .filter(m => m.attachments.size > 0)
-      .sort((a, b) => b.timestamp - a.timestamp)
+      .sort((a, b) => a.timestamp - b.timestamp)
       .first()
       .attachments.first().url;
     msg.channel.send({files: [repost]});
