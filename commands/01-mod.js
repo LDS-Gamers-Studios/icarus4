@@ -19,6 +19,8 @@ const translate = new Translate({googleId});
 const bans = new USet();
 const cardReactions = ["✅","⚠","⛔","🛑","🔇"];
 
+function noop() {}
+
 function filter(msg, text) {
   // PROFANITY FILTER
   let noWhiteSpace = text.toLowerCase().replace(/[\.,\/#!$%\^&\*;:\{\}=\-_`~"'\(\)\?\|]/g,"").replace(/\s\s+/g, " ");
@@ -204,8 +206,19 @@ async function processCardReaction(reaction, mod, infraction) {
       /**************************
       **  Warn as appropriate  **
       **************************/
-      let msg = await message.guild.channels.get(infraction.channel).fetchMessage(infraction.message);
-      if (msg) u.clean(msg, 0);
+      let msg;
+      let quote;
+      try {
+        msg = await message.guild.channels.get(infraction.channel).fetchMessage(infraction.message);
+        if (msg) {
+          u.clean(msg, 0);
+          quote = u.embed()
+          .setAuthor(u.escapeText(msg.member.displayName), msg.author.displayAvatarURL)
+          .setDescription(msg.cleanContent + (msg.editedAt ? "\n*[Edited]*" : ""))
+          .addField("Channel", `#${msg.channel.name}`)
+          .setTimestamp((msg.editedAt ? msg.editedAt : msg.createdAt));
+        }
+      } catch(e) { noop(); }
 
       embed.setColor(0x0000FF);
       infraction.mod = mod.id;
@@ -235,12 +248,6 @@ async function processCardReaction(reaction, mod, infraction) {
 
       let infractionSummary = await Module.db.infraction.getSummary(member.id);
 
-      let quote = u.embed()
-      .setAuthor(u.escapeText(message.member.displayName), message.author.displayAvatarURL)
-      .setDescription(message.cleanContent + (message.editedAt ? "\n*[Edited]*" : ""))
-      .addField("Channel", `#${message.channel.name}`)
-      .setTimestamp((message.editedAt ? message.editedAt : message.createdAt));
-
       let response = "We have received one or more complaints regarding content you posted. We have reviewed the content in question and have determined, in our sole discretion, that it is against our code of conduct (<http://ldsgamers.com/code-of-conduct>). This content was removed on your behalf. As a reminder, if we believe that you are frequently in breach of our code of conduct or are otherwise acting inconsistently with the letter or spirit of the code, we may limit, suspend or terminate your access to the LDSG discord server.";
 
       if (message.guild.members.has(member.id))
@@ -255,7 +262,6 @@ async function processCardReaction(reaction, mod, infraction) {
     }
 
   } catch(e) { u.alertError(e, "Mod Card Reaction"); }
-
 }
 
 const Module = new Augur.Module();
