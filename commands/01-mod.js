@@ -206,18 +206,9 @@ async function processCardReaction(reaction, mod, infraction) {
       /**************************
       **  Warn as appropriate  **
       **************************/
-      let msg;
-      let quote;
       try {
-        msg = await message.guild.channels.get(infraction.channel).fetchMessage(infraction.message);
-        if (msg) {
-          u.clean(msg, 0);
-          quote = u.embed()
-          .setAuthor(u.escapeText(msg.member.displayName), msg.author.displayAvatarURL)
-          .setDescription(msg.cleanContent + (msg.editedAt ? "\n*[Edited]*" : ""))
-          .addField("Channel", `#${msg.channel.name}`)
-          .setTimestamp((msg.editedAt ? msg.editedAt : msg.createdAt));
-        }
+        let msg = await message.guild.channels.get(infraction.channel).fetchMessage(infraction.message);
+        if (msg) u.clean(msg, 0);
       } catch(e) { noop(); }
 
       embed.setColor(0x0000FF);
@@ -247,6 +238,12 @@ async function processCardReaction(reaction, mod, infraction) {
       let inf = await Module.db.infraction.update(infraction._id, infraction);
 
       let infractionSummary = await Module.db.infraction.getSummary(member.id);
+
+      let quote = u.embed()
+      .setAuthor(u.escapeText(member.displayName), member.user.displayAvatarURL)
+      .addField("Channel", `#${message.guild.channels.get(infraction.channel).name}`)
+      .setDescription(message.embeds[0].description)
+      .setTimestamp(message.createdAt);
 
       let response = "We have received one or more complaints regarding content you posted. We have reviewed the content in question and have determined, in our sole discretion, that it is against our code of conduct (<http://ldsgamers.com/code-of-conduct>). This content was removed on your behalf. As a reminder, if we believe that you are frequently in breach of our code of conduct or are otherwise acting inconsistently with the letter or spirit of the code, we may limit, suspend or terminate your access to the LDSG discord server.";
 
