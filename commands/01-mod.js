@@ -191,7 +191,7 @@ async function processCardReaction(reaction, mod, infraction) {
 
         message.edit({embed});
       }
-    } else if (embed.color != 0xff0000) {
+    } else if (embed.color != 16292386) {
       /***************************************
       **  Only process non-processed cards  **
       ***************************************/
@@ -215,7 +215,7 @@ async function processCardReaction(reaction, mod, infraction) {
       if ((infractionSummary.count > 0) && (infractionSummary.detail.length > 0)) {
         for (let i = 0; i < infractionSummary.detail.length; i++) {
           let record = infractionSummary.detail[i];
-          let mod = ldsg.members.get(record.mod);
+          let mod = message.guild.members.get(record.mod);
           infractionDescription.push(`${record.timestamp.toLocaleDateString()} (${record.value}) pts, modded by ${mod.displayName}): ${record.description}`);
         }
       }
