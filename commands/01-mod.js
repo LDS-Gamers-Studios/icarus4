@@ -224,8 +224,7 @@ async function processCardReaction(reaction, mod, infraction) {
       if (infractionDescription.length > 2048) infractionDescription = infractionDescription.substr(0, infractionDescription.indexOf("\n", 1950)) + "\n...";
 
       let infoEmbed = u.embed()
-      .setAuthor(member.displayname, (member.user.displayAvatarURL ? member.user.displayAvatarURL : null))
-      .setTitle(u.escapeText(member.displayName))
+      .setAuthor(member.displayName, (member.user.displayAvatarURL ? member.user.displayAvatarURL : null))
       .setDescription(infractionDescription)
       .addField("ID", member.id)
       .addField("Joined", member.joinedAt.toUTCString(), true)
