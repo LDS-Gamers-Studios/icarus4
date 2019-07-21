@@ -17,7 +17,7 @@ const googleId = require("../config/google_api.json").creds.project_id;
 const translate = new Translate({googleId});
 
 const bans = new USet();
-const cardReactions = ["✅","⚠","⛔","🛑","🔇"];
+const cardReactions = ["ℹ️", "✅","⚠","⛔","🛑","🔇"];
 
 function noop() {}
 
@@ -191,7 +191,51 @@ async function processCardReaction(reaction, mod, infraction) {
 
         message.edit({embed});
       }
+    } else if (embed.color != 0xff0000) {
+      /***************************************
+      **  Only process non-processed cards  **
+      ***************************************/
+      return;
     } else if (reaction == cardReactions[0]) {
+      /*********************
+      **  Post Full Info  **
+      *********************/
+      const Rank = require("../utils/RankInfo");
+      let member = message.guild.members.get(infraction.discordId);
+
+      let roleString = member.roles.map(role => role.name).join(", ");
+      if (roleString.length > 1024) roleString = roleString.substr(0, roleString.indexOf(", ", 1000)) + " ...";
+
+      let userDoc = await Module.db.user.findXPRank(member.id);
+      userDoc.level = Rank.level(userDoc.totalXP);
+
+      let infractionSummary = await Module.db.infraction.getSummary(member.id);
+
+      let infractionDescription = [`**${u.escapeText(member.displayName)}** has had **${infractionSummary.count}** infraction(s) in the last **${infractionSummary.time}** days, totalling **${infractionSummary.points}** points.`];
+      if ((infractionSummary.count > 0) && (infractionSummary.detail.length > 0)) {
+        for (let i = 0; i < infractionSummary.detail.length; i++) {
+          let record = infractionSummary.detail[i];
+          let mod = ldsg.members.get(record.mod);
+          infractionDescription.push(`${record.timestamp.toLocaleDateString()} (${record.value}) pts, modded by ${mod.displayName}): ${record.description}`);
+        }
+      }
+
+      infractionDescription = infractionDescription.join("\n");
+      if (infractionDescription.length > 2048) infractionDescription = infractionDescription.substr(0, infractionDescription.indexOf("\n", 1950)) + "\n...";
+
+      let infoEmbed = u.embed()
+      .setAuthor(member.displayname, (member.user.displayAvatarURL ? member.user.displayAvatarURL : null))
+      .setTitle(u.escapeText(member.displayName))
+      .setDescription(infractionDescription)
+      .addField("ID", member.id)
+      .addField("Joined", member.joinedAt.toUTCString(), true)
+      .addField("Account Created", member.user.createdAt.toUTCString(), true)
+      .addField("Roles", roleString)
+      .addField("Chat Level", `Current Level: ${userDoc.level}`, true)
+      .addField("Chat XP", `Season: ${parseInt(userDoc.currentXP, 10).toLocaleString()} XP\nLifetime: ${parseInt(userDoc.totalXP, 10).toLocaleString()} XP`, true)
+      message.channel.send({embed: infoEmbed, disableEveryone: true});
+      //Infraction Summary
+    } else if (reaction == cardReactions[1]) {
       /********************
       **  Ignore a flag  **
       ********************/
