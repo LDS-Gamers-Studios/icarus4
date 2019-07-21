@@ -17,7 +17,7 @@ const googleId = require("../config/google_api.json").creds.project_id;
 const translate = new Translate({googleId});
 
 const bans = new USet();
-const cardReactions = ["ℹ️", "✅","⚠","⛔","🛑","🔇"];
+const cardReactions = ["🗨", "✅","⚠","⛔","🛑","🔇"];
 
 function noop() {}
 
