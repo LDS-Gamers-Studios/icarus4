@@ -225,6 +225,7 @@ async function processCardReaction(reaction, mod, infraction) {
 
       let infoEmbed = u.embed()
       .setAuthor(member.displayName, (member.user.displayAvatarURL ? member.user.displayAvatarURL : null))
+      .setThumbnail(member.user.displayAvatarURL)
       .setDescription(infractionDescription)
       .addField("ID", member.id)
       .addField("Joined", member.joinedAt.toUTCString(), true)
