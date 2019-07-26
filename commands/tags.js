@@ -27,7 +27,7 @@ function runTag(msg) {
           }
         }
       );
-    } else msg.channel.send(tag.response);
+    } else msg.channel.send(response);
     return true;
   } else if (cmd && (cmd.command == "help") && (tags.get(msg.guild.id).size > 0) && !cmd.suffix) {
     let embed = u.embed()
