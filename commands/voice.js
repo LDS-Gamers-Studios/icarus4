@@ -4,25 +4,9 @@ const u = require("../utils/utils"),
   request = require("request"),
   ytdl = require("ytdl-core");
 
-const roomList = [
-  "Room Buttermelon",
-  "Room Slothmare",
-  "Room Handicorn",
-  "Room Manahands",
-  "Room Toxipandankery",
-  "Room Cornmuffin",
-  "Room Shenanigans",
-  "Room Fancypants",
-  "Room Thunderpaws",
-  "Room Barley",
-  "Room Fry Sauce",
-  "Room Goat",
-  "Room Ink",
-  "Room Potat",
-  "Room Trogdor",
-];
+const roomList = [];
 
-const availableNames = new Set(roomList);
+const availableNames = new Set();
 
 const communityVoice = "363014069533540362";
 const isCommunityVoice = (channel) => ((channel.parentID == communityVoice) && (channel.id != "123477839696625664"));
@@ -225,9 +209,18 @@ const Module = new Augur.Module()
   queue = (data ? data : new Map());
 
   let ldsg = Module.handler.client.guilds.get(Module.config.ldsg);
-  for (let i = 0; i < roomList.length; i++) {
-    if (ldsg.channels.find(c => c.name.startsWith(roomList[i]))) availableNames.delete(roomList[i]);
-  }
+
+  setTimeout(() => {
+    Module.config.sheets.get("Voice Channel Names").getRows((e, rows) => {
+      if (e) u.alertError(e, "Error loading voice channel names.");
+      else {
+        for (let i = 0; i < rows.length; i++) {
+          roomList.push(rows[i].name);
+          if (!ldsg.channels.find(c => c.name.startsWith(rows[i].name))) availableNames.add(rows[i].name);
+        }
+      }
+    });
+  }, 3000);
 })
 .setUnload(() => queue)
 .addEvent("voiceStateUpdate", async (oldMember, newMember) => {
