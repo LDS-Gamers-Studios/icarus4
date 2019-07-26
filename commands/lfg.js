@@ -256,13 +256,15 @@ const Module = new Augur.Module()
   if (msg.channel.id == lfgBoard.channel) msg.delete();
 })
 .setInit(() => {
-  Module.config.sheets.get("WIP Channel Defaults").getRows((e, rows) => {
-    if (e) u.alertError(e, "Error loading WIP channel defaults.");
-    else {
-      for (let i = 0; i < rows.length; i++)
-        gameDefaults.set(rows[i].channelid, rows[i].gamename);
-    }
-  })
+  setTimeout(() => {
+    Module.config.sheets.get("WIP Channel Defaults").getRows((e, rows) => {
+      if (e) u.alertError(e, "Error loading WIP channel defaults.");
+      else {
+        for (let i = 0; i < rows.length; i++)
+          gameDefaults.set(rows[i].channelid, rows[i].gamename);
+      }
+    })
+  }, 1000);
 })
 .setUnload(writeData)
 .setClockwork(() => {
