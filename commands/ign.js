@@ -187,7 +187,7 @@ const Module = new Augur.Module()
     if (e) u.alertError(e, "Error loading IGNs.");
     else {
       for (let i = 0; i < rows.length; i++)
-        Ign.gameids.set(rows[i], new GameSystem(rows[i]));
+        Ign.gameids.set(rows[i].system, new GameSystem(rows[i]));
     }
   });
   Module.config.sheets.get("IGN Aliases").getRows((e, rows) => {
