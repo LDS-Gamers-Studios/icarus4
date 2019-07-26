@@ -1,6 +1,44 @@
 const Augur = require("augurbot"),
-  Ign = require("../utils/IgnInfo"),
   u = require("../utils/utils");
+
+const Ign = {
+  categories: [
+    "Game Platforms",
+    "Streaming",
+    "Social",
+    "Personal"
+  ],
+  helpList: () => {
+    let response = ["```md"];
+
+    Ign.categories.forEach(category => {
+      let categoryList = ["# " + category];
+      for (const [slug, system] of Ign.gameids) {
+        if (system.display && system.category == category) categoryList.push(`* ${system.system} (${system.name})`);
+      }
+      if (categoryList.length > 1) {
+        response = response.concat(categoryList);
+        response.push("");
+      }
+    });
+
+    response.push("```");
+
+    return response.join("\n");
+  },
+  aliases: {},
+  gameids: new Map()
+};
+
+class GameSystem {
+  constructor(data) {
+    this.system = data.system;
+    this.name = data.name;
+    this.category = (data.category ? data.category : "Game Platforms");
+    this.display = (this.category != "Personal");
+    this.link = data.link;
+  }
+}
 
 function embedIGN(user, igns) {
   if (igns.length > 0) {
@@ -18,7 +56,7 @@ function embedIGN(user, igns) {
       .forEach(ign => {
         let name = ign.ign;
         if (Ign.aliases[ign.system]) ign.system = Ign.aliases[ign.system];
-        if (Ign.gameids.get(ign.system).link && !hasLink.test(name)) name = `[${name}](${Ign.gameids.get(ign.system).link}${encodeURIComponent(name)})`;
+        if (Ign.gameids.get(ign.system).link && !hasLink.test(name)) name = `[${name}](${Ign.gameids.get(ign.system).link.replace(/{ign}/ig, encodeURIComponent(name))})`;
         embed.addField(Ign.gameids.get(ign.system).name, name, true);
       });
     });
@@ -143,6 +181,22 @@ const Module = new Augur.Module()
       u.alertError(e, msg);
     }
   }
+})
+.setInit(() => {
+  Module.config.sheets.get("IGN").getRows((e, rows) => {
+    if (e) u.alertError(e, "Error loading IGNs.");
+    else {
+      for (let i = 0; i < rows.length; i++)
+        Ign.gameids.set(rows[i], new GameSystem(rows[i]));
+    }
+  });
+  Module.config.sheets.get("IGN Aliases").getRows((e, rows) => {
+    if (e) u.alertError(e, "Error loading IGN Aliases.");
+    else {
+      for (let i = 0; i < rows.length; i++)
+        Ign.aliases[rows[i].alias] = rows[i].system;
+    }
+  });
 })
 .setUnload(() => {
   const path = require("path");
