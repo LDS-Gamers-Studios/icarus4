@@ -12,7 +12,7 @@ function runTag(msg) {
       .replace(/<@authorname>/ig, msg.member.displayName);
     if ((/(<@target>)|(<@targetname>)/i).test(response)) {
       if (u.userMentions(msg)) {
-        let target = u.userMentions.first();
+        let target = u.userMentions(msg).first();
         response.replace(/<@target>/ig, target.toString())
           .replace(/<@targetname>/ig, msg.guild.members.get(target.id).displayName);
       } else return msg.reply("You need to `@mention` a user with that command!").then(u.clean);
