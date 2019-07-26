@@ -264,7 +264,7 @@ const Module = new Augur.Module()
           gameDefaults.set(rows[i].channelid, rows[i].gamename);
       }
     })
-  }, 1000);
+  }, 3000);
 })
 .setUnload(writeData)
 .setClockwork(() => {

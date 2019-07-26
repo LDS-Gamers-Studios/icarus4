@@ -198,7 +198,7 @@ const Module = new Augur.Module()
           Ign.aliases[rows[i].alias] = rows[i].system;
       }
     });
-  }, 1000);
+  }, 3000);
 })
 .setUnload(() => {
   const path = require("path");

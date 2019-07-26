@@ -89,7 +89,7 @@ const Module = new Augur.Module()
         Module.commands.find(c => c.name == "remove").info = "Remove one of the following roles:\n```md\n* " + Array.from(roles.keys()).join("\n* ") + "```";
       }
     });
-  }, 1000);
+  }, 3000);
 });
 
 module.exports = Module;
