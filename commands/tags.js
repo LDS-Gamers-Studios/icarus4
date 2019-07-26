@@ -7,9 +7,19 @@ function runTag(msg) {
   let cmd = u.parse(msg);
   if (cmd && tags.get(msg.guild.id).has(cmd.command)) {
     let tag = tags.get(msg.guild.id).get(cmd.command);
+    let response = tag.response
+      .replace(/<@author>/ig, msg.author)
+      .replace(/<@authorname>/ig, msg.member.displayName);
+    if ((/(<@target>)|(<@targetname>)/i).test(response)) {
+      if (u.userMentions(msg)) {
+        let target = u.userMentions.first();
+        response.replace(/<@target>/ig, target.toString())
+          .replace(/<@targetname>/ig, msg.guild.members.get(target.id).displayName);
+      } else return msg.reply("You need to `@mention` a user with that command!").then(u.clean);
+    }
     if (tag.attachment) {
       msg.channel.send(
-        tag.response,
+        response,
         {
           file: {
             attachment: process.cwd() + "/storage/" + tag._id,
@@ -25,7 +35,7 @@ function runTag(msg) {
     .setThumbnail(msg.guild.iconURL);
 
     let prefix = u.prefix(msg);
-    prefix = prefix.replace(/<@!?d+>/g, `@${msg.guild.members.get(msg.client.user.id).displayName} `);
+    prefix = prefix.replace(/<@!?\d+>/g, `@${msg.guild.members.get(msg.client.user.id).displayName} `);
 
     let list = Array.from(tags.get(msg.guild.id).values()).map(c => prefix + c.tag).sort();
 
