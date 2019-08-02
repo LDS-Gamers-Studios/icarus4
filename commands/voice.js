@@ -208,22 +208,20 @@ const Module = new Augur.Module()
 })
 .setInit((data) => {
   if (data) for (const [key, value] of data) queue.set(key, value);
-
-  let ldsg = Module.handler.client.guilds.get(Module.config.ldsg);
-
-  setTimeout(() => {
-    Module.config.sheets.get("Voice Channel Names").getRows((e, rows) => {
-      if (e) u.alertError(e, "Error loading voice channel names.");
-      else {
-        for (let i = 0; i < rows.length; i++) {
-          roomList.push(rows[i].name);
-          if (!ldsg.channels.find(c => c.name.startsWith(rows[i].name))) availableNames.add(rows[i].name);
-        }
-      }
-    });
-  }, 3000);
 })
 .setUnload(() => queue)
+.addEvent("loadConfig", () => {
+  let ldsg = Module.handler.client.guilds.get(Module.config.ldsg);
+  Module.config.sheets.get("Voice Channel Names").getRows((e, rows) => {
+    if (e) u.alertError(e, "Error loading voice channel names.");
+    else {
+      for (let i = 0; i < rows.length; i++) {
+        roomList.push(rows[i].name);
+        if (!ldsg.channels.find(c => c.name.startsWith(rows[i].name))) availableNames.add(rows[i].name);
+      }
+    }
+  });
+})
 .addEvent("voiceStateUpdate", async (oldMember, newMember) => {
   let guild = oldMember.guild;
   if ((guild.id == Module.config.ldsg) && (oldMember.voiceChannelID != newMember.voiceChannelID)) {

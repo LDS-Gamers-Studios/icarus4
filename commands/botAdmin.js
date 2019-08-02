@@ -205,6 +205,7 @@ const Module = new Augur.Module()
           for (let i = 0; i < sheets.length; i++) {
             Module.config.sheets.set(sheets[i].title, sheets[i]);
           }
+          Module.handler.client.emit("loadConfig");
         }
       });
     }

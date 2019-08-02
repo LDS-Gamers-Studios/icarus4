@@ -78,18 +78,16 @@ const Module = new Augur.Module()
   },
   permissions: (msg) => msg.guild
 })
-.setInit(() => {
-  setTimeout(() => {
-    Module.config.sheets.get("Opt-In Roles").getRows((e, rows) => {
-      if (e) u.alertError(e, "Error loading opt-in roles.");
-      else {
-        for (let i = 0; i < rows.length; i++)
-          roles.set(rows[i].roletag, rows[i].roleid);
-        Module.commands.find(c => c.name == "add").info = "Gives you one of the following roles:\n```md\n* " + Array.from(roles.keys()).join("\n* ") + "```";
-        Module.commands.find(c => c.name == "remove").info = "Remove one of the following roles:\n```md\n* " + Array.from(roles.keys()).join("\n* ") + "```";
-      }
-    });
-  }, 3000);
+.addEvent("loadConfig", () => {
+  Module.config.sheets.get("Opt-In Roles").getRows((e, rows) => {
+    if (e) u.alertError(e, "Error loading opt-in roles.");
+    else {
+      for (let i = 0; i < rows.length; i++)
+        roles.set(rows[i].roletag, rows[i].roleid);
+      Module.commands.find(c => c.name == "add").info = "Gives you one of the following roles:\n```md\n* " + Array.from(roles.keys()).join("\n* ") + "```";
+      Module.commands.find(c => c.name == "remove").info = "Remove one of the following roles:\n```md\n* " + Array.from(roles.keys()).join("\n* ") + "```";
+    }
+  });
 });
 
 module.exports = Module;

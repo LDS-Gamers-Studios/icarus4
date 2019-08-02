@@ -182,23 +182,21 @@ const Module = new Augur.Module()
     }
   }
 })
-.setInit(() => {
-  setTimeout(() => {
-    Module.config.sheets.get("IGN").getRows((e, rows) => {
-      if (e) u.alertError(e, "Error loading IGNs.");
-      else {
-        for (let i = 0; i < rows.length; i++)
-          Ign.gameids.set(rows[i].system, new GameSystem(rows[i]));
-      }
-    });
-    Module.config.sheets.get("IGN Aliases").getRows((e, rows) => {
-      if (e) u.alertError(e, "Error loading IGN Aliases.");
-      else {
-        for (let i = 0; i < rows.length; i++)
-          Ign.aliases[rows[i].alias] = rows[i].system;
-      }
-    });
-  }, 3000);
+.addEvent("loadConfig", () => {
+  Module.config.sheets.get("IGN").getRows((e, rows) => {
+    if (e) u.alertError(e, "Error loading IGNs.");
+    else {
+      for (let i = 0; i < rows.length; i++)
+        Ign.gameids.set(rows[i].system, new GameSystem(rows[i]));
+    }
+  });
+  Module.config.sheets.get("IGN Aliases").getRows((e, rows) => {
+    if (e) u.alertError(e, "Error loading IGN Aliases.");
+    else {
+      for (let i = 0; i < rows.length; i++)
+        Ign.aliases[rows[i].alias] = rows[i].system;
+    }
+  });
 })
 .setUnload(() => {
   const path = require("path");
