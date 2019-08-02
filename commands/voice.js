@@ -2,16 +2,17 @@ const u = require("../utils/utils"),
   Augur = require("augurbot"),
   profanityFilter = require("profanity-matcher"),
   request = require("request"),
-  ytdl = require("ytdl-core");
+  ytdl = require("ytdl-core"),
+  {USet} = require("../utils/tools");
 
 const roomList = [];
 
-const availableNames = new Set();
+const availableNames = new USet();
 
 const communityVoice = "363014069533540362";
 const isCommunityVoice = (channel) => ((channel.parentID == communityVoice) && (channel.id != "123477839696625664"));
 
-var queue;
+const queue = new Map();
 
 async function playSound(guildId) {
   try {
@@ -206,7 +207,7 @@ const Module = new Augur.Module()
   }
 })
 .setInit((data) => {
-  queue = (data ? data : new Map());
+  for (const [key, value] of data) queue.set(key, value);
 
   let ldsg = Module.handler.client.guilds.get(Module.config.ldsg);
 
@@ -236,8 +237,7 @@ const Module = new Augur.Module()
       // CREATE NEW VOICE CHANNEL
       const bitrate = newMember.voiceChannel.bitrate;
 
-      const pool = (availableNames.size > 0 ? [...availableNames] : roomList);
-      let name = pool[Math.floor(Math.random() * pool.length)];
+      let name = (availableNames.size > 0 ? availableNames.random() : roomList[Math.floor(Math.random() * roomList.length)]);
       availableNames.delete(name);
       name += ` (${bitrate} kbps)`;
 
