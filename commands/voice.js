@@ -229,8 +229,9 @@ const Module = new Augur.Module()
   if ((guild.id == Module.config.ldsg) && (oldMember.voiceChannelID != newMember.voiceChannelID)) {
     if (oldMember.voiceChannel && (oldMember.voiceChannel.members.size == 0) && isCommunityVoice(oldMember.voiceChannel)) {
       // REMOVE OLD VOICE CHANNEL
+      let oldChannelName = oldMember.voiceChannel.name;
       await oldMember.voiceChannel.delete().catch(e => u.alertError(e, "Could not delete empty voice channel."));
-      let name = roomList.find(room => oldMember.voiceChannel.name.startsWith(room));
+      let name = roomList.find(room => oldChannelName.startsWith(room));
       if (name && !guild.channels.find(c => c.name.startsWith(name))) availableNames.add(name);
     }
     if (newMember.voiceChannelID && (newMember.voiceChannel.members.size == 1) && isCommunityVoice(newMember.voiceChannel)) {
