@@ -51,6 +51,15 @@ class USet extends Set {
     return [...this].map(fn);
   }
 
+  random() {
+    // Get a random element
+    let index = Math.floor(Math.random() * this.size);
+    let i = 0;
+    for (const value of this) {
+      if (index == i++) return value;
+    }
+  }
+
   reduce(fn, value) {
     return [...this].reduce(fn, value);
   }
