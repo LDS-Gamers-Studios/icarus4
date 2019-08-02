@@ -207,7 +207,7 @@ const Module = new Augur.Module()
   }
 })
 .setInit((data) => {
-  for (const [key, value] of data) queue.set(key, value);
+  if (data) for (const [key, value] of data) queue.set(key, value);
 
   let ldsg = Module.handler.client.guilds.get(Module.config.ldsg);
 
