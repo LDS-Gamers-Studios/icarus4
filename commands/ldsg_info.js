@@ -7,7 +7,7 @@ const Augur = require("augurbot"),
 const Module = new Augur.Module()
 .addCommand({name: "code",
   description: "Our Code of Conduct",
-  aliases: ["coc", "tos", "terms"],
+  aliases: ["tos", "terms"],
   category: "LDSG",
   process: (msg) => {
     msg.channel.send("Please read our Code of Conduct:\nhttp://ldsgamers.com/code-of-conduct").catch(e => u.alertError(e, msg));
