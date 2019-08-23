@@ -223,7 +223,7 @@ const Module = new Augur.Module()
       const staticURL = `https://cdn.discordapp.com/avatars/${target.id}/${target.avatar.replace("a_", "")}.png`;
 
       const right = await Jimp.read(arm);
-      const mask = await Jimp.read("https://cdn.discordapp.com/attachments/193042027066163200/614491730376523814/614491645878075392.png");
+      const mask = await Jimp.read("./storage/mask.png");
       const avatar = await Jimp.read(staticURL);
       const canvas = new Jimp(320, 128, 0x00000000);
 
