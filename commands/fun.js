@@ -225,7 +225,7 @@ const Module = new Augur.Module()
       const right = await Jimp.read(arm);
       const mask = await Jimp.read("./storage/mask.png");
       const avatar = await Jimp.read(staticURL);
-      const canvas = new Jimp(320, 128, 0x00000000);
+      const canvas = new Jimp(368, 128, 0x00000000);
 
       if (Math.random() > 0.5) right.flip(false, true);
       const left = right.clone().flip(true, (Math.random() > 0.5));
@@ -234,9 +234,9 @@ const Module = new Augur.Module()
       avatar.mask(mask, 0, 0);
 
       canvas.blit(left, 0, 4);
-      canvas.blit(right, 200, 4);
+      canvas.blit(right, 248, 4);
 
-      canvas.blit(avatar, 96, 0);
+      canvas.blit(avatar, 120, 0);
 
       await msg.channel.send({files: [await canvas.getBufferAsync(Jimp.MIME_PNG)]});
     } catch(e) { u.alertError(e, msg); }
