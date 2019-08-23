@@ -222,17 +222,10 @@ const Module = new Augur.Module()
       const target = (msg.mentions.users.size > 0 ? msg.mentions.users.first() : msg.author);
       const staticURL = `https://cdn.discordapp.com/avatars/${target.id}/${target.avatar.replace("a_", "")}.png`;
 
-      const [
-        right,
-        mask,
-        avatar,
-        canvas
-      ] = await Promise.all([
-        Jimp.read(arm),
-        Jimp.read("https://cdn.discordapp.com/attachments/193042027066163200/614491730376523814/614491645878075392.png"),
-        Jimp.read(staticURL),
-        new Jimp(320, 128, 0x00000000)
-      ]);
+      const right = await Jimp.read(arm);
+      const mask = await Jimp.read("https://cdn.discordapp.com/attachments/193042027066163200/614491730376523814/614491645878075392.png");
+      const avatar = await Jimp.read(staticURL);
+      const canvas = new Jimp(320, 128, 0x00000000);
 
       if (Math.random() > 0.5) right.flip(false, true);
       const left = right.clone().flip(true, (Math.random() > 0.5));
