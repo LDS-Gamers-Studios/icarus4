@@ -190,7 +190,7 @@ const Module = new Augur.Module()
       helpList = helpList.join("\n");
 
       Module.commands.forEach(command => {
-        command.info.replace("{helpList}", helpList);
+        command.info = command.info.replace("{helpList}", helpList);
       });
     }
   });
