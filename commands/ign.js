@@ -79,8 +79,8 @@ const Module = new Augur.Module()
         var systems = suffix.replace(/<@!?\d+>/ig, '').toLowerCase().trim();
       } else {
         let params = suffix.toLowerCase().split(" ");
-        var systems = params.filter(s => Ign.aliases.has(s) || Ign.systems.has(s)).join(" ");
-        var user = u.getUser(msg, params.filter(s => !(Ign.aliases.has(s) || Ign.systems.has(s))).join(" "));
+        var systems = params.filter(s => Ign.aliases.has(s) || Ign.gameids.has(s)).join(" ");
+        var user = u.getUser(msg, params.filter(s => !(Ign.aliases.has(s) || Ign.gameids.has(s))).join(" "));
       }
 
       let member = ((msg.guild) ? (msg.guild.members.get(user.id)): null);
