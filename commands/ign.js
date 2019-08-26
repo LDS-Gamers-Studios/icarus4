@@ -26,7 +26,7 @@ const Ign = {
 
     return response.join("\n");
   },
-  aliases: {},
+  aliases: new Map(),
   gameids: new Map()
 };
 
@@ -55,7 +55,7 @@ function embedIGN(user, igns) {
       .sort((a, b) => Ign.gameids.get(a.system).name.localeCompare(Ign.gameids.get(b.system).name))
       .forEach(ign => {
         let name = ign.ign;
-        if (Ign.aliases[ign.system]) ign.system = Ign.aliases[ign.system];
+        if (Ign.aliases.has(ign.system)) ign.system = Ign.aliases.get(ign.system);
         if (Ign.gameids.get(ign.system).link && !hasLink.test(name)) name = `[${name}](${Ign.gameids.get(ign.system).link.replace(/{ign}/ig, encodeURIComponent(name))})`;
         embed.addField(Ign.gameids.get(ign.system).name, name, true);
       });
@@ -78,12 +78,13 @@ const Module = new Augur.Module()
         var user = userMentions.first();
         var systems = suffix.replace(/<@!?\d+>/ig, '').toLowerCase().trim();
       } else {
-        var user = u.getUser(msg, suffix);
-        var systems = (user.id == msg.author.id ? suffix : null);
+        let params = suffix.toLowerCase().split(" ");
+        var systems = params.filter(s => Ign.aliases.has(s) || Ign.systems.has(s)).join(" ");
+        var user = u.getUser(msg, params.filter(s => !(Ign.aliases.has(s) || Ign.systems.has(s))).join(" "));
       }
 
       let member = ((msg.guild) ? (msg.guild.members.get(user.id)): null);
-      systems = (systems ? systems.toLowerCase().split(' ').map(s => (Ign.aliases[s] ? Ign.aliases[s] : s)) : null);
+      systems = (systems ? systems.toLowerCase().split(' ').map(s => (Ign.aliases.has(s) ? Ign.aliases.get(s) : s)) : null);
       let igns = await Module.db.ign.find(user.id, systems);
 
       let embed = embedIGN({name: (member ? member.displayName : user.username), avatar: user.displayAvatarURL}, igns);
@@ -116,7 +117,7 @@ const Module = new Augur.Module()
         return;
       }
       name = name.join(" ");
-      if (Ign.aliases[system]) system = Ign.aliases[system];
+      if (Ign.aliases.has(system)) system = Ign.aliases.get(system);
       if (Ign.gameids.get(system)) {
         if (system == "birthday") {
           try {
@@ -155,7 +156,7 @@ const Module = new Augur.Module()
         return;
       }
       suffix = suffix.toLowerCase();
-      if (Ign.aliases[suffix]) suffix = Ign.aliases[suffix];
+      if (Ign.aliases.has(suffix)) suffix = Ign.aliases.get(suffix);
       if (Ign.gameids.get(suffix)) {
         let users = await Module.db.ign.getList(suffix);
         if (users.length > 0) {
@@ -194,7 +195,7 @@ const Module = new Augur.Module()
     if (e) u.alertError(e, "Error loading IGN Aliases.");
     else {
       for (let i = 0; i < rows.length; i++)
-        Ign.aliases[rows[i].alias] = rows[i].system;
+        Ign.aliases.set(rows[i].alias, rows[i].system);
     }
   });
 })
