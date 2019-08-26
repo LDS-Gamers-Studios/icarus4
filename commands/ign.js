@@ -8,24 +8,6 @@ const Ign = {
     "Social",
     "Personal"
   ],
-  helpList: () => {
-    let response = ["```md"];
-
-    Ign.categories.forEach(category => {
-      let categoryList = ["# " + category];
-      for (const [slug, system] of Ign.gameids) {
-        if (system.display && system.category == category) categoryList.push(`* ${system.system} (${system.name})`);
-      }
-      if (categoryList.length > 1) {
-        response = response.concat(categoryList);
-        response.push("");
-      }
-    });
-
-    response.push("```");
-
-    return response.join("\n");
-  },
   aliases: new Map(),
   gameids: new Map()
 };
@@ -69,7 +51,7 @@ const Module = new Augur.Module()
 .addCommand({name: "ign",
   description: "View an IGN",
   syntax: "[@user] [system]",
-  info: "Displays various game system IGNs or social network names that have been added via the `!addign` command. Use the `!whoplays` command to view all people who have saved IGNs for a particular system.\n" + Ign.helpList(),
+  info: "Displays various game system IGNs or social network names that have been added via the `!addign` command. Use the `!whoplays` command to view all people who have saved IGNs for a particular system.\n{helpList}",
   category: "IGN",
   process: async function(msg, suffix) {
     try {
@@ -99,7 +81,7 @@ const Module = new Augur.Module()
 .addCommand({name: "addign",
   description: "Save an IGN",
   syntax: "<system> <ign>",
-  info: "Saves various game system IGNs or social network names. User IGNs are visible with the `!ign` command, and lists of users with the `!whoplays` command.\n" + Ign.helpList(),
+  info: "Saves various game system IGNs or social network names. User IGNs are visible with the `!ign` command, and lists of users with the `!whoplays` command.\n{helpList}",
   aliases: ["adding"],
   category: "IGN",
   process: async function(msg, suffix) {
@@ -145,7 +127,7 @@ const Module = new Augur.Module()
 .addCommand({name: "whoplays",
   description: "List server members who have stored an IGN for a given system.",
   syntax: "<system>",
-  info: "Lists server members who have saved IGNs for a given system.\n" + Ign.helpList(),
+  info: "Lists server members who have saved IGNs for a given system.\n{helpList}",
   aliases: ["whohas", "whoison"],
   category: "IGN",
   permissions: (msg) => msg.guild,
@@ -189,6 +171,27 @@ const Module = new Augur.Module()
     else {
       for (let i = 0; i < rows.length; i++)
         Ign.gameids.set(rows[i].system, new GameSystem(rows[i]));
+
+      let helpList = ["```md"];
+
+      Ign.categories.forEach(category => {
+        let categoryList = ["# " + category];
+        for (const [slug, system] of Ign.gameids) {
+          if (system.display && system.category == category) categoryList.push(`* ${system.system} (${system.name})`);
+        }
+        if (categoryList.length > 1) {
+          helpList = helpList.concat(categoryList);
+          helpList.push("");
+        }
+      });
+
+      helpList.push("```");
+
+      helpList = helpList.join("\n");
+
+      Module.commands.forEach(command => {
+        command.info.replace("{helpList}", helpList);
+      });
     }
   });
   Module.config.sheets.get("IGN Aliases").getRows((e, rows) => {
