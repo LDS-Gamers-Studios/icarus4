@@ -1,7 +1,7 @@
 const Augur = require("augurbot"),
   fs = require("fs"),
   Mixer = require("beam-client-node"),
-  TwitchApi = require("twitch-api"),
+  TwitchClient = require("twitch").default,
   twitchConfig = require("../config/twitch.json"),
   u = require("../utils/utils"),
   yaml = require("js-yaml");
@@ -10,7 +10,8 @@ var yt, applicationCount = 0;
 
 const mixer = new Mixer.Client(new Mixer.DefaultRequestRunner()),
   mixerStatus = new Map(),
-  twitch = new TwitchApi(twitchConfig),
+  twitch = TwitchClient.withClientCredentials(twitchConfig.clientId, twitchConfig.clientSecret).helix,
+  twitchGames = new Map(),
   twitchStatus = new Map(),
   ytStatus = new Map(),
   bonusStreams = require("../data/streams.json");
@@ -81,12 +82,13 @@ function notificationEmbed(body, srv) {
   let embed = u.embed()
     .setTimestamp();
   if (srv == "twitch") {
+    let data = body._data;
     let channel = body.stream.channel;
     embed.setColor('#6441A4')
-      .setThumbnail(`${body.stream.preview.medium}?t=${Date.now()}`)
-      .setTitle(channel.status)
-      .setAuthor(channel.display_name + (body.stream.game ? ` playing ${body.stream.game}` : ""), channel.logo)
-      .setURL(channel.url);
+      .setThumbnail(data.thumbnail_url.replace("{width}", "480").replace("{height}", "270"))
+      .setTitle(data.user_name)
+      .setAuthor(data.user_name + (twitchGames.has(data.game_id) ? ` playing ${twitchGames.get(data.game_id).name}` : ""))
+      .setURL(data.stream_url);
   } else if (srv == "mixer") {
     embed.setColor('#0078d7')
       .setThumbnail(body.type.coverUrl)
@@ -168,52 +170,47 @@ async function processMixer(bot, key, channel) {
   }
 };
 
-function processTwitch(bot, key, channel) {
+async function processTwitch(bot, key, channel) {
   try {
     let ldsg = bot.guilds.get(Module.config.ldsg),
       liveRole = ldsg.roles.get("281135201407467520"),
       notificationChannel = ldsg.channels.get(Module.config.ldsg), // #general
       member = ldsg.members.get(key);
 
-    twitch.getChannelStream(channel, function(error, body) {
-      if (error) {
-        if (error.status == 400) console.log("TWITCH:", channel);
-        console.log(error);
-      } else if (body.stream) {
-        let status = twitchStatus.get(key);
-        if (!status || ((status.status == "offline") && ((Date.now() - status.since) >= (30 * 60 * 1000)))) {
-          // Is LDSG streaming? Set Icarus status
-          if (channel.toLowerCase() == "ldsgamers") {
-            bot.user.setActivity(
-              body.stream.channel.status,
-              {
-                url: body.stream.channel.url,
-                type: "STREAMING"
-              }
-            );
-          }
-          twitchStatus.set(key, {
-            status: "online",
-            since: Date.now()
-          });
-          if (!body.stream.channel.mature) {
-            notificationChannel.send(notificationEmbed(body, "twitch"));
-            if (member && isPartnered(member)) member.addRole(liveRole);
-          }
-        }
-      } else if (twitchStatus.has(key) && (twitchStatus.get(key).status == "online")) {
-        // Is LDSG streaming? Set Icarus status
+    const stream = await twitch.streams.getStreamByUserName(channel);
+    if (stream) {
+      if (!twitchGames.has(stream._data.game_id)) {
+        let game = (await twitch.games.getByGameId(stream_data.game_id)).data;
+        twitchGames.set(game.id, game);
+      }
+      let status = twitchStatus.get(key);
+      stream._data.stream_url = "https://www.twitch.tv/" + encodeURIComponent(channel).toLowerCase();
+      if (!status || ((status.status == "offline") && ((Date.now() - status.since) >= (30 * 60 * 1000)))) {
         if (channel.toLowerCase() == "ldsgamers") {
-          bot.user.setGame("");
+          bot.user.setActivity(
+            stream._data.title,
+            {
+              url: stream._data.stream_url,
+              type: "STREAMING"
+            }
+          );
         }
-        if (member && liveRole.members.has(member.id)) member.removeRole(liveRole);
-
         twitchStatus.set(key, {
-          status: "offline",
+          status: "online",
           since: Date.now()
         });
       }
-    });
+      if (member && isPartnered(member)) member.addRole(liveRole);
+      notificationChannel.send(notificationEmbed(stream, "twitch"));
+    } else if (twitchStatus.has(key) && (twitchStatus.get(key).status == "online")) {
+      if (channel.toLowerCase() == "ldsgamers") bot.user.setGame("");
+      if (member && liveRole.members.has(member.id)) member.removeRole(liveRole);
+
+      twitchStatus.set(key, {
+        status: "offline",
+        since: Date.now()
+      });
+    }
   } catch(e) {
     u.alertError(e, "Process Twitch");
   }
@@ -251,27 +248,29 @@ async function processYouTube(bot, key, channel) {
   }
 };
 
-function twitchEmbed(body) {
-  let channel = null;
-  let embed = u.embed()
-    .setColor('#6441A4')
-    .setTimestamp();
+function twitchEmbed(stream, online = true) {
+  const data = stream._data;
+  const name = data.user_name || data.display_name;
+  const embed = u.embed()
+    .setURL(data.stream_url)
+    .setAuthor(name)
+    .setTitle("Twitch Stream: " + name)
+    .setColor('#6441A4');
 
-  if (body.stream) {
-    channel = body.stream.channel;
-    embed.setDescription(body.stream.channel.status)
-      .setThumbnail(`${body.stream.preview.medium}?t=${Date.now()}`)
-      .addField('Playing', (body.stream.game ? body.stream.game : "Nothing"), true)
-      .addField('Current Viewers', body.stream.viewers, true);
+  if (online) {
+    embed.setDescription(data.title)
+    .setTitle(data.user_name)
+    .setThumbnail(data.thumbnail_url.replace("{width}", "480").replace("{height}", "270"))
+    .addField("Playing", (data.game_id ? twitchGames.get(data.game_id).name : "Nothing"))
+    .addField("Current Viewers", data.viewer_count)
+    .setTimestamp(new Date(data.started_at));
   } else {
-    channel = body;
-    embed.setDescription("Currently Offline")
-      .setThumbnail(body.logo)
-      .addField('Followers', body.followers);
+    embed.setDescription("**Currently Offline**\n" + data.description)
+    .setTitle(data.display_name)
+    .setThumbnail(data.profile_image_url)
+    .setTimestamp();
   }
-  embed.setTitle("Twitch Stream: " + channel.display_name)
-    .setAuthor(channel.display_name, channel.logo)
-    .setURL(channel.url);
+
   return embed;
 };
 
@@ -522,25 +521,24 @@ const Module = new Augur.Module()
         }
       } else name = encodeURIComponent(suffix);
 
-      twitch.getChannelStream(name, function(error, body) {
-        if (error && error.status == 404) {
-          msg.channel.send("I couldn't find a Twitch channel for " + decodeURIComponent(name)).then(u.clean);
-        } else if (error) {
-          console.error(error);
-        } else if (body.stream) {
-          msg.channel.send(twitchEmbed(body));
-        } else {
-          twitch.getChannel(name, function(error, body){
-            if (error && error.status == 404) {
-              msg.channel.send("I couldn't find a Twitch channel for " + decodeURIComponent(name)).then(u.clean);
-            } else if (error) {
-              console.error(error);
-            } else {
-              msg.channel.send(twitchEmbed(body));
-            }
-          });
+      try {
+        const stream = (await twitch.streams.getStreamByUserName(name));
+        if (stream) {
+          if (!twitchGames.has(stream._data.game_id)) {
+            let game = (await twitch.games.getGameById(stream._data.game_id))._data;
+            twitchGames.set(game.id, game);
+          }
+          stream._data.stream_url = "https://www.twitch.tv/" + encodeURIComponent(name).toLowerCase();
+          msg.channel.send(twitchEmbed(stream));
+        } else { // Offline
+          const streamer = (await twitch.users.getUserByName(name));
+          streamer._data.stream_url = "https://www.twitch.tv/" + encodeURIComponent(name).toLowerCase();
+          msg.channel.send(twitchEmbed(streamer, false));
         }
-      });
+      } catch(e) {
+        // msg.channel.send("I couldn't find a Twitch channel for " + decodeURIComponent(name)).then(u.clean);
+        u.alertError(e, msg);
+      }
     } catch(e) {
       u.alertError(e, msg);
     }
