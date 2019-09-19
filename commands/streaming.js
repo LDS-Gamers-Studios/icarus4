@@ -260,8 +260,8 @@ function twitchEmbed(stream, online = true) {
     embed.setDescription(data.title)
     .setTitle(data.user_name)
     .setThumbnail(data.thumbnail_url.replace("{width}", "480").replace("{height}", "270") + "?t=" + Date.now())
-    .addField("Playing", (data.game_id ? twitchGames.get(data.game_id).name : "Nothing"))
-    .addField("Current Viewers", data.viewer_count)
+    .addField("Playing", (data.game_id ? twitchGames.get(data.game_id).name : "Nothing"), true)
+    .addField("Current Viewers", data.viewer_count, true)
     .setTimestamp(new Date(data.started_at));
   } else {
     embed.setDescription("**Currently Offline**\n" + data.description)
