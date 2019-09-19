@@ -436,7 +436,7 @@ const Module = new Augur.Module()
       let res = await Promise.all([
         new Promise(async (fulfill, reject) => {
           try {
-            let streams = await twitch.streams.getStreams({userName: twitchChannels});
+            let streams = await twitch.streams.getStreams({userName: twitchChannels.filter((v, i) => i < 100)});
             fulfill({service: "twitch", channels: streams.data});
           } catch(e) { u.alertError(e, msg); }
         }),
