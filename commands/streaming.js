@@ -83,7 +83,6 @@ function notificationEmbed(body, srv) {
     .setTimestamp();
   if (srv == "twitch") {
     let data = body._data;
-    let channel = body.stream.channel;
     embed.setColor('#6441A4')
       .setThumbnail(data.thumbnail_url.replace("{width}", "480").replace("{height}", "270"))
       .setTitle(data.user_name)
