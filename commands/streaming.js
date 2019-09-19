@@ -84,7 +84,7 @@ function notificationEmbed(body, srv) {
   if (srv == "twitch") {
     let data = body._data;
     embed.setColor('#6441A4')
-      .setThumbnail(data.thumbnail_url.replace("{width}", "480").replace("{height}", "270"))
+      .setThumbnail(data.thumbnail_url.replace("{width}", "480").replace("{height}", "270") + "?t=" + Date.now())
       .setTitle(data.user_name)
       .setAuthor(data.user_name + (twitchGames.has(data.game_id) ? ` playing ${twitchGames.get(data.game_id).name}` : ""))
       .setURL(data.stream_url);
@@ -259,7 +259,7 @@ function twitchEmbed(stream, online = true) {
   if (online) {
     embed.setDescription(data.title)
     .setTitle(data.user_name)
-    .setThumbnail(data.thumbnail_url.replace("{width}", "480").replace("{height}", "270"))
+    .setThumbnail(data.thumbnail_url.replace("{width}", "480").replace("{height}", "270") + "?t=" + Date.now())
     .addField("Playing", (data.game_id ? twitchGames.get(data.game_id).name : "Nothing"))
     .addField("Current Viewers", data.viewer_count)
     .setTimestamp(new Date(data.started_at));
