@@ -178,13 +178,13 @@ async function processTwitch(bot, key, channel) {
 
     const stream = await twitch.streams.getStreamByUserName(channel);
     if (stream) {
-      if (!twitchGames.has(stream._data.game_id)) {
-        let game = (await twitch.games.getGameById(stream._data.game_id))._data;
-        twitchGames.set(game.id, game);
-      }
       let status = twitchStatus.get(key);
-      stream._data.stream_url = "https://www.twitch.tv/" + encodeURIComponent(channel).toLowerCase();
       if (!status || ((status.status == "offline") && ((Date.now() - status.since) >= (30 * 60 * 1000)))) {
+        if (!twitchGames.has(stream._data.game_id)) {
+          let game = (await twitch.games.getGameById(stream._data.game_id))._data;
+          twitchGames.set(game.id, game);
+        }
+        stream._data.stream_url = "https://www.twitch.tv/" + encodeURIComponent(channel).toLowerCase();
         if (channel.toLowerCase() == "ldsgamers") {
           bot.user.setActivity(
             stream._data.title,
@@ -198,9 +198,9 @@ async function processTwitch(bot, key, channel) {
           status: "online",
           since: Date.now()
         });
+        if (member && isPartnered(member)) member.addRole(liveRole);
+        notificationChannel.send(notificationEmbed(stream, "twitch"));
       }
-      if (member && isPartnered(member)) member.addRole(liveRole);
-      notificationChannel.send(notificationEmbed(stream, "twitch"));
     } else if (twitchStatus.has(key) && (twitchStatus.get(key).status == "online")) {
       if (channel.toLowerCase() == "ldsgamers") bot.user.setGame("");
       if (member && liveRole.members.has(member.id)) member.removeRole(liveRole);
