@@ -180,7 +180,7 @@ async function processTwitch(bot, key, channel) {
     const stream = await twitch.streams.getStreamByUserName(channel);
     if (stream) {
       if (!twitchGames.has(stream._data.game_id)) {
-        let game = (await twitch.games.getGameById(stream._data.game_id)).data;
+        let game = (await twitch.games.getGameById(stream._data.game_id))._data;
         twitchGames.set(game.id, game);
       }
       let status = twitchStatus.get(key);
