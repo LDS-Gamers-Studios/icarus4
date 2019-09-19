@@ -434,13 +434,11 @@ const Module = new Augur.Module()
 
       // Fetch channels from Twitch and Mixer
       let res = await Promise.all([
-        new Promise((fulfill, reject) => {
-          twitch.getStreams({
-            channel: twitchChannels.join(",")
-          }, (error, body) => {
-            if (error) reject(error);
-            else fulfill({service: "twitch", channels: body.streams});
-          });
+        new Promise(async (fulfill, reject) => {
+          try {
+            let streams = await twitch.streams.getStreams({userName: twitchChannels});
+            fulfill({service: "twitch", channels: streams.data});
+          } catch(e) { u.alertError(e, msg); }
         }),
         new Promise((fulfill, reject) => {
           mixer.request("GET", `channels?where=token:in:${mixerChannels.join(";")}`)
@@ -460,14 +458,14 @@ const Module = new Augur.Module()
       res.forEach(service => {
         if (service.service == "twitch") {
           service.channels.forEach(stream => {
-            let channel = stream.channel;
+            let channel = stream._data;
             if (channel)
             channels.push({
-              name: channel.display_name,
-              game: channel.game,
+              name: channel.user_name,
+              game: twitchGames.has(channel.game_id) ? twitchGames.get(channel.game_id).name : "Something?",
               service: "Twitch",
-              title: channel.status,
-              url: channel.url
+              title: channel.title,
+              url: `https://www.twitch.tv/${channel.user_name}`
             });
           });
         } else if (service.service == "mixer") {
