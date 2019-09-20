@@ -181,8 +181,8 @@ async function processTwitch(bot, key, channel) {
       let status = twitchStatus.get(key);
       if (!status || ((status.status == "offline") && ((Date.now() - status.since) >= (30 * 60 * 1000)))) {
         if (!twitchGames.has(stream._data.game_id)) {
-          let game = (await twitch.games.getGameById(stream._data.game_id))._data;
-          twitchGames.set(game.id, game);
+          let game = await twitch.games.getGameById(stream._data.game_id);
+          if (game) twitchGames.set(game.id, game._data);
         }
         stream._data.stream_url = "https://www.twitch.tv/" + encodeURIComponent(channel).toLowerCase();
         if (channel.toLowerCase() == "ldsgamers") {
