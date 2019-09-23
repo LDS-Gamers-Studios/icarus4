@@ -397,28 +397,27 @@ const Module = new Augur.Module()
   description: "Watch the LDSG Twitch stream",
   info: "Displays LDSG stream status and stream info.",
   category: "Streaming",
-  process: (msg) => {
+  process: async (msg) => {
     let name = "ldsgamers";
 
-    twitch.getChannelStream(name, function(error, body) {
-      if (error) {
-        if (error.status == 404)
-          msg.channel.send("I couldn't find a Twitch channel for " + name).then(u.clean);
-        else console.error(error);
-      } else if (body.stream) {
-        msg.channel.send(twitchEmbed(body));
-      } else {
-        twitch.getChannel(name, function(error, body) {
-          if (error && error.status == 404) {
-            msg.channel.send("I couldn't find a Twitch channel for " + name).then(u.clean);
-          } else if (error) {
-            console.error(error);
-          } else {
-            msg.channel.send(twitchEmbed(body));
-          }
-        });
+    try {
+      const stream = (await twitch.streams.getStreamByUserName(name));
+      if (stream) {
+        if (!twitchGames.has(stream._data.game_id)) {
+          let game = (await twitch.games.getGameById(stream._data.game_id))._data;
+          twitchGames.set(game.id, game);
+        }
+        stream._data.stream_url = "https://www.twitch.tv/" + encodeURIComponent(name).toLowerCase();
+        msg.channel.send(twitchEmbed(stream));
+      } else { // Offline
+        const streamer = (await twitch.users.getUserByName(name));
+        streamer._data.stream_url = "https://www.twitch.tv/" + encodeURIComponent(name).toLowerCase();
+        msg.channel.send(twitchEmbed(streamer, false));
       }
-    });
+    } catch(e) {
+      // msg.channel.send("I couldn't find a Twitch channel for " + decodeURIComponent(name)).then(u.clean);
+      u.alertError(e, msg);
+    }
   }
 })
 .addCommand({name: "streaming",
