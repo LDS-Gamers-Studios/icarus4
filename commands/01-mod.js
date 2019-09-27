@@ -259,16 +259,16 @@ async function processCardReaction(reaction, mod, infraction) {
       infraction.mod = mod.id;
       let member = message.guild.members.get(infraction.discordId);
 
-      if (reaction == cardReactions[1]) {         // Minor infraction
+      if (reaction == cardReactions[2]) {         // Minor infraction
         infraction.value = 1;
         embed.addField("Resolved", mod.username + " issued a 1 point warning.");
-      } else if (reaction == cardReactions[2]) {  // Moderate infraction
+      } else if (reaction == cardReactions[3]) {  // Moderate infraction
         infraction.value = 5;
         embed.addField("Resolved", mod.username + " issued a 5 point warning.");
-      } else if (reaction == cardReactions[3]) {  // Major infraction
+      } else if (reaction == cardReactions[4]) {  // Major infraction
         infraction.value = 10;
         embed.addField("Resolved", mod.username + " issued a 10 point warning.");
-      } else if (reaction == cardReactions[4]) {  // Mute
+      } else if (reaction == cardReactions[5]) {  // Mute
         infraction.value = 10;
         if (!member.roles.has(Module.config.roles.muted)) {
           // Only mute them if they weren't already muted.
