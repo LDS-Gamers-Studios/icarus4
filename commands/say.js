@@ -23,7 +23,8 @@ const Module = new Augur.Module()
     let str = params.join(" ").replace(/ /g, "").toLowerCase();
     let message = msg.channel.messages.get(id);
     if (message)
-      for (let i = 0; i < str.length; i++) await message.react(chars[str[i]]);
+      for (let i = 0; i < str.length; i++)
+        if (chars[str[i]]) await message.react(chars[str[i]]);
   }
 });
 
