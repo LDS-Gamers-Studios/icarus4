@@ -17,6 +17,7 @@ const Module = new Augur.Module()
   category: "Silly",
   hidden: true,
   process: async (msg, suffix) => {
+    u.clean(msg, 0);
     let params = suffix.split(" ");
     let id = params.shift();
     let str = params.join(" ").replace(/ /g, "").toLowerCase();
