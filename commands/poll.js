@@ -51,10 +51,13 @@ const Module = new Augur.Module()
     try {
       u.clean(msg);
       const poll = (await msg.channel.fetchMessages()).filter(m => (m.author.id == msg.author.id) && (m.id != msg.id)).first();
-      const options = suffix.toLowerCase().replace(/[^0-9a-z]/g, "");
-      for (let i = 0; i < Math.min(options.length, 20); i++) {
-        const opt = chars[options[i]];
-        if (opt) await poll.react(opt);
+      if (!poll) msg.reply("I couldn't find a recent message from you to seed!").then(u.clean);
+      else {
+        const options = suffix.toLowerCase().replace(/[^0-9a-z]/g, "");
+        for (let i = 0; i < Math.min(options.length, 20); i++) {
+          const opt = chars[options[i]];
+          if (opt) await poll.react(opt);
+        }
       }
     } catch(e) { u.alertError(e, msg); }
   },
