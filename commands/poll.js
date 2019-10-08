@@ -49,6 +49,7 @@ const Module = new Augur.Module()
   syntax: "abc.../123...",
   process: async (msg, suffix) => {
     try {
+      u.clean(msg);
       const poll = (await msg.channel.fetchMessages()).filter(m => (m.author.id == msg.author.id) && (m.id != msg.id)).first();
       const options = suffix.toLowerCase().replace(/[^0-9a-z]/g, "");
       for (let i = 0; i < Math.min(options.length, 20); i++) {
