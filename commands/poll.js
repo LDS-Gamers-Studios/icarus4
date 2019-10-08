@@ -1,6 +1,7 @@
 const Augur = require("augurbot"),
   request = require("request"),
-  u = require("../utils/utils");
+  u = require("../utils/utils"),
+  chars = require("../utils/emojiCharacters");
 
 const Module = new Augur.Module()
 .addCommand({name: "poll",
@@ -42,6 +43,21 @@ const Module = new Augur.Module()
       });
     }
   }
+})
+.addCommand({name: "seed",
+  description: "Seed your most recent post for a poll.",
+  syntax: "abc.../123...",
+  process: async (msg, suffix) => {
+    try {
+      const poll = (await msg.channel.fetchMessages()).filter(m => (m.author.id == msg.author.id) && (m.id != msg.id)).first();
+      const options = suffix.toLowerCase().replace(/[^0-9a-z]/g, "");
+      for (let i = 0; i < Math.min(options.length, 20); i++) {
+        const opt = chars[options[i]];
+        if (opt) await poll.react(opt);
+      }
+    } catch(e) { u.alertError(e, msg); }
+  },
+  permissions: (msg) => msg.guild && msg.channel.permissionsFor(msg.client.user).has("ADD_REACTIONS")
 });
 
 module.exports = Module;
