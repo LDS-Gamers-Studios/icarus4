@@ -17,7 +17,7 @@ const googleId = require("../config/google_api.json").creds.project_id;
 const translate = new Translate({googleId});
 
 const bans = new USet();
-const cardReactions = ["👤", "✅","⚠","⛔","🛑","🔇"];
+const cardReactions = ["👤", "✅", "⚠", "⛔", "🛑", "🔇"];
 
 function noop() {}
 
@@ -296,7 +296,7 @@ async function processCardReaction(reaction, mod, infraction) {
         .catch(e => u.alertError(e, "Warning DM"));
 
       embed.fields = embed.fields.filter(f => !f.name || !f.name.startsWith("Jump"));
-      embed.fields.find(f => f.name && f.name.startsWith("Infraction")).value = `Infractions: ${infractionSummary.count + 1}\nPoints: ${infractionSummary.points + inf.value}`;
+      embed.fields.find(f => f.name && f.name.startsWith("Infraction")).value = `Infractions: ${infractionSummary.count}\nPoints: ${infractionSummary.points}`;
 
       await message.clearReactions();
       message.edit({embed});
