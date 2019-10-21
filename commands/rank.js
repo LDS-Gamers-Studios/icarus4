@@ -93,8 +93,8 @@ const Module = new Augur.Module()
         }
       }
 
-      let announce = `__**CHAT RANK RESET!!**__\n\nAnother chat season has come to a close! In the most recent season, the three most active members were:\n${top3}`;
-      if (dist > 0) announce += `\n\n${gb}${dist} have been distributed among *all* LDSG members who participated in chat this season!`;
+      let announce = `__**CHAT RANK RESET!!**__\n\nAnother chat season has come to a close! In the most recent season, we've had ${users.length} active members chatting! The three most active members were:\n${top3}`;
+      if (dist > 0) announce += `\n\n${gb}${dist} have been distributed among *all* LDSG members who participated in chat this season, proportional to their participation.`;
       msg.guild.channels.get("121752198731268099").send(announce);
 
       Module.db.user.resetXP();
