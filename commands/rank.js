@@ -74,19 +74,28 @@ const Module = new Augur.Module()
         .map((u, i) => `${(i + 1)}) ${guild.members.get(u.discordId)}`)
         .join("\n");
 
-      users.forEach(user => {
-        let award = Math.round(rate * user.currentXP);
-        Module.db.bank.addCurrency({
-          discordId: user.discordId,
-          description: "Chat Rank Reset - " + (new Date()).toDateString(),
-          value: award,
-          mod: msg.author.id
-        }).then(deposit => {
-          guild.members.get(deposit.discordId).send(`${guild.name} Chat Ranks have been reset! You've been awarded ${gb}${deposit.value} for your participation this season!`).catch(u.ignoreError);
-        });
-      });
+      if (dist) {
+        for (let i = 0; i < users.length; i++) {
+          let user = users[i];
+          let award = Math.round(rate * user.currentXP);
+          if (award) {
+            setTimeout(async (user, award) => {
+              Module.db.bank.addCurrency({
+                discordId: user.discordId,
+                description: "Chat Rank Reset - " + (new Date()).toDateString(),
+                value: award,
+                mod: msg.author.id
+              }).then(deposit => {
+                guild.members.get(deposit.discordId).send(`${guild.name} Chat Ranks have been reset! You've been awarded ${gb}${deposit.value} for your participation this season!`).catch(u.ignoreError);
+              });
+            }, 1100 * i, user, award);
+          }
+        }
+      }
 
-      msg.guild.channels.get("121752198731268099").send(`__**CHAT RANK RESET!!**__\n\nAnother chat season has come to a close! In the most recent season, the three most active members were:\n${top3}\n\n${gb}${dist} have been distributed among *all* LDSG members who participated in chat this season!`);
+      let announce = `__**CHAT RANK RESET!!**__\n\nAnother chat season has come to a close! In the most recent season, the three most active members were:\n${top3}`;
+      if (dist > 0) announce += `\n\n${gb}${dist} have been distributed among *all* LDSG members who participated in chat this season!`;
+      msg.guild.channels.get("121752198731268099").send(announce);
 
       Module.db.user.resetXP();
     } catch(e) { u.alertError(e, msg); }
