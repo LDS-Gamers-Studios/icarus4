@@ -381,6 +381,20 @@ const Module = new Augur.Module()
     quickFile(msg, "https://cdn.discordapp.com/attachments/96335850576556032/294187421648551936/image.jpg");
   }
 })
+.addCommand({name: "mario",
+  description: "It's-a me!",
+  category: "Silly",
+  permissions: (msg) => msg.channel.id == "369658907221557248",
+  aliases: ["luigi"],
+  process: async (msg) => {
+    try {
+      const ml = "https://cdn.discordapp.com/attachments/209046676781006849/638413831835615232/413395389501276167.gif";
+      let name = (msg.cleanContent.toLowerCase().endsWith("luigi") ? "luigi" : "mario");
+      await msg.channel.edit({name});
+      await msg.channel.send({files: [ml]});
+    } catch(e) { u.alertError(e, msg); }
+  }
+})
 .addCommand({name: "ohsnap",
   description: "Oh, snap!",
   aliases: ["snap"],
