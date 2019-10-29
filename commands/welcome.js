@@ -1,7 +1,8 @@
 const Augur = require("augurbot"),
   u = require("../utils/utils"),
   mod_log = "506575671242260490",
-  milestone = 3000;
+  milestone = 3000,
+  pizza = true;
 
 var r = (parts) => parts[Math.floor(Math.random() * parts.length)];
 
@@ -54,7 +55,7 @@ const Module = new Augur.Module()
 
         Module.db.user.newUser(member.id);
       }
-
+      if (pizza && (guild.members.size < milestone)) welcomeString += `\n*${milestone - guild.members.size} more until we have a pizza party!*`;
       modLogs.send(embed);
       if (!member.roles.has(Module.config.roles.muted) && !member.user.bot)
       general.send(welcomeString);
