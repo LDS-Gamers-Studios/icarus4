@@ -55,7 +55,7 @@ const Module = new Augur.Module()
 
         Module.db.user.newUser(member.id);
       }
-      if (pizza && (guild.members.size < milestone)) welcomeString += `\n*${milestone - guild.members.size} more until we have a pizza party!*`;
+      if (pizza && (guild.members.size < milestone)) welcomeString += `\n*${milestone - guild.members.size} more members until we have a pizza party!*`;
       modLogs.send(embed);
       if (!member.roles.has(Module.config.roles.muted) && !member.user.bot)
       general.send(welcomeString);
