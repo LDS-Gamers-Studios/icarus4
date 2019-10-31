@@ -6,6 +6,8 @@ const Augur = require("augurbot"),
   u = require("../utils/utils"),
   yaml = require("js-yaml");
 
+const extraLife = true;
+
 var yt, applicationCount = 0;
 
 const mixer = new Mixer.Client(new Mixer.DefaultRequestRunner()),
@@ -42,16 +44,90 @@ function checkStreams(bot) {
     // Check for new Approved Streamers applications
     processApplications();
 
+    // Check for Extra Life
+    if (extraLife && (new Date()).getMinutes() < 5) {
+      const liveEL = bot.guilds.get(Module.config.ldsg).roles.get("281135201407467520").members.filter(m => m.roles.has("507031155627786250"));
+      if (liveEL.size > 0) extraLifeEmbed(bot, liveEL);
+    }
+
   } catch(e) { u.alertError(e, "Stream Check"); }
+};
+
+async function extraLifeEmbed(bot, liveEL) {
+  try {
+    let twitchIgns = await Module.db.ign.getList("twitch");
+    let mixerIgns = await Module.db.ign.getList("mixer");
+
+    let twitchChannels = twitchIgns.filter(ign => liveEL.has(ign.discordId)).map(ign => ign.ign);
+    let mixerChannels = mixerIgns.filter(ign => liveEL.has(ign.discordId)).map(ign => ign.ign);
+
+    // Fetch channels from Twitch and Mixer
+    let res = await Promise.all([
+      new Promise(async (fulfill, reject) => {
+        try {
+          let streams = await twitch.streams.getStreams({userName: twitchChannels.filter((v, i) => i < 100)});
+          fulfill({service: "twitch", channels: streams.data});
+        } catch(e) { u.alertError(e, msg); }
+      }),
+      new Promise((fulfill, reject) => {
+        mixer.request("GET", `channels?where=token:in:${mixerChannels.join(";")}`)
+        .then(res => {
+          fulfill({service: "mixer", channels: res.body});
+        })
+        .catch(reject);
+      })
+    ]);
+
+    let embed = u.embed()
+    .setColor('#7FD836')
+    .setTimestamp()
+    .setTitle("Live from the Extra Life Team!");
+
+    let channels = [];
+    res.forEach(service => {
+      if (service.service == "twitch") {
+        service.channels.forEach(stream => {
+          let channel = stream._data;
+          if (channel)
+          channels.push({
+            name: channel.user_name,
+            game: twitchGames.has(channel.game_id) ? twitchGames.get(channel.game_id).name : "Something?",
+            service: "Twitch",
+            title: channel.title,
+            url: `https://www.twitch.tv/${channel.user_name}`
+          });
+        });
+      } else if (service.service == "mixer") {
+        service.channels.forEach(stream => {
+          channels.push({
+            name: stream.token,
+            game: stream.type.name,
+            service: "Mixer",
+            title: stream.name,
+            url: `https://mixer.com/${stream.token}`
+          });
+        });
+      }
+    });
+
+    channels.sort((a, b) => a.name.localeCompare(b.name)).forEach(channel => {
+      embed.addField(`${channel.name} playing ${channel.game} [${channel.service}]`, `[${channel.title}](${channel.url})`, true);
+    });
+
+    bot.channels.get("96335850576556032").send(embed);
+
+  } catch (e) {
+    u.alertError(e, msg);
+  }
 };
 
 function isPartnered(member) {
   let roles = [
-    '507031155627786250', // Extra Life
     '121783798647095297', // Onyx Sponsor
     '121783903630524419', // Pro Sponsor
     '96345401078087680' // Staff
   ];
+  if (extraLife) roles.push("507031155627786250");
 
   let partnered = roles.reduce((p, role) => (p || member.roles.has(role)), (member.id == member.client.user.id));
   return partnered;
