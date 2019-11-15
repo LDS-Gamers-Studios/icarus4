@@ -9,40 +9,37 @@ const Module = new Augur.Module()
   process: (msg, suffix) => {
     let processed = false;
     msg.channel.fetchMessages({ limit: 100 }).then(messages => {
-      if (processed){
-        return;
-      }
       for (const [key, value] of messages) {
-        if (processed ||value.author.bot){
-          break;
+        if (processed || value.author.bot){
+          continue;
         }
-        if (value.attachments.size >0){
-          let a=value.attachments.first();
-          processed =true;
+        if (value.attachments.size > 0){
+          let a = value.attachments.first();
+          processed = true;
           try {
             const Jimp = require("jimp");
             const cropped = await Jimp.read(a.url);
 
-            let ogw= cropped.bitmap.width
-            let ogh= cropped.bitmap.height
+            let ogw = cropped.bitmap.width
+            let ogh = cropped.bitmap.height
 
             // width
-            let max = ogw * 9/10;
-            let min = ogw /10;
+            let max = ogw * 9 / 10;
+            let min = ogw / 10;
             let nw = Math.floor(Math.random() * (max - min) + min);
 
             // height
-            max = ogh * 9/10;
-            min = ogh /10;
+            max = ogh * 9 / 10;
+            min = ogh / 10;
             let nh = Math.floor(Math.random() * (max - min) + min);
 
             //starting x
-            max=ogw -nw;
+            max = ogw - nw;
             min = 1;
             let startX = Math.floor(Math.random() * (max - min) + min);  
 
             //starting y
-            max=ogh -nh;
+            max = ogh - nh;
             min = 1;
             let startY = Math.floor(Math.random() * (max - min) + min);  
 
@@ -58,6 +55,6 @@ const Module = new Augur.Module()
     .catch(e => u.alertError(e, msg));
     u.clean(msg);
   }
-})
+});
 
 module.exports = Module;
