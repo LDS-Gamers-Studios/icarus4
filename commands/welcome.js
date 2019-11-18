@@ -1,8 +1,8 @@
 const Augur = require("augurbot"),
   u = require("../utils/utils"),
   mod_log = "506575671242260490",
-  milestone = 3000,
-  pizza = true;
+  milestone = 4000,
+  pizza = false;
 
 var r = (parts) => parts[Math.floor(Math.random() * parts.length)];
 
@@ -55,10 +55,10 @@ const Module = new Augur.Module()
 
         Module.db.user.newUser(member.id);
       }
-      if (pizza && (guild.members.size < milestone)) welcomeString += `\n*${milestone - guild.members.size} more members until we have a pizza party!*`;
       modLogs.send(embed);
+      if (pizza && (guild.members.size < milestone)) welcomeString += `\n*${milestone - guild.members.size} more members until we have a pizza party!*`;
       if (!member.roles.has(Module.config.roles.muted) && !member.user.bot)
-      general.send(welcomeString);
+        general.send(welcomeString);
       if (guild.members.size == milestone) {
         general.send(`:tada: :confetti_ball: We're now at ${milestone} members! :confetti_ball: :tada:`);
         modLogs.send(`:tada: :confetti_ball: We're now at ${milestone} members! :confetti_ball: :tada:\n*pinging for effect: <@96335658997526528> <@111232201848295424>*`);
