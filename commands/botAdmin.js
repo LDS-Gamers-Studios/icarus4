@@ -169,12 +169,13 @@ const Module = new Augur.Module()
   syntax: "Requested Feature",
   process: (msg, suffix) => {
     if (suffix) {
+      let content = msg.cleanContent.substr(msg.cleanContent.indexOf(" ")).trim();
       let trelloConfig = require("../config/trello.json");
       let card = {
         path: {
           board: 'Icarus',
           list: 'Requested Features',
-          card: suffix,
+          card: content,
         },
         content: {
           cardDesc: `Submitted by ${msg.author.username} in ${msg.channel.name}.`,
@@ -183,7 +184,10 @@ const Module = new Augur.Module()
       };
       Trello.send(trelloConfig, card, function(err, result){
         if (err) console.error(err);
-        else msg.react("👌");
+        else {
+          msg.reply("👌");
+          msg.reply("Request received!\n\nNote that if the request was for a *Discord* feature or a command which only gives a single static response, it'll be ignored here. This is for requesting features for Icarus that actually require coding.").then(u.clean);
+        }
       });
     } else msg.reply("You need to tell me what your request is!");
   }
