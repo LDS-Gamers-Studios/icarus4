@@ -185,7 +185,7 @@ const Module = new Augur.Module()
       Trello.send(trelloConfig, card, function(err, result){
         if (err) console.error(err);
         else {
-          msg.reply("👌");
+          msg.react("👌");
           msg.reply("Request received!\n\nNote that if the request was for a *Discord* feature or a command which only gives a single static response, it'll be ignored here. This is for requesting features for Icarus that actually require coding.").then(u.clean);
         }
       });
