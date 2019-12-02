@@ -6,7 +6,7 @@ const Augur = require("augurbot"),
   u = require("../utils/utils"),
   yaml = require("js-yaml");
 
-const extraLife = true;
+const extraLife = false;
 
 var yt, applicationCount = 0;
 
