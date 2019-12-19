@@ -69,7 +69,7 @@ const Module = new Augur.Module()
       systems = (systems ? systems.toLowerCase().split(' ').map(s => (Ign.aliases.has(s) ? Ign.aliases.get(s) : s)) : null);
       let igns = await Module.db.ign.find(user.id, systems);
 
-      let embed = embedIGN({name: (member ? member.displayName : user.username), avatar: user.displayAvatarURL}, igns);
+      let embed = embedIGN({name: u.escapeText(member ? member.displayName : user.username), avatar: user.displayAvatarURL}, igns);
 
       if (embed) msg.channel.send({embed: embed});
       else msg.channel.send("It looks like " + (member ? member.displayName : user.username) + " hasn't saved an IGN with `!addign` yet.").then(u.clean);

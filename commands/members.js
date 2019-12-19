@@ -32,7 +32,7 @@ const Module = new Augur.Module()
       let name = (member ? member.displayName : user.username);
       let embed = u.embed()
         .setAuthor(name)
-        .setDescription(name + "'s Avatar")
+        .setDescription(u.escapeText(name) + "'s Avatar")
         .setImage(user.avatarURL);
       msg.channel.send({embed: embed});
     } else {

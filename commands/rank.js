@@ -34,7 +34,7 @@ const Module = new Augur.Module()
           "ain't interested in no XP gettin'.",
           "don't talk to me no more, so I ignore 'em."
         ];
-        response = `**${member.displayName}** ${u.rand(snark)}`;
+        response = `**${u.escapeText(member.displayName)}** ${u.rand(snark)}`;
       } else {
         let userDoc = await Module.db.user.findXPRank(user);
         userDoc.level = Rank.level(userDoc.totalXP);
