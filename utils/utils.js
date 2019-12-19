@@ -57,7 +57,7 @@ const Utils = {
   },
   embed: (data) => new Discord.RichEmbed(data).setColor(config.color),
   errorLog: errorLog,
-  escapeText: (txt) => txt.replace(/\\(\*|_|`|~|\\|\|)/g, '$1').replace(/(\*|_|`|~|\\|\|)/g, '\\$1'),
+  escapeText: (txt) => txt.replace(/(\*|_|`|~|\\|\|)/g, '\\$1'),
   getUser: function(msg, user, strict = false) {
     // Finds a user in the same guild as the message.
 
