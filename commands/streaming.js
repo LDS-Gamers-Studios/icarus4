@@ -532,9 +532,13 @@ const Module = new Augur.Module()
       let channels = [];
       for (let service of res) {
         if (service.service == "twitch") {
-          service.channels.forEach(stream => {
+          for (let stream of service.channels) {
             let channel = stream._data;
-            if (channel)
+            if (!channel) continue;
+            if (!twitchGames.has(stream._data.game_id)) {
+              let game = (await twitch.games.getGameById(stream._data.game_id));
+              if (game) twitchGames.set(game._data.id, game._data);
+            }
             channels.push({
               name: channel.user_name,
               game: twitchGames.has(channel.game_id) ? twitchGames.get(channel.game_id).name : "Something?",
@@ -542,9 +546,9 @@ const Module = new Augur.Module()
               title: channel.title,
               url: `https://www.twitch.tv/${channel.user_name}`
             });
-          });
+          }
         } else if (service.service == "mixer") {
-          service.channels.forEach(stream => {
+          for (let stream of service.channels) {
             channels.push({
               name: stream.token,
               game: stream.type.name,
@@ -552,7 +556,7 @@ const Module = new Augur.Module()
               title: stream.name,
               url: `https://mixer.com/${stream.token}`
             });
-          });
+          }
         }
       }
 
