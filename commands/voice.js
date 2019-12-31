@@ -59,8 +59,8 @@ const Module = new Augur.Module()
       let muted = Module.config.roles.muted;
 
       try {
-        for (let permission of channel.permissionOverwrites)
-          if ((permission.id != muted) && (permission.id != msg.guild.id) && !userIds.includes(permission.id)) await permission.delete();
+        for (const [permissionId, permission] of channel.permissionOverwrites)
+          if ((permissionId != muted) && (permissionId != msg.guild.id) && !userIds.includes(permissionId)) await permission.delete();
 
         for (let user of users) await channel.overwritePermissions(user, {CONNECT: true});
 
