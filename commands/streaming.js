@@ -508,7 +508,7 @@ const Module = new Augur.Module()
       let mixerChannels = mixerIgns.filter(ign => msg.guild.roles.get("267038468474011650").members.has(ign.discordId)).map(ign => ign.ign);
 
       // Fetch channels from Twitch and Mixer
-      let res = await Promise.allSettled([
+      let res = await Promise.all([
         new Promise(async (fulfill, reject) => {
           try {
             let streams = await twitch.streams.getStreams({userName: twitchChannels.slice(0, 100)});
@@ -531,8 +531,6 @@ const Module = new Augur.Module()
 
       let channels = [];
       for (let service of res) {
-        if (service.status == "rejected") continue;
-        else service = service.value;
         if (service.service == "twitch") {
           service.channels.forEach(stream => {
             let channel = stream._data;
