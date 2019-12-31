@@ -504,16 +504,16 @@ const Module = new Augur.Module()
       let twitchIgns = await Module.db.ign.getList("twitch");
       let mixerIgns = await Module.db.ign.getList("mixer");
 
-      let twitchChannels = twitchIgns.filter(ign => msg.guild.members.has(ign.discordId)).map(ign => ign.ign);
-      let mixerChannels = mixerIgns.filter(ign => msg.guild.members.has(ign.discordId)).map(ign => ign.ign);
+      let twitchChannels = twitchIgns.filter(ign => msg.guild.roles.get("267038468474011650").members.has(ign.discordId)).map(ign => ign.ign);
+      let mixerChannels = mixerIgns.filter(ign => msg.guild.roles.get("267038468474011650").members.has(ign.discordId)).map(ign => ign.ign);
 
       // Fetch channels from Twitch and Mixer
-      let res = await Promise.all([
+      let res = await Promise.allSettled([
         new Promise(async (fulfill, reject) => {
           try {
-            let streams = await twitch.streams.getStreams({userName: twitchChannels.filter((v, i) => i < 100)});
+            let streams = await twitch.streams.getStreams({userName: twitchChannels.slice(0, 100)});
             fulfill({service: "twitch", channels: streams.data});
-          } catch(e) { u.alertError(e, msg); }
+          } catch(e) { u.alertError(e, msg); reject(e); }
         }),
         new Promise((fulfill, reject) => {
           mixer.request("GET", `channels?where=token:in:${mixerChannels.join(";")}`)
@@ -530,7 +530,9 @@ const Module = new Augur.Module()
       .setTitle("Currently Streaming in " + msg.guild.name);
 
       let channels = [];
-      res.forEach(service => {
+      for (let service of res) {
+        if (service.status == "rejected") continue;
+        else service = service.value;
         if (service.service == "twitch") {
           service.channels.forEach(stream => {
             let channel = stream._data;
@@ -554,7 +556,7 @@ const Module = new Augur.Module()
             });
           });
         }
-      });
+      }
 
       channels.sort((a, b) => a.name.localeCompare(b.name)).forEach(channel => {
         embed.addField(`${channel.name} playing ${channel.game} [${channel.service}]`, `[${channel.title}](${channel.url})`, true);
