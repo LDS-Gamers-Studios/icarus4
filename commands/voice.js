@@ -50,26 +50,23 @@ const Module = new Augur.Module()
   description: "Locks your current voice channel to new users",
   category: "Voice",
   permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && msg.member.voiceChannel && isCommunityVoice(msg.member.voiceChannel)),
-  process: (msg) => {
+  process: async (msg) => {
     let channel = msg.member.voiceChannel;
     if (channel && isCommunityVoice(channel)) {
-      let users = Array.from(channel.members.values()).concat(Array.from(msg.mentions.members.values()));
-      users.push(msg.client.user);
+      let users = [msg.client.user].concat(Array.from(channel.members.values()), Array.from(msg.mentions.members.values()));
+      let userIds = users.map(u => u.id);
 
-      let channelMods = [];
       let muted = Module.config.roles.muted;
 
-      channelMods.push(channel.overwritePermissions(msg.guild.id, {CONNECT: false}));
+      try {
+        for (let permission of channel.permissionOverwrites)
+          if ((permission.id != muted) && (permission.id != msg.guild.id) && !userIds.includes(permission.id)) await permission.delete();
 
-      channel.permissionOverwrites.forEach(permission => {
-        if ((permission.id != muted) && (permission.id != msg.guild.id) && !users.map(u => u.id).includes(permission.id)) channelMods.push(permission.delete());
-      });
+        for (let user of users) await channel.overwritePermissions(user, {CONNECT: true});
 
-      users.forEach(user => {
-        channelMods.push(channel.overwritePermissions(user, {CONNECT: true}));
-      });
-
-      Promise.all(channelMods).then(() => msg.react("🔒"));
+        await channel.overwritePermissions(msg.guild.id, {CONNECT: false});
+        await msg.react("🔒");
+      } catch(e) { u.alertError(e, msg); }
     } else {
       msg.reply("you need to be in a community voice channel to use this command!").then(u.clean);
     }
