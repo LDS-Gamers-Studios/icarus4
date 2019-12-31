@@ -336,7 +336,7 @@ function twitchEmbed(stream, online = true) {
     embed.setDescription(data.title)
     .setTitle(data.user_name)
     .setThumbnail(data.thumbnail_url.replace("{width}", "480").replace("{height}", "270") + "?t=" + Date.now())
-    .addField("Playing", (data.game_id ? twitchGames.get(data.game_id).name : "Nothing"), true)
+    .addField("Playing", (data.game_id && twitchGames.has(data.game_id) ? twitchGames.get(data.game_id).name : "Something"), true)
     .addField("Current Viewers", data.viewer_count, true)
     .setTimestamp(new Date(data.started_at));
   } else {
@@ -480,8 +480,8 @@ const Module = new Augur.Module()
       const stream = (await twitch.streams.getStreamByUserName(name));
       if (stream) {
         if (!twitchGames.has(stream._data.game_id)) {
-          let game = (await twitch.games.getGameById(stream._data.game_id))._data;
-          twitchGames.set(game.id, game);
+          let game = (await twitch.games.getGameById(stream._data.game_id));
+          if (game) twitchGames.set(game._data.id, game._data);
         }
         stream._data.stream_url = "https://www.twitch.tv/" + encodeURIComponent(name).toLowerCase();
         msg.channel.send(twitchEmbed(stream));
@@ -597,8 +597,8 @@ const Module = new Augur.Module()
         const stream = (await twitch.streams.getStreamByUserName(name));
         if (stream) {
           if (!twitchGames.has(stream._data.game_id)) {
-            let game = (await twitch.games.getGameById(stream._data.game_id))._data;
-            twitchGames.set(game.id, game);
+            let game = (await twitch.games.getGameById(stream._data.game_id));
+            if (game) twitchGames.set(game._data.id, game._data);
           }
           stream._data.stream_url = "https://www.twitch.tv/" + encodeURIComponent(name).toLowerCase();
           msg.channel.send(twitchEmbed(stream));
