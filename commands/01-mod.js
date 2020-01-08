@@ -360,7 +360,10 @@ Module
           } else msg.reply("That user is no longer part of the server.").then(u.clean);
         } catch(e) { u.alertError(e, msg); }
       });
-    } else msg.reply("You need to tell me who to ban!").then(u.clean);
+    } else {
+      msg.reply("you need to tell me who to ban!")
+        .then(u.clean);
+    }
   }
 })
 .addCommand({name: "channelactivity",
@@ -554,7 +557,10 @@ Module
           msg.client.channels.get(modLogs).send(card);
         } catch(e) { u.alertError(e, msg); }
       });
-    } else msg.reply("you need to tell me who and what the note is.").then(u.clean);
+    } else {
+      msg.reply("you need to tell me who and what the note is.")
+        .then(u.clean);
+    }
   }
 })
 .addCommand({name: "purge",
@@ -574,7 +580,8 @@ Module
         if (num > 0) await msg.channel.bulkDelete(num);
         msg.client.channels.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** purged ${purge} messages in ${msg.channel}`);
       } else {
-        msg.reply("you need to tell me how many to delete.").then(u.clean);
+        msg.reply("you need to tell me how many to delete.")
+          .then(u.clean);
       }
     } catch(e) { u.alertError(e, msg); }
   }
@@ -598,8 +605,12 @@ Module
           m.send("Thanks for your purchase from LDSG! You've been awarded the **Swagoteer** role!")
         }
       });
-      msg.reply(`I added the *Swagoteer* role to ${members.map(m => m.displayName).join(", ")}`).then(u.clean);
-    } else msg.reply("you need to @mention the user(s) you want to give the role!").then(u.clean);
+      msg.reply(`I added the *Swagoteer* role to ${members.map(m => m.displayName).join(", ")}`)
+        .then(u.clean);
+    } else {
+      msg.reply("you need to @mention the user(s) you want to give the role!")
+        .then(u.clean);
+    }
   }
 })
 .addCommand({name: "trust",
@@ -619,7 +630,7 @@ Module
       });
     } else {
       msg.reply("you need to tell me which users to trust!")
-      .then(u.clean);
+        .then(u.clean);
     }
   }
 })

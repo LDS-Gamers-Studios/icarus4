@@ -22,7 +22,8 @@ const Module = new Augur.Module()
         });
       });
     } else {
-      msg.reply("you didn't give me a valid role to apply.").then(u.clean);
+      msg.reply("you didn't give me a valid role to apply.")
+        .then(u.clean);
     }
   }
 })
@@ -44,7 +45,8 @@ const Module = new Augur.Module()
         });
       });
     } else {
-      msg.reply("you didn't give me a valid role to remove.").then(u.clean);
+      msg.reply("you didn't give me a valid role to remove.")
+        .then(u.clean);
     }
   }
 })
@@ -59,7 +61,10 @@ const Module = new Augur.Module()
       let role = guild.roles.find(r => r.name.toLowerCase() == suffix.toLowerCase());
       if (role && role.members.size > 0) msg.channel.send(`Members with the ${role.name} role:\n\`\`\`${role.members.map(m => m.displayName).sort().join("\n")}\`\`\``, {split: {prepend: "```", append: "```"}});
       else msg.channel.send("I couldn't find any members with that role. :shrug:");
-    } else msg.reply("you need to tell me a role to find!").then(u.clean);
+    } else {
+      msg.reply("you need to tell me a role to find!")
+        .then(u.clean);
+    }
   },
   permissions: (msg) => msg.guild
 })
