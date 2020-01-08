@@ -3,7 +3,7 @@ const Augur = require("augurbot"),
 
 function quickFile(msg, file, name = null, showName = true) {
   if (Array.isArray(file))
-    file = file[Math.floor(Math.random() * file.length)];
+    file = u.rand(file);
 
   msg.delete().catch(console.error);
   msg.channel.send(
