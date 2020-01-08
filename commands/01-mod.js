@@ -683,7 +683,11 @@ Module
       u.userMentions(msg).forEach(function(userId) {
         msg.guild.fetchMember(userId).then(member => {
           member.addRole(Module.config.roles.trusted);
-          member.send("You have been marked as \"Trusted\" in " + msg.guild.name + ". This means you are now permitted to post images and links in chat. Please remember to follow the Code of Conduct when doing so.\n<http://ldsgamers.com/code-of-conduct>");
+          try {
+            member.send("You have been marked as \"Trusted\" in " + msg.guild.name + ". This means you are now permitted to post images and links in chat. Please remember to follow the Code of Conduct when doing so.\n<http://ldsgamers.com/code-of-conduct>");
+          } catch (e) {
+            msg.client.channels.get(modLogs).send(`ℹ️ I think ${msg.member} has blocked me.`);
+          }
           msg.client.channels.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** trusted **${u.escapeText(member.displayName)}**`);
         });
       });
@@ -770,7 +774,11 @@ Module
       u.userMentions(msg).forEach(function(userId) {
         msg.guild.fetchMember(userId).then(member => {
           member.removeRole(Module.config.roles.trusted);
-          member.send("You have been removed from \"Trusted\" in " + msg.guild.name + ". This means you no longer have the ability to post images. Please remember to follow the Code of Conduct when posting images or links.\n<http://ldsgamers.com/code-of-conduct>");
+          try {
+            member.send("You have been removed from \"Trusted\" in " + msg.guild.name + ". This means you no longer have the ability to post images. Please remember to follow the Code of Conduct when posting images or links.\n<http://ldsgamers.com/code-of-conduct>");
+          } catch (e) {
+            msg.client.channels.get(modLogs).send(`ℹ️ I think ${msg.member} has blocked me.`);
+          }
           msg.client.channels.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** untrusted **${u.escapeText(member.displayName)}**`);
         });
       });
