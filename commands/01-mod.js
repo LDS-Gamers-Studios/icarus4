@@ -594,45 +594,46 @@ Module
   permissions: (msg) => (msg.guild && msg.channel.permissionsFor(msg.member).has("MANAGE_NICKNAMES")),
   process: async (msg, suffix) => {
     u.clean(msg, 0);
+    let newNick = suffix.replace(/<@!?\d+>/g, "").trim();
     if (u.userMentions(msg)) {
       u.userMentions(msg).forEach(async user => {
         try {
           let member = await msg.guild.fetchMember(user);
           let oldNick = member.displayName;
-          member.setNickname(suffix)
+          member.setNickname(newNick)
+
+          try {
+            let inf = await Module.db.infraction.save({
+              discordId: member.id,
+              value: 0,
+              description: comment,
+              message: msg.id,
+              channel: msg.channel.id,
+              mod: msg.author.id
+            });
+            let summary = await Module.db.infraction.getSummary(member.id);
+
+            let card = u.embed()
+            .setColor("#0000FF")
+            .setAuthor(u.escapeText(member.displayName), member.user.displayAvatarURL)
+            .setDescription(comment)
+            .addField("Resolved", `${msg.author.username} changed the user's nickname from ${oldNick} to ${newNick}.`)
+            .addField(`Infraction Summary (${summary.time} Days) `, `Infractions: ${summary.count}\nPoints: ${summary.points}`)
+            .setTimestamp();
+
+            msg.client.channels.get(modLogs).send(card);
+          } catch(e) { u.alertError(e, msg); }
+
+          try {
+            member.send(`Your nickname has been changed in ${msg.guild.name} from ${oldNick} to ${newNick}. Please contact a moderator or member of the management team if you have questions regarding the change.`);
+          } catch(e) {
+            // msg.channel.send("Could not inform user of the nickname change.")
+            //   .then(u.clean);
+            u.alertError(e, msg);
+          }
         } catch(e) {
-          msg.channel.send(`Could not change ${userId}'s nickname to ${suffix}.`)
-            .then(u.clean);
-          u.alertError(e, msg);
-        }
-
-        try {
-          let inf = await Module.db.infraction.save({
-            discordId: member.id,
-            value: 0,
-            description: comment,
-            message: msg.id,
-            channel: msg.channel.id,
-            mod: msg.author.id
-          });
-          let summary = await Module.db.infraction.getSummary(member.id);
-
-          let card = u.embed()
-          .setColor("#0000FF")
-          .setAuthor(u.escapeText(member.displayName), member.user.displayAvatarURL)
-          .setDescription(comment)
-          .addField("Resolved", `${msg.author.username} changed the user's nickname from ${oldNick} to ${suffix}.`)
-          .addField(`Infraction Summary (${summary.time} Days) `, `Infractions: ${summary.count}\nPoints: ${summary.points}`)
-          .setTimestamp();
-
-          msg.client.channels.get(modLogs).send(card);
-        } catch(e) { u.alertError(e, msg); }
-
-        try {
-          member.send(`Your nickname has been changed in ${msg.guild.name} from ${oldNick} to ${suffix}. Please contact a moderator or member of the management team if you have questions regarding the change.`);
-        } catch(e) {
-          msg.channel.send("Could not inform user of the nickname change.")
-            .then(u.clean);
+          // msg.channel.send(`Could not change ${userId}'s nickname to ${newNick}.`)
+          //   .then(u.clean);
           u.alertError(e, msg);
         }
       });
