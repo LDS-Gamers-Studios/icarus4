@@ -602,11 +602,13 @@ Module
           let oldNick = member.displayName;
           member.setNickname(newNick)
 
+          let comment = `Set nickname to ${newNick} from ${oldNick}.`;
+
           try {
             let inf = await Module.db.infraction.save({
               discordId: member.id,
               value: 0,
-              description: `Set nickname to ${newNick} from ${oldNick}.`,
+              description: comment,
               message: msg.id,
               channel: msg.channel.id,
               mod: msg.author.id
