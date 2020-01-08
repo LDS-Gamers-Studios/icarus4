@@ -601,7 +601,11 @@ Module
           const {names, colors, adjectives} = require("../data/nameParts.json");
           let member = await msg.guild.fetchMember(user);
           let oldNick = member.displayName;
-          let newNick = setNick || u.rand(colors) + " " + u.rand(adjectives) + " " + u.rand(names);
+          let newNick = setNick;
+
+          while (!newNick || newNick.length > 32) {
+            newNick = u.rand(colors) + " " + u.rand(adjectives) + " " + u.rand(names);
+          }
 
           member.setNickname(newNick)
 
