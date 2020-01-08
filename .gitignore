@@ -1,5 +1,7 @@
 node_modules
+legends
 storage
+tmp
 config/*
 !config/*-example.json
 test.js
@@ -10,4 +12,5 @@ data/*
 !data/buttermelon.json
 !data/whoisplaying.json
 !data/roles.json
+!data/nameParts.json
 site/*

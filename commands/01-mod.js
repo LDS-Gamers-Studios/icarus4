@@ -594,12 +594,15 @@ Module
   permissions: (msg) => (msg.guild && msg.channel.permissionsFor(msg.member).has("MANAGE_NICKNAMES")),
   process: async (msg, suffix) => {
     u.clean(msg, 0);
-    let newNick = suffix.replace(/<@!?\d+>/g, "").trim();
+    let setNick = suffix.replace(/<@!?\d+>/g, "").trim();
     if (u.userMentions(msg)) {
       u.userMentions(msg).forEach(async user => {
         try {
+          const {names, colors, adjectives} = require("../data/nameParts.json");
           let member = await msg.guild.fetchMember(user);
           let oldNick = member.displayName;
+          let newNick = setNick || u.rand(colors) + " " + u.rand(adjectives) + " " + u.rand(names);
+
           member.setNickname(newNick)
 
           let comment = `Set nickname to ${newNick} from ${oldNick}.`;
