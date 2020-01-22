@@ -604,7 +604,7 @@ Module
           let newNick = setNick;
 
           while (!newNick || newNick.length > 32) {
-            newNick = u.rand(colors) + " " + u.rand(adjectives) + " " + u.rand(names);
+            newNick = u.rand(adjectives) + " " + u.rand(colors) + " " + u.rand(names);
           }
 
           member.setNickname(newNick)
