@@ -96,6 +96,7 @@ const Utils = {
   },
   init: (Handler) => db.init(Handler),
   ignoreError: (e) => {},
+  noop: () => {},
   paginator: async function(msg, pager, elements, page = 0, perPage = 1) {
     try {
       let totalPages = Math.ceil(elements.length / perPage);
