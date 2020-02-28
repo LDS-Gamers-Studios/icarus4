@@ -26,7 +26,7 @@ var UserSchema = new Schema({
   house: String,
   excludeXP: {
     type: Boolean,
-    default: false
+    default: true
   },
   roles: [String]
 });
