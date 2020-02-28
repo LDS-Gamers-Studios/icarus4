@@ -106,19 +106,20 @@ const Module = new Augur.Module()
   syntax: "true | false",
   process: (msg, suffix) => {
     suffix = suffix.toLowerCase();
+    msg.react("👌");
+    u.clean(msg);
     if (!suffix || suffix == "true") {
       Module.db.user.update(msg.author, {excludeXP: false})
       .then((user) => {
         includeUsers.add(user.discordId);
-        msg.reply("I'll keep track of your chat XP!");
+        msg.react("👌");
       });
     } else if (suffix == "false") {
       Module.db.user.update(msg.author, {excludeXP: true})
       .then((user) => {
         if (includeUsers.has(user.discordId)) includeUsers.delete(user.discordId);
-        msg.reply("I won't track your chat XP anymore!");
       });
-    } else msg.reply("you need to tell me `true` or `false` for tracking your chat XP!");
+    }
   }
 })
 .addEvent("message", (msg) => {
