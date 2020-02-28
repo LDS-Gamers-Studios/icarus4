@@ -103,6 +103,7 @@ const Module = new Augur.Module()
 })
 .addCommand({name: "trackxp",
   description: "Tell Icarus whether to track your chat XP.",
+  aliases: ["chatxp"],
   syntax: "true | false",
   process: (msg, suffix) => {
     suffix = suffix.toLowerCase();
