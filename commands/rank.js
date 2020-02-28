@@ -3,14 +3,14 @@ const Augur = require("augurbot"),
   u = require("../utils/utils");
 
 const active = new Set();
-const excludeUsers = new Set();
+const includeUsers = new Set();
 
 const Module = new Augur.Module()
 .setInit(() => {
-  Module.db.user.getUsers({excludeXP: true})
+  Module.db.user.getUsers({excludeXP: false})
   .then(users => {
     for (let i = 0; i < users.length; i++) {
-      excludeUsers.add(users[i].discordId);
+      includeUsers.add(users[i].discordId);
     }
   });
 })
@@ -28,7 +28,7 @@ const Module = new Augur.Module()
 
       let member = msg.client.guilds.get(Module.config.ldsg).members.get(user.id);
       let response = null;
-      if (excludeUsers.has(member.id) || member.user.bot) {
+      if (!includeUsers.has(member.id) || member.user.bot) {
         let snark = [
           "don't got time for dat.",
           "ain't interested in no XP gettin'.",
@@ -106,23 +106,23 @@ const Module = new Augur.Module()
   syntax: "true | false",
   process: (msg, suffix) => {
     suffix = suffix.toLowerCase();
-    if (suffix == "true") {
+    if (!suffix || suffix == "true") {
       Module.db.user.update(msg.author, {excludeXP: false})
       .then((user) => {
-        if (excludeUsers.has(user.discordId)) excludeUsers.delete(user.discordId);
+        includeUsers.add(user.discordId);
         msg.reply("I'll keep track of your chat XP!");
       });
     } else if (suffix == "false") {
       Module.db.user.update(msg.author, {excludeXP: true})
       .then((user) => {
-        if (!excludeUsers.has(user.discordId)) excludeUsers.add(user.discordId);
+        if (includeUsers.has(user.discordId)) includeUsers.delete(user.discordId);
         msg.reply("I won't track your chat XP anymore!");
       });
     } else msg.reply("you need to tell me `true` or `false` for tracking your chat XP!");
   }
 })
 .addEvent("message", (msg) => {
-  if (msg.guild && (msg.guild.id == Module.config.ldsg) && !active.has(msg.author.id) && !(Rank.excludeChannels.includes(msg.channel.id) || Rank.excludeChannels.includes(msg.channel.parentID)) && !u.parse(msg) && !excludeUsers.has(msg.author.id) && !msg.author.bot)
+  if (msg.guild && (msg.guild.id == Module.config.ldsg) && !active.has(msg.author.id) && !(Rank.excludeChannels.includes(msg.channel.id) || Rank.excludeChannels.includes(msg.channel.parentID)) && !u.parse(msg) && includeUsers.has(msg.author.id) && !msg.author.bot)
     active.add(msg.author.id);
 })
 .setClockwork(() => {
