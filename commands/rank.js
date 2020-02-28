@@ -106,7 +106,7 @@ const Module = new Augur.Module()
   syntax: "true | false",
   process: (msg, suffix) => {
     suffix = suffix.toLowerCase();
-    msg.react("👌");
+    msg.react("👌").catch(u.noop);
     u.clean(msg);
     if (!suffix || suffix == "true") {
       Module.db.user.update(msg.author, {excludeXP: false})
