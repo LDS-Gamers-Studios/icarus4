@@ -471,7 +471,7 @@ const models = {
     },
     fetchCurrentRankings: (limit = 50, page = 1) => {
       return new Promise((fulfill, reject) => {
-        User.find()
+        User.find({excludeXP: false})
           .sort({currentXP: -1, totalXP: -1})
           .skip(limit * (page - 1))
           .limit(limit)
@@ -483,7 +483,7 @@ const models = {
     },
     fetchLifetimeRankings: (limit = 50, page = 1) => {
       return new Promise((fulfill, reject) => {
-        User.find()
+        User.find({excludeXP: false})
           .sort({totalXP: -1, currentXP: -1})
           .skip(limit * (page - 1))
           .limit(limit)
