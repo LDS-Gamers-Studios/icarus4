@@ -107,19 +107,21 @@ const Module = new Augur.Module()
   syntax: "true | false",
   process: (msg, suffix) => {
     suffix = suffix.toLowerCase();
-    msg.react("👌").catch(u.noop);
     u.clean(msg);
-    if (!suffix || suffix == "true") {
+    if (!suffix || suffix == "true" || suffix == "on") {
       Module.db.user.update(msg.author, {excludeXP: false})
       .then((user) => {
         includeUsers.add(user.discordId);
-        msg.react("👌");
+        msg.react("👌").catch(u.noop);
       });
-    } else if (suffix == "false") {
+    } else if (suffix == "false" || suffix == "off") {
       Module.db.user.update(msg.author, {excludeXP: true})
       .then((user) => {
         if (includeUsers.has(user.discordId)) includeUsers.delete(user.discordId);
+        msg.react("👌").catch(u.noop);
       });
+    } else {
+      msg.reply("you need to tell me `on` or `off`.").then(u.clean);
     }
   }
 })
