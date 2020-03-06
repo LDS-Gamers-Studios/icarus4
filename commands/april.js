@@ -7,7 +7,7 @@ const Module = new Augur.Module()
     let date = new Date();
     if (!msg.author.bot && msg.guild && ((msg.guild.id == "136569499859025920") || (date.getMonth() == 3 && date.getDate() == 1))) {
       let regex = /(?:^|\.|\?|!|\n)\s*(?:I am|I'm) (.*?)(?:\.|!|\?|\n|$)/i;
-      let match = regex.match(msg.cleanContent);
+      let match = regex.exec(msg.cleanContent);
       if (match) {
         let name = u.properCase(match[1]);
         message.member.setNickname(name)
