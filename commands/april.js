@@ -25,10 +25,7 @@ const Module = new Augur.Module()
         cooldown.set(msg.author.id, date.getTime());
         let name = u.properCase(match[1]);
         msg.member.setNickname(name)
-        .then(member => {
-          msg.channel.send(`Hi, ${member}. I'm Icarus.`);
-        })
-        .catch(() => {
+        .finally(() => {
           msg.channel.send(`Hi, ${name}. I'm Icarus.`);
         });
       }
