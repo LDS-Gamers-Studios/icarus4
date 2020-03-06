@@ -5,7 +5,7 @@ const Module = new Augur.Module()
 .addEvent("message", (msg) => {
   try {
     let date = new Date();
-    if (msg.guild && ((msg.guild.id == "136569499859025920") || (d.getMonth() == 3 && d.getDate() == 1))) {
+    if (!msg.author.bot && msg.guild && ((msg.guild.id == "136569499859025920") || (date.getMonth() == 3 && date.getDate() == 1))) {
       let regex = /(?:^|\.|\?|!|\n)\s*(?:I am|I'm) (.*?)(?:\.|!|\?|\n|$)/i;
       let match = regex.match(msg.cleanContent);
       if (match) {
