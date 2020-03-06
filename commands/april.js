@@ -10,12 +10,12 @@ const Module = new Augur.Module()
       let match = regex.exec(msg.cleanContent);
       if (match) {
         let name = u.properCase(match[1]);
-        message.member.setNickname(name)
+        msg.member.setNickname(name)
         .then(member => {
-          message.channel.send(`Hi, ${member}. I'm Icarus.`);
+          msg.channel.send(`Hi, ${member}. I'm Icarus.`);
         })
         .catch(() => {
-          message.channel.send(`Hi, ${name}. I'm Icarus.`);
+          msg.channel.send(`Hi, ${name}. I'm Icarus.`);
         });
       }
     }
