@@ -19,12 +19,12 @@ const Module = new Augur.Module()
         ((date.getTime() - cooldown.get(msg.author.id)) > 120000)
       )
     ) {
-      let regex = /(?:^|\.|\?|!|\n)\s*(?:I am|I'm|Im) (.*?)(?:\.|!|\?|\n|$)/i;
+      let regex = /(?:^|\.|\?|!|\n|,)\s*(?:I am|I'm|Im|I’m) (.*?)(?:\.|!|,|\?|\n|$)/i;
       let match = regex.exec(msg.cleanContent);
       if (match) {
         cooldown.set(msg.author.id, date.getTime());
         let name = u.properCase(match[1]);
-        msg.member.setNickname(name.substr(0, 32))
+        msg.member.setNickname(name.substr(0, name.lastIndexOf(" ", 32)))
         .finally(() => {
           msg.channel.send(`Hi, ${name}. I'm Icarus.`);
         });
