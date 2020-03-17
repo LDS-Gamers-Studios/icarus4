@@ -22,7 +22,7 @@ const Module = new Augur.Module()
 
           for (let i = 0; i < Math.min(25, contributors.length); i++) {
             let contrib = contributors[i];
-            embed.addField(`[${contrib.name}](https://stats.foldingathome.org/donor/${contrib.name})`, `**Work Units:** ${contrib.wus}\n**Credit:** ${contrib.credit}\n**Rank:** ${contrib.rank}`, true);
+            embed.addField(contrib.name, `**Profile:** [[Link]](https://stats.foldingathome.org/donor/${contrib.name})\n**Work Units:** ${contrib.wus}\n**Credit:** ${contrib.credit}${(contrib.rank ? "\n**Rank:** " + contrib.rank : "")}`, true);
           }
 
           msg.channel.send({embed});
