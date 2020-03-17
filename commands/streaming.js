@@ -205,7 +205,7 @@ function processApplications() {
 
         Module.handler.client.channels.get("146289578674749440")
           .send(embed)
-          .then(() => fs.unlink(path))
+          .then(() => fs.unlinkSync(path))
           .catch(e => u.alertError(e, "Delete Approved Streamer Application Error"));
       }
     });
