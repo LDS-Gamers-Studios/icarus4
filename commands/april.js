@@ -8,12 +8,10 @@ const Module = new Augur.Module()
   try {
     let date = new Date();
     if (
-      !msg.author.bot &&
+      (date.getMonth() == 3 && date.getDate() == 1) &&
       msg.guild &&
-      (
-        (msg.guild.id == "136569499859025920") ||
-        (date.getMonth() == 3 && date.getDate() == 1)
-      ) &&
+      !msg.author.bot &&
+      msg.guild.id == "96335850576556032" &&
       (
         !cooldown.has(msg.author.id) ||
         ((date.getTime() - cooldown.get(msg.author.id)) > 120000)
