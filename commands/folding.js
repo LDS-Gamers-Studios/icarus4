@@ -24,13 +24,11 @@ function getStats(channel) {
             embed.addField(contrib.name, `**Profile:** [[Link]](https://stats.foldingathome.org/donor/${contrib.name})\n**Work Units:** ${contrib.wus}\n**Credit:** ${contrib.credit}${(contrib.rank ? "\n**Rank:** " + contrib.rank : "")}`, true);
           }
 
-          if (attempts.has(channel.id)) {
-            clearInterval(attempts.get(channel.id));
-            attempts.delete(channel.id);
+          for (const [channel, interval] of attempts) {
+            Module.handler.client.channels.get(channel).send({embed}).catch(e => u.alertError(e, "F@H Post"));
+            clearInterval(interval);
           }
-
-          channel.send({embed});
-
+          attempts.clear();
           fulfill(true);
         } else if (response.statusCode != 200) {
           fulfill(false);
@@ -40,29 +38,28 @@ function getStats(channel) {
   });
 }
 
+function postStats(embed) {
+}
+
 const Module = new Augur.Module()
 .addCommand({name: "fah",
   aliases: ["foldingathome", "folding", "folding@home"],
   description: "LDSG Folding@home Stats",
   process: async (msg) => {
     try {
+      if (attempts.has(msg.channel.id)) clearInterval(attempts.get(msg.channel.id));
+      attempts.set(msg.channel.id, setInterval(getStats, 60000, msg.channel));
       let success = await getStats(msg.channel);
-      if (!success) {
+      if (!success)
         msg.channel.send("I'm having trouble connecting to the Folding @ Home website. I'll keep trying!");
-        if (attempts.has(msg.channel.id)) {
-          clearInterval(attempts.get(msg.channel.id));
-          attempts.delete(msg.channel.id);
-        }
-        attempts.set(msg.channel.id, setInterval(getStats, 60000, msg.channel));
-      }
     } catch(e) { u.alertError(e, msg); }
   }
 })
 .setUnload(() => {
   for (const [channel, interval] of attempts) {
     clearInterval(interval);
-    attempts.delete(channel);
   }
+  attempts.clear();
 });
 
 module.exports = Module;
