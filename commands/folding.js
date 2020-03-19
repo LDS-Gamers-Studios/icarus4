@@ -57,6 +57,12 @@ const Module = new Augur.Module()
       }
     } catch(e) { u.alertError(e, msg); }
   }
+})
+.setUnload(() => {
+  for (const [channel, interval] of attempts) {
+    clearInterval(interval);
+    attempts.delete(channel);
+  }
 });
 
 module.exports = Module;
