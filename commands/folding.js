@@ -49,9 +49,9 @@ const Module = new Augur.Module()
       let success = await getStats(msg.channel);
       if (!success) {
         msg.channel.send("I'm having trouble connecting to the Folding @ Home website. I'll keep trying!");
-        if (attempts.has(channel.id)) {
-          clearInterval(attempts.get(channel.id));
-          attempts.delete(channel.id);
+        if (attempts.has(msg.channel.id)) {
+          clearInterval(attempts.get(msg.channel.id));
+          attempts.delete(msg.channel.id);
         }
         attempts.set(msg.channel.id, setInterval(getStats, 60000, msg.channel));
       }
