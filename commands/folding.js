@@ -30,10 +30,10 @@ function getStats(channel) {
           }
           attempts.clear();
           fulfill(true);
-        } else if (response.statusCode != 200) {
+        } else {
           fulfill(false);
         }
-      } catch(error) { u.alertError(error, msg); }
+      } catch(error) { u.alertError(error, "F@H Posting"); }
     });
   });
 }
