@@ -270,30 +270,38 @@ async function processCardReaction(reaction, mod, infraction) {
         embed.addField("Resolved", mod.username + " issued a 10 point warning.");
       } else if (reaction == cardReactions[5]) {  // Mute
         infraction.value = 10;
-        if (!member.roles.has(Module.config.roles.muted)) {
+        if (member && !member.roles.has(Module.config.roles.muted)) {
           // Only mute them if they weren't already muted.
           await member.addRole(Module.config.roles.muted);
           if (member.voiceChannel) await member.setMute(true);
           message.client.channels.get("356657507197779968").send(`${member}, you have been muted in ${message.guild.name}. Please review our Code of Conduct. A member of the management team will be available to discuss more details.\n\nhttp://ldsgamers.com/code-of-conduct`);
+        } else if (!member) {
+          let memberRoles = (await Module.db.user.fetchUser(infraction.discordId)).roles;
+          let roles = message.guild.roles.filter(r => memberRoles.includes(r.id) || r.id == Module.config.roles.muted);
+          await Module.db.updateRoles({
+            id: infraction.discordId,
+            roles
+          });
         }
         embed.addField("Resolved", mod.username + " muted the member.");
       }
 
       let inf = await Module.db.infraction.update(infraction._id, infraction);
 
-      let infractionSummary = await Module.db.infraction.getSummary(member.id);
+      let infractionSummary = await Module.db.infraction.getSummary(infraction.discordId);
 
-      let quote = u.embed()
-      .setAuthor(u.escapeText(member.displayName), member.user.displayAvatarURL)
-      .addField("Channel", `#${message.guild.channels.get(infraction.channel).name}`)
-      .setDescription(message.embeds[0].description)
-      .setTimestamp(message.createdAt);
+      if (member) {
+        let quote = u.embed()
+        .setAuthor(u.escapeText(member.displayName), member.user.displayAvatarURL)
+        .addField("Channel", `#${message.guild.channels.get(infraction.channel).name}`)
+        .setDescription(message.embeds[0].description)
+        .setTimestamp(message.createdAt);
 
-      let response = "We have received one or more complaints regarding content you posted. We have reviewed the content in question and have determined, in our sole discretion, that it is against our code of conduct (<http://ldsgamers.com/code-of-conduct>). This content was removed on your behalf. As a reminder, if we believe that you are frequently in breach of our code of conduct or are otherwise acting inconsistently with the letter or spirit of the code, we may limit, suspend or terminate your access to the LDSG discord server.";
+        let response = "We have received one or more complaints regarding content you posted. We have reviewed the content in question and have determined, in our sole discretion, that it is against our code of conduct (<https://ldsgamers.com/code-of-conduct>). This content was removed on your behalf. As a reminder, if we believe that you are frequently in breach of our code of conduct or are otherwise acting inconsistently with the letter or spirit of the code, we may limit, suspend or terminate your access to the LDSG Discord server.";
 
-      if (message.guild.members.has(member.id))
         member.send(`${response}\n\n**${mod.username}** has issued this warning.`, quote)
         .catch(e => u.alertError(e, "Warning DM"));
+      }
 
       embed.fields = embed.fields.filter(f => !f.name || !f.name.startsWith("Jump"));
       embed.fields.find(f => f.name && f.name.startsWith("Infraction")).value = `Infractions: ${infractionSummary.count}\nPoints: ${infractionSummary.points}`;
