@@ -167,6 +167,7 @@ const Module = new Augur.Module()
   description: "Request a feature for Icarus",
   info: "Send a feature request to the bot Trello board.",
   syntax: "Requested Feature",
+  permissions: (msg) => msg.author.id != "386553948443639818",
   process: (msg, suffix) => {
     if (suffix) {
       let content = msg.cleanContent.substr(msg.cleanContent.indexOf(" ")).trim();
