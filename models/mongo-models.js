@@ -273,7 +273,7 @@ const models = {
     },
     fetchReminders: () => {
       return new Promise((fulfill, reject) => {
-        Remind.find({complete: false, timestamp: {$lte: new Date()}}, (error, docs) => {
+        Remind.find({timestamp: {$lte: new Date()}}, (error, docs) => {
           if (error) reject(error);
           else fulfill(docs);
         });
@@ -284,9 +284,7 @@ const models = {
         let reminder = new Remind(data);
         reminder.save((err, doc) => {
           if (err) reject(err);
-          else {
-            fulfill(doc);
-          }
+          else fulfill(doc);
         });
       });
     }

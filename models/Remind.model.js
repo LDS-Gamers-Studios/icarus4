@@ -4,11 +4,7 @@ var mongoose = require('mongoose'),
 var RemindSchema = new Schema({
   discordId: String,
   reminder: String,
-  timestamp: Date,
-  complete: {
-    type: Boolean,
-    value: false
-  }
+  timestamp: Date
 });
 
 module.exports = mongoose.model("Remind", RemindSchema);

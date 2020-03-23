@@ -35,7 +35,7 @@ const Module = new Augur.Module()
   aliases: ["remindme", "reminder"],
   description: "Sets a reminder via DM from the bot.",
   syntax: "MM/DD/YYYY HH:MM Reminder Text",
-  info: "Sets a reminder, which will be received by DM from the bot. The reminder will come *within 15 minutes* after the time. Times are Eastern Standard Time.",
+  info: "Sets a reminder, which will be received by DM from the bot. The reminder will come *within 5 minutes* after the time. Times are Eastern Standard Time.",
   process: async (msg, suffix) => {
     try {
       let dateString = suffix.split(" ");
@@ -95,7 +95,7 @@ const Module = new Augur.Module()
         } catch(e) { u.alertError(e, "Complete Reminder"); }
       }
     } catch(error) { u.alertError(error, "Execute Reminders"); }
-  }, 15 * 60000);
+  }, 5 * 60000);
 });
 
 module.exports = Module;
