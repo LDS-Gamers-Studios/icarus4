@@ -3,6 +3,7 @@ const Animation = require("./Animation.model"),
   Ign = require("./Ign.model"),
   Infraction = require("./Infraction.model"),
   Missionary = require("./Missionary.model"),
+  Remind = require("./Remind.model"),
   Server = require("./Server.model"),
   Spoiler = require("./Spoiler.model"),
   Star = require("./Star.model"),
@@ -258,6 +259,35 @@ const models = {
             else fulfill(missionaries);
           }
         );
+      });
+    }
+  },
+  reminder: {
+    complete: (reminder) => {
+      return new Promise((fulfill, reject) => {
+        Remind.findOneAndRemove({_id: reminder._id}, (err) => {
+          if (err) reject(err);
+          else fulfill();
+        });
+      });
+    },
+    fetchReminders: () => {
+      return new Promise((fulfill, reject) => {
+        Remind.find({complete: false, timestamp: {$lte: new Date()}}, (error, docs) => {
+          if (error) reject(error);
+          else fulfill(docs);
+        });
+      });
+    },
+    setReminder: (data) => {
+      return new Promise((fulfill, reject) => {
+        let reminder = new Remind(data);
+        reminder.save((err, doc) => {
+          if (err) reject(err);
+          else {
+            fulfill(doc);
+          }
+        });
       });
     }
   },
