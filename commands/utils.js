@@ -71,6 +71,7 @@ const Module = new Augur.Module()
       setTimeout((m, l, d) => {
         m.reply(`your ${l} timer (${d}) is up!`);
       }, time, msg, label, timer);
+      msg.react("⏱️");
     } else {
       msg.reply("you need to give me a duration in HH:MM:SS format!").then(u.clean);
     }
