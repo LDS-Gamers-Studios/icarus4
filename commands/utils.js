@@ -59,7 +59,7 @@ const Module = new Augur.Module()
   syntax: "HH:MM:SS Label",
   process: (msg, suffix) => {
     let [timer, ...label] = suffix.split(" ");
-    label = (label.length > 0 ? label.join(" ") || "Unnamed");
+    label = (label.length > 0 ? label.join(" ") : "Unnamed");
     let times = timer.split(":").map(t => parseInt(t, 10));
     if (times.length <= 3 && times.length > 0) {
       let time = 0;
