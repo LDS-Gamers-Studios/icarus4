@@ -73,10 +73,15 @@ const Module = new Augur.Module()
     else {
       let embed = u.embed()
         .setTimestamp()
-        .setAuthor(message.member.displayName, message.member.displayAvatarURL)
+        .setAuthor(message.member.displayName, message.member.user.displayAvatarURL)
         .setTitle("Pin Request from " + message.guild.members.get(user.id).displayName)
         .setDescription(message.cleanContent)
+        .addField("Channel", message.channel.toString())
         .addField("Link to Post", message.url);
+
+      if (message.attachments && (message.attachments.size > 0))
+        embed.setImage(message.attachments.first().url);
+
       message.guild.channels.get("506575671242260490").send({embed});
     }
   }
