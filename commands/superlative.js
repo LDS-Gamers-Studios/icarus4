@@ -66,6 +66,22 @@ function validate(message) {
 const Module = new Augur.Module()
 .addEvent("messageReactionAdd", (reaction, user) => {
   let message = reaction.message;
+
+  // Pin Request
+  if (message.guild && (message.guild.id == Module.config.ldsg) && (reaction.emoji.name == "📌") && (reaction.count == 1)) {
+    if (message.channel.permissionsFor(user).has("MANAGE_MESSAGES")) message.pin();
+    else {
+      let embed = u.embed()
+        .setTimestamp()
+        .setAuthor(message.member.displayName, message.member.displayAvatarURL)
+        .setTitle("Pin Request from " + message.guild.members.get(user.id).displayName)
+        .setDescription(message.cleanContent)
+        .addField("Link to Post", message.url);
+      message.guild.channels.get("506575671242260490").send({embed});
+    }
+  }
+
+  // Process Stars
   if (message.guild && (message.guild.id == Module.config.ldsg) && !message.author.bot) {
     let {count, valid} = validate(message);
     if (valid || ((count >= threshold) && !Rank.excludeChannels.includes(message.channel.id) && !message.channel.name.includes("spoiler")))
