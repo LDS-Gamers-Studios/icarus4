@@ -22,7 +22,7 @@ const Module = new Augur.Module()
       if (match) {
         cooldown.set(msg.author.id, date.getTime());
         let name = u.properCase(match[1]);
-        msg.member.setNickname(name.substr(0, name.lastIndexOf(" ", 32)))
+        msg.member.setNickname(name.substr(0, (name.lastIndexOf(" ", 32) > 0 ? name.lastIndexOf(" ", 32) : name.length)))
         .finally(() => {
           msg.channel.send(`Hi, ${name}. I'm Icarus.`);
         });
