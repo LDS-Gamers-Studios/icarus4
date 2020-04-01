@@ -15,7 +15,8 @@ const Module = new Augur.Module()
       (
         !cooldown.has(msg.author.id) ||
         ((date.getTime() - cooldown.get(msg.author.id)) > 120000)
-      )
+      ) &&
+      msg.channel.id != "114944876763807751" // No #inspire-and-uplift
     ) {
       let regex = /(?:^|\.|\?|!|\n|,)\s*(?:I am|I'm|Im|I’m) (.*?)(?:\.|!|,|\?|\n|;|$)/i;
       let match = regex.exec(msg.cleanContent);
