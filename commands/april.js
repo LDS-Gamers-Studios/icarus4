@@ -21,10 +21,10 @@ const Module = new Augur.Module()
       let match = regex.exec(msg.cleanContent);
       if (match) {
         cooldown.set(msg.author.id, date.getTime());
-        let name = u.properCase(match[1]);
+        let name = match[1];
         msg.member.setNickname(name.length > 32 ? name.substr(0, name.lastIndexOf(" ", 32)) : name)
         .finally(() => {
-          msg.channel.send(`Hi, ${name}. I'm Icarus.`);
+          msg.channel.send(`Hi, ${u.properCase(name)}. I'm Icarus.`);
         });
       }
     }
