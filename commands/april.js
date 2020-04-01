@@ -17,7 +17,7 @@ const Module = new Augur.Module()
         ((date.getTime() - cooldown.get(msg.author.id)) > 120000)
       )
     ) {
-      let regex = /(?:^|\.|\?|!|\n|,)\s*(?:I am|I'm|Im|I’m) (.*?)(?:\.|!|,|\?|\n|$)/i;
+      let regex = /(?:^|\.|\?|!|\n|,)\s*(?:I am|I'm|Im|I’m) (.*?)(?:\.|!|,|\?|\n|;|$)/i;
       let match = regex.exec(msg.cleanContent);
       if (match) {
         cooldown.set(msg.author.id, date.getTime());
