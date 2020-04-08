@@ -436,7 +436,7 @@ Module
             response.push(`${record.timestamp.toLocaleDateString()} (${record.value} pts, modded by ${mod.displayName}): ${record.description}`);
           });
         }
-        msg.channel.send(response.join("\n"));
+        msg.channel.send(response.join("\n"), {split: true});
       } catch(e) { u.alertError(e, m); }
     } else {
       msg.reply("you need to tell me whose summary you want to view.")
