@@ -226,7 +226,7 @@ const Module = new Augur.Module()
       for (const [id, role] of newMember.roles) {
         if (!oldMember.roles.has(id) && inventory.has(id)) {
           // New equippable!
-          if (newMember.roles.some((r) => inventory.find(r.id))) {
+          if (newMember.roles.some((r) => inventory.find(i => i == r.id))) {
             // They already have a role equipped
             newMember.send(`You now have the color-equippable role **${role.name}**! You can equip the color with the \`!equip ${role.name}\` command.`).catch(u.noop);
           } else {
