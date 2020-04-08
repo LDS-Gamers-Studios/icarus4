@@ -78,11 +78,6 @@ const Module = new Augur.Module()
       member.client.channels.get(mod_log).send(response.join("\n"));
     });
   }
-})
-.addEvent("guildMemberUpdate", (oldMember, newMember) => {
-  if (newMember.guild.id == Module.config.ldsg && (oldMember.roles.size != newMember.roles.size)) {
-    Module.db.user.updateRoles(newMember);
-  }
 });
 
 module.exports = Module;
