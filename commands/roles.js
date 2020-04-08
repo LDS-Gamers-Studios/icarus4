@@ -1,4 +1,5 @@
 const Augur = require("augurbot"),
+  {Collection} = require("discord.js"),
   u = require("../utils/utils");
 
 const roles = new Map();
@@ -60,7 +61,7 @@ const colors = new Collection([
 ]);
 */
 
-const inventory = new Map([
+const inventory = new Collection([
 	["114499378936283143", "697257738010493049"],
 	["96360253850935296" , "697257737133883435"],
 	["205826273639923722", "697257740443058208"],
