@@ -1,9 +1,10 @@
 const u = require("../utils/utils"),
   Augur = require("augurbot"),
   profanityFilter = require("profanity-matcher"),
-  request = require("request"),
-  ytdl = require("ytdl-core"),
-  {USet} = require("../utils/tools");
+  request = require("request-promise-native"),
+  ytpl = require("ytpl"),
+  ytdl = require("ytdl-core-discord"),
+  {USet, Link} = require("../utils/tools");
 
 const roomList = [];
 
@@ -11,6 +12,128 @@ const availableNames = new USet();
 
 const communityVoice = "363014069533540362";
 const isCommunityVoice = (channel) => ((channel.parentID == communityVoice) && (channel.id != "123477839696625664"));
+
+class Queue {
+  constructor() {
+    this.queue = null;
+  }
+
+  add(channel, sound) {
+    if (this.queue) this.queue.last.addAfter({channel, sound});
+    else this.queue = new Link({channel, sound});
+    if (!this.current) this.play();
+    return this;
+  }
+
+  pause(t) {
+    if (this.dispatcher) this.dispatcher.pause();
+    if (t) setTimeout(this.resume, t);
+    return this;
+  }
+
+  async play() {
+      if (this.queue) {
+        let {channel, sound} = this.queue.value;
+        try {
+          this.queue = this.queue.remove();
+          this.current = sound;
+          let voiceConnection = channel.guild.voiceConnection;
+
+          if (voiceConnection && voiceConnection.channel.id != channel.id) {
+            await voiceConnection.disconnect();
+            voiceConnection = await channel.join();
+          } else if (!voiceConnection) {
+            voiceConnection = await channel.join();
+          }
+
+          let dispatcher;
+          if (sound.type == "yt") {
+            dispatcher = voiceConnection.playOpusStream(await ytdl(sound.link));
+          } else {
+            dispatcher = voiceConnection.playStream(sound.link);
+          }
+          this.dispatcher = dispatcher;
+          this.playlist();
+          dispatcher.on("end", (reason) => {
+            if (!this.queue) {
+              if (!this.sticky) voiceConnection.disconnect();
+              if (this.pl) this.playlist();
+              delete this.dispatcher;
+              delete this.current;
+            }
+            else this.play();
+          });
+      } catch(error) { Module.handler.errorHandler(error, `Sound Playback in ${channel.guild.name}`); }
+    }
+    return this;
+  }
+
+  async playlist(msg) {
+    if (this.current) {
+      let list = [this.current];
+      let next = this.queue;
+      let i = 0;
+      while (next && i++ < 5) {
+        list.push(next.value.sound);
+        next = next.after;
+      }
+      let embed = u.embed().setTimestamp()
+      .setTitle("Current Playlist")
+      .setDescription(list.map(song => `(${Math.floor(song.length / 3600)}:${(Math.floor(song.length / 60) % 60).toString().padStart(2, "0")}:${(song.length % 60).toString().padStart(2, "0")}) ${song.title}`).join("\n"))
+      if (msg) {
+        let m = await msg.channel.send({embed});
+        if (this.pl) {
+          this.pl.edit({embed: u.embed().setTimestamp().setTitle("Current Playlist").setURL(m.url).setDescription(`Active playlist has been moved to ${m.url}`)});
+          this.pl.clearReactions().catch(u.noop);
+        }
+        this.pl = m;
+        let buttons = ["⏹️", "⏯️", "⏭️"];
+        for (const button of buttons) await m.react(button);
+        let press;
+        while ((press = await m.awaitReactions((reaction, user) => !user.bot && buttons.includes(reaction.emoji.name), {max: 1})) && this.pl.id == m.id) {
+          press = press.first();
+          if (press.emoji.name == "⏹️") {
+            this.stop();
+          } else if (press.emoji.name == "⏯️") {
+            if (this.dispatcher && this.dispatcher.paused) this.resume();
+            else this.pause();
+          } else if (press.emoji.name == "⏭️") {
+            this.skip();
+          }
+          for (const [id, user] of press.users)
+            if (id != m.client.user.id) press.remove(user).catch(u.noop);
+        }
+      } else if (this.pl) {
+        this.pl.edit({embed});
+      }
+    } else {
+      if (msg) msg.channel.send("There are no songs currently playing in this server.").then(u.clean);
+      if (this.pl) this.pl.edit({embed: u.embed().setTimestamp().setTitle("Current Playlist").setDescription("No songs are currently playing.")});
+    }
+  }
+
+  resume() {
+    if (this.dispatcher) this.dispatcher.resume();
+    return this;
+  }
+
+  skip() {
+    if (this.dispatcher) this.dispatcher.end();
+    return this;
+  }
+
+  stick(value) {
+    this.sticky = value;
+    return this;
+  }
+
+  stop() {
+    if (this.current) this.current = null;
+    if (this.queue) this.queue = null;
+    if (this.dispatcher) this.dispatcher.end();
+    return this;
+  }
+}
 
 const queue = new Map();
 
@@ -45,6 +168,27 @@ async function playSound(guildId) {
 }
 
 const Module = new Augur.Module()
+.addCommand({name: "join",
+  description: "Make the bot join voice chat.",
+  permission: msg => msg.guild && msg.member.voiceChannel,
+  process: (msg) => {
+    msg.member.voiceChannel.join();
+    if (!queue.has(msg.guild.id)) queue.set(msg.guild.id, new Queue());
+    queue.get(msg.guild.id).stick(true);
+    msg.react("👌");
+  }
+})
+.addCommand({name: "leave",
+  description: "Make the bot leave voice chat.",
+  permissions: msg => msg.guild,
+  process: (msg) => {
+    if (queue.has(msg.guild.id))
+      queue.get(msg.guild.id).stick(false);
+    if (msg.guild.voiceConnection)
+      msg.guild.voiceConnection.disconnect();
+    msg.react("👌");
+  }
+})
 .addCommand({name: "lock",
   syntax: "[@additionalUser(s)]",
   description: "Locks your current voice channel to new users",
@@ -72,56 +216,79 @@ const Module = new Augur.Module()
     }
   }
 })
-.addCommand({name: "silent",
-  description: "Stop playing songs and sounds",
-  hidden: true,
-  category: "Voice",
-  permissions: (msg) => (msg.guild && msg.guild.voiceConnection && msg.guild.voiceConnection.dispatcher && (msg.member.roles.has(Module.config.roles.mod) || msg.member.roles.has(Module.config.roles.management))),
-  process: async function(msg) {
-    try {
-      let guildQueue = queue.get(msg.guild.id).queue;
-      guildQueue = [];
-      msg.guild.voiceConnection.dispatcher.end();
-      msg.react("🔇");
-    } catch(e) { u.alertError(e, msg); }
-  }
-})
-.addCommand({name: "skip",
-  description: "Skip the current song",
-  hidden: true, aliases: ["next"],
-  category: "Voice",
-  permissions: (msg) => (msg.guild && msg.guild.voiceConnection && msg.guild.voiceConnection.dispatcher && (msg.member.roles.has(Module.config.roles.mod) || msg.member.roles.has(Module.config.roles.management))),
-  process: async function(msg) {
-    try {
-      await msg.guild.voiceConnection.dispatcher.end();
-      msg.react("⏩");
-    } catch(e) { u.alertError(e, msg); }
+.addCommand({name: "playlist",
+  permissions: (msg) => msg.guild,
+  aliases: ["pl"],
+  syntax: "[skip/stop/pause/resume]",
+  process: (msg, suffix) => {
+    suffix = suffix.toLowerCase();
+    if (queue.has(msg.guild.id)) {
+      let pl = queue.get(msg.guild.id);
+      if (suffix == "skip" || suffix == "next") {
+        pl.skip();
+        msg.react("⏭️");
+      } else if (suffix == "stop") {
+        pl.stop();
+        msg.react("⏹️");
+      } else if (suffix == "pause" || suffix == "resume" || suffix == "unpause") {
+        if (pl.dispatcher && pl.dispatcher.paused) pl.resume();
+        else pl.pause();
+        msg.react("⏯️");
+      } else if (!suffix) {
+        pl.playlist(msg);
+      } else {
+        msg.reply("I don't know what that means.").then(u.clean);
+      }
+    } else {
+      msg.reply("There is no current playlist for this server.").then(u.clean);
+    }
   }
 })
 .addCommand({name: "song",
-  description: "Play a YouTube Song",
-  hidden: true,
-  syntax: "<YouTube URL>",
-  category: "Voice",
-  permissions: (msg) => (msg.guild && ((msg.guild.id == "136569499859025920") || ((msg.guild.id == "136569499859025920") || ((msg.guild.id == Module.config.ldsg) && (msg.member.roles.has(Module.config.roles.team) || msg.member.roles.has("114816596341424129")))) && msg.member.voiceChannel)),
-  process: async function(msg, song) {
-    try {
-      if (song.startsWith("<") && song.endsWith(">")) song = song.substr(1, song.length - 2);
+  description: "Play a song or playlist from YouTube",
+  syntax: "<link>",
+  permissions: msg => msg.guild && msg.member.voiceChannel,
+  process: async (msg, suffix) => {
+    if (suffix.startsWith("<") && suffix.endsWith(">")) suffix = suffix.substr(1, suffix.length - 2);
+    if (ytpl.validateURL(suffix)) {
+      try {
+        let items = await ytpl(suffix);
+        if (items.items && items.items.length > 0) {
+          if (!queue.has(msg.guild.id)) queue.set(msg.guild.id, new Queue());
+          for (let song of items.items) {
+            let duration = song.duration.split(":").map(n => parseInt(n, 10));
+            if (duration.length == 1) duration = duration[0];
+            if (duration.length == 2) duration = duration[1] + 60 * duration[0];
+            if (duration.length == 3) duration = duration[2] + 60 * duration[1] + 3600 * duration[2];
 
-      if (ytdl.validateURL(song)) {
-        let info = await ytdl.getBasicInfo(song);
-        if (!queue.has(msg.guild.id)) queue.set(msg.guild.id, {queue: [], nonce: null});
-        let guildQueue = queue.get(msg.guild.id);
-
-        if (msg.nonce != guildQueue.nonce) { // Prevent double-queueing due to embed updates
-          guildQueue.queue.push({channel: msg.member.voiceChannel, sound: ytdl(song, {filter: "audioonly"})});
-          guildQueue.nonce = msg.nonce;
-          msg.channel.send(`Queueing ${info.title}...`);
-          if (!(msg.guild.voiceConnection && msg.guild.voiceConnection.dispatcher)) playSound(msg.guild.id);
-        }
-      } else msg.reply(`\`${song}\` isn't a valid YouTube URL.`);
-    } catch(e) {
-      u.alertError(e, msg);
+            let sound = {
+              title: song.title,
+              link: song.url_simple,
+              type: "yt",
+              length: duration
+            };
+            let channel = msg.member.voiceChannel;
+            queue.get(msg.guild.id).add(channel, sound);
+          }
+          msg.react("👌");
+        } else msg.reply("I couldn't find any songs on that playlist.").then(u.clean);
+      } catch(error) { u.alertError(error, msg); }
+    } else if (ytdl.validateURL(suffix)) {
+      try {
+        let info = await ytdl.getBasicInfo(suffix);
+        let sound = {
+          title: info.player_response.videoDetails.title,
+          link: suffix,
+          type: "yt",
+          length: parseInt(info.player_response.videoDetails.lengthSeconds, 10)
+        };
+        let channel = msg.member.voiceChannel;
+        if (!queue.has(msg.guild.id)) queue.set(msg.guild.id, new Queue());
+        queue.get(msg.guild.id).add(channel, sound);
+        msg.react("👌");
+      } catch(error) { u.alertError(error, msg); }
+    } else {
+      msg.reply("that wasn't a valid YouTube link!").then(u.clean);
     }
   }
 })
@@ -131,39 +298,38 @@ const Module = new Augur.Module()
   description: "Plays a sound",
   info: "Plays a matched sound from Freesound.org",
   category: "Voice",
-  permissions: (msg) => (msg.guild && ((msg.guild.id == "136569499859025920") || ((msg.guild.id == Module.config.ldsg) && (msg.member.roles.has(Module.config.roles.team) || msg.member.roles.has("114816596341424129")))) && msg.member.voiceChannel),
-  process: (msg, suffix) => {
+  permissions: (msg) => (msg.guild && msg.member.voiceChannel && ((msg.guild.id != Module.config.ldsg) || msg.member.roles.has(Module.config.roles.team) || msg.member.roles.has("114816596341424129"))),
+  process: async (msg, suffix) => {
     if (suffix) {
       let pf = new profanityFilter();
       if (pf.scan(suffix.toLowerCase()).length == 0) {
-        let url = `https://freesound.org/apiv2/search/text/?query=${suffix}&fields=name,id,duration,previews,tags,description&filter=duration:[* TO 10]&token=${Module.config.api.freesound}`;
-        request(url, async function(err, response, body) {
-          try {
-            if (!err && response.statusCode == 200) {
-              body = JSON.parse(body);
-              let sound = null;
+        try {
+          let url = `https://freesound.org/apiv2/search/text/?query=${encodeURIComponent(suffix)}&fields=name,id,duration,previews,tags,description&filter=duration:[* TO 10]&token=${Module.config.api.freesound}`;
+          let sounds = (JSON.parse(await request(url))).results;
+          let sound = null;
 
-              while (!sound && (body.results.length > 0)) {
-                sound = body.results[Math.floor(Math.random() * body.results.length)];
-                if ((pf.scan(sound.tags.join(" ")).length > 0) || (pf.scan(sound.description).length > 0)) {
-                  body.results = body.results.filter(r => r.id != sound.id);
-                  sound = null;
-                }
-              }
-
-              if (sound) {
-                if (!queue.has(msg.guild.id)) queue.set(msg.guild.id, {queue: [], nonce: null});
-                let guildQueue = queue.get(msg.guild.id).queue;
-
-                guildQueue.push({channel: msg.member.voiceChannel, sound: sound.previews["preview-lq-mp3"]});
-                if (!(msg.guild.voiceConnection && msg.guild.voiceConnection.dispatcher)) playSound(msg.guild.id);
-
-              } else msg.reply("I couldn't find any sounds for " + suffix);
-            } else u.alertError(err, msg);
-          } catch(e) {
-            u.alertError(e, msg);
+          while (!sound && (sounds.length > 0)) {
+            sound = sounds[Math.floor(Math.random() * body.results.length)];
+            if ((pf.scan(sound.tags.join(" ")).length > 0) || (pf.scan(sound.description).length > 0)) {
+              body.results = body.results.filter(r => r.id != sound.id);
+              sound = null;
+            }
           }
-        });
+
+          if (sound) {
+            let effect = {
+              title: sound.name,
+              link: sound.previews["preview-lq-mp3"],
+              type: "playStream",
+              length: sound.duration
+            };
+            let channel = msg.member.voiceChannel;
+            if (!queue.has(msg.guild.id)) queue.set(msg.guild.id, new Queue());
+            queue.get(msg.guild.id).add(channel, sound);
+          } else msg.reply("I couldn't find any sounds for " + suffix);
+        } catch(e) {
+          u.alertError(e, msg);
+        }
       } else msg.reply("I'm not going to make that sound.").then(u.clean);
     }
   }

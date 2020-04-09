@@ -39,7 +39,7 @@
     "profanity-matcher": "^1.0.1",
     "pug": "^2.0.4",
     "request": "^2.88.0",
-    "request-promise-native": "^1.0.7",
+    "request-promise-native": "^1.0.8",
     "shortid": "^2.2.14",
     "simple-oauth2": "^2.2.1",
     "simply-trello": "0.0.9",
@@ -49,6 +49,8 @@
     "twitch-api": "^0.5.0",
     "uws": "^99.0.0",
     "xml2js": "^0.4.19",
-    "ytdl-core": "^0.24.0"
+    "ytdl-core": "^0.24.0",
+    "ytdl-core-discord": "^1.1.0",
+    "ytpl": "^0.1.20"
   }
 }
