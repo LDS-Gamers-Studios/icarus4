@@ -1,3 +1,91 @@
+class Link {
+  constructor(value, closed = false) {
+    this.closed = closed;
+    this.value = value;
+    this.after = (closed ? this : undefined);
+    this.before = (closed ? this : undefined);
+  }
+
+  addAfter(value) {
+    const displaced = this.after;
+    const newLink = new this.constructor(value);
+    this.after = newLink;
+    newLink.before = this;
+    newLink.after = displaced;
+    if (displaced) displaced.before = newLink;
+    return this.after;
+  }
+
+  addBefore(value) {
+    const displaced = this.before;
+    const newLink = new this.constructor(value);
+    this.before = newLink;
+    newLink.after = this;
+    newLink.before = displaced;
+    if (displaced) displaced.after = newLink;
+    return this.before;
+  }
+
+  get chainSize() {
+    let link = this;
+    let size = 1;
+    while (link = link.before) {
+      if (link == this) return size;
+      size++;
+    }
+    link = this;
+    while (link = link.after) {
+      if (link == this) return size;
+      size++;
+    }
+    return size;
+  }
+
+  get first() {
+    if (this.closed) return undefined;
+    let link = this;
+    while (link.before) {
+      link = link.before;
+    }
+    return link;
+  }
+
+  get last() {
+    if (this.closed) return undefined;
+    let link = this;
+    while (link.after) {
+      link = link.after;
+    }
+    return link;
+  }
+
+  next(q = 1) {
+    let link = this;
+    let i = 0;
+    while (i++ < q) {
+      link = link.after;
+      if (!link) break;
+    }
+    return link;
+  }
+
+  previous(q = 1) {
+    let link = this;
+    let i = 0;
+    while (i++ < q) {
+      link = link.before;
+      if (!link) break;
+    }
+    return link;
+  }
+
+  remove(after = true) {
+    if (this.before) this.before.after = this.after;
+    if (this.after) this.after.before = this.before;
+    return (after ? this.after : this.before);
+  }
+}
+
 class USet extends Set {
   constructor(...args) {
     super(...args);
@@ -70,5 +158,6 @@ class USet extends Set {
 }
 
 module.exports = {
+  Link,
   USet
-}
+};
