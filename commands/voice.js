@@ -247,7 +247,7 @@ const Module = new Augur.Module()
 .addCommand({name: "song",
   description: "Play a song or playlist from YouTube",
   syntax: "<link>",
-  permissions: msg => msg.guild && msg.member.voiceChannel,
+  permissions: (msg) => (msg.guild && msg.member.voiceChannel && ((msg.guild.id != Module.config.ldsg) || msg.member.roles.has(Module.config.roles.team) || msg.member.roles.has("114816596341424129"))),
   process: async (msg, suffix) => {
     if (suffix.startsWith("<") && suffix.endsWith(">")) suffix = suffix.substr(1, suffix.length - 2);
     if (ytpl.validateURL(suffix)) {
