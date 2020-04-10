@@ -32,29 +32,29 @@ class Queue {
   }
 
   async play() {
-      if (this.queue) {
-        let {channel, sound} = this.queue.value;
-        try {
-          this.queue = this.queue.remove();
-          this.current = sound;
-          let voiceConnection = channel.guild.voiceConnection;
+    if (this.queue) {
+      let {channel, sound} = this.queue.value;
+      try {
+        this.queue = this.queue.remove();
+        this.current = sound;
+        let voiceConnection = channel.guild.voiceConnection;
 
-          if (voiceConnection && voiceConnection.channel.id != channel.id) {
-            await voiceConnection.disconnect();
-            voiceConnection = await channel.join();
-          } else if (!voiceConnection) {
-            voiceConnection = await channel.join();
-          }
+        if (voiceConnection && voiceConnection.channel.id != channel.id) {
+          await voiceConnection.disconnect();
+          voiceConnection = await channel.join();
+        } else if (!voiceConnection) {
+          voiceConnection = await channel.join();
+        }
 
-          let dispatcher;
-          if (sound.type == "yt") {
-            dispatcher = voiceConnection.playOpusStream(await ytdl(sound.link));
-          } else {
-            dispatcher = voiceConnection.playStream(sound.link);
-          }
-          this.dispatcher = dispatcher;
-          this.playlist();
-          dispatcher.on("end", (reason) => {
+        let dispatcher;
+        if (sound.type == "yt") {
+          dispatcher = voiceConnection.playOpusStream(await ytdl(sound.link));
+        } else {
+          dispatcher = voiceConnection.playStream(sound.link);
+        }
+        this.dispatcher = dispatcher;
+        this.playlist();
+        dispatcher.on("end", (reason) => {
             if (!this.queue) {
               if (!this.sticky) voiceConnection.disconnect();
               if (this.pl) this.playlist();
@@ -63,7 +63,10 @@ class Queue {
             }
             else this.play();
           });
-      } catch(error) { Module.handler.errorHandler(error, `Sound Playback in ${channel.guild.name}`); }
+      } catch(error) {
+        this.stop();
+        //Module.handler.errorHandler(error, `Sound Playback in ${channel.guild.name}`);
+      }
     }
     return this;
   }
@@ -128,6 +131,7 @@ class Queue {
 
   skip() {
     if (this.dispatcher) this.dispatcher.end();
+    if (!this.queue) this.playlist();
     return this;
   }
 
@@ -140,6 +144,7 @@ class Queue {
     if (this.current) this.current = null;
     if (this.queue) this.queue = null;
     if (this.dispatcher) this.dispatcher.end();
+    this.playlist();
     return this;
   }
 }
