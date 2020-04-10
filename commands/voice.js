@@ -83,7 +83,6 @@ class Queue {
         later.duration += next.length;
         next = next.after;
       }
-      if (later.count)
       let embed = u.embed().setTimestamp()
       .setTitle("Current Playlist")
       .setDescription(
@@ -382,7 +381,13 @@ const Module = new Augur.Module()
 .setInit((data) => {
   if (data) for (const [key, value] of data) queue.set(key, value);
 })
-.setUnload(() => queue)
+.setUnload(() => {
+  let active = new Map();
+  for (const [key, value] of queue) {
+    if (value.current) active.set(key, value);
+  }
+  return active;
+})
 .addEvent("loadConfig", () => {
   let ldsg = Module.handler.client.guilds.get(Module.config.ldsg);
   Module.config.sheets.get("Voice Channel Names").getRows((e, rows) => {
