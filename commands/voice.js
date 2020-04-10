@@ -72,14 +72,24 @@ class Queue {
     if (this.current) {
       let list = [this.current];
       let next = this.queue;
+      let later = {count: 0, duration: 0};
       let i = 0;
       while (next && i++ < 5) {
         list.push(next.value.sound);
         next = next.after;
       }
+      while (next) {
+        later.count++;
+        later.duration += next.length;
+        next = next.after;
+      }
+      if (later.count)
       let embed = u.embed().setTimestamp()
       .setTitle("Current Playlist")
-      .setDescription(list.map(song => `(${Math.floor(song.length / 3600)}:${(Math.floor(song.length / 60) % 60).toString().padStart(2, "0")}:${(song.length % 60).toString().padStart(2, "0")}) ${song.title}`).join("\n"))
+      .setDescription(
+        list.map((song, i) => `${(i == 0 ? "▶️ " : "")}(${Math.floor(song.length / 3600)}:${(Math.floor(song.length / 60) % 60).toString().padStart(2, "0")}:${(song.length % 60).toString().padStart(2, "0")}) ${song.title}`).join("\n")
+        + (later.count ? `\n${later.count} more songs... (${Math.floor(later.duration / 3600)}:${(Math.floor(later.duration / 60) % 60).toString().padStart(2, "0")}:${(later.duration % 60).toString().padStart(2, "0")})` : "")
+      );
       if (msg) {
         let m = await msg.channel.send({embed});
         if (this.pl && !this.pl.deleted) {
