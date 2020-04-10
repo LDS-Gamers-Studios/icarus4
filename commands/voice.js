@@ -82,7 +82,7 @@ class Queue {
       .setDescription(list.map(song => `(${Math.floor(song.length / 3600)}:${(Math.floor(song.length / 60) % 60).toString().padStart(2, "0")}:${(song.length % 60).toString().padStart(2, "0")}) ${song.title}`).join("\n"))
       if (msg) {
         let m = await msg.channel.send({embed});
-        if (this.pl) {
+        if (this.pl && !this.pl.deleted) {
           this.pl.edit({embed: u.embed().setTimestamp().setTitle("Current Playlist").setURL(m.url).setDescription(`Active playlist has been moved to ${m.url}`)});
           this.pl.clearReactions().catch(u.noop);
         }
@@ -103,12 +103,12 @@ class Queue {
           for (const [id, user] of press.users)
             if (id != m.client.user.id) press.remove(user).catch(u.noop);
         }
-      } else if (this.pl) {
+      } else if (this.pl && !this.pl.deleted) {
         this.pl.edit({embed});
       }
     } else {
       if (msg) msg.channel.send("There are no songs currently playing in this server.").then(u.clean);
-      if (this.pl) this.pl.edit({embed: u.embed().setTimestamp().setTitle("Current Playlist").setDescription("No songs are currently playing.")});
+      if (this.pl && !this.pl.deleted) this.pl.edit({embed: u.embed().setTimestamp().setTitle("Current Playlist").setDescription("No songs are currently playing.")});
     }
   }
 
