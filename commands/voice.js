@@ -63,6 +63,9 @@ class Queue {
             }
             else this.play();
           });
+        dispatcher.on("error", (error) => {
+          dispatcher.end();
+        });
       } catch(error) {
         this.stop();
         //Module.handler.errorHandler(error, `Sound Playback in ${channel.guild.name}`);
