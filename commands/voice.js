@@ -80,7 +80,7 @@ class Queue {
       }
       while (next) {
         later.count++;
-        later.duration += next.length;
+        later.duration += next.value.sound.length;
         next = next.after;
       }
       let embed = u.embed().setTimestamp()
