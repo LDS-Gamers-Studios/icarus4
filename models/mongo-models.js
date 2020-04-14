@@ -609,7 +609,7 @@ const models = {
             preferences: 0,
             ghostBucks: 0,
             house: null,
-            excludeXP: false,
+            excludeXP: true,
             roles: []
           });
           newMember.save((err, doc) => {
