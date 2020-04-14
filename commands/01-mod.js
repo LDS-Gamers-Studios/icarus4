@@ -278,7 +278,7 @@ async function processCardReaction(reaction, mod, infraction) {
         } else if (!member) {
           let memberRoles = (await Module.db.user.fetchUser(infraction.discordId)).roles;
           let roles = message.guild.roles.filter(r => memberRoles.includes(r.id) || r.id == Module.config.roles.muted);
-          await Module.db.updateRoles({
+          await Module.db.user.updateRoles({
             id: infraction.discordId,
             roles
           });
