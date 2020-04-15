@@ -193,6 +193,16 @@ const Module = new Augur.Module()
     } else msg.reply("You need to tell me what your request is!");
   }
 })
+.addEvent("disconnect", async () => {
+  try {
+    let embed = u.embed()
+    .setTimestamp()
+    .setTitle("Bot Disconnect")
+    .setDescription((Module.handler.client.shard ? ("Shard " + Module.handler.client.shard.id) : "Bot") + " has disconnected. I will try restarting the bot.");
+    await u.errorLog.send({embed});
+    process.exit();
+  } catch(error) { u.alertError(error); process.exit(); }
+})
 .setInit((reload) => {
   if (!reload) {
     Module.handler.client.guilds.get(Module.config.ldsg).fetchMembers();
