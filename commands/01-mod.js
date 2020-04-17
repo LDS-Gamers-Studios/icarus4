@@ -354,7 +354,7 @@ Module
       u.userMentions(msg).forEach(async user => {
         try {
           // Make sure banner's highest role is higher than ban-ee's highest role
-          const toBeBanned = msg.guild.fetchMember(user);
+          const toBeBanned = await msg.guild.fetchMember(user);
           const bannedHighRole = user.member.roles.filter(r => r.id != "281135201407467520").sort((a, b) => b.position - a.position).first();
           if (bannerHighRole.comparePositionTo(bannedHighRole) <= 0) return;
         } catch(e) { u.alertError(e, "Role Rank Comparison (Ban)"); }
@@ -467,7 +467,7 @@ Module
       u.userMentions(msg).forEach(async user => {
         try {
           // Make sure kicker's highest role is higher than kick-ee's highest role
-          const toBeKicked = msg.guild.fetchMember(user);
+          const toBeKicked = await msg.guild.fetchMember(user);
           const kickedHighRole = user.member.roles.filter(r => r.id != "281135201407467520").sort((a, b) => b.position - a.position).first();
           if (kickerHighRole.comparePositionTo(kickedHighRole) <= 0) return;
         } catch(e) { u.alertError(e, "Role Rank Comparison (Kick)"); }
