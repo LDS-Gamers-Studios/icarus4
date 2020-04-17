@@ -355,26 +355,26 @@ Module
         try {
           // Make sure banner's highest role is higher than ban-ee's highest role
           const toBeBanned = await msg.guild.fetchMember(user);
-          const bannedHighRole = user.member.roles.filter(r => r.id != "281135201407467520").sort((a, b) => b.position - a.position).first();
+          const bannedHighRole = toBeBanned.roles.filter(r => r.id != "281135201407467520").sort((a, b) => b.position - a.position).first();
           if (bannerHighRole.comparePositionTo(bannedHighRole) <= 0) return;
-        } catch(e) { u.alertError(e, "Role Rank Comparison (Ban)"); }
-        try {
-          let infraction = {
-            discordId: user.id,
-            description: (reason ? reason : "Member ban"),
-            value: 30,
-            mod: msg.author.id
-          };
-          let inf = await Module.db.infraction.save(infraction);
+          try {
+            let infraction = {
+              discordId: user.id,
+              description: (reason ? reason : "Member ban"),
+              value: 30,
+              mod: msg.author.id
+            };
+            let inf = await Module.db.infraction.save(infraction);
 
-          let member = await msg.guild.fetchMember(user);
-          if (member) {
-            await member.send(`You were banned from ${msg.guild.name} for violating our code of conduct.${(reason ? ("\n" + reason) : "")}`);
-            bans.add(member.id);
-            await member.ban({days: 2, reason: reason});
-            msg.client.channels.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** banned **${u.escapeText(member.displayName)}**${(reason ? (" for " + reason) : "")}`);
-          } else msg.reply("That user is no longer part of the server.").then(u.clean);
-        } catch(e) { u.alertError(e, msg); }
+            let member = await msg.guild.fetchMember(user);
+            if (member) {
+              await member.send(`You were banned from ${msg.guild.name} for violating our code of conduct.${(reason ? ("\n" + reason) : "")}`);
+              bans.add(member.id);
+              await member.ban({days: 2, reason: reason});
+              msg.client.channels.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** banned **${u.escapeText(member.displayName)}**${(reason ? (" for " + reason) : "")}`);
+            } else msg.reply("That user is no longer part of the server.").then(u.clean);
+          } catch(e) { u.alertError(e, msg); }
+        } catch(e) { u.alertError(e, "Role Rank Comparison (Ban)"); }
       });
     } else {
       msg.reply("you need to tell me who to ban!")
@@ -468,25 +468,25 @@ Module
         try {
           // Make sure kicker's highest role is higher than kick-ee's highest role
           const toBeKicked = await msg.guild.fetchMember(user);
-          const kickedHighRole = user.member.roles.filter(r => r.id != "281135201407467520").sort((a, b) => b.position - a.position).first();
+          const kickedHighRole = toBeKicked.roles.filter(r => r.id != "281135201407467520").sort((a, b) => b.position - a.position).first();
           if (kickerHighRole.comparePositionTo(kickedHighRole) <= 0) return;
-        } catch(e) { u.alertError(e, "Role Rank Comparison (Kick)"); }
-        try {
-          let infraction = {
-            discordId: user.id,
-            description: (reason ? reason : "Member kick"),
-            value: 20,
-            mod: msg.author.id
-          };
-          let inf = await Module.db.infraction.save(infraction);
+          try {
+            let infraction = {
+              discordId: user.id,
+              description: (reason ? reason : "Member kick"),
+              value: 20,
+              mod: msg.author.id
+            };
+            let inf = await Module.db.infraction.save(infraction);
 
-          let member = await ldsg.fetchMember(user);
-          if (member) {
-            await member.send(`You were kicked from ${ldsg.name} for ${reason ? reason : "violating our code of conduct"}.`);
-            await member.kick(reason);
-            msg.client.channels.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** kicked **${u.escapeText(member.displayName)}**${reason ? (" for " + reason) : ""}`);
-          }
-        } catch(e) { u.alertError(e, msg); }
+            let member = await ldsg.fetchMember(user);
+            if (member) {
+              await member.send(`You were kicked from ${ldsg.name} for ${reason ? reason : "violating our code of conduct"}.`);
+              await member.kick(reason);
+              msg.client.channels.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** kicked **${u.escapeText(member.displayName)}**${reason ? (" for " + reason) : ""}`);
+            }
+          } catch(e) { u.alertError(e, msg); }
+        } catch(e) { u.alertError(e, "Role Rank Comparison (Kick)"); }
       });
     } else {
       msg.reply("you need to tell me who to kick!")
