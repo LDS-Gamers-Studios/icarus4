@@ -349,7 +349,15 @@ Module
     u.clean(msg, 0);
     if (u.userMentions(msg)) {
       let reason = suffix.replace(/<@!?\d+>/ig, "").trim();
+      // Get highest role that isn't "Live"
+      const bannerHighRole = msg.member.roles.filter(r => r.id != "281135201407467520").sort((a, b) => b.position - a.position).first();
       u.userMentions(msg).forEach(async user => {
+        try {
+          // Make sure banner's highest role is higher than ban-ee's highest role
+          const toBeBanned = await msg.guild.fetchMember(user);
+          const bannedHighRole = user.member.roles.filter(r => r.id != "281135201407467520").sort((a, b) => b.position - a.position).first();
+          if (bannerHighRole.comparePositionTo(bannedHighRole) <= 0) return;
+        } catch(e) { u.alertError(e, "Role Rank Comparison (Ban)"); }
         try {
           let infraction = {
             discordId: user.id,
@@ -454,7 +462,15 @@ Module
     let reason = suffix.replace(/<@!?\d+>/ig, "").trim();
     if (u.userMentions(msg)) {
       let ldsg = msg.guild;
+      // Get highest role that isn't "Live"
+      const kickerHighRole = msg.member.roles.filter(r => r.id != "281135201407467520").sort((a, b) => b.position - a.position).first();
       u.userMentions(msg).forEach(async user => {
+        try {
+          // Make sure kicker's highest role is higher than kick-ee's highest role
+          const toBeKicked = await msg.guild.fetchMember(user);
+          const kickedHighRole = user.member.roles.filter(r => r.id != "281135201407467520").sort((a, b) => b.position - a.position).first();
+          if (kickerHighRole.comparePositionTo(kickedHighRole) <= 0) return;
+        } catch(e) { u.alertError(e, "Role Rank Comparison (Kick)"); }
         try {
           let infraction = {
             discordId: user.id,
