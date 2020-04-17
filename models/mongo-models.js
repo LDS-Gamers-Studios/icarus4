@@ -45,6 +45,103 @@ const models = {
       });
     }
   },
+  ankle: {
+    save: function(data) {
+      return new Promise((fulfill, reject) => {
+        let newLostAnkle = new Ankle(data);
+        newLostAnkle.save(e => {
+          if (e) reject(e);
+          else fulfill(data);
+        });
+      });
+    },
+    getAnkles: function(channelId, time = 365) {
+      return new Promise((fulfill, reject) => {
+        let since = new Date(Date.now() - (time * 24 * 60 * 60 * 1000));
+        Ankle.find({channel: channelId, timestamp: { $gte: since }}, (err, records) => {
+          if (err) reject(err);
+          else fulfill(records);
+        });
+      });
+    },
+    getChannelSummary: function(channelId, time = 10000) {
+      return new Promise((fulfill, reject) => {
+        let since = new Date(Date.now() - (time * 24 * 60 * 60 * 1000));
+        Ankle.find({channel: channelId, timestamp: { $gte: since }}, (err, records) => {
+          if (err) {
+            reject(err);
+          } else {
+            fulfill({
+              channelId: channelId,
+              perUser: records.reduce(function(acc, rec) {
+                // Group lost ankles by user.
+                // perUser attribute is an object with User IDs as keys and counts (within the channel) as values
+                if (acc[rec.discordID] === undefined) acc[rec.discordID] = 1;
+                else acc[rec.discordID] += 1;
+                return acc;
+                }, {}
+              );,
+              total: records.length
+            });
+          }
+        });
+      });
+    },
+    getUserSummary: function(userId, time = 10000) {
+      return new Promise((fulfill, reject) => {
+        let since = new Date(Date.now() - (time * 24 * 60 * 60 * 1000));
+        Ankle.find({discordID: userId, timestamp: { $gte: since }}, (err, records) => {
+          if (err) {
+            reject(err);
+          } else {
+            fulfill({
+              userId: userId,
+              perChannel: records.reduce(function(acc, r) {
+                // Group lost ankles by channel.
+                // perChannel attribute is an object with Channel IDs as keys and counts as values
+                if (acc[rec.channel] === undefined) acc[rec.channel] = 1;
+                else acc[rec.channel] += 1;
+                return acc;
+                }, {}
+              );,
+              total: records.length
+            });
+          }
+        });
+      });
+    },
+    getSummary: function(time = 10000) {
+      return new Promise((fulfill, reject) => {
+        let since = new Date(Date.now() - (time * 24 * 60 * 60 * 1000));
+        Ankle.find({timestamp: { $gte: since }}, (err, records) => {
+          if (err) {
+            reject(err);
+          } else {
+            fulfill({
+              userId: userId,
+              channelTotals: records.reduce(function(acc, r) {
+                // Group lost ankles by channel.
+                // perChannel attribute is an object with Channel IDs as keys and counts as values
+                if (acc[rec.channel] === undefined) acc[rec.channel] = 1;
+                else acc[rec.channel] += 1;
+                return acc;
+                }, {}
+              );,
+              userTotals: records.reduce(function(acc, r) {
+                // Group lost ankles by user.
+                // perUser attribute is an object with User IDs as keys and counts (within the channel) as values
+                if (acc[rec.discordID] === undefined) acc[rec.discordID] = 1;
+                else acc[rec.discordID] += 1;
+                return acc;
+                }, {}
+              );,
+              total: records.length
+            });
+          }
+        });
+      });
+    }
+  },
   bank: {
     getBalance: function(user, currency = "gb") {
       return new Promise((fulfill, reject) => {
