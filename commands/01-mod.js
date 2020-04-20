@@ -347,7 +347,7 @@ Module
       if (userMentions) {
         userMentions.forEach(function(userId) {
           let data = await Module.db.ankle.getUserSummary(userId, time);
-          data.perChannel.sort((i0, i1) => i1[1] - i0[1]);
+          data.perChannel.sort((v0, v1) => v1 - v0);
           let entries = data.perChannel.entries();
 
           let response = [];
@@ -361,7 +361,7 @@ Module
       if (channelMentions.size > 0) {
         channelMentions.forEach(function channelId) {
           let data = await Module.db.ankle.getChannelSummary(channelId, time);
-          data.perUser.sort((i0, i1) => i1[1] - i0[1]);
+          data.perUser.sort((v0, v1) => v1 - v0);
           let entries = data.perUser.entries();
           
           let response = [];
@@ -374,9 +374,9 @@ Module
       }
       if (!userMentions && channelMentions.size == 0) { // No user or channel mentions, give high summary
         let data = await Module.db.ankle.getSummary(time);
-        data.perUser.sort((i0, i1) => i1[1] - i0[1]);
+        data.perUser.sort((v0, v1) => v1 - v0);
         let userEntries = data.perUser.entries();
-        data.perChannel.sort((i0, i1) => i1[1] - i0[1]);
+        data.perChannel.sort((v0, v1) => v1 - v0);
         let channelEntries = data.perChannel.entries();
           
         let response = [];
