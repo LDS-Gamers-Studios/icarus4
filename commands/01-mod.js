@@ -332,7 +332,7 @@ Module
 .addCommand({name: "ankles",
   description: "View lost ankles",
   category: "Mod",
-  permission: (msg) => (msg.guild && msg.member.roles.has(Module.config.roles.mod)),
+  permission: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && (msg.member.roles.has(Module.config.roles.mod) || msg.member.roles.has(Module.config.roles.management))),
   process: (msg, suffix) => {
     try {
       let time;
