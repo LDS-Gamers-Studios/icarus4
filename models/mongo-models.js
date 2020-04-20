@@ -1,4 +1,5 @@
 const Animation = require("./Animation.model"),
+  Ankle = require("./Ankle.model"),
   Bank = require("./Bank.model"),
   Ign = require("./Ign.model"),
   Infraction = require("./Infraction.model"),
@@ -73,14 +74,14 @@ const models = {
           } else {
             fulfill({
               channelId: channelId,
-              perUser: records.reduce(function(acc, rec) {
+              perUser: records.reduce(function(acc, r) {
                 // Group lost ankles by user.
                 // perUser attribute is an object with User IDs as keys and counts (within the channel) as values
-                if (acc[rec.discordID] === undefined) acc[rec.discordID] = 1;
-                else acc[rec.discordID] += 1;
+                if (acc[r.discordID] === undefined) acc[r.discordID] = 1;
+                else acc[r.discordID] += 1;
                 return acc;
                 }, {}
-              );,
+              ),
               total: records.length
             });
           }
@@ -99,11 +100,11 @@ const models = {
               perChannel: records.reduce(function(acc, r) {
                 // Group lost ankles by channel.
                 // perChannel attribute is an object with Channel IDs as keys and counts as values
-                if (acc[rec.channel] === undefined) acc[rec.channel] = 1;
-                else acc[rec.channel] += 1;
+                if (acc[r.channel] === undefined) acc[r.channel] = 1;
+                else acc[r.channel] += 1;
                 return acc;
                 }, {}
-              );,
+              ),
               total: records.length
             });
           }
@@ -122,19 +123,19 @@ const models = {
               channelTotals: records.reduce(function(acc, r) {
                 // Group lost ankles by channel.
                 // perChannel attribute is an object with Channel IDs as keys and counts as values
-                if (acc[rec.channel] === undefined) acc[rec.channel] = 1;
-                else acc[rec.channel] += 1;
+                if (acc[r.channel] === undefined) acc[r.channel] = 1;
+                else acc[r.channel] += 1;
                 return acc;
                 }, {}
-              );,
+              ),
               userTotals: records.reduce(function(acc, r) {
                 // Group lost ankles by user.
                 // perUser attribute is an object with User IDs as keys and counts (within the channel) as values
-                if (acc[rec.discordID] === undefined) acc[rec.discordID] = 1;
-                else acc[rec.discordID] += 1;
+                if (acc[r.discordID] === undefined) acc[r.discordID] = 1;
+                else acc[r.discordID] += 1;
                 return acc;
                 }, {}
-              );,
+              ),
               total: records.length
             });
           }
