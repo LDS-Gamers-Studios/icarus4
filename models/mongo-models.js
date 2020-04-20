@@ -13,7 +13,8 @@ const Animation = require("./Animation.model"),
   config = require("../config/config.json"),
   mongoose = require("mongoose");
 
-const serverSettings = new Map();
+const serverSettings = new Map(),
+  {Collection} = require("discord.js");
 
 mongoose.connect(config.db.db, config.db.settings);
 
@@ -74,13 +75,13 @@ const models = {
           } else {
             fulfill({
               channelId: channelId,
-              perUser: records.reduce(function(acc, r) {
+              perUser: records.reduce((acc, r) => {
                 // Group lost ankles by user.
                 // perUser attribute is an object with User IDs as keys and counts (within the channel) as values
-                if (acc[r.discordID] === undefined) acc[r.discordID] = 1;
-                else acc[r.discordID] += 1;
+                if (acc.has(r.discordId)) acc.set(r.discordId, acc.get(r.discordID) + 1);
+                else acc.set(r.discordID, 1);
                 return acc;
-                }, {}
+                }, new Collection()
               ),
               total: records.length
             });
@@ -97,13 +98,13 @@ const models = {
           } else {
             fulfill({
               userId: userId,
-              perChannel: records.reduce(function(acc, r) {
+              perChannel: records.reduce((acc, r) => {
                 // Group lost ankles by channel.
                 // perChannel attribute is an object with Channel IDs as keys and counts as values
-                if (acc[r.channel] === undefined) acc[r.channel] = 1;
-                else acc[r.channel] += 1;
+                if (acc.has(r.channel)) acc.set(r.channel, acc.get(r.channel) + 1);
+                else acc.set(r.channel, 1);
                 return acc;
-                }, {}
+                }, new Collection()
               ),
               total: records.length
             });
@@ -120,21 +121,21 @@ const models = {
           } else {
             fulfill({
               userId: userId,
-              channelTotals: records.reduce(function(acc, r) {
+              channelTotals: records.reduce((acc, r) => {
                 // Group lost ankles by channel.
                 // perChannel attribute is an object with Channel IDs as keys and counts as values
-                if (acc[r.channel] === undefined) acc[r.channel] = 1;
-                else acc[r.channel] += 1;
+                if (acc.has(r.channel)) acc.set(r.channel, acc.get(r.channel) + 1);
+                else acc.set(r.channel, 1);
                 return acc;
-                }, {}
+                }, new Collection()
               ),
-              userTotals: records.reduce(function(acc, r) {
+              userTotals: records.reduce((acc, r) => {
                 // Group lost ankles by user.
                 // perUser attribute is an object with User IDs as keys and counts (within the channel) as values
-                if (acc[r.discordID] === undefined) acc[r.discordID] = 1;
-                else acc[r.discordID] += 1;
+                if (acc.has(r.discordId)) acc.set(r.discordId, acc.get(r.discordID) + 1);
+                else acc.set(r.discordID, 1);
                 return acc;
-                }, {}
+                }, new Collection()
               ),
               total: records.length
             });
