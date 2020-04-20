@@ -329,6 +329,75 @@ const Module = new Augur.Module();
 **  Mod Commands  **
 *******************/
 Module
+.addCommand({name: "ankles",
+  description: "View lost ankles",
+  category: "Mod",
+  permission: (msg) => (msg.guild && msg.member.roles.has(Module.config.roles.mod)),
+  process: (msg, suffix) => {
+    try {
+      let time;
+      if (suffix)
+        let time = parseInt(suffix.replace(/<@!?\d+>/ig, '').replace(msg.mentions.CHANNELS_PATTERN, '').trim(), 10);
+      if (!Number.isInteger(time)) time = 10000;
+
+      let userMentions = u.userMentions(msg);
+      let channelMentions = msg.mentions.channels;
+      if (userMentions) {
+        userMentions.forEach(function(userId) {
+          let data = await Module.db.ankle.getUserSummary(userId, time);
+          data.perChannel.sort((i0, i1) => i1[1] - i0[1]);
+          let entries = data.perChannel.entries();
+
+          let response = [];
+          response.push(`<@${userId}> has lost ${data.total} ankles over the last ${time} days in ${data.perChannel.size} channels:\`\`\``)
+          for (chan of entries) {
+            response.push(`<#${chan[0]}>: ${chan[1]} ankles lost.`);
+          }
+          await msg.channel.send(response.join("\n") + "```");
+        });
+      }
+      if (channelMentions.size > 0) {
+        channelMentions.forEach(function channelId) {
+          let data = await Module.db.ankle.getChannelSummary(channelId, time);
+          data.perUser.sort((i0, i1) => i1[1] - i0[1]);
+          let entries = data.perUser.entries();
+          
+          let response = [];
+          response.push(`${data.perUser.size} users have lost ${data.total} ankles over the last ${time} days in <#${channelId}>:\`\`\``);
+          for (user of entries) {
+            response.push(`<@${user[0]}>: ${user[1]} ankles lost.`);
+          }
+          await msg.channel.send(response.join("\n") + "```");
+        }
+      }
+      if (!userMentions && channelMentions.size == 0) { // No user or channel mentions, give high summary
+        let data = await Module.db.ankle.getSummary(time);
+        data.perUser.sort((i0, i1) => i1[1] - i0[1]);
+        let userEntries = data.perUser.entries();
+        data.perChannel.sort((i0, i1) => i1[1] - i0[1]);
+        let channelEntries = data.perChannel.entries();
+          
+        let response = [];
+        response.push(`${data.perUser.size} users have lost ${data.total} ankles over the last ${time} days in ${data.perChannel.size} channels.`);
+        response.push("Top 5 users:```");
+        count = 0;
+        for (user of entries) {
+          response.push(`<@${user[0]}>: ${user[1]} ankles lost.`);
+          count++;
+          if (count == 5) break;
+        }
+        response[response.length-1] += "```";
+        response.push("Top 5 channels:```");
+        for (chan of entries) {
+          response.push(`<#${chan[0]}>: ${chan[1]} ankles lost.`);
+          count++;
+          if (count == 10) break;
+        }
+        await msg.channel.send(response.join("\n") + "```");
+      }
+    } catch (e) { u.alertError(e, msg); }
+  }
+})
 .addCommand({name: "announce",
   description: "Announce a post!",
   syntax: "<messageId> (in channel with message)",
