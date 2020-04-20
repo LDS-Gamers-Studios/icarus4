@@ -116,7 +116,17 @@ async function warnCard(msg, filtered = null, call = false) {
     .setDescription(msg.cleanContent + (msg.editedAt ? "\n[Edited]" : ""));
 
     filtered = (Array.isArray(filtered) ? filtered.join(", ") : filtered);
-    if (filtered) embed.addField("Match", filtered);
+    if (filtered) {
+      embed.addField("Match", filtered);
+      if (filtered.includes("lmao") && !msg.author.bot) {
+        let ankle = {
+          discordId: msg.author.id,
+          channel: msg.channel.id,
+          message: msg.id,
+        };
+        await Module.db.ankle.save(ankle);
+      }
+    }
 
     embed.addField("Channel", `#${msg.channel.name}`)
     .addField("Jump to Post", msg.url)
