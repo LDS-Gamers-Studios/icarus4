@@ -121,7 +121,7 @@ const models = {
           } else {
             fulfill({
               userId: userId,
-              channelTotals: records.reduce((acc, r) => {
+              perChannel: records.reduce((acc, r) => {
                 // Group lost ankles by channel.
                 // perChannel attribute is an object with Channel IDs as keys and counts as values
                 if (acc.has(r.channel)) acc.set(r.channel, acc.get(r.channel) + 1);
@@ -129,7 +129,7 @@ const models = {
                 return acc;
                 }, new Collection()
               ),
-              userTotals: records.reduce((acc, r) => {
+              perUser: records.reduce((acc, r) => {
                 // Group lost ankles by user.
                 // perUser attribute is an object with User IDs as keys and counts (within the channel) as values
                 if (acc.has(r.discordId)) acc.set(r.discordId, acc.get(r.discordId) + 1);
