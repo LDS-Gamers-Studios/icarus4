@@ -119,12 +119,14 @@ async function warnCard(msg, filtered = null, call = false) {
     if (filtered) {
       embed.addField("Match", filtered);
       if (filtered.includes("lmao") && !msg.author.bot) {
-        let ankle = {
-          discordId: msg.author.id,
-          channel: msg.channel.id,
-          message: msg.id,
-        };
-        await Module.db.ankle.save(ankle);
+        try {
+          let ankle = {
+            discordId: msg.author.id,
+            channel: msg.channel.id,
+            message: msg.id,
+          };
+          await Module.db.ankle.save(ankle);
+        } catch(e) { u.alertError(e, "Saving Ankle"); }
       }
     }
 
