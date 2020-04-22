@@ -334,7 +334,7 @@ Module
 .addCommand({name: "ankles",
   description: "View lost ankles",
   category: "Mod",
-  permission: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && (msg.member.roles.has(Module.config.roles.mod) || msg.member.roles.has(Module.config.roles.management))),
+  permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && (msg.member.roles.has(Module.config.roles.mod) || msg.member.roles.has(Module.config.roles.management))),
   process: async (msg, suffix) => {
     try {
       let time = parseInt(suffix.replace(/<@!?\d+>/ig, '').replace(msg.mentions.CHANNELS_PATTERN, '').trim(), 10) || 10000;
