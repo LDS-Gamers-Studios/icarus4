@@ -337,10 +337,7 @@ Module
   permission: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && (msg.member.roles.has(Module.config.roles.mod) || msg.member.roles.has(Module.config.roles.management))),
   process: (msg, suffix) => {
     try {
-      let time;
-      if (suffix)
-        let time = parseInt(suffix.replace(/<@!?\d+>/ig, '').replace(msg.mentions.CHANNELS_PATTERN, '').trim(), 10);
-      if (!Number.isInteger(time)) time = 10000;
+      let time = parseInt(suffix.replace(/<@!?\d+>/ig, '').replace(msg.mentions.CHANNELS_PATTERN, '').trim(), 10) || 10000;
 
       let userMentions = u.userMentions(msg);
       let channelMentions = msg.mentions.channels;
