@@ -355,7 +355,7 @@ Module
               }
               await msg.channel.send(response.join("\n") + "```");
             } else {
-              msg.channel.send(msg.guild.members.get(userId).displayName + " still has all their ankles!");
+              msg.channel.send(msg.guild.members.get(userId.id).displayName + " still has all their ankles!");
             }
           } catch (e) { u.alertError(e, `Handling lost ankles for user: ${userId}`); }
         });
