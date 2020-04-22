@@ -94,7 +94,7 @@ const models = {
       userId = userId.id ? userId.id : userId;
       return new Promise((fulfill, reject) => {
         let since = new Date(Date.now() - (time * 24 * 60 * 60 * 1000));
-        Ankle.find({discordID: userId, timestamp: { $gte: since }}, (err, records) => {
+        Ankle.find({discordId: userId, timestamp: { $gte: since }}, (err, records) => {
           if (err) {
             reject(err);
           } else {
