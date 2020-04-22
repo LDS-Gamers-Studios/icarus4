@@ -335,37 +335,41 @@ Module
   description: "View lost ankles",
   category: "Mod",
   permission: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && (msg.member.roles.has(Module.config.roles.mod) || msg.member.roles.has(Module.config.roles.management))),
-  process: (msg, suffix) => {
+  process: async (msg, suffix) => {
     try {
       let time = parseInt(suffix.replace(/<@!?\d+>/ig, '').replace(msg.mentions.CHANNELS_PATTERN, '').trim(), 10) || 10000;
 
       let userMentions = u.userMentions(msg);
       let channelMentions = msg.mentions.channels;
       if (userMentions) {
-        userMentions.forEach(function(userId) {
-          let data = await Module.db.ankle.getUserSummary(userId, time);
-          data.perChannel.sort((v0, v1) => v1 - v0);
+        userMentions.forEach(async (userId) => {
+          try {
+            let data = await Module.db.ankle.getUserSummary(userId, time);
+            data.perChannel.sort((v0, v1) => v1 - v0);
 
-          let response = [];
-          response.push(`<@${userId}> has lost ${data.total} ankles over the last ${time} days in ${data.perChannel.size} channels:\`\`\``)
-          for (const [chanId, count] of data.perChannel) {
-            response.push(`<#${chanId}>: ${count} ankles lost.`);
-          }
-          await msg.channel.send(response.join("\n") + "```");
+            let response = [];
+            response.push(`<@${userId}> has lost ${data.total} ankles over the last ${time} days in ${data.perChannel.size} channels:\`\`\``)
+            for (const [chanId, count] of data.perChannel) {
+              response.push(`<#${chanId}>: ${count} ankles lost.`);
+            }
+            await msg.channel.send(response.join("\n") + "```");
+          } catch (e) { u.alertError(e, `Handling lost ankles for user: <@${userId}>`); }
         });
       }
       if (channelMentions.size > 0) {
-        channelMentions.forEach(function channelId) {
-          let data = await Module.db.ankle.getChannelSummary(channelId, time);
-          data.perUser.sort((v0, v1) => v1 - v0);
-          
-          let response = [];
-          response.push(`${data.perUser.size} users have lost ${data.total} ankles over the last ${time} days in <#${channelId}>:\`\`\``);
-          for (const [userId, count] of data.perUser) {
-            response.push(`<@${userId}>: ${count} ankles lost.`);
-          }
-          await msg.channel.send(response.join("\n") + "```");
-        }
+        channelMentions.forEach(async (channelId) => {
+          try {
+            let data = await Module.db.ankle.getChannelSummary(channelId, time);
+            data.perUser.sort((v0, v1) => v1 - v0);
+
+            let response = [];
+            response.push(`${data.perUser.size} users have lost ${data.total} ankles over the last ${time} days in <#${channelId}>:\`\`\``);
+            for (const [userId, count] of data.perUser) {
+              response.push(`<@${userId}>: ${count} ankles lost.`);
+            }
+            await msg.channel.send(response.join("\n") + "```");
+          } catch (e) { u.alertError(e, `Handling lost ankles for channel: <#${channelId}>`); }
+        });
       }
       if (!userMentions && channelMentions.size == 0) { // No user or channel mentions, give high summary
         let data = await Module.db.ankle.getSummary(time);
