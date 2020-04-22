@@ -375,16 +375,16 @@ Module
         let response = [];
         response.push(`${data.perUser.size} users have lost ${data.total} ankles over the last ${time} days in ${data.perChannel.size} channels.`);
         response.push("Top 5 users:```");
-        let count = 0;
+        let displayCount = 0;
         for (const [userId, count] of data.perUser) {
           response.push(`<@${userId}>: ${count} ankles lost.`);
-          if (++count == 5) break;
+          if (++displayCount == 5) break;
         }
         response[response.length-1] += "```";
         response.push("Top 5 channels:```");
         for (const [chanId, count] of data.perChannel) {
           response.push(`<#${chanId}>: ${count} ankles lost.`);
-          if (++count == 10) break;
+          if (++displayCount == 10) break;
         }
         await msg.channel.send(response.join("\n") + "```");
       }
