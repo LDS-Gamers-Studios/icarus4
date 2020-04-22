@@ -1,4 +1,5 @@
 const Animation = require("./Animation.model"),
+  Ankle = require("./Ankle.model"),
   Bank = require("./Bank.model"),
   Ign = require("./Ign.model"),
   Infraction = require("./Infraction.model"),
@@ -12,7 +13,8 @@ const Animation = require("./Animation.model"),
   config = require("../config/config.json"),
   mongoose = require("mongoose");
 
-const serverSettings = new Map();
+const serverSettings = new Map(),
+  {Collection} = require("discord.js");
 
 mongoose.connect(config.db.db, config.db.settings);
 
@@ -41,6 +43,104 @@ const models = {
         Animation.find({date: { $gte: since }}, (err, records) => {
           if (err) reject(err);
           else fulfill(records);
+        });
+      });
+    }
+  },
+  ankle: {
+    save: function(data) {
+      return new Promise((fulfill, reject) => {
+        let newLostAnkle = new Ankle(data);
+        newLostAnkle.save(e => {
+          if (e) reject(e);
+          else fulfill(data);
+        });
+      });
+    },
+    getAnkles: function(time = 365) {
+      return new Promise((fulfill, reject) => {
+        let since = new Date(Date.now() - (time * 24 * 60 * 60 * 1000));
+        Ankle.find({timestamp: { $gte: since }}, (err, records) => {
+          if (err) reject(err);
+          else fulfill(records);
+        });
+      });
+    },
+    getChannelSummary: function(channelId, time = 10000) {
+      channelId = channelId.id ? channelId.id : channelId;
+      return new Promise((fulfill, reject) => {
+        let since = new Date(Date.now() - (time * 24 * 60 * 60 * 1000));
+        Ankle.find({channel: channelId, timestamp: { $gte: since }}, (err, records) => {
+          if (err) {
+            reject(err);
+          } else {
+            fulfill({
+              channelId: channelId,
+              perUser: records.reduce((acc, r) => {
+                // Group lost ankles by user.
+                // perUser attribute is an object with User IDs as keys and counts (within the channel) as values
+                if (acc.has(r.discordId)) acc.set(r.discordId, acc.get(r.discordId) + 1);
+                else acc.set(r.discordId, 1);
+                return acc;
+                }, new Collection()
+              ),
+              total: records.length
+            });
+          }
+        });
+      });
+    },
+    getUserSummary: function(userId, time = 10000) {
+      userId = userId.id ? userId.id : userId;
+      return new Promise((fulfill, reject) => {
+        let since = new Date(Date.now() - (time * 24 * 60 * 60 * 1000));
+        Ankle.find({discordID: userId, timestamp: { $gte: since }}, (err, records) => {
+          if (err) {
+            reject(err);
+          } else {
+            fulfill({
+              userId: userId,
+              perChannel: records.reduce((acc, r) => {
+                // Group lost ankles by channel.
+                // perChannel attribute is an object with Channel IDs as keys and counts as values
+                if (acc.has(r.channel)) acc.set(r.channel, acc.get(r.channel) + 1);
+                else acc.set(r.channel, 1);
+                return acc;
+                }, new Collection()
+              ),
+              total: records.length
+            });
+          }
+        });
+      });
+    },
+    getSummary: function(time = 10000) {
+      return new Promise((fulfill, reject) => {
+        let since = new Date(Date.now() - (time * 24 * 60 * 60 * 1000));
+        Ankle.find({timestamp: { $gte: since }}, (err, records) => {
+          if (err) {
+            reject(err);
+          } else {
+            fulfill({
+              perChannel: records.reduce((acc, r) => {
+                // Group lost ankles by channel.
+                // perChannel attribute is an object with Channel IDs as keys and counts as values
+                if (acc.has(r.channel)) acc.set(r.channel, acc.get(r.channel) + 1);
+                else acc.set(r.channel, 1);
+                return acc;
+                }, new Collection()
+              ),
+              perUser: records.reduce((acc, r) => {
+                // Group lost ankles by user.
+                // perUser attribute is an object with User IDs as keys and counts (within the channel) as values
+                if (acc.has(r.discordId)) acc.set(r.discordId, acc.get(r.discordId) + 1);
+                else acc.set(r.discordId, 1);
+                return acc;
+                }, new Collection()
+              ),
+              total: records.length
+            });
+          }
         });
       });
     }
