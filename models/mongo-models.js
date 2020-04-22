@@ -57,10 +57,10 @@ const models = {
         });
       });
     },
-    getAnkles: function(channelId, time = 365) {
+    getAnkles: function(time = 365) {
       return new Promise((fulfill, reject) => {
         let since = new Date(Date.now() - (time * 24 * 60 * 60 * 1000));
-        Ankle.find({channel: channelId, timestamp: { $gte: since }}, (err, records) => {
+        Ankle.find({timestamp: { $gte: since }}, (err, records) => {
           if (err) reject(err);
           else fulfill(records);
         });
