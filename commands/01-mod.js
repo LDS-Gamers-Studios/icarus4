@@ -368,7 +368,7 @@ Module
               data.perUser.sort((v0, v1) => v1 - v0);
 
               let response = [];
-              response.push(`${data.perUser.size} users have lost ${data.total} ankles over the last ${time} days in <#${channelId}>:\`\`\``);
+              response.push(`${data.perUser.size} users have lost ${data.total} ankles over the last ${time} days in ${channelId}:\`\`\``);
               for (const [userId, count] of data.perUser) {
                 response.push(`${msg.guild.members.get(userId).displayName}: ${count} ankles lost.`);
               }
@@ -397,9 +397,10 @@ Module
         }
         if (data.perChannel.size > 0) {
           response.push("Top 5 channels:```");
+          let displayCount = 0;
           for (const [chanId, count] of data.perChannel) {
             response.push(`${msg.guild.channels.get(chanId).name}: ${count} ankles lost.`);
-            if (++displayCount == 10) break;
+            if (++displayCount == 5) break;
           }
           response.push("```");
         }
