@@ -67,6 +67,7 @@ const models = {
       });
     },
     getChannelSummary: function(channelId, time = 10000) {
+      channelId = channelId.id ? channelId.id : channelId;
       return new Promise((fulfill, reject) => {
         let since = new Date(Date.now() - (time * 24 * 60 * 60 * 1000));
         Ankle.find({channel: channelId, timestamp: { $gte: since }}, (err, records) => {
@@ -90,6 +91,7 @@ const models = {
       });
     },
     getUserSummary: function(userId, time = 10000) {
+      userId = userId.id ? userId.id : userId;
       return new Promise((fulfill, reject) => {
         let since = new Date(Date.now() - (time * 24 * 60 * 60 * 1000));
         Ankle.find({discordID: userId, timestamp: { $gte: since }}, (err, records) => {
