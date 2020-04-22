@@ -122,7 +122,6 @@ const models = {
             reject(err);
           } else {
             fulfill({
-              userId: userId,
               perChannel: records.reduce((acc, r) => {
                 // Group lost ankles by channel.
                 // perChannel attribute is an object with Channel IDs as keys and counts as values
