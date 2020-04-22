@@ -345,52 +345,65 @@ Module
         userMentions.forEach(async (userId) => {
           try {
             let data = await Module.db.ankle.getUserSummary(userId, time);
-            data.perChannel.sort((v0, v1) => v1 - v0);
+            if (data.perChannel.size > 0) {
+              data.perChannel.sort((v0, v1) => v1 - v0);
 
-            let response = [];
-            response.push(`<@${userId}> has lost ${data.total} ankles over the last ${time} days in ${data.perChannel.size} channels:\`\`\``)
-            for (const [chanId, count] of data.perChannel) {
-              response.push(`<#${chanId}>: ${count} ankles lost.`);
+              let response = [];
+              response.push(`${userId} has lost ${data.total} ankles over the last ${time} days in ${data.perChannel.size} channels:\`\`\``)
+              for (const [chanId, count] of data.perChannel) {
+                response.push(`#${msg.guild.channels.get(chanId).name}: ${count} ankles lost.`);
+              }
+              await msg.channel.send(response.join("\n") + "```");
+            } else {
+              msg.channel.send(msg.guild.members.get(userId).displayName + " still has all their ankles!");
             }
-            await msg.channel.send(response.join("\n") + "```");
-          } catch (e) { u.alertError(e, `Handling lost ankles for user: <@${userId}>`); }
+          } catch (e) { u.alertError(e, `Handling lost ankles for user: ${userId}`); }
         });
       }
       if (channelMentions.size > 0) {
         channelMentions.forEach(async (channelId) => {
           try {
             let data = await Module.db.ankle.getChannelSummary(channelId, time);
-            data.perUser.sort((v0, v1) => v1 - v0);
+            if (data.perUser.size > 0) {
+              data.perUser.sort((v0, v1) => v1 - v0);
 
-            let response = [];
-            response.push(`${data.perUser.size} users have lost ${data.total} ankles over the last ${time} days in <#${channelId}>:\`\`\``);
-            for (const [userId, count] of data.perUser) {
-              response.push(`<@${userId}>: ${count} ankles lost.`);
+              let response = [];
+              response.push(`${data.perUser.size} users have lost ${data.total} ankles over the last ${time} days in <#${channelId}>:\`\`\``);
+              for (const [userId, count] of data.perUser) {
+                response.push(`${msg.guild.members.get(userId).displayName}: ${count} ankles lost.`);
+              }
+              await msg.channel.send(response.join("\n") + "```");
+            } else {
+              msg.channel.send(`No users have lost any ankles in ${channelId}!`);
             }
-            await msg.channel.send(response.join("\n") + "```");
-          } catch (e) { u.alertError(e, `Handling lost ankles for channel: <#${channelId}>`); }
+          } catch (e) { u.alertError(e, `Handling lost ankles for channel: ${channelId}`); }
         });
       }
       if (!userMentions && channelMentions.size == 0) { // No user or channel mentions, give high summary
         let data = await Module.db.ankle.getSummary(time);
         data.perUser.sort((v0, v1) => v1 - v0);
         data.perChannel.sort((v0, v1) => v1 - v0);
-          
+
         let response = [];
         response.push(`${data.perUser.size} users have lost ${data.total} ankles over the last ${time} days in ${data.perChannel.size} channels.`);
-        response.push("Top 5 users:```");
-        let displayCount = 0;
-        for (const [userId, count] of data.perUser) {
-          response.push(`<@${userId}>: ${count} ankles lost.`);
-          if (++displayCount == 5) break;
+        if (data.perUser.size > 0) {
+          response.push("Top 5 users:```");
+          let displayCount = 0;
+          for (const [userId, count] of data.perUser) {
+            response.push(`${msg.guild.members.get(userId).displayName}: ${count} ankles lost.`);
+            if (++displayCount == 5) break;
+          }
+          response[response.length-1] += "```";
         }
-        response[response.length-1] += "```";
-        response.push("Top 5 channels:```");
-        for (const [chanId, count] of data.perChannel) {
-          response.push(`<#${chanId}>: ${count} ankles lost.`);
-          if (++displayCount == 10) break;
+        if (data.perChannel.size > 0) {
+          response.push("Top 5 channels:```");
+          for (const [chanId, count] of data.perChannel) {
+            response.push(`${msg.guild.channels.get(chanId).name}: ${count} ankles lost.`);
+            if (++displayCount == 10) break;
+          }
+          response.push("```");
         }
-        await msg.channel.send(response.join("\n") + "```");
+        await msg.channel.send(response.join("\n"));
       }
     } catch (e) { u.alertError(e, msg); }
   }
