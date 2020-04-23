@@ -3,17 +3,12 @@ const Augur = require("augurbot"),
   u = require("../utils/utils");
 
 const active = new Set();
-const includeUsers = new Set();
 
 const Module = new Augur.Module()
-.setInit(() => {
-  Module.db.user.getUsers({excludeXP: false})
-  .then(users => {
-    for (let i = 0; i < users.length; i++) {
-      includeUsers.add(users[i].discordId);
-    }
-  });
+.setInit((talking) => {
+  for (let user of talking) active.add(user);
 })
+.setUnload(() => active)
 .addCommand({name: "leaderboard",
   description: "View the LDSG Chat Leaderboard",
   aliases: ["levels"],
@@ -28,13 +23,21 @@ const Module = new Augur.Module()
 
       let member = msg.client.guilds.get(Module.config.ldsg).members.get(user.id);
       let response = null;
-      if (!includeUsers.has(member.id) || member.user.bot) {
-        let snark = [
-          "don't got time for dat.",
-          "ain't interested in no XP gettin'.",
-          "don't talk to me no more, so I ignore 'em."
-        ];
-        response = `**${u.escapeText(member.displayName)}** ${u.rand(snark)}`;
+
+      let memberInfo = await Module.db.user.fetchUser(user);
+
+      if (memberInfo.excludeXP || member.user.bot) {
+        if (msg.member.roles.has(Module.config.roles.mod)) {
+          let userInfo = await Module.db.user.fetchUser(member)
+          response = `> **${u.escapeText(member.displayName)}** Activity: ${userInfo.posts} posts.`;
+        } else {
+          let snark = [
+            "don't got time for dat.",
+            "ain't interested in no XP gettin'.",
+            "don't talk to me no more, so I ignore 'em."
+          ];
+          response = `**${u.escapeText(member.displayName)}** ${u.rand(snark)}`;
+        }
       } else {
         let userDoc = await Module.db.user.findXPRank(user);
         userDoc.level = Rank.level(userDoc.totalXP);
@@ -111,13 +114,11 @@ const Module = new Augur.Module()
     if (!suffix || suffix == "true" || suffix == "on") {
       Module.db.user.update(msg.author, {excludeXP: false})
       .then((user) => {
-        includeUsers.add(user.discordId);
         msg.react("👌").catch(u.noop);
       });
     } else if (suffix == "false" || suffix == "off") {
       Module.db.user.update(msg.author, {excludeXP: true})
       .then((user) => {
-        if (includeUsers.has(user.discordId)) includeUsers.delete(user.discordId);
         msg.react("👌").catch(u.noop);
       });
     } else {
@@ -126,7 +127,7 @@ const Module = new Augur.Module()
   }
 })
 .addEvent("message", (msg) => {
-  if (msg.guild && (msg.guild.id == Module.config.ldsg) && !active.has(msg.author.id) && !(Rank.excludeChannels.includes(msg.channel.id) || Rank.excludeChannels.includes(msg.channel.parentID)) && !u.parse(msg) && includeUsers.has(msg.author.id) && !msg.author.bot)
+  if (msg.guild && (msg.guild.id == Module.config.ldsg) && !active.has(msg.author.id) && !(Rank.excludeChannels.includes(msg.channel.id) || Rank.excludeChannels.includes(msg.channel.parentID)) && !u.parse(msg) && !msg.author.bot)
     active.add(msg.author.id);
 })
 .setClockwork(() => {

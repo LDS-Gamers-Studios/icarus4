@@ -69,11 +69,11 @@ const Module = new Augur.Module()
 .addEvent("guildMemberRemove", (member) => {
   if (member.guild.id == Module.config.ldsg) {
     Module.db.user.updateRoles(member);
-    Module.db.user.findXPRank(member.id).then(rank => {
+    Module.db.user.fetchUser(member.id).then(user => {
       let response = [
         `**${member.displayName}** has left the server.`,
         "Joined: " + member.joinedAt.toLocaleDateString(),
-        "Lifetime XP: " + rank.totalXP
+        "Posts: " + user.posts
       ];
       member.client.channels.get(mod_log).send(response.join("\n"));
     });

@@ -577,18 +577,28 @@ const models = {
         response.xp = xp;
         User.updateMany(
           { discordId: {$in: users} },
-          { $inc: { currentXP: xp, totalXP: xp, posts: 1 } },
+          { $inc: { posts: 1 } },
           { new: true, upsert: true },
-          (err, newUsers) => {
+          (err, allUsersMod) => {
             if (err) reject(err);
             else {
-              User.find(
-                { discordId: {$in: users} },
-                (error, userDocs) => {
-                  if (error) reject(error);
+              User.updateMany(
+                { discordId: {$in: users}, excludeXP: false },
+                { $inc: { currentXP: xp, totalXP: xp } },
+                { new: true, upsert: true },
+                (err, rankUsersMod) => {
+                  if (err) reject(err);
                   else {
-                    response.users = userDocs;
-                    fulfill(response);
+                    User.find(
+                      { discordId: {$in: users}, excludeXP: false },
+                      (error, userDocs) => {
+                        if (error) reject(error);
+                        else {
+                          response.users = userDocs;
+                          fulfill(response);
+                        }
+                      }
+                    );
                   }
                 }
               );

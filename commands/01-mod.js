@@ -212,14 +212,12 @@ async function processCardReaction(reaction, mod, infraction) {
       /*********************
       **  Post Full Info  **
       *********************/
-      const Rank = require("../utils/RankInfo");
       let member = message.guild.members.get(infraction.discordId);
 
       let roleString = member.roles.map(role => role.name).join(", ");
       if (roleString.length > 1024) roleString = roleString.substr(0, roleString.indexOf(", ", 1000)) + " ...";
 
-      let userDoc = await Module.db.user.findXPRank(member.id);
-      userDoc.level = Rank.level(userDoc.totalXP);
+      let userDoc = await Module.db.user.fetchUser(member.id);
 
       let infractionSummary = await Module.db.infraction.getSummary(member.id);
 
@@ -243,8 +241,7 @@ async function processCardReaction(reaction, mod, infraction) {
       .addField("Joined", member.joinedAt.toUTCString(), true)
       .addField("Account Created", member.user.createdAt.toUTCString(), true)
       .addField("Roles", roleString)
-      .addField("Chat Level", `Current Level: ${userDoc.level}`, true)
-      .addField("Chat XP", `Season: ${parseInt(userDoc.currentXP, 10).toLocaleString()} XP\nLifetime: ${parseInt(userDoc.totalXP, 10).toLocaleString()} XP`, true)
+      .addField("Activity", `Posts: ${parseInt(userDoc.posts, 10).toLocaleString()}`, true)
       message.channel.send({embed: infoEmbed, disableEveryone: true});
       //Infraction Summary
     } else if (reaction == cardReactions[1]) {
