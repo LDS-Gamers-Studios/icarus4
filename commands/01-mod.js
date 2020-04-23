@@ -979,7 +979,7 @@ Module
   if ((guild.id == Module.config.ldsg) && !bans.has(user.id)) guild.client.channels.get(modLogs).send(`**${user.username}** has been banned.`);
 })
 .addEvent("message", (msg) => {
-  if (msg.guild && msg.guild.id == Module.config.ldsg) return processMessageLanguage(msg);
+  if (msg.guild && msg.member && msg.guild.id == Module.config.ldsg) return processMessageLanguage(msg);
 })
 .addEvent("messageReactionAdd", async (reaction, user) => {
   try {
@@ -991,7 +991,7 @@ Module
   } catch(e) { u.alertError(e, "Card Reaction Processing"); }
 })
 .addEvent("messageUpdate", (old, msg) => {
-  if (msg.guild && msg.guild.id == Module.config.ldsg) return processMessageLanguage(msg, true);
+  if (msg.guild && msg.member && msg.guild.id == Module.config.ldsg) return processMessageLanguage(msg, true);
 });
 
 module.exports = Module;
