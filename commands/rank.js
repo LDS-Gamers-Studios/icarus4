@@ -6,7 +6,8 @@ const active = new Set();
 
 const Module = new Augur.Module()
 .setInit((talking) => {
-  for (let user of talking) active.add(user);
+  if (talking)
+    for (let user of talking) active.add(user);
 })
 .setUnload(() => active)
 .addCommand({name: "leaderboard",
