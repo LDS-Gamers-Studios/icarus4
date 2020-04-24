@@ -585,7 +585,7 @@ const models = {
               User.updateMany(
                 { discordId: {$in: users}, excludeXP: false },
                 { $inc: { currentXP: xp, totalXP: xp } },
-                { new: true, upsert: true },
+                { new: true, upsert: false },
                 (err, rankUsersMod) => {
                   if (err) reject(err);
                   else {
