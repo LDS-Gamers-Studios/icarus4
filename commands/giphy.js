@@ -32,7 +32,7 @@ const Module = new Augur.Module()
               else if (file.downsized_large) file = file.downsized_large.url;
               else file = file.original.url;
 
-              let m = await msg.channel.send(`${msg.member.displayName}: \`${suffix}\``,
+              let m = await msg.channel.send(`${u.escapeText(msg.member.displayName)}: \`${suffix}\``,
                 {files: [
                   {attachment: file, name: suffix + ".gif"}
                 ]}
