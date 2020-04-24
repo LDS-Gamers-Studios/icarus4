@@ -90,7 +90,7 @@ const Module = new Augur.Module()
                 value: award,
                 mod: msg.author.id
               }).then(deposit => {
-                guild.members.get(deposit.discordId).send(`${guild.name} Chat Ranks have been reset! You've been awarded ${gb}${deposit.value} for your participation this season!`).catch(u.ignoreError);
+                guild.members.get(deposit.discordId).send(`${guild.name} Chat Ranks have been reset! You've been awarded ${gb}${deposit.value} for your participation this season!`).catch(u.noop);
               });
             }, 1100 * i, user, award);
           }
@@ -128,7 +128,7 @@ const Module = new Augur.Module()
   }
 })
 .addEvent("message", (msg) => {
-  if (msg.guild && (msg.guild.id == Module.config.ldsg) && !active.has(msg.author.id) && !(Rank.excludeChannels.includes(msg.channel.id) || Rank.excludeChannels.includes(msg.channel.parentID)) && !u.parse(msg) && !msg.author.bot)
+  if (msg.guild && (msg.guild.id == Module.config.ldsg) && !active.has(msg.author.id) && !(Rank.excludeChannels.includes(msg.channel.id) || Rank.excludeChannels.includes(msg.channel.parentID)) && !msg.member.roles.has(Module.config.roles.muted) && !u.parse(msg) && !msg.author.bot)
     active.add(msg.author.id);
 })
 .setClockwork(() => {
@@ -138,23 +138,24 @@ const Module = new Augur.Module()
       try {
         let response = await Module.db.user.addXp(active);
         if (response.users.length > 0) {
+          const ldsg = bot.guilds.get(Module.config.ldsg);
           for (const user of response.users) {
-            let member = bot.guilds.get(Module.config.ldsg).members.get(user.discordId);
+            let member = ldsg.members.get(user.discordId);
 
             if ((user.posts % 25 == 0) && !member.roles.has(Module.config.roles.trusted)) {
               let {Collection} = require("discord.js");
-              let modLogs = bot.channels.get("506575671242260490");
-              let gai = modLogs.guild.members.get(Module.config.ownerId);
-              modLogs.send(`${member} has posted ${user.posts} times in chat without being trusted!`);
+              let modLogs = ldsg.channels.get("506575671242260490");
+              let gai = ldsg.members.get(Module.config.ownerId);
+              await modLogs.send(`${member} has posted ${user.posts} times in chat without being trusted!`);
               Module.handler.execute("fullinfo", {
                 author: gai.user,
                 channel: modLogs,
                 client: bot,
-                guild: modLogs.guild,
+                guild: ldsg,
                 member: gai,
                 mentions: {
-                  users: new Collection().set(member.id, member.user),
-                  members: new Collection().set(member.id, member)
+                  users: new Collection([[member.id, member.user]]),
+                  members: new Collection([[member.id, member]])
                 }
               }, member.toString());
             }
@@ -172,7 +173,7 @@ const Module = new Augur.Module()
                   member.addRole(reward);
                   message += `\n\nYou have been awarded the ${reward.name} role!`;
                 }
-                member.send(message).catch(u.ignoreError);
+                member.send(message).catch(u.noop);
               }
             }
           }
