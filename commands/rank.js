@@ -138,41 +138,43 @@ const Module = new Augur.Module()
       try {
         let response = await Module.db.user.addXp(active);
         if (response.users.length > 0) {
-          response.users.forEach(user => {
-            let oldXP = user.totalXP - response.xp;
-            let lvl = Rank.level(user.totalXP);
-            let oldLvl = Rank.level(oldXP);
-
-            if (lvl != oldLvl) {
-              let member = bot.guilds.get(Module.config.ldsg).members.get(user.discordId);
-              let message = u.rand(Rank.messages) + " " + u.rand(Rank.levelPhrase).replace("%LEVEL%", lvl);
-
-              if (lvl >= 3 && !member.roles.has(Module.config.roles.trusted)) {
-                let {Collection} = require("discord.js");
-                let modLogs = bot.channels.get("506575671242260490");
-                let gai = modLogs.guild.members.get(Module.config.ownerId);
-                modLogs.send(`${member} has reached Level ${lvl} in chat without being trusted!`);
-                Module.handler.execute("fullinfo", {
-                  author: gai.user,
-                  channel: modLogs,
-                  client: bot,
-                  guild: modLogs.guild,
-                  member: gai,
-                  mentions: {
-                    users: new Collection().set(member.id, member.user),
-                    members: new Collection().set(member.id, member)
-                  }
-                }, member.toString());
-              }
-
-              if (Rank.rewards.has(lvl)) {
-                let reward = bot.guilds.get(Module.config.ldsg).roles.get(Rank.rewards.get(lvl).id);
-                member.addRole(reward);
-                message += `\n\nYou have been awarded the ${reward.name} role!`;
-              }
-              member.send(message).catch(u.ignoreError);
+          for (const user of response.users) {
+            if ((user.posts % 25 == 0) && !member.roles.has(Module.config.roles.trusted)) {
+              let {Collection} = require("discord.js");
+              let modLogs = bot.channels.get("506575671242260490");
+              let gai = modLogs.guild.members.get(Module.config.ownerId);
+              modLogs.send(`${member} has posted ${user.posts} times in chat without being trusted!`);
+              Module.handler.execute("fullinfo", {
+                author: gai.user,
+                channel: modLogs,
+                client: bot,
+                guild: modLogs.guild,
+                member: gai,
+                mentions: {
+                  users: new Collection().set(member.id, member.user),
+                  members: new Collection().set(member.id, member)
+                }
+              }, member.toString());
             }
-          });
+
+            if (!user.excludeXP) {
+              let oldXP = user.totalXP - response.xp;
+              let lvl = Rank.level(user.totalXP);
+              let oldLvl = Rank.level(oldXP);
+
+              if (lvl != oldLvl) {
+                let member = bot.guilds.get(Module.config.ldsg).members.get(user.discordId);
+                let message = u.rand(Rank.messages) + " " + u.rand(Rank.levelPhrase).replace("%LEVEL%", lvl);
+
+                if (Rank.rewards.has(lvl)) {
+                  let reward = bot.guilds.get(Module.config.ldsg).roles.get(Rank.rewards.get(lvl).id);
+                  member.addRole(reward);
+                  message += `\n\nYou have been awarded the ${reward.name} role!`;
+                }
+                member.send(message).catch(u.ignoreError);
+              }
+            }
+          }
         }
         active.clear();
       } catch(e) { u.alertError(e, "Rank clockwork update"); }
