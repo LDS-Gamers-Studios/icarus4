@@ -1,4 +1,5 @@
-const Augur = require("augurbot"),
+const Augur = require("augurbot");
+/*,
   DubAPI = require("dubapi"),
   WebhookClient = require("discord.js").WebhookClient,
   config = require("../config/dubtrack.json"),
@@ -76,5 +77,5 @@ const Module = new Augur.Module()
   dubBot.disconnect();
   return nowPlaying;
 });
-
-module.exports = Module;
+*/
+module.exports = new Augur.Module();
