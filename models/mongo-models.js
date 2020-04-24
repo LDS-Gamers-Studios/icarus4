@@ -590,7 +590,7 @@ const models = {
                   if (err) reject(err);
                   else {
                     User.find(
-                      { discordId: {$in: users}, excludeXP: false },
+                      { discordId: {$in: users} },
                       (error, userDocs) => {
                         if (error) reject(error);
                         else {
