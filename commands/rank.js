@@ -139,6 +139,8 @@ const Module = new Augur.Module()
         let response = await Module.db.user.addXp(active);
         if (response.users.length > 0) {
           for (const user of response.users) {
+            let member = bot.guilds.get(Module.config.ldsg).members.get(user.discordId);
+
             if ((user.posts % 25 == 0) && !member.roles.has(Module.config.roles.trusted)) {
               let {Collection} = require("discord.js");
               let modLogs = bot.channels.get("506575671242260490");
@@ -163,7 +165,6 @@ const Module = new Augur.Module()
               let oldLvl = Rank.level(oldXP);
 
               if (lvl != oldLvl) {
-                let member = bot.guilds.get(Module.config.ldsg).members.get(user.discordId);
                 let message = u.rand(Rank.messages) + " " + u.rand(Rank.levelPhrase).replace("%LEVEL%", lvl);
 
                 if (Rank.rewards.has(lvl)) {
