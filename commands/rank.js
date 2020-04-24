@@ -28,7 +28,7 @@ const Module = new Augur.Module()
       let memberInfo = await Module.db.user.fetchUser(user);
 
       if (memberInfo.excludeXP || member.user.bot) {
-        if (msg.member.roles.has(Module.config.roles.mod)) {
+        if (msg.member && msg.member.roles.has(Module.config.roles.mod)) {
           let userInfo = await Module.db.user.fetchUser(member)
           response = `> **${u.escapeText(member.displayName)}** Activity: ${userInfo.posts} posts.`;
         } else {
