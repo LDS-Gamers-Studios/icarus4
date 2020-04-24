@@ -128,7 +128,7 @@ const Module = new Augur.Module()
   }
 })
 .addEvent("message", (msg) => {
-  if (msg.guild && (msg.guild.id == Module.config.ldsg) && !active.has(msg.author.id) && !(Rank.excludeChannels.includes(msg.channel.id) || Rank.excludeChannels.includes(msg.channel.parentID)) && !msg.member.roles.has(Module.config.roles.muted) && !u.parse(msg) && !msg.author.bot)
+  if (msg.guild && (msg.guild.id == Module.config.ldsg) && !active.has(msg.author.id) && !(Rank.excludeChannels.includes(msg.channel.id) || Rank.excludeChannels.includes(msg.channel.parentID)) && !msg.webhookID && !msg.member.roles.has(Module.config.roles.muted) && !u.parse(msg) && !msg.author.bot)
     active.add(msg.author.id);
 })
 .setClockwork(() => {
