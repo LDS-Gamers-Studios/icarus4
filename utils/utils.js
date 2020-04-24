@@ -27,7 +27,7 @@ const Utils = {
       errorInfo
       .addField("User", msg.author.username, true)
       .addField("Location", (msg.guild ? `${msg.guild.name} > ${msg.channel.name}` : "PM"), true)
-      .addField("Command", msg.cleanContent, true)
+      .addField("Command", msg.cleanContent || "`undefined`", true)
     }
 
     let errorStack = (error.stack ? error.stack : error.toString());
