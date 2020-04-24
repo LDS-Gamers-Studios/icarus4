@@ -816,34 +816,25 @@ Module
   }
 })
 .addCommand({name: "trustaudit",
-  description: "List active (100 XP or more) untrusted users",
+  description: "List semi-active (15 posts or more) untrusted users",
   category: "Mod",
   hidden: true,
   permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && (msg.member.roles.has(Module.config.roles.mod) || msg.member.roles.has(Module.config.roles.management))),
-  process: (msg, suffix) => {
+  process: async (msg, suffix) => {
     try {
-      let threshold = parseInt(suffix, 10);
-      if (!threshold) threshold = 100;
-
-      var ldsg = msg.guild;
-      var User = require("../models/User.model");
-
-      User.find({currentXP: {$gt: threshold}}, (err, users) => {
-        if (err) {
-          msg.reply("I ran into an error: " + err).then(u.clean);
-        } else {
-          let response = [];
-          users.forEach(user => {
-            let member = ldsg.members.get(user.discordId);
-            if (member && !member.roles.has(Module.config.roles.trusted)) {
-              response.push({member: member, xp: user.currentXP});
-            }
-          });
-          if (response.length > 0)
-            msg.channel.send(response.sort((a, b) => b.xp - a.xp).map(m => `${m.member}: ${m.xp} XP, joined ${m.member.joinedAt.toLocaleDateString()}`).join("\n"), {split: true});
-          else msg.channel.send(`No untrusted users with ${threshold} XP found.`);
+      let threshold = parseInt(suffix, 10) || 15;
+      const ldsg = msg.guild;
+      let users = await Module.db.getUsers({posts: {$gt: threshold}});
+      let response = [];
+      for (const user of users) {
+        let member = ldsg.members.get(user.discordId);
+        if (member && !member.roles.has(Module.config.roles.trusted)) {
+          response.push({member: member, posts: user.posts});
         }
-      });
+      }
+      if (response.length > 0)
+        msg.channel.send(response.sort((a, b) => b.posts - a.posts).map(m => `${m.member}: ${m.posts} posts, joined ${m.member.joinedAt.toLocaleDateString()}`).join("\n"), {split: true});
+      else msg.channel.send(`No untrusted users with ${threshold} posts found.`);
     } catch(e) { u.alertError(e, msg); }
   }
 })
