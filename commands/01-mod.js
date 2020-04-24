@@ -824,7 +824,7 @@ Module
     try {
       let threshold = parseInt(suffix, 10) || 15;
       const ldsg = msg.guild;
-      let users = await Module.db.getUsers({posts: {$gt: threshold}});
+      let users = await Module.db.user.getUsers({posts: {$gt: threshold}});
       let response = [];
       for (const user of users) {
         let member = ldsg.members.get(user.discordId);
