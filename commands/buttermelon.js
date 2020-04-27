@@ -1,9 +1,11 @@
 const Augur = require("augurbot"),
+  u = require("../utils/utils"),
   buttermelon = require("../data/buttermelon.json");
 
 function buttermelonEdit(msg) {
   let emojis = {
     buttermelon: "305039588014161921",
+    noice: "633500960483704843",
     why: "403553351775551488"
   };
   let exclude = ['121033996439257092', '164784857296273408'];
@@ -27,11 +29,15 @@ function buttermelonEdit(msg) {
     // Reactions
     let bot = msg.client;
     if ((msg.mentions.users && msg.mentions.users.has(bot.user.id)) || (msg.mentions.roles && msg.mentions.roles.has("96360253850935296")))
-      msg.react(bot.emojis.get(emojis.why)).catch(console.error);
-    else if (/buttermelon/.test(msg.content.toLowerCase()) && (roll < .3))
-      msg.react(bot.emojis.get(emojis.buttermelon)).catch(console.error);
-    else if (/carp/.test(msg.content.toLowerCase()) && (roll < .3))
-      msg.react("🐟").catch(console.error);
+      msg.react(bot.emojis.get(emojis.why)).catch(u.noop);
+    if (roll < .3) {
+      if (/buttermelon/.test(msg.content.toLowerCase()))
+        msg.react(bot.emojis.get(emojis.buttermelon)).catch(u.noop);
+      if (/carp/.test(msg.content.toLowerCase()))
+        msg.react("🐟").catch(u.noop);
+      if (/noice/.test(msg.content.toLowerCase()))
+        msg.react(bot.emojis.get(emojis.noice)).catch(u.noop);
+    }
 
     if ((msg.channel.id == "203518149809799168") && (msg.cleanContent.toLowerCase() == "test"))
       msg.channel.send((Math.random() < 0.8 ? "`pass`" : "`fail`"));
