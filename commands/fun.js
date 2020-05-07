@@ -186,6 +186,25 @@ const Module = new Augur.Module()
   },
   permissions: (msg) => Module.config.adminId.includes(msg.author.id)
 })
+.addCommand({name: "blurple",
+  description: "Blurple an Avatar",
+  category: "Silly",
+  process: async (msg) => {
+    try {
+      const Jimp = require("jimp");
+      let blurple = "#7289da";
+
+      let target = msg.mentions.users.first() || msg.author;
+      let av = await Jimp.read(target.displayAvatarURL);
+      av.color([
+        {apply: "hue", params: [227]},
+        {apply: "mix", params: [blurple, 30]}
+      ]);
+
+      await msg.channel.send({files: [await av.getBufferAsync(JIMP.MIME_PNG)]});
+    } catch(e) { u.alertError(e, msg); }
+  }
+})
 .addCommand({name: "chaos",
   description: "IT'S MADNESS!",
   category: "Silly",
