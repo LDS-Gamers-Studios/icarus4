@@ -198,7 +198,7 @@ const Module = new Augur.Module()
       let av = await Jimp.read(target.displayAvatarURL);
       av.color([
         {apply: "hue", params: [227]},
-        //{apply: "mix", params: [blurple, 30]}
+        {apply: "mix", params: [blurple, 25]}
       ]);
 
       await msg.channel.send({files: [await av.getBufferAsync(Jimp.MIME_PNG)]});
