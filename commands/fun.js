@@ -201,7 +201,7 @@ const Module = new Augur.Module()
         {apply: "mix", params: [blurple, 30]}
       ]);
 
-      await msg.channel.send({files: [await av.getBufferAsync(JIMP.MIME_PNG)]});
+      await msg.channel.send({files: [await av.getBufferAsync(Jimp.MIME_PNG)]});
     } catch(e) { u.alertError(e, msg); }
   }
 })
