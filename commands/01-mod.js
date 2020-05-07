@@ -343,7 +343,7 @@ Module
           try {
             let data = await Module.db.ankle.getUserSummary(userId, time);
             if (data.perChannel.size > 0) {
-              data.perChannel.sort((v0, v1) => v1 - v0);
+              data.perChannel = data.perChannel.sort((v0, v1) => v1 - v0);
 
               let response = [];
               response.push(`${userId} has lost ${data.total} ankles over the last ${time} days in ${data.perChannel.size} channels:\`\`\``)
@@ -362,7 +362,7 @@ Module
           try {
             let data = await Module.db.ankle.getChannelSummary(channelId, time);
             if (data.perUser.size > 0) {
-              data.perUser.sort((v0, v1) => v1 - v0);
+              data.perUser = data.perUser.sort((v0, v1) => v1 - v0);
 
               let response = [];
               response.push(`${data.perUser.size} users have lost ${data.total} ankles over the last ${time} days in ${channelId}:\`\`\``);
@@ -378,8 +378,8 @@ Module
       }
       if (!userMentions && channelMentions.size == 0) { // No user or channel mentions, give high summary
         let data = await Module.db.ankle.getSummary(time);
-        data.perUser.sort((v0, v1) => v1 - v0);
-        data.perChannel.sort((v0, v1) => v1 - v0);
+        data.perUser = data.perUser.sort((v0, v1) => v1 - v0);
+        data.perChannel = data.perChannel.sort((v0, v1) => v1 - v0);
 
         let response = [];
         response.push(`${data.perUser.size} users have lost ${data.total} ankles over the last ${time} days in ${data.perChannel.size} channels.`);
