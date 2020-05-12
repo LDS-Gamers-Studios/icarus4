@@ -52,10 +52,10 @@ const Module = new Augur.Module()
         ];
         welcomeString = `${r(welcome)}, ${member}! ${r(info1)} ${welcomeChannel} ${r(info2)}. ${r(info3)}`;
         embed.setTitle(member.displayName + " has joined the server.");
-        embed.setTimestamp();
 
         Module.db.user.newUser(member.id);
       }
+      embed.setTimestamp();
       modLogs.send(embed);
       if (pizza && (guild.members.size < milestone)) welcomeString += `\n*${milestone - guild.members.size} more members until we have a pizza party!*`;
       if (!member.roles.has(Module.config.roles.muted) && !member.user.bot)
