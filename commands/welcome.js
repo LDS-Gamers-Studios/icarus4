@@ -52,6 +52,7 @@ const Module = new Augur.Module()
         ];
         welcomeString = `${r(welcome)}, ${member}! ${r(info1)} ${welcomeChannel} ${r(info2)}. ${r(info3)}`;
         embed.setTitle(member.displayName + " has joined the server.");
+        embed.setTimestamp();
 
         Module.db.user.newUser(member.id);
       }
