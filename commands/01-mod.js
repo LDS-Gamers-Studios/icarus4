@@ -309,7 +309,8 @@ async function processCardReaction(reaction, mod, infraction) {
         let response = "We have received one or more complaints regarding content you posted. We have reviewed the content in question and have determined, in our sole discretion, that it is against our code of conduct (<https://ldsgamers.com/code-of-conduct>). This content was removed on your behalf. As a reminder, if we believe that you are frequently in breach of our code of conduct or are otherwise acting inconsistently with the letter or spirit of the code, we may limit, suspend or terminate your access to the LDSG Discord server.";
 
         member.send(`${response}\n\n**${mod.username}** has issued this warning.`, quote)
-        .catch(e => u.alertError(e, "Warning DM"));
+        .catch(u.noop);
+        //.catch(e => u.alertError(e, "Warning DM"));
       }
 
       embed.fields = embed.fields.filter(f => !f.name || !f.name.startsWith("Jump"));
@@ -455,7 +456,7 @@ Module
 
             let member = await msg.guild.fetchMember(user);
             if (member) {
-              await member.send(`You were banned from ${msg.guild.name} for violating our code of conduct.${(reason ? ("\n" + reason) : "")}`);
+              await member.send(`You were banned from ${msg.guild.name} for violating our code of conduct.${(reason ? ("\n" + reason) : "")}`).catch(u.noop);
               bans.add(member.id);
               await member.ban({days: 2, reason: reason});
               msg.client.channels.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** banned **${u.escapeText(member.displayName)}**${(reason ? (" for " + reason) : "")}`);
@@ -568,7 +569,7 @@ Module
 
             let member = await ldsg.fetchMember(user);
             if (member) {
-              await member.send(`You were kicked from ${ldsg.name} for ${reason ? reason : "violating our code of conduct"}.`);
+              await member.send(`You were kicked from ${ldsg.name} for ${reason ? reason : "violating our code of conduct"}.`).catch(u.noop);
               await member.kick(reason);
               msg.client.channels.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** kicked **${u.escapeText(member.displayName)}**${reason ? (" for " + reason) : ""}`);
             }
@@ -745,7 +746,7 @@ Module
           } catch(e) { u.alertError(e, msg); }
 
           try {
-            member.send(`Your nickname has been changed in ${msg.guild.name} from ${oldNick} to ${newNick}. Please contact a moderator or member of the management team if you have questions regarding the change.`);
+            member.send(`Your nickname has been changed in ${msg.guild.name} from ${oldNick} to ${newNick}. Please contact a moderator or member of the management team if you have questions regarding the change.`).catch(u.noop);
           } catch(e) {
             // msg.channel.send("Could not inform user of the nickname change.")
             //   .then(u.clean);
@@ -776,10 +777,10 @@ Module
       let swagoteer = "441267815622639616";
       members.forEach(async (member) => {
         if (member.roles.has(swagoteer)) {
-          member.send("Thanks for your purchase from LDSG!");
+          member.send("Thanks for your purchase from LDSG!").catch(u.noop);
         } else {
           let m = await member.addRole(swagoteer);
-          m.send("Thanks for your purchase from LDSG! You've been awarded the **Swagoteer** role!")
+          m.send("Thanks for your purchase from LDSG! You've been awarded the **Swagoteer** role!").catch(u.noop);
         }
       });
       msg.reply(`I added the *Swagoteer* role to ${members.map(m => m.displayName).join(", ")}`)
@@ -802,7 +803,7 @@ Module
         msg.guild.fetchMember(userId).then(member => {
           member.addRole(Module.config.roles.trusted);
           try {
-            member.send("You have been marked as \"Trusted\" in " + msg.guild.name + ". This means you are now permitted to post images and links in chat. Please remember to follow the Code of Conduct when doing so.\n<http://ldsgamers.com/code-of-conduct>");
+            member.send("You have been marked as \"Trusted\" in " + msg.guild.name + ". This means you are now permitted to post images and links in chat. Please remember to follow the Code of Conduct when doing so.\n<http://ldsgamers.com/code-of-conduct>").catch(u.noop);
           } catch (e) {
             msg.client.channels.get(modLogs).send(`ℹ️ I think ${msg.member} has blocked me.`);
           }
@@ -884,7 +885,7 @@ Module
         msg.guild.fetchMember(userId).then(member => {
           member.removeRole(Module.config.roles.trusted);
           try {
-            member.send("You have been removed from \"Trusted\" in " + msg.guild.name + ". This means you no longer have the ability to post images. Please remember to follow the Code of Conduct when posting images or links.\n<http://ldsgamers.com/code-of-conduct>");
+            member.send("You have been removed from \"Trusted\" in " + msg.guild.name + ". This means you no longer have the ability to post images. Please remember to follow the Code of Conduct when posting images or links.\n<http://ldsgamers.com/code-of-conduct>").catch(u.noop);
           } catch (e) {
             msg.client.channels.get(modLogs).send(`ℹ️ I think ${msg.member} has blocked me.`);
           }
@@ -931,7 +932,7 @@ Module
           let summary = await Module.db.infraction.getSummary(member.id);
 
           let response = "We have received one or more complaints regarding content you posted. We have reviewed the content in question and have determined, in our sole discretion, that it is against our code of conduct (<http://ldsgamers.com/code-of-conduct>). This content was removed on your behalf. As a reminder, if we believe that you are frequently in breach of our code of conduct or are otherwise acting inconsistently with the letter or spirit of the code, we may limit, suspend or terminate your access to the LDSG discord server.";
-          member.send(`${response}\n\n**${msg.author.username}** has issued you a warning for:\n${comment}`);
+          member.send(`${response}\n\n**${msg.author.username}** has issued you a warning for:\n${comment}`).catch(u.noop);
 
           let card = u.embed()
           .setColor("#0000FF")
