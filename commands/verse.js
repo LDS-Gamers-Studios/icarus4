@@ -202,21 +202,28 @@ const Module = new Augur.Module()
   process: (msg, suffix) => {
     try {
       let date = suffix ? new Date(suffix) : new Date();
+      date.setHours(0, 0, 0, 0);
+      let displayDate = new Date(date);
+      let jan1;
+      // Account for year-end dates.
+      if (date.getMonth() == 11 && (date.getDate() - date.getDay() >= 26)) {
+        jan1 = new Date(date.getFullYear() + 1, 0, 1, 0, 0, 0);
+        date = jan1;
+      } else {
+        jan1 = new Date(date.getFullYear(), 0, 1, 0, 0, 0);
+      }
 
-      if (manuals.has(date.getFullYear())) {
-        let manual = manuals.get(date.getFullYear());
+      let manual = manuals.get(date.getFullYear());
+      if (manual) {
+        // Add full weeks and check partial weeks by day of week comparison
+        let week = ((date.getDay() + 6) % 7 < (jan1.getDay() + 6) % 7 ? 2 : 1) + Math.floor((date - jan1) / (1000 * 60 * 60 * 24 * 7));
+        // Account for General Conference
+        if ((date.getMonth() == 3 && (date.getDate() - date.getDay()) >= 0) || date.getMonth() > 3) week -= 1;
+        if ((date.getMonth() == 9 && (date.getDate() - date.getDay()) >= 0) || date.getMonth() > 9) week -= 1;
 
-        date.setHours(0, 0, 0, 0);
-        date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
-        let week1 = new Date(date.getFullYear(), 0, 1);
-        let week = 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
+        let link = `https://www.churchofjesuschrist.org/study/manual/come-follow-me-for-individuals-and-families-${manual}/${week.toString().padStart(2, "0")}`;
 
-        if ((date.getMonth() == 9 && date.getDate() >= 7) || date.getMonth() > 9) week -= 2;
-        else if ((date.getMonth() == 3 && date.getDate() >= 7) || date.getMonth() > 3) week -= 1;
-
-        let link = `https://churchofjesuschrist.org/study/manual/come-follow-me-for-individuals-and-families-${manual}/${week.toString().padStart(2, "0")}`;
-
-        msg.channel.send(`__Come, Follow Me Lesson for the week of ${(suffix ? new Date(suffix) : new Date()).toLocaleDateString()}:__\n${link}`);
+        msg.channel.send(`__Come, Follow Me Lesson for the week of ${displayDate.toLocaleDateString()}:__\n${link}`);
       } else {
         msg.channel.send(`Sorry, I don't have information for the ${date.getFullYear()} manual yet.`).then(u.clean);
       }
