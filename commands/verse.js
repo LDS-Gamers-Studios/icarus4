@@ -202,19 +202,25 @@ const Module = new Augur.Module()
   process: (msg, suffix) => {
     try {
       let date = suffix ? new Date(suffix) : new Date();
-      let manual = manuals.get(date.getFullYear());
 
-      date.setHours(0, 0, 0, 0);
-      date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
-      let week1 = new Date(date.getFullYear(), 0, 1);
-      let week = 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
+      if (manuals.has(date.getFullYear())) {
+        let manual = manuals.get(date.getFullYear());
 
-      if ((date.getMonth() == 9 && date.getDate() >= 7) || date.getMonth() > 9) week -= 2;
-      else if ((date.getMonth() == 3 && date.getDate() >= 7) || date.getMonth() > 3) week -= 1;
+        date.setHours(0, 0, 0, 0);
+        date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
+        let week1 = new Date(date.getFullYear(), 0, 1);
+        let week = 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
 
-      let link = `https://churchofjesuschrist.org/study/manual/come-follow-me-for-individuals-and-families-${manual}/${week.toString().padStart(2, "0")}`;
+        if ((date.getMonth() == 9 && date.getDate() >= 7) || date.getMonth() > 9) week -= 2;
+        else if ((date.getMonth() == 3 && date.getDate() >= 7) || date.getMonth() > 3) week -= 1;
 
-      msg.channel.send(`__Come, Follow Me Lesson for the week of ${(suffix ? new Date(suffix) : new Date()).toLocaleDateString()}:__\n${link}`);
+        let link = `https://churchofjesuschrist.org/study/manual/come-follow-me-for-individuals-and-families-${manual}/${week.toString().padStart(2, "0")}`;
+
+        msg.channel.send(`__Come, Follow Me Lesson for the week of ${(suffix ? new Date(suffix) : new Date()).toLocaleDateString()}:__\n${link}`);
+      } else {
+        msg.channel.send(`Sorry, I don't have information for the ${date.getFullYear()} manual yet.`).then(u.clean);
+      }
+
     } catch(error) { u.alertError(error, msg); }
   }
 })
