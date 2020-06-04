@@ -214,7 +214,7 @@ const Module = new Augur.Module()
 
       let link = `https://churchofjesuschrist.org/study/manual/come-follow-me-for-individuals-and-families-${manual}/${week.toString().padStart(2, "0")}`;
 
-      msg.channel.send(`__Come, Follow Me Lesson for ${(suffix ? new Date(suffix) : new Date()).toLocaleString()}:__\n${link}`);
+      msg.channel.send(`__Come, Follow Me Lesson for the week of ${(suffix ? new Date(suffix) : new Date()).toLocaleDateString()}:__\n${link}`);
     } catch(error) { u.alertError(error, msg); }
   }
 })
