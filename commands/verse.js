@@ -12,7 +12,11 @@ const scriptureTest = /([\w &]+) ((\d+)(\s?:\s?(\d+)\s?(-\s?\d+)?)?)/i,
   },
   u = require("../utils/utils"),
   request = require("request"),
-  cheerio = require("cheerio");
+  cheerio = require("cheerio"),
+  manuals = new Map([
+    [2019, "new-testament-2019"],
+    [2020, "book-of-mormon-2020"]
+  ]);
 
 const searchKeys = [];
 var highlights;
@@ -190,6 +194,54 @@ nb("Articles of Faith", "a of f", "pgp", "aof");
 const searchExp = new RegExp(`\\b(${searchKeys.join("|")})\\s*(\\d+)\\s?:\\s?(\\d+)(-\\s?\\d+)?`, "ig");
 
 const Module = new Augur.Module()
+.addCommand({name: "cfm",
+  description: "Probably links to the current Come, Follow Me lesson",
+  syntax: "date",
+  alisases: ["comefollowme"],
+  category: "Gospel",
+  process: (msg, suffix) => {
+    try {
+      let date = new Date(suffix);
+      let manual = manuals.get(date.getFullYear());
+
+      date.setHours(0, 0, 0, 0);
+      date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
+      let week1 = new Date(date.getFullYear(), 0, 1);
+      let week = 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
+
+      if ((date.getMonth() == 9 && date.getDate() >= 7) || date.getMonth() > 9) week -= 2;
+      else if ((date.getMonth() == 3 && date.getDate() >= 7) || date.getMonth() > 3) week -= 1;
+
+      let link = `https://churchofjesuschrist.org/study/manual/come-follow-me-for-individuals-and-families-${manual}/${week.toString().padStart(2, "0")}`;
+
+      msg.channel.send(`__Come, Follow Me__ Leson for ${suffix}:\n${link}`);
+    } catch(error) { u.alertError(error, msg); }
+  }
+})
+.addCommand({name: "conference",
+  description: "Searches for the best matching conference talk.",
+  syntax: "Search terms",
+  aliases: ["conf"],
+  category: "Gospel",
+  process: (msg, suffix) => {
+    if (suffix) {
+      let url = `https://www.churchofjesuschrist.org/search?lang=eng&facet=general-conference&query=${encodeURIComponent(suffix)}`;
+
+      request(url, (err, response, body) => {
+        if (err) {
+          console.error(err);
+        } else {
+          $ = cheerio.load(body);
+          let link = $("section.results a").first().attr("href");
+          if (link) msg.channel.send(link);
+          else msg.reply("I couldn't find any results for that.").then(u.clean);
+        }
+      });
+  } else {
+    msg.reply("you need to tell me what you want to search!");
+  }
+  }
+})
 .addCommand({name: "verse",
   description: "Link to a chapter or verse in the standard works",
   syntax: "Scripture Reference (John 10:11)",
@@ -228,30 +280,6 @@ const Module = new Augur.Module()
         //} else msg.channel.send(`**${books[scripture.book].title} ${scripture.chapter}${(scripture.verse ? (":" + scripture.verse) : "")}**\n<${link}>`);
       } else msg.reply("sorry, I couldn't understand that reference.").then(u.clean);
     } else msg.reply("sorry, I couldn't understand that reference.").then(u.clean);
-  }
-})
-.addCommand({name: "conference",
-  description: "Searches for the best matching conference talk.",
-  syntax: "Search terms",
-  aliases: ["conf"],
-  category: "Gospel",
-  process: (msg, suffix) => {
-    if (suffix) {
-      let url = `https://www.churchofjesuschrist.org/search?lang=eng&facet=general-conference&query=${encodeURIComponent(suffix)}`;
-
-      request(url, (err, response, body) => {
-        if (err) {
-          console.error(err);
-        } else {
-          $ = cheerio.load(body);
-          let link = $("section.results a").first().attr("href");
-          if (link) msg.channel.send(link);
-          else msg.reply("I couldn't find any results for that.").then(u.clean);
-        }
-      });
-  } else {
-    msg.reply("you need to tell me what you want to search!");
-  }
   }
 })
 .addEvent("message", (msg) => {
