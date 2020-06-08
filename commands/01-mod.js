@@ -264,7 +264,7 @@ async function processCardReaction(reaction, mod, infraction) {
       try {
         let msg = await message.guild.channels.get(infraction.channel).fetchMessage(infraction.message);
         if (msg) u.clean(msg, 0);
-      } catch(e) { noop(); }
+      } catch(e) { u.noop(); }
 
       embed.setColor(0x0000FF);
       infraction.mod = mod.id;
