@@ -214,18 +214,26 @@ const Module = new Augur.Module()
   }
 })
 .addCommand({name: "colorme",
-  description: "Colorize an avatar",
+  description: "Colorize an avatar or attached image",
   category: "Silly",
   process: async (msg, suffix) => {
     try {
       const Jimp = require("jimp");
       let color = parseInt(suffix.replace(/<@!?\d+>/g, ""), 10) || (10 * (Math.floor(Math.random() * 35) + 1));
-      let target = msg.mentions.users.first() || msg.author;
-      let av = await Jimp.read(target.displayAvatarURL);
-      av.color([
+      let original;
+
+      if (msg.attachments.size > 0) {
+        original = msg.attachments.first().url;
+      } else {
+        let target = msg.mentions.users.first() || msg.author;
+        original = target.displayAvatarURL;
+      }
+
+      let image = await Jimp.read(original);
+      image.color([
         { apply: "hue", params: [color] }
       ]);
-      await msg.channel.send({files: [await av.getBufferAsync(Jimp.MIME_PNG)]});
+      await msg.channel.send({files: [await image.getBufferAsync(Jimp.MIME_PNG)]});
     } catch(e) { u.alertError(e, msg); }
   }
 })
