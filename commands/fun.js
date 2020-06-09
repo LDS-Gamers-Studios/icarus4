@@ -218,6 +218,7 @@ const Module = new Augur.Module()
   category: "Silly",
   process: async (msg, suffix) => {
     try {
+      const Jimp = require("jimp");
       let color = parseInt(suffix.replace(/<@!?\d+>/g, ""), 10) || (10 * (Math.floor(Math.random() * 35) + 1));
       let target = msg.mentions.users.first() || msg.author;
       let av = await Jimp.read(target.displayAvatarURL);
