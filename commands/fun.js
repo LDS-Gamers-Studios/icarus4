@@ -213,6 +213,21 @@ const Module = new Augur.Module()
     quickFile(msg, "https://cdn.discordapp.com/attachments/96335850576556032/452153983931383808/FireGifLDSG.gif", "fire.gif");
   }
 })
+.addCommand({name: "colorme",
+  description: "Colorize an avatar",
+  category: "Silly",
+  process: async (msg, suffix) => {
+    try {
+      let color = parseInt(suffix.replace(/<@!?\d+>/g, ""), 10) || (10 * (Math.floor(Math.random() * 35) + 1));
+      let target = msg.mentions.users.first() || msg.author;
+      let av = await Jimp.read(target.displayAvatarURL);
+      av.color([
+        { apply: "hue", params: [color] }
+      ]);
+      await msg.channel.send({files: [await av.getBufferAsync(Jimp.MIME_PNG)]});
+    } catch(e) { u.alertError(e, msg); }
+  }
+})
 .addCommand({name: "disagree",
   description: "I'm not sure I agree...",
   category: "Silly",
