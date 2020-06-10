@@ -555,7 +555,7 @@ const Module = new Augur.Module()
   }
 })
 .addEvent("messageReactionAdd", (reaction, user) => {
-  if ((reaction.message.channel.id == "121755900313731074") && (reaction.users.size == 1))
+  if ((reaction.message.channel.id == "121755900313731074") && (reaction.emoji.name == "♻️") && (reaction.users.size == 1))
     reaction.message.react("🤺").catch(u.noop);
 })
 .setClockwork(() => {
