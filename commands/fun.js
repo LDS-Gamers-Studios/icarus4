@@ -554,6 +554,10 @@ const Module = new Augur.Module()
     ], "wut.gif");
   }
 })
+.addEvent("messageReactionAdd", (reaction, user) => {
+  if ((reaction.message.channel.id == "121755900313731074") && (reaction.users.size == 1))
+    reaction.message.react("🤺").catch(u.noop);
+})
 .setClockwork(() => {
   try {
     let bot = Module.handler.client;
