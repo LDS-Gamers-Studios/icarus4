@@ -87,7 +87,8 @@ function processMessageLanguage(msg, edited = false) {
           warnCard(msg, ["Link preview language"].concat(match));
           u.clean(msg, 0);
           break;
-        } else if (filter(msg, preview)) {
+        }
+        if (filter(msg, preview)) {
           msg.reply("it looks like that link might have some language in the preview. Please be careful!").then(u.clean);
           msg.suppressEmbeds().catch(u.noop);
           break;
