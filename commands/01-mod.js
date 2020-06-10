@@ -27,7 +27,10 @@ function filter(msg, text) {
   // PROFANITY FILTER
   let noWhiteSpace = text.toLowerCase().replace(/[\.,\/#!$%\^&\*;:\{\}=\-_`~"'\(\)\?\|]/g,"").replace(/\s\s+/g, " ");
   let filtered = pf.scan(noWhiteSpace);
-  if ((filtered.length > 0) && (noWhiteSpace.length > 0)) warnCard(msg, filtered);
+  if ((filtered.length > 0) && (noWhiteSpace.length > 0)) {
+    warnCard(msg, filtered);
+    return true;
+  } else return false;
 }
 
 async function toEnglish(msg) {
@@ -73,6 +76,19 @@ function processMessageLanguage(msg, edited = false) {
       toEnglish(msg).then(translation => filter(msg, translation));
     } else {
       filter(msg, msg.cleanContent);
+    }
+
+    if (msg.embeds.length > 0) {
+      for (let embed of msg.embeds) {
+        let preview = [embed.author.name, embed.title, embed.description].join("\n");
+        if (match = bannedWords.exec(preview)) {
+          msg.delete();
+          warnCard(msg, match);
+          break;
+        } else if (filter(msg, preview)) {
+          msg.suppressEmbeds().catch(u.noop);
+        }
+      }
     }
   }
 };
