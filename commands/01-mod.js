@@ -80,13 +80,17 @@ function processMessageLanguage(msg, edited = false) {
 
     if (msg.embeds.length > 0) {
       for (let embed of msg.embeds) {
-        let preview = [embed.author.name, embed.title, embed.description].join("\n");
+        let preview = [embed.author ? embed.author.name : "", embed.title, embed.description].join("\n");
+        let match;
         if (match = bannedWords.exec(preview)) {
-          msg.delete();
-          warnCard(msg, match);
+          msg.reply("it looks like that link might have some harsh language in the preview. Please be careful!").then(u.clean);
+          warnCard(msg, ["Link preview language"].concat(match));
+          u.clean(msg, 0);
           break;
         } else if (filter(msg, preview)) {
+          msg.reply("it looks like that link might have some language in the preview. Please be careful!").then(u.clean);
           msg.suppressEmbeds().catch(u.noop);
+          break;
         }
       }
     }
