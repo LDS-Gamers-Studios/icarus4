@@ -359,6 +359,7 @@ Module
   process: async (msg, suffix) => {
     try {
       let time = parseInt(suffix.replace(/<@!?\d+>/ig, '').replace(msg.mentions.CHANNELS_PATTERN, '').trim(), 10) || 10000;
+      let since = new Date(Date.now() - (time * 24 * 60 * 60 * 1000));
 
       let userMentions = u.userMentions(msg);
       let channelMentions = msg.mentions.channels;
@@ -370,7 +371,12 @@ Module
               data.perChannel = data.perChannel.sort((v0, v1) => v1 - v0);
 
               let response = [];
-              response.push(`${userId} has lost ${data.total} ankles over the last ${time} days in ${data.perChannel.size} channels:\`\`\``)
+              if (since < new Date(2020, 4, 22)) {
+                response.push(`${userId} has lost ${data.total} ankles since 4/22/2020 in ${data.perChannel.size} channels:\`\`\``);
+              } else {
+                response.push(`${userId} has lost ${data.total} ankles over the last ${time} days in ${data.perChannel.size} channels:\`\`\``)
+              }
+
               for (const [chanId, count] of data.perChannel) {
                 response.push(`#${msg.guild.channels.get(chanId).name}: ${count} ankles lost.`);
               }
@@ -389,7 +395,12 @@ Module
               data.perUser = data.perUser.sort((v0, v1) => v1 - v0);
 
               let response = [];
-              response.push(`${data.perUser.size} users have lost ${data.total} ankles over the last ${time} days in ${channelId}:\`\`\``);
+              if (since < new Date(2020, 4, 22)) {
+                response.push(`${data.perUser.size} users have lost ${data.total} ankles since 4/22/2020 in ${channelId}:\`\`\``);
+              } else {
+                response.push(`${data.perUser.size} users have lost ${data.total} ankles over the last ${time} days in ${channelId}:\`\`\``);
+              }
+
               for (const [userId, count] of data.perUser) {
                 response.push(`${msg.guild.members.get(userId).displayName}: ${count} ankles lost.`);
               }
@@ -406,7 +417,12 @@ Module
         data.perChannel = data.perChannel.sort((v0, v1) => v1 - v0);
 
         let response = [];
-        response.push(`${data.perUser.size} users have lost ${data.total} ankles over the last ${time} days in ${data.perChannel.size} channels.`);
+        if (since < new Date(2020, 4, 22)) {
+          response.push(`${data.perUser.size} users have lost ${data.total} ankles since 4/22/2020 in ${data.perChannel.size} channels.`);
+        } else {
+          response.push(`${data.perUser.size} users have lost ${data.total} ankles over the last ${time} days in ${data.perChannel.size} channels.`);
+        }
+
         if (data.perUser.size > 0) {
           response.push("Top 5 users:```");
           let displayCount = 0;
