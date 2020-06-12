@@ -505,7 +505,7 @@ Module
     Promise.all(fetch).then(channelMsgs => {
       for (const messages of channelMsgs) {
         if (messages.size > 0) {
-          stats.get(messages.channel.id).messages = messages.size;
+          stats.get(messages.first().channel.id).messages = messages.size;
         }
       }
       msg.channel.send(
