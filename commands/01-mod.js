@@ -498,10 +498,11 @@ Module
   category: "Mod",
   permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && (msg.member.roles.has(Module.config.roles.management) || msg.member.roles.has("205826273639923722"))),
   process: (msg) => {
+    const {Collection} = require("discord.js");
     let last = Date.now() - (14 * 24 * 60 * 60 * 1000);
     let channels = msg.guild.channels.filter(c => (c.type == "text" && c.permissionsFor(msg.client.user).has("VIEW_CHANNEL") && (c.parentID != "363019058158895117")));
     let fetch = channels.map(c => c.fetchMessages({limit: 100}));
-    let stats = new Map(channels.map(c => ([c.id, {id: c.id, name: c.name, messages: 0}])));
+    let stats = new Collection(channels.map(c => ([c.id, {id: c.id, name: c.name, messages: 0}])));
     Promise.all(fetch).then(channelMsgs => {
       for (const messages of channelMsgs) {
         if (messages.size > 0) {
