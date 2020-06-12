@@ -504,7 +504,8 @@ Module
     let fetch = channels.map(c => c.fetchMessages({limit: 100}));
     let stats = new Collection(channels.map(c => ([c.id, {id: c.id, name: c.name, messages: 0}])));
     Promise.all(fetch).then(channelMsgs => {
-      for (const messages of channelMsgs) {
+      for (let messages of channelMsgs) {
+        let messages = messages.filter(m => m.createdTimestamp > last);
         if (messages.size > 0) {
           stats.get(messages.first().channel.id).messages = messages.size;
         }
