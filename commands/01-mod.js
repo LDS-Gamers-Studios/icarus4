@@ -499,18 +499,20 @@ Module
   permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && (msg.member.roles.has(Module.config.roles.management) || msg.member.roles.has("205826273639923722"))),
   process: (msg) => {
     let last = Date.now() - (14 * 24 * 60 * 60 * 1000);
-    let fetch = msg.guild.channels.filter(c => (c.type == "text" && c.permissionsFor(msg.client.user).has("VIEW_CHANNEL") && (c.parentID != "363019058158895117"))).map(c => c.fetchMessages({limit: 100}));
+    let channels = msg.guild.channels.filter(c => (c.type == "text" && c.permissionsFor(msg.client.user).has("VIEW_CHANNEL") && (c.parentID != "363019058158895117")));
+    let fetch = channels.map(c => c.fetchMessages({limit: 100}));
+    let stats = new Map(channel.map(c => ([c.id, {id: c.id, name: c.name, messages: 0}])));
     Promise.all(fetch).then(channelMsgs => {
+      for (const messages of channelMsgs) {
+        if (messages.size > 0) {
+          stats.get(messages.channel.id).messages = messages.size;
+        }
+      }
       msg.channel.send(
-        channelMsgs
-          .map(msgs => {
-            return {
-              name: msgs.first().channel.name,
-              messages: msgs.filter(m => m.createdTimestamp > last)
-            };
-          })
-          .sort((a, b) => b.messages.size - a.messages.size)
-          .map(channel => `${channel.name}: ${channel.messages.size}`)
+        stats
+          .filter(c => c.messages < 25)
+          .sort((a, b) => b.messages - a.messages)
+          .map(channel => `${channel.name}: ${channel.messages}`)
           .join("\n"),
         {split: true}
       );
