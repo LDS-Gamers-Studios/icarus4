@@ -22,7 +22,7 @@ function checkStreams(bot) {
   try {
     // Approved Streamers
     let streamers = bot.guilds.get(Module.config.ldsg).roles.get("267038468474011650").members;
-
+/*
     Module.db.ign.getList("twitch").then(igns => {
       igns.filter(ign => streamers.has(ign.discordId))
       .concat(bonusStreams.twitch.map(c => ({ign: c, discordId: c})))
@@ -31,7 +31,7 @@ function checkStreams(bot) {
         processTwitch(bot, ign.discordId, channelName);
       });
     });
-
+*/
     Module.db.ign.getList("mixer").then(igns => {
       igns.filter(ign => streamers.has(ign.discordId))
       .concat(bonusStreams.mixer.map(c => ({ign: c, discordId: c})))
