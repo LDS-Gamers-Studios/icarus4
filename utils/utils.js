@@ -53,7 +53,8 @@ const Utils = {
     } else return msg.channel;
   },
   clean: function(msg, t = 20000) {
-    if (msg.deletable && !msg.deleted) msg.delete(t).catch(() => {});
+    if (msg.deletable && !msg.deleted) return msg.delete(t);
+    else return Promise.resolve(msg);
   },
   embed: (data) => new Discord.RichEmbed(data).setColor(config.color),
   errorLog: errorLog,
