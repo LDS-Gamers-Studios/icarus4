@@ -872,7 +872,7 @@ Module
       let response = [];
       for (const user of users) {
         let member = ldsg.members.get(user.discordId);
-        if (member && !member.roles.has(Module.config.roles.trusted)) {
+        if (member && !member.roles.has(Module.config.roles.trusted) & !member.roles.has(Module.config.roles.untrusted)) {
           response.push({member: member, posts: user.posts});
         }
       }
@@ -927,6 +927,7 @@ Module
       u.userMentions(msg).forEach(function(userId) {
         msg.guild.fetchMember(userId).then(member => {
           member.removeRole(Module.config.roles.trusted);
+          member.addRole(Module.config.roles.untrusted);
           try {
             member.send("You have been removed from \"Trusted\" in " + msg.guild.name + ". This means you no longer have the ability to post images. Please remember to follow the Code of Conduct when posting images or links.\n<http://ldsgamers.com/code-of-conduct>").catch(() => blocked(member));
           } catch (e) {

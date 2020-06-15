@@ -142,7 +142,7 @@ const Module = new Augur.Module()
           for (const user of response.users) {
             let member = ldsg.members.get(user.discordId);
 
-            if ((user.posts % 25 == 0) && !member.roles.has(Module.config.roles.trusted) && !member.roles.has("722107904496500756")) {
+            if ((user.posts % 25 == 0) && !member.roles.has(Module.config.roles.trusted) && !member.roles.has(Module.config.roles.untrusted)) {
               let {Collection} = require("discord.js");
               let modLogs = ldsg.channels.get("506575671242260490");
               let gai = ldsg.members.get(Module.config.ownerId);
