@@ -845,6 +845,8 @@ Module
       u.userMentions(msg).forEach(function(userId) {
         msg.guild.fetchMember(userId).then(member => {
           member.addRole(Module.config.roles.trusted);
+          if (member.roles.has(Module.config.roles.untrusted))
+            member.removeRole(Module.config.roles.untrusted);
           try {
             member.send("You have been marked as \"Trusted\" in " + msg.guild.name + ". This means you are now permitted to post images and links in chat. Please remember to follow the Code of Conduct when doing so.\n<http://ldsgamers.com/code-of-conduct>").catch(() => blocked(member));
           } catch (e) {
