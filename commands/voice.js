@@ -445,13 +445,10 @@ const Module = new Augur.Module()
           if (connection.dispatcher && connection.dispatcher.paused)
             connection.dispatcher.resume();
           if (!connection.dispatcher) {
-            const path = require("path");
-            //"Pencil, Writing, Close, A.wav" by InspectorJ (www.jshaw.co.uk) of Freesound.org
-            let file = path.resolve(__dirname, "../storage/398271__inspectorj__pencil-writing-close-a.wav");
-            connection.playFile(file);
+            connection.playStream("https://www.youtube.com/watch?v=HWwDPd7LvNs");
           }
         } catch(error) { u.alertError(error, "Start Taking Notes."); }
-      }, 750, member);
+      }, 250, member);
     } else {
       // Hold Up!
       setTimeout(async (member) => {
@@ -467,32 +464,6 @@ const Module = new Augur.Module()
 })
 .addEvent("voiceStateUpdate", async (oldMember, newMember) => {
   let guild = oldMember.guild;
-
-  // Take Notes Trolling
-  if ((guild.id == Module.config.ldsg) && notes.has(oldMember.id)) {
-    if (oldMember.voiceChannel) {
-      // Member Left
-      try {
-        let connection = guild.voiceConnection;
-        if (connection) {
-          if (connection.dispatcher) connection.dispatcher.end();
-          await connection.disconnect();
-        }
-      } catch(error) { u.alertError(error, "Notes Disconnect."); }
-    }
-    if (newMember.voiceChannel){
-      // Member Joined
-      try {
-        let connection = guild.voiceConnection;
-        if (connection) {
-          if (connection.dispatcher) connection.dispatcher.end();
-          await connection.disconnect();
-        }
-        await newMember.voiceChannel.join();
-      } catch(error) { u.alertError(error, "Notes Join."); }
-    }
-  }
-
   if ((guild.id == Module.config.ldsg) && (oldMember.voiceChannelID != newMember.voiceChannelID)) {
     if (oldMember.voiceChannel && (oldMember.voiceChannel.members.size == 0) && isCommunityVoice(oldMember.voiceChannel)) {
       // REMOVE OLD VOICE CHANNEL
@@ -519,6 +490,31 @@ const Module = new Augur.Module()
           deny: ["VIEW_CHANNEL", "CONNECT", "SEND_MESSAGES", "SPEAK"]
         }]);
       } catch(e) { u.alertError(e, "Voice message creation error."); }
+    }
+  }
+
+  // Take Notes Trolling
+  if ((guild.id == Module.config.ldsg) && notes.has(oldMember.id)) {
+    if (oldMember.voiceChannel) {
+      // Member Left
+      try {
+        let connection = guild.voiceConnection;
+        if (connection) {
+          if (connection.dispatcher) connection.dispatcher.end();
+          await connection.disconnect();
+        }
+      } catch(error) { u.alertError(error, "Notes Disconnect."); }
+    }
+    if (newMember.voiceChannel){
+      // Member Joined
+      try {
+        let connection = guild.voiceConnection;
+        if (connection) {
+          if (connection.dispatcher) connection.dispatcher.end();
+          await connection.disconnect();
+        }
+        await newMember.voiceChannel.join();
+      } catch(error) { u.alertError(error, "Notes Join."); }
     }
   }
 });
