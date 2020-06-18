@@ -13,6 +13,8 @@ const availableNames = new USet();
 const communityVoice = "363014069533540362";
 const isCommunityVoice = (channel) => ((channel.parentID == communityVoice) && (channel.id != "123477839696625664"));
 
+const notes = new Set();
+
 class Queue {
   constructor() {
     this.queue = null;
@@ -351,6 +353,23 @@ const Module = new Augur.Module()
     }
   }
 })
+.addCommand({name: "takenotes",
+  permissions: (msg) => msg.author.id == Module.config.ownerId,
+  hidden: true,
+  process: (msg, suffix) => {
+    let enabled = suffix.replace(/<@!?\d+>/ig, "").toLowerCase().trim();
+    let targets = u.userMentions(msg);
+    if (!targets) {
+      msg.reply("you need to tell me who to take notes on!");
+      return;
+    } else if (enabled == "false") {
+      for (const [id, member] of targets) notes.delete(id);
+    } else {
+      for (const [id, member] of targets) notes.add(id);
+    }
+    msg.react("👌");
+  }
+})
 .addCommand({name: "unlock",
   description: "Unlocks your current voice channel for new users",
   category: "Voice",
@@ -408,8 +427,72 @@ const Module = new Augur.Module()
     }
   });
 })
+.addEvent("guildMemberSpeaking", async (member, speaking) => {
+  if (notes.has(member.id) && (member.guild.id == Module.config.ldsg)) {
+    // Only take notes if a noted member is speaking in LDSG.
+    if (speaking) {
+      // Take Notes
+      setTimeout(async (member) => {
+        try {
+          let connection = member.guild.voiceConnection;
+          if (connection && (connection.channel.id != member.voiceChannel.id)) {
+            if (connection.dispatcher) connection.dispatcher.end();
+            await connection.disconnect();
+            connection = await member.voiceChannel.join();
+          } else if (!connection) {
+            connection = await member.voiceChannel.join();
+          }
+          if (connection.dispatcher && connection.dispatcher.paused)
+            connection.dispatcher.resume();
+          if (!connection.dispatcher) {
+            const path = require("path");
+            //"Pencil, Writing, Close, A.wav" by InspectorJ (www.jshaw.co.uk) of Freesound.org
+            let file = path.resolve(__dirname, "../storage/398271__inspectorj__pencil-writing-close-a.wav");
+            connection.playFile(file);
+          }
+        } catch(error) { u.alertError(error, "Start Taking Notes."); }
+      }, 750, member);
+    } else {
+      // Hold Up!
+      setTimeout(async (member) => {
+        try {
+          let connection = member.guild.voiceConnection;
+          if (connection && (connection.channel.id == member.voiceChannel.id) && connection.dispatcher) {
+            connection.dispatcher.pause();
+          }
+        } catch(error) { u.alertError(error, "Pause Taking Notes."); }
+      }, 500, member);
+    }
+  }
+})
 .addEvent("voiceStateUpdate", async (oldMember, newMember) => {
   let guild = oldMember.guild;
+
+  // Take Notes Trolling
+  if ((guild.id == Module.config.ldsg) && notes.has(oldMember.id)) {
+    if (oldMember.voiceChannel) {
+      // Member Left
+      try {
+        let connection = guild.voiceConnection;
+        if (connection) {
+          if (connection.dispatcher) connection.dispatcher.end();
+          await connection.disconnect();
+        }
+      } catch(error) { u.alertError(error, "Notes Disconnect."); }
+    }
+    if (newMember.voiceChannel){
+      // Member Joined
+      try {
+        let connection = guild.voiceConnection;
+        if (connection) {
+          if (connection.dispatcher) connection.dispatcher.end();
+          await connection.disconnect();
+        }
+        await newMember.voiceChannel.join();
+      } catch(error) { u.alertError(error, "Notes Join."); }
+    }
+  }
+
   if ((guild.id == Module.config.ldsg) && (oldMember.voiceChannelID != newMember.voiceChannelID)) {
     if (oldMember.voiceChannel && (oldMember.voiceChannel.members.size == 0) && isCommunityVoice(oldMember.voiceChannel)) {
       // REMOVE OLD VOICE CHANNEL
