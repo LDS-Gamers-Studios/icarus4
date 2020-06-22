@@ -1027,6 +1027,17 @@ Module
 })
 .addEvent("messageUpdate", (old, msg) => {
   if (msg.guild && msg.member && msg.guild.id == Module.config.ldsg) return processMessageLanguage(msg, true);
+})
+.addEvent("userUpdate", (oldUser, newUser) => {
+  let ldsg = newUser.client.guilds.get(Module.config.ldsg);
+  if (ldsg.members.has(newUser.id)) {
+    let newMember = ldsg.members.get(newUser.id);
+    if (!newMember.roles.has(Module.config.roles.trusted) && (oldUser.tag != newUser.tag)) {
+      let response = [`**${oldUser.tag}** has changed their name to **${newUser.tag}**.`];
+      if (newMember.nickname) response.push(`Their nickname is currently **${newMember.nickname}.`);
+      newUser.client.channels.get(modLogs).send(response.join(" "));
+    }
+  }
 });
 
 module.exports = Module;
