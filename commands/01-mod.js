@@ -612,6 +612,8 @@ Module
 
             let member = await ldsg.fetchMember(user);
             if (member) {
+              if (member.roles.has(Module.config.roles.trusted) await member.removeRole(Module.config.roles.trusted);
+              await member.addRoles([Module.config.roles.muted, Module.config.roles.untrusted]);
               await member.send(`You were kicked from ${ldsg.name} for ${reason ? reason : "violating our code of conduct"}.`).catch(() => blocked(member));
               await member.kick(reason);
               msg.client.channels.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** kicked **${u.escapeText(member.displayName)}**${reason ? (" for " + reason) : ""}`);
@@ -728,11 +730,11 @@ Module
       let purge = parseInt(suffix, 10);
       let num = purge + 1;
       if (num) {
-        while (num > 100) {
-          await msg.channel.bulkDelete(100);
-          num -= 100;
+        while (num > 0) {
+          let deleting = Math.min(num, 50)
+          await msg.channel.bulkDelete(deleting);
+          num -= deleting;
         }
-        if (num > 0) await msg.channel.bulkDelete(num);
         msg.client.channels.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** purged ${purge} messages in ${msg.channel}`);
       } else {
         msg.reply("you need to tell me how many to delete.")
