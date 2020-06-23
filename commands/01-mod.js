@@ -612,7 +612,7 @@ Module
 
             let member = await ldsg.fetchMember(user);
             if (member) {
-              if (member.roles.has(Module.config.roles.trusted) await member.removeRole(Module.config.roles.trusted);
+              if (member.roles.has(Module.config.roles.trusted)) await member.removeRole(Module.config.roles.trusted);
               await member.addRoles([Module.config.roles.muted, Module.config.roles.untrusted]);
               await member.send(`You were kicked from ${ldsg.name} for ${reason ? reason : "violating our code of conduct"}.`).catch(() => blocked(member));
               await member.kick(reason);
