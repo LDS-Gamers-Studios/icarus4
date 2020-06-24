@@ -729,13 +729,14 @@ Module
     try {
       let purge = parseInt(suffix, 10);
       let num = purge + 1;
+      let channel = msg.channel;
       if (num) {
         while (num > 0) {
           let deleting = Math.min(num, 50)
-          await msg.channel.bulkDelete(deleting);
+          await channel.bulkDelete(deleting);
           num -= deleting;
         }
-        msg.client.channels.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** purged ${purge} messages in ${msg.channel}`);
+        channel.client.channels.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** purged ${purge} messages in ${msg.channel}`);
       } else {
         msg.reply("you need to tell me how many to delete.")
           .then(u.clean);
