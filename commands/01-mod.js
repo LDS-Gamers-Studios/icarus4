@@ -1036,7 +1036,7 @@ Module
   if (ldsg.members.has(newUser.id)) {
     let newMember = ldsg.members.get(newUser.id);
     if (!newMember.roles.has(Module.config.roles.trusted) || newMember.roles.has(Module.config.roles.untrusted)) {
-      const embed = new u.embed()
+      const embed = u.embed()
         .setTimestamp()
         .setAuthor(newMember.displayName, newUser.displayAvatarURL)
         .setTitle("User Update")
