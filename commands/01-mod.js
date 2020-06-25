@@ -1039,13 +1039,14 @@ Module
       const embed = u.embed()
         .setTimestamp()
         .setAuthor(newMember.displayName, newUser.displayAvatarURL)
-        .setTitle("User Update")
-        .setThumbnail(newUser.displayAvatarURL);
+        .setTitle("User Update");
       if (oldUser.tag != newUser.tag) {
-        embed.addField("Username Update", `**Old:** ${oldUser.tag}\n**New:** ${newUser.tag}`);
+        embed.addField("**Username Update**", `**Old:** ${oldUser.tag}\n**New:** ${newUser.tag}`);
       }
       if (oldUser.avatar != newUser.avatar) {
-        embed.addField("Avatar Update", "See Below").setImage(newUser.displayAvatarURL);
+        embed.addField("**Avatar Update**", "See Below").setImage(newUser.displayAvatarURL);
+      } else {
+        embed.setThumbnail(newUser.displayAvatarURL);
       }
       ldsg.channels.get(modLogs).send({embed});
     }
