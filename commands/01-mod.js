@@ -1035,10 +1035,19 @@ Module
   let ldsg = newUser.client.guilds.get(Module.config.ldsg);
   if (ldsg.members.has(newUser.id)) {
     let newMember = ldsg.members.get(newUser.id);
-    if (!newMember.roles.has(Module.config.roles.trusted) && (oldUser.tag != newUser.tag)) {
-      let response = [`**${oldUser.tag}** has changed their name to **${newUser.tag}**.`];
-      if (newMember.nickname) response.push(`Their nickname is currently **${newMember.nickname}.`);
-      newUser.client.channels.get(modLogs).send(response.join(" "));
+    if (!newMember.roles.has(Module.config.roles.trusted) || newMember.roles.has(Module.config.roles.untrusted)) {
+      const embed = new u.embed()
+        .setTimestamp()
+        .setAuthor(newMember.displayName, newUser.displayAvatarURL)
+        .setTitle("User Update")
+        .setThumbnail(newUser.displayAvatarURL);
+      if (oldUser.tag != newUser.tag) {
+        embed.addField("Username Update", `**Old:** ${oldUser.tag}\n**New:** ${newUser.tag}`);
+      }
+      if (oldUser.avatar != newUser.avatar) {
+        embed.addField("Avatar Update", "See Below").setImage(newUser.displayAvatarURL);
+      }
+      ldsg.channels.get(modLogs).send({embed});
     }
   }
 });
