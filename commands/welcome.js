@@ -19,15 +19,23 @@ const Module = new Augur.Module()
       let modLogs = bot.channels.get(mod_log); // #mod-logs
 
       let embed = u.embed()
-      .setDescription("Account Created:\n" + member.user.createdAt.toLocaleDateString());
+      .setDescription("Account Created:\n" + member.user.createdAt.toLocaleDateString())
+      .setTimestamp();
+
       if (member.user.avatarURL) embed.setThumbnail(member.user.avatarURL);
 
       let welcomeString = "";
 
       if (user) { // Member is returning
-        embed.setTitle(member.displayName + " has rejoined the server.");
+        if (user.roles.length > 0) member = await member.addRoles(user.roles.filter(role => guild.roles.has(role)));
+
+        let roleString = member.roles.map(role => role.name).join(", ");
+        if (roleString.length > 1024) roleString = roleString.substr(0, roleString.indexOf(", ", 1000)) + " ...";
+
+        embed.setTitle(member.displayName + " has rejoined the server.")
+          .addField("Roles", roleString);
         welcomeString = `Welcome back, ${member}! Glad to see you again.`;
-        if (user.roles.length > 0) member = await member.addRoles(user.roles);
+
       } else { // Member is new
         let welcome = [
           "Welcome",
@@ -55,7 +63,6 @@ const Module = new Augur.Module()
 
         Module.db.user.newUser(member.id);
       }
-      embed.setTimestamp();
       modLogs.send(embed);
       if (pizza && (guild.members.size < milestone)) welcomeString += `\n*${milestone - guild.members.size} more members until we have a pizza party!*`;
       if (!member.roles.has(Module.config.roles.muted) && !member.user.bot)
