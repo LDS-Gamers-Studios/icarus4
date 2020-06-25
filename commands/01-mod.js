@@ -1048,7 +1048,7 @@ Module
       } else {
         embed.setThumbnail(newUser.displayAvatarURL);
       }
-      ldsg.channels.get(modLogs).send({embed});
+      ldsg.channels.get("725797487129919488").send({embed});
     }
   }
 });
