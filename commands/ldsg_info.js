@@ -22,7 +22,7 @@ const Module = new Augur.Module()
       .setTitle("Donate to LDSG")
       .setDescription("Interested in helping out?\nDonations are used to help fund game servers, giveaways, and other benefits for the community.")
       .addField("Patreon - Recurring Donation", "[Donate on Patreon](https://patreon.com/LDSGamers)")
-      .addField("PayPal - One-time Donation", "[Donate on PayPal](https://paypal.me/LDSGamers)")
+      //.addField("PayPal - One-time Donation", "[Donate on PayPal](https://paypal.me/LDSGamers)")
       .addField("Venmo - One-time Donation", "[Donate on Venmo](https://venmo.com/LDSGamers) Code: `5374`");
     msg.channel.send({embed: embed}).catch(e => u.alertError(e, msg));
   }
