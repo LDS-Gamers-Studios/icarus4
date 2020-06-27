@@ -16,6 +16,7 @@ const Module = new Augur.Module()
 .addCommand({name: "donate",
   description: "Help us out!",
   category: "LDSG",
+  aliases: ["patreon", "paypal", "venmo"],
   process: (msg) => {
     let  embed = u.embed()
       .setTitle("Donate to LDSG")
