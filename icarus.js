@@ -21,7 +21,8 @@ Handler.start().then(loadCommands);
 
 // LAST DITCH ERROR HANDLING
 process.on("unhandledRejection", (error, p) => {
-  u.alertError(error, "Unhandled Rejection");
+  p.catch(e => u.alertError(e, "Unhandled Rejection"));
+//  u.alertError(error, "Unhandled Rejection");
 });
 process.on("uncaughtException", (error) => {
   u.alertError(error, "Uncaught Exception");
