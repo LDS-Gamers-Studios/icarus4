@@ -20,6 +20,7 @@
     "beam-client-node": "^2.0.0",
     "body-parser": "^1.19.0",
     "cheerio": "^1.0.0-rc.3",
+    "chess-web-api": "^1.0.9",
     "discord.js": "^11.6.4",
     "dubapi": "^1.6.9",
     "express": "^4.17.1",
