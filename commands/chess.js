@@ -31,7 +31,7 @@ const Module = new Augur.Module()
       } else {
         msg.reply("you need to tell me who to search for or set an ign with `!addIGN chess name`.").then(u.clean);
       }
-    } catch(error) { u.errorHandler(error, msg); }
+    } catch(error) { u.alertError(error, msg); }
   }
 });
 
