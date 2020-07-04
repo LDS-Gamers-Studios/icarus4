@@ -365,24 +365,56 @@ function youtubeEmbed(info) {
 }
 
 const Module = new Augur.Module()
-.addCommand({name: "approve",
-  description: "Approve an LDSG Streamer",
+.addCommand({name: "astreamer",
+  description: "Approve an LDSG Streamer for notifications",
   syntax: "@user(s)",
   category: "Streaming",
-  process: (msg) => {
+  process: async (msg) => {
     u.clean(msg);
     let bot = msg.client;
 
     if (u.userMentions(msg)) {
       msg.react("👌");
-      u.userMentions(msg).forEach(user => {
-        let member = bot.guilds.get(Module.config.ldsg).members.get(user.id);
-        member.addRole("267038468474011650").then((streamer) => {
-          streamer.send("Congratulations! You've been added to the Approved Streamers list in LDSG!\n\nWhile streaming, please remember the Streaming Guidelines ( https://goo.gl/Pm3mwS ) and LDSG Code of Conduct ( http://ldsgamers.com/code-of-conduct ). Also, please be aware that LDSG may make changes to the Approved Streamers list from time to time at its discretion.");
-          msg.reply("I applied the role to " + streamer.displayName + "!").then(u.clean);
-          bot.channels.get("506575671242260490").send(`ℹ️ ${(msg.member ? msg.member.displayName : msg.author.username)} has made ${streamer.displayName} an Approved Streamer.`);
-        });
-      });
+      for (const [id, user] of u.userMentions(msg)) {
+        try {
+          let member = bot.guilds.get(Module.config.ldsg).members.get(user.id);
+          if (member.roles.has(Module.config.roles.trusted)) {
+            let streamer = await member.addRole("267038468474011650");
+            streamer.send("Congratulations! You've been added to the Approved Streamers list in LDSG! This allows notifications to show up in #general and grants access to stream to voice channels. In order to show notifications in #general, please make sure your correct Twitch or Mixer name is saved in the database with `!addIGN twitch/mixer YourName`.\n\nWhile streaming, please remember the Streaming Guidelines ( https://goo.gl/Pm3mwS ) and LDSG Code of Conduct ( http://ldsgamers.com/code-of-conduct ). Also, please be aware that LDSG may make changes to the Approved Streamers list from time to time at its discretion.").catch(u.noop);
+            msg.reply("I applied the role to " + streamer.displayName + "!").then(u.clean);
+            bot.channels.get("506575671242260490").send(`ℹ️ ${(msg.member ? msg.member.displayName : msg.author.username)} has made ${streamer.displayName} an Approved Streamer.`);
+          } else {
+            msg.reply(`${member.displayName} needs to be trusted first!`);
+          }
+        } catch(error) { u.alertError(error, msg); }
+      }
+    } else msg.reply("you need to tell me who to approve!").then(u.clean);
+  },
+  permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && msg.member.roles.has(Module.config.roles.team))
+})
+.addCommand({name: "cstreamer",
+  description: "Approve an LDSG Streamer for community streaming",
+  syntax: "@user(s)",
+  category: "Streaming",
+  process: async (msg) => {
+    u.clean(msg);
+    let bot = msg.client;
+
+    if (u.userMentions(msg)) {
+      msg.react("👌");
+      for (const [id, user] of u.userMentions(msg)) {
+        try {
+          let member = bot.guilds.get(Module.config.ldsg).members.get(user.id);
+          if (member.roles.has(Module.config.roles.trusted)) {
+            let streamer = await member.addRole("698291753308127265");
+            streamer.send("Congratulations! You've been added to the Community Streamers list in LDSG, allowing you to stream to voice channels!\n\nWhile streaming, please remember the Streaming Guidelines ( https://goo.gl/Pm3mwS ) and LDSG Code of Conduct ( http://ldsgamers.com/code-of-conduct ). Also, please be aware that LDSG may make changes to the Community Streamers list from time to time at its discretion.").catch(u.noop);
+            msg.reply("I applied the role to " + streamer.displayName + "!").then(u.clean);
+            bot.channels.get("506575671242260490").send(`ℹ️ ${(msg.member ? msg.member.displayName : msg.author.username)} has made ${streamer.displayName} a Community Streamer.`);
+          } else {
+            msg.reply(`${member.displayName} needs to be trusted first!`);
+          }
+        } catch(error) { u.alertError(error, msg); }
+      }
     } else msg.reply("you need to tell me who to approve!").then(u.clean);
   },
   permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && msg.member.roles.has(Module.config.roles.team))
