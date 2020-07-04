@@ -13,7 +13,7 @@ const Module = new Augur.Module()
       if (suffix) name = suffix;
       else {
         let user = (u.userMentions(msg) ? u.userMentions(msg).first() : msg.author);
-        name = await Module.db.ign.find(user.id, 'chess');
+        name = (await Module.db.ign.find(user.id, 'chess')).ign;
       }
 
       if (name) {
