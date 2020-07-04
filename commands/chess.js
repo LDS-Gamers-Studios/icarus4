@@ -26,7 +26,7 @@ const Module = new Augur.Module()
           .setThumbnail("https://openclipart.org/image/800px/svg_to_png/275248/1_REY_Blanco_Pieza-Mural_.png");
         let i = 0;
         for (const game of games) {
-          embed.addField(`[♙${getPlayer.exec(game.white)[1]} v ♟${getPlayer.exec(game.black)[1]}](${game.url})`, `Current Turn: ${(game.turn == "white" ? "♙" : "♟")}${getPlayer.exec(game[game.turn])[1]}\nMove By: ${moment(game.move_by).format("ddd h:mmA Z")}`, true);
+          embed.addField(`♙${getPlayer.exec(game.white)[1]} v ♟${getPlayer.exec(game.black)[1]}`, `Current Turn: ${(game.turn == "white" ? "♙" : "♟")}${getPlayer.exec(game[game.turn])[1]}\nMove By: ${moment(game.move_by).format("ddd h:mmA Z")}\n[[link]](${game.url})`, true);
           if (++i == 25) break;
         }
         if (games.length == 0) embed.setDescription(`No active games found for ${name}.`);
