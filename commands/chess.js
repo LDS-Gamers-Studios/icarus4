@@ -9,12 +9,12 @@ const Module = new Augur.Module()
   syntax: "[playerName]",
   process: async (msg, suffix) => {
     let name;
-    //if (u.userMentions(msg)) {
-    //  try {
-    //    name = (await Module.db.ign.find(u.userMentions(msg).first().id, 'chess')).ign;
-    //  } catch(error) { u.alertError(error, msg); }
-    //} else if (suffix) {
-    if (suffix) {
+    if (u.userMentions(msg)) {
+      try {
+        name = (await Module.db.ign.find(u.userMentions(msg).first().id, 'chess')).ign;
+      } catch(error) { u.alertError(error, msg); }
+    } else if (suffix) {
+    //if (suffix) {
       name = suffix;
     } else {
       try {
@@ -24,7 +24,7 @@ const Module = new Augur.Module()
 
     if (name) {
       try {
-        let result = await chess.getPlayerCurrentDailyChess(name);
+        let result = await chess.getPlayerCurrentDailyChess(encodeURIComponent(name));
         let games = result.body.games;
         let getPlayer = /https:\/\/api\.chess\.com\/pub\/player\/(.*)$/;
         let embed = u.embed().setTitle(`Current Chess.com Games for ${name}`)
@@ -44,9 +44,8 @@ const Module = new Augur.Module()
         } else { u.alertError(error, msg); }
       }
     } else {
-      //if (u.userMentions(msg)) msg.reply(`${u.userMentions(msg).first().username} hasn't saved a Chess.com IGN!`).then(u.clean);
-      //else
-      msg.reply("you need to tell me who to search for or set an ign with `!addIGN chess name`.").then(u.clean);
+      if (u.userMentions(msg)) msg.reply(`${u.userMentions(msg).first().username} hasn't saved a Chess.com IGN!`).then(u.clean);
+      else msg.reply("you need to tell me who to search for or set an ign with `!addIGN chess name`.").then(u.clean);
     }
   }
 });
