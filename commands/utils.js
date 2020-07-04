@@ -1,5 +1,6 @@
 const u = require("../utils/utils"),
-  Augur = require("augurbot");
+  Augur = require("augurbot"),
+  moment = require("moment");
 
 const Module = new Augur.Module()
 .addCommand({name: "choose",
@@ -34,13 +35,22 @@ const Module = new Augur.Module()
 .addCommand({name: "remind",
   aliases: ["remindme", "reminder"],
   description: "Sets a reminder via DM from the bot.",
-  syntax: "MM/DD/YYYY HH:MM Reminder Text",
-  info: "Sets a reminder, which will be received by DM from the bot. The reminder will come *within 5 minutes* after the time. Times are Eastern Standard Time.",
+  syntax: "`DD MMM YYYY HH:MM MDT/PST/Etc. Your Reminder` OR `in N hours/days/weeks Your Reminder`",
+  info: "Sets a reminder, which will be received by DM from the bot. The reminder will come *within 5 minutes* after the time.",
   process: async (msg, suffix) => {
     try {
-      let dateString = suffix.split(" ");
-      let reminder = dateString.splice(2).join(" ");
-      let timestamp = new Date(dateString.join(" "));
+      let inExp = /in (\d+) (minute|hour|day|week|month|year)s? (.*)$/i;
+      let dateExp = /(\d{1,2} \w{3} \d{4} \d{2}:\d{2} \w+) (.*)$/i;
+      let match, reminder, timestamp;
+      if (match = inExp.exec(suffix)) {
+        // "in duration" format
+        timestamp = moment().add(parseInt(match[1], 10), match[2].toLowerCase()).toDate();
+        reminder = match[3];
+      } else if (match = dateExp.exec(suffix)) {
+        timestamp = moment(match[1]).toDate();
+        reminder = match[2];
+      }
+
       if (reminder && timestamp.valueOf()) {
         await Module.db.reminder.setReminder({
           discordId: msg.author.id,
@@ -49,7 +59,7 @@ const Module = new Augur.Module()
         });
         msg.react("👌");
       } else {
-        msg.reply("you need to use the following format:\n> MM/DD/YY HH:MM Your Reminder Text\nTimes are based on a 24 hour format and are parsed in EST.");
+        msg.reply("you need to use one of the following formats:\n> DD MM YYYY HH:MM PST/MDT/EST/Etc Your Reminder Text\n> in N hours/days/weeks/months Your Reminder Text");
       }
     } catch(error) { u.alertError(error, msg); }
   }
