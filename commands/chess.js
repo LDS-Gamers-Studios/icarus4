@@ -9,11 +9,15 @@ const Module = new Augur.Module()
   syntax: "[playerName]",
   process: async (msg, suffix) => {
     let name;
-    if (suffix) name = suffix;
-    else {
+    if (u.userMentions(msg)) {
       try {
-        let user = (u.userMentions(msg) ? u.userMentions(msg).first() : msg.author);
-        name = (await Module.db.ign.find(user.id, 'chess')).ign;
+        name = (await Module.db.ign.find(u.userMentions(msg).first().id, 'chess')).ign;
+      } catch(error) { u.alertError(error, msg); }
+    } else if (suffix) {
+      name = suffix;
+    } else {
+      try {
+        name = (await Module.db.ign.find(msg.author.id, 'chess')).ign;
       } catch(error) { u.alertError(error, msg); }
     }
 
