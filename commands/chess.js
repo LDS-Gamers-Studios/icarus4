@@ -8,15 +8,17 @@ const Module = new Augur.Module()
   description: "Get your Chess.com games, using the name saved with `!addIGN`",
   syntax: "[playerName]",
   process: async (msg, suffix) => {
-    try {
-      let name;
-      if (suffix) name = suffix;
-      else {
+    let name;
+    if (suffix) name = suffix;
+    else {
+      try {
         let user = (u.userMentions(msg) ? u.userMentions(msg).first() : msg.author);
         name = (await Module.db.ign.find(user.id, 'chess')).ign;
-      }
+      } catch(error) { u.alertError(error, msg); }
+    }
 
-      if (name) {
+    if (name) {
+      try {
         let result = await chess.getPlayerCurrentDailyChess(name);
         let games = result.body.games;
         let getPlayer = /https:\/\/api\.chess\.com\/pub\/player\/(.*)$/;
@@ -31,10 +33,14 @@ const Module = new Augur.Module()
         else if (games.length > 25) embed.setDescription(`${name}'s first 25 active games:`);
         else embed.setDescription(`${name}'s active games:`);
         msg.channel.send({embed});
-      } else {
-        msg.reply("you need to tell me who to search for or set an ign with `!addIGN chess name`.").then(u.clean);
+      } catch(error) {
+        if (error.message == "Not Found" && error.statusCode == 404) {
+          msg.reply(`I couldn't find a profile for \`${name}\`.`);
+        } else { u.alertError(error, msg); }
       }
-    } catch(error) { u.alertError(error, msg); }
+    } else {
+      msg.reply("you need to tell me who to search for or set an ign with `!addIGN chess name`.").then(u.clean);
+    }
   }
 });
 
