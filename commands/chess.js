@@ -11,7 +11,10 @@ const Module = new Augur.Module()
     try {
       let name;
       if (suffix) name = suffix;
-      else name = await Module.db.ign.find(user.id, 'chess');
+      else {
+        let user = (u.userMentions(msg) ? u.userMentions(msg).first() : msg.author);
+        name = await Module.db.ign.find(user.id, 'chess');
+      }
 
       if (name) {
         let result = await chess.getPlayerCurrentDailyChess(name);
