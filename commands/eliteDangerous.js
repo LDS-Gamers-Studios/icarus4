@@ -26,7 +26,7 @@ const Module = new Augur.Module()
             msg.channel.send("Not *yet* implemented. I might work faster if you give me a :buttermelon:")
           break;
         case "system":
-          let starSystem = getFromAPI("system?showPrimaryStar=1&showInformation=1&showPermit=1&systemName=" + remainder);
+          let starSystem = await getFromAPI("system?showPrimaryStar=1&showInformation=1&showPermit=1&systemName=" + remainder);
           if (starSystem) {
             let embed = u.embed();
             embed.setThumbnail("https://i.imgur.com/Ud8MOzY.png");
