@@ -23,7 +23,7 @@ const Module = new Augur.Module()
         // Returns help for subcommands.
         // Will be added once the rest is done.
         case "help":
-          msg.channel.send("Not *yet* implemented. I might work faster if you give me a :buttermelon:");
+          msg.channel.send("Not *yet* implemented. I might work faster if you give me a <:buttermelon:305039588014161921>");
           break;
         case "system":
           let starSystem = await getFromAPI("system?showPrimaryStar=1&showInformation=1&showPermit=1&systemName=" + remainder);
