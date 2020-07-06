@@ -23,7 +23,7 @@ const Module = new Augur.Module()
         // Returns help for subcommands.
         // Will be added once the rest is done.
         case "help":
-            msg.channel.send("Not *yet* implemented. I might work faster if you give me a :buttermelon:")
+          msg.channel.send("Not *yet* implemented. I might work faster if you give me a :buttermelon:");
           break;
         case "system":
           let starSystem = await getFromAPI("system?showPrimaryStar=1&showInformation=1&showPermit=1&systemName=" + remainder);
@@ -34,20 +34,25 @@ const Module = new Augur.Module()
             if (starSystem.information) {
               embed.addField("Controlling Faction", starSystem.information.faction);
               embed.addField("Government Type", starSystem.information.allegiance + " - " + starSystem.information.government);
-            } else { embed.addField("Uninhabited System", "No faction information available."); }
+            } else {
+              embed.addField("Uninhabited System", "No faction information available.");
+            }
             embed.addField("Permit Required", starSystem.requirePermit);
             if (starSystem.primaryStar) {
               embed.addField("Star Scoopable", starSystem.primaryStar.isScoopable);
             }
             embed.setURL("https://www.edsm.net/en/system/id/17631/name/" + starSystem.name.replace(" ", "+"));
             msg.channel.send({embed});
-            break;
           } else {
             msg.channel.send("I couldn't find a system with that name.");
-          }
+          };
+          break;
+        default:
+          msg.channel.send("I didn't understand that command.").then(u.clean);
+        }
       } catch(error) { u.alertError(error, "Elite Dangerous API Error"); }
     }
   }
-})
+});
 
 module.exports = Module;
