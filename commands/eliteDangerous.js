@@ -49,9 +49,8 @@ const Module = new Augur.Module()
           break;
         default:
           msg.channel.send("I didn't understand that command.").then(u.clean);
-        }
-      } catch(error) { u.alertError(error, "Elite Dangerous API Error"); }
-    }
+      }
+    } catch(error) { u.alertError(error, "Elite Dangerous API Error"); }
   }
 });
 
