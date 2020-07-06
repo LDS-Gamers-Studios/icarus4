@@ -27,7 +27,7 @@ const Module = new Augur.Module()
           break;
         case "system":
           let starSystem = await getFromAPI("system?showPrimaryStar=1&showInformation=1&showPermit=1&systemName=" + remainder);
-          if (starSystem) {
+          if (starSystem && starSystem.name) {
             let embed = u.embed();
             embed.setThumbnail("https://i.imgur.com/Ud8MOzY.png");
             embed.setTitle(starSystem.name);
