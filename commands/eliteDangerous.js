@@ -4,7 +4,7 @@ const request = require("request-promise-native");
 
 async function getFromAPI(params) {
   try {
-    var url = "https://www.edsm.net/api-v1/" + params;
+    let url = "https://www.edsm.net/api-v1/" + params;
     return JSON.parse(await request(url));
   } catch(error) { u.alertError(error, "Elite Dangerous API Error"); }
 }
@@ -26,7 +26,7 @@ const Module = new Augur.Module()
           msg.channel.send("Not *yet* implemented. I might work faster if you give me a <:buttermelon:305039588014161921>");
           break;
         case "system":
-          let starSystem = await getFromAPI("system?showPrimaryStar=1&showInformation=1&showPermit=1&systemName=" + remainder);
+          let starSystem = await getFromAPI("system?showPrimaryStar=1&showInformation=1&showPermit=1&showId=1&systemName=" + remainder);
           if (starSystem && starSystem.name) {
             let embed = u.embed();
             embed.setThumbnail("https://i.imgur.com/Ud8MOzY.png");
@@ -41,7 +41,7 @@ const Module = new Augur.Module()
             if (starSystem.primaryStar) {
               embed.addField("Star Scoopable", starSystem.primaryStar.isScoopable);
             }
-            embed.setURL("https://www.edsm.net/en/system/id/17631/name/" + starSystem.name.replace(" ", "+"));
+            embed.setURL("https://www.edsm.net/en/system/id/" + starSystem.id + "/name/" + starSystem.name.replace(" ", "+"));
             msg.channel.send({embed});
           } else {
             msg.channel.send("I couldn't find a system with that name.");
