@@ -62,14 +62,14 @@ const Module = new Augur.Module()
         let i = 0;
         for (let station of starSystem.stations) {
           // Filtering out fleet carriers. There can be over 100 of them (spam) and their names are user-determined (not always clean).
-          if (station.type === "Fleet Carrier") { continue; } 
+          if (station.type === "Fleet Carrier" || station.type === "Unknown") { continue; } 
           i++; if (i > 25) { continue; }
           let stationURL = "https://www.edsm.net/en/system/stations/id/" + starSystem.id + "/name/" + starSystem.name + "/details/idS/" + station.id + "/";
           let faction = "";
           // Rounding to one decimal
           let distance = Math.round(station.distanceToArrival * 10) / 10;
           if (station.controllingFaction) {
-            faction = " - " + station.controllingFaction.name;
+            faction = station.controllingFaction.name;
           }
 
           embed.addField(station.name, "**" + station.type + "** [Link](" + encodeURI(stationURL) + ")\n" + distance + " ls\n" + faction, true);
