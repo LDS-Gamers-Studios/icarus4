@@ -73,7 +73,7 @@ const Module = new Augur.Module()
         default:
           msg.channel.send("I didn't understand that command. See `!elite help`.").then(u.clean);
       }
-    } catch(error) { u.alertError(error, "Elite Dangerous API Error"); }
+    } catch(error) { u.alertError(error, msg); }
   }
 });
 
