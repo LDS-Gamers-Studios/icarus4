@@ -60,13 +60,17 @@ const Module = new Augur.Module()
           .setURL(starSystem.stationsURL);
 
         for (let station of starSystem.stations.filter((e, i) => i < 25)) {
+          // Filtering out fleet carriers. There can be over 100 of them (spam) and their names are user-determined (not always clean).
+          if (station.type === "Fleet Carrier") { continue; } 
           let stationURL = "https://www.edsm.net/en/system/stations/id/" + starSystem.id + "/name/" + starSystem.name + "/details/idS/" + station.id + "/";
           let faction = "";
+          // Rounding to one decimal
+          let distance = Math.round(station.distanceToArrival * 10) / 10;
           if (station.controllingFaction) {
             faction = " - " + station.controllingFaction.name;
           }
 
-          embed.addField(station.name, "[**" + station.type + "** - " + station.distanceToArrival + " LS" + faction + "](" + encodeURI(stationURL) + ")");
+          embed.addField(station.name, "[**" + station.type + "** - " + distance + " LS" + faction + "](" + encodeURI(stationURL) + ")");
         }
 
         msg.channel.send({ embed });
