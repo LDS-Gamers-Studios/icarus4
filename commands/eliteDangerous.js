@@ -15,6 +15,23 @@ const Module = new Augur.Module()
       command = command.toLowerCase();
       let remainder = params.join(" ");
 
+      if (command === "status") {
+        let status = elite.getEliteStatus();
+        var message = "The Elite: Dangerous servers are " + (status.type === "success" ? "online." : "offline.");
+        msg.channel.send(message);
+        return;
+      }
+
+      let starSystem = await elite.getSystemInfo(remainder);
+      if (!starSystem) {
+        msg.channel.send("I couldn't find a system with that name.").then(u.clean);
+        return;
+      }
+
+      let embed = u.embed()
+        .setThumbnail("https://i.imgur.com/Ud8MOzY.png")
+        .setAuthor("EDSM", "https://i.imgur.com/4NsBfKl.png")
+
       //
       // Help
       //
@@ -24,16 +41,7 @@ const Module = new Augur.Module()
       // System
       //
       } else if (command === "system") {
-        let starSystem = await elite.getSystemInfo(remainder);
-        if (!starSystem) {
-          msg.channel.send("I couldn't find a system with that name.").then(u.clean);
-          return;
-        }
-
-        let embed = u.embed()
-          .setThumbnail("https://i.imgur.com/Ud8MOzY.png")
-          .setTitle(starSystem.name)
-          .setAuthor("EDSM", "https://i.imgur.com/4NsBfKl.png")
+        embed.setTitle(starSystem.name)
           .setURL("https://www.edsm.net/en/system/id/" + starSystem.id + "/name/")
           .addField("Permit Required?", starSystem.requirePermit ? "Yes" : "No", true);
 
@@ -53,11 +61,6 @@ const Module = new Augur.Module()
       // Stations
       //
       } else if (command === "stations") {
-        let starSystem = await elite.getSystemInfo(remainder);
-        if (!starSystem) {
-          msg.channel.send("I couldn't find a system with that name.").then(u.clean);
-          return;
-        }
         if (starSystem.stations.length <= 0) { msg.channel.send("I couldn't find any stations in that system."); return; }
 
         let embed = u.embed()
@@ -107,23 +110,34 @@ const Module = new Augur.Module()
       //
       } else if (command === "factions")
       {
-        let starSystem = await elite.getSystemInfo(remainder);
-        if (!starSystem) {
-          msg.channel.send("I couldn't find a system with that name.").then(u.clean);
-          return;
-        }
         if (starSystem.factions.length <= 0) { msg.channel.send("I couldn't find any factions in that system."); return; }
 
-        let embed = u.embed()
-          .setThumbnail("https://i.imgur.com/Ud8MOzY.png")
-          .setTitle(starSystem.name)
-          .setAuthor("EDSM", "https://i.imgur.com/4NsBfKl.png")
+        embed.setTitle(starSystem.name)
           .setURL(starSystem.factionsURL);
 
         for (let faction of starSystem.factions) {
           let influence = Math.round(faction.influence * 10000) / 100;
+          let url = encodeURI("https://www.edsm.net/en/faction/id/" + faction.id + "/name/");
           embed.addField(factions.name + (faction.name === starSystem.controllingFaction.name ? " (Controlling)" : "") + " " + influence + "%",
-            "State: " + faction.state + "\nGovernment: " + faction.allegiance + " - " + faction.government, true);
+            "State: " + faction.state + "\nGovernment: " + faction.allegiance + " - " + faction.government + "\n[Link](" + url + ")", true);
+        }
+
+        msg.channel.send({ embed });
+      //
+      // Bodies
+      //
+      } else if (command === "bodies") {
+        if (starSystem.bodies.length <= 0) { msg.channel.send("I couldn't find any bodies in that system."); return; }
+
+        embed.setTitle(starSystem.name)
+          .setURL(starSystem.bodiesURL);
+
+        for (let body of starSystem.bodies) {
+          //                                                                                 Yes, this double slash is intentional
+          let url = encodeURI("https://www.edsm.net/en/system/bodies/id/" + starSystem.id + "//details/idB/" + body.id + "/nameB/");
+          let scoopable = body.type === "Star" ? (body.isScoopable ? " (Scoopable)" : " (Not Scoopable)") : "";
+          let distance = Math.round(body.distanceToArrival * 10) / 10;
+          embed.addField(body.name, body.type + scoopable + "\n" + distance + " ls");
         }
 
         msg.channel.send({ embed });
