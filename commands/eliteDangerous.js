@@ -15,9 +15,15 @@ const Module = new Augur.Module()
       command = command.toLowerCase();
       let remainder = params.join(" ");
 
-      if (command == "help") {
+      //
+      // Help
+      //
+      if (command === "help") {
         msg.channel.send("Not *yet* implemented. I might work faster if you give me a <:buttermelon:305039588014161921>");
-      } else if (command == "system") {
+      //
+      // System
+      //
+      } else if (command === "system") {
         let starSystem = await elite.getSystemInfo(remainder);
         if (!starSystem) {
           msg.channel.send("I couldn't find a system with that name.").then(u.clean);
@@ -42,15 +48,16 @@ const Module = new Augur.Module()
           embed.addField("Uninhabited System", "No faction information available.", true);
         }
 
-        msg.channel.send({embed});
-      } else if (command == "stations") {
+        msg.channel.send({ embed });
+      //
+      // Stations
+      //
+      } else if (command === "stations") {
         let starSystem = await elite.getSystemInfo(remainder);
         if (!starSystem) {
           msg.channel.send("I couldn't find a system with that name.").then(u.clean);
           return;
         }
-
-        if (!starSystem) { msg.channel.send("I couldn't find a system with that name."); return; }
         if (starSystem.stations.length <= 0) { msg.channel.send("I couldn't find any stations in that system."); return; }
 
         let embed = u.embed()
@@ -59,25 +66,64 @@ const Module = new Augur.Module()
           .setAuthor("EDSM", "https://i.imgur.com/4NsBfKl.png")
           .setURL(starSystem.stationsURL);
 
+        let stationList = {};
+
         let i = 0;
         for (let station of starSystem.stations) {
           // Filtering out fleet carriers. There can be over 100 of them (spam) and their names are user-determined (not always clean).
-          if (station.type === "Fleet Carrier" || station.type === "Unknown") { continue; } 
+          if (station.type === "Fleet Carrier" || station.type === "Unknown") { continue; }
           i++; if (i > 25) { continue; }
-          let stationURL = "https://www.edsm.net/en/system/stations/id/" + starSystem.id + "/name/" + starSystem.name + "/details/idS/" + station.id + "/";
-          let faction = "";
-          // Rounding to one decimal
-          let distance = Math.round(station.distanceToArrival * 10) / 10;
-          if (station.controllingFaction) {
-            faction = station.controllingFaction.name;
-          }
 
-          embed.addField(station.name, "**" + station.type + "** [Link](" + encodeURI(stationURL) + ")\n" + distance + " ls\n" + faction, true);
+          if (!stationList[station.type]) {
+            stationList[station.type] = [];
+          }
+          stationList[station.type].push(station);
+        }
+
+        for (let stationType in stationList) {
+          embed.addField(stationType, "-----------------------------");
+
+          for (let station of stationList[stationType]) {
+            let stationURL = "https://www.edsm.net/en/system/stations/id/" + starSystem.id + "/name/" + starSystem.name + "/details/idS/" + station.id + "/";
+            let faction = "";
+            // Rounding to one decimal
+            let distance = Math.round(station.distanceToArrival * 10) / 10;
+            if (station.controllingFaction) {
+              faction = station.controllingFaction.name;
+            }
+
+            embed.addField(faction, "[" + station.name + "](" + encodeURI(stationURL) + ")\n" + distance + " ls", true);
+          }
         }
 
         // Letting the user know there were more than 25
-        if (starSystem.stations.length > 25) {
-          embed.setFooter("Some stations were filtered out because the limit was exceeded.", "https://imgur.com/a/4pcFzW1");
+        if (i > 25) {
+          embed.setFooter("Some stations were filtered out because the limit was exceeded.", "https://i.imgur.com/vYPj8iX.png");
+        }
+
+        msg.channel.send({ embed });
+      //
+      // Factions
+      //
+      } else if (command === "factions")
+      {
+        let starSystem = await elite.getSystemInfo(remainder);
+        if (!starSystem) {
+          msg.channel.send("I couldn't find a system with that name.").then(u.clean);
+          return;
+        }
+        if (starSystem.factions.length <= 0) { msg.channel.send("I couldn't find any factions in that system."); return; }
+
+        let embed = u.embed()
+          .setThumbnail("https://i.imgur.com/Ud8MOzY.png")
+          .setTitle(starSystem.name)
+          .setAuthor("EDSM", "https://i.imgur.com/4NsBfKl.png")
+          .setURL(starSystem.factionsURL);
+
+        for (let faction of starSystem.factions) {
+          let influence = Math.round(faction.influence * 10000) / 100;
+          embed.addField(factions.name + (faction.name === starSystem.controllingFaction.name ? " (Controlling)" : "") + " " + influence + "%",
+            "State: " + faction.state + "\nGovernment: " + faction.allegiance + " - " + faction.government, true);
         }
 
         msg.channel.send({ embed });
