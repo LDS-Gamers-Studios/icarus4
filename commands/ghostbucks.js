@@ -221,11 +221,13 @@ const Module = new Augur.Module()
       msg.delete();
       let amount = parseInt(suffix, 10);
       if (amount) {
+        amount = Math.min(amount, 1000);
         let balance = await Module.db.bank.getBalance(msg.author);
         if ((amount <= balance.balance) && (amount > 0)) {
           let snipcart = require("../utils/snipcart")(Module.config.api.snipcart);
           let discountInfo = {
             name: msg.author.username + " " + Date().toLocaleString(),
+            combinable: false,
             maxNumberOfUsages: 1,
             trigger: "Code",
             code: code(6),
