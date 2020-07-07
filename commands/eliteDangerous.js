@@ -8,7 +8,8 @@ const Module = new Augur.Module()
   .addCommand({
     name: "elite",
     description: "Elite Dangerous information. Use `!elite help` for more.",
-    syntax: "See `!elite help`",
+    syntax: "help | status | system [system] | stations [system] | factions [system] | bodies [system]",
+    info: "See `!elite help` for more information.",
     aliases: [],
     process: async (msg, suffix) => {
       try {
@@ -117,7 +118,7 @@ const Module = new Augur.Module()
         for (let faction of starSystem.factions) {
           let influence = Math.round(faction.influence * 10000) / 100;
           let url = encodeURI("https://www.edsm.net/en/faction/id/" + faction.id + "/name/");
-          embed.addField(faction.name + (faction.name === starSystem.controllingFaction.name ? " (Controlling)" : "") + " " + influence + "%",
+          embed.addField(faction.name + (starSystem.information && (faction.name === starSystem.information.faction) ? " (Controlling)" : "") + " " + influence + "%",
             "State: " + faction.state + "\nGovernment: " + faction.allegiance + " - " + faction.government + "\n[Link](" + url + ")", true);
         }
 
