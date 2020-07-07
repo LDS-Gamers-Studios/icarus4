@@ -66,7 +66,7 @@ const Module = new Augur.Module()
             faction = " - " + station.controllingFaction.name;
           }
 
-          embed.addField(station.name, "[**" + station.type + "** - " + station.distanceToArrival + " LS" + faction + "](" + stationURL + ")");
+          embed.addField(station.name, "[**" + station.type + "** - " + station.distanceToArrival + " LS" + faction + "](" + encodeURI(stationURL) + ")");
         }
 
         msg.channel.send({ embed });
