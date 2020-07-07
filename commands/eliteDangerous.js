@@ -73,6 +73,11 @@ const Module = new Augur.Module()
           embed.addField(station.name, "**" + station.type + "** [Link](" + encodeURI(stationURL) + ")\n" + distance + " ls\n" + faction, true);
         }
 
+        // Letting the user know there were more than 25
+        if (starSystem.stations.length > 25) {
+          embed.setFooter("Some stations were filtered out because the limit was exceeded.", "https://imgur.com/a/4pcFzW1");
+        }
+
         msg.channel.send({ embed });
       } else {
         msg.channel.send("I didn't understand that command. See `!elite help`.").then(u.clean);
