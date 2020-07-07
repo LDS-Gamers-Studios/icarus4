@@ -8,7 +8,8 @@ const Module = new Augur.Module()
   .addCommand({
     name: "elite",
     description: "Elite Dangerous information. Use `!elite help` for more.",
-    syntax: "See `!elite help`",
+    syntax: "help | status | system [system] | stations [system] | factions [system] | bodies [system]",
+    info: "See `!elite help` for more information.",
     aliases: [],
     process: async (msg, suffix) => {
       try {
