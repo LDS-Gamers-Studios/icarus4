@@ -36,7 +36,13 @@ const Module = new Augur.Module()
       // Help
       //
       if (command === "help") {
-        msg.channel.send("Not *yet* implemented. I might work faster if you give me a <:buttermelon:305039588014161921>");
+        embed.addField("Get Elite's Server Status", "!elite status");
+        embed.addField("Get System Information", "!elite system **Systen Name**");
+        embed.addField("Get Stations in a System", "!elite stations **Systen Name**\n(Note: Will not show Fleet Carriers)");
+        embed.addField("Get Factions in a System", "!elite factions **Systen Name**");
+        embed.addField("Get Celestial Bodies in a System", "!elite bodies **Systen Name**");
+
+        msg.channel.send({ embed });
       //
       // System
       //
