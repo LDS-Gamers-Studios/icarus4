@@ -117,7 +117,7 @@ const Module = new Augur.Module()
         for (let faction of starSystem.factions) {
           let influence = Math.round(faction.influence * 10000) / 100;
           let url = encodeURI("https://www.edsm.net/en/faction/id/" + faction.id + "/name/");
-          embed.addField(faction.name + (faction.name === starSystem.controllingFaction.name ? " (Controlling)" : "") + " " + influence + "%",
+          embed.addField(faction.name + (starSystem.information && (faction.name === starSystem.information.faction) ? " (Controlling)" : "") + " " + influence + "%",
             "State: " + faction.state + "\nGovernment: " + faction.allegiance + " - " + faction.government + "\n[Link](" + url + ")", true);
         }
 
