@@ -14,3 +14,5 @@ data/*
 !data/roles.json
 !data/nameParts.json
 site/*
+
+.vs/
