@@ -15,11 +15,6 @@ const Module = new Augur.Module()
       command = command.toLowerCase();
       let remainder = params.join(" ");
 
-      let embed = u.embed()
-        .setThumbnail("https://i.imgur.com/Ud8MOzY.png")
-        .setTitle(starSystem.name)
-        .setAuthor("EDSM", "https://i.imgur.com/4NsBfKl.png");
-
       if (command == "help") {
         msg.channel.send("Not *yet* implemented. I might work faster if you give me a <:buttermelon:305039588014161921>");
       } else if (command == "system") {
@@ -29,8 +24,12 @@ const Module = new Augur.Module()
           return;
         }
 
-        embed.setURL("https://www.edsm.net/en/system/id/" + starSystem.id + "/name/")
-        .addField("Permit Required?", starSystem.requirePermit ? "Yes" : "No", true);
+        let embed = u.embed()
+          .setThumbnail("https://i.imgur.com/Ud8MOzY.png")
+          .setTitle(starSystem.name)
+          .setAuthor("EDSM", "https://i.imgur.com/4NsBfKl.png")
+          .setURL("https://www.edsm.net/en/system/id/" + starSystem.id + "/name/")
+          .addField("Permit Required?", starSystem.requirePermit ? "Yes" : "No", true);
 
         if (starSystem.primaryStar) {
           embed.addField("Star Scoopable", starSystem.primaryStar.isScoopable ? "Yes" : "No", true);
@@ -54,7 +53,11 @@ const Module = new Augur.Module()
         if (!starSystem) { msg.channel.send("I couldn't find a system with that name."); return; }
         if (starSystem.stations.length <= 0) { msg.channel.send("I couldn't find any stations in that system."); return; }
 
-        embed.setURL(starSystem.stationsURL);
+        let embed = u.embed()
+          .setThumbnail("https://i.imgur.com/Ud8MOzY.png")
+          .setTitle(starSystem.name)
+          .setAuthor("EDSM", "https://i.imgur.com/4NsBfKl.png")
+          .setURL(starSystem.stationsURL);
 
         for (let station of starSystem.stations.filter((e, i) => i < 25)) {
           let stationURL = "https://www.edsm.net/en/system/stations/id/" + starSystem.id + "/name/" + starSystem.name + "/details/idS/" + station.id + "/";
@@ -63,7 +66,7 @@ const Module = new Augur.Module()
             faction = " - " + station.controllingFaction.name;
           }
 
-          embed.addField(station.name, "[**" + station.type + "** - " + station.distanceToArrival + " LS" + faction + "](" + stationURL + ")");
+          embed.addField(station.name, "[**" + station.type + "** - " + station.distanceToArrival + " LS" + faction + "](" + encodeURI(stationURL) + ")");
         }
 
         msg.channel.send({ embed });
