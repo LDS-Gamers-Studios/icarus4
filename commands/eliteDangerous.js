@@ -67,10 +67,7 @@ const Module = new Augur.Module()
       } else if (command === "stations") {
         if (starSystem.stations.length <= 0) { msg.channel.send("I couldn't find any stations in that system."); return; }
 
-        let embed = u.embed()
-          .setThumbnail("https://i.imgur.com/Ud8MOzY.png")
-          .setTitle(starSystem.name)
-          .setAuthor("EDSM", "https://i.imgur.com/4NsBfKl.png")
+        embed.setTitle(starSystem.name)
           .setURL(starSystem.stationsURL);
 
         let stationList = {};
