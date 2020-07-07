@@ -20,6 +20,18 @@ const Module = new Augur.Module()
         var message = "The Elite: Dangerous servers are " + (status.type === "success" ? "online." : "offline.");
         msg.channel.send(message);
         return;
+      //
+      // Help
+      //
+      } else if (command === "help") {
+        embed.addField("Get Elite's Server Status", "!elite status");
+        embed.addField("Get System Information", "!elite system **System Name**");
+        embed.addField("Get Stations in a System", "!elite stations **System Name**\n(Note: Will not show Fleet Carriers)");
+        embed.addField("Get Factions in a System", "!elite factions **System Name**");
+        embed.addField("Get Celestial Bodies in a System", "!elite bodies **System Name**");
+
+        msg.channel.send({ embed });
+        return;
       }
 
       let starSystem = await elite.getSystemInfo(remainder);
@@ -32,21 +44,7 @@ const Module = new Augur.Module()
         .setThumbnail("https://i.imgur.com/Ud8MOzY.png")
         .setAuthor("EDSM", "https://i.imgur.com/4NsBfKl.png")
 
-      //
-      // Help
-      //
-      if (command === "help") {
-        embed.addField("Get Elite's Server Status", "!elite status");
-        embed.addField("Get System Information", "!elite system **Systen Name**");
-        embed.addField("Get Stations in a System", "!elite stations **Systen Name**\n(Note: Will not show Fleet Carriers)");
-        embed.addField("Get Factions in a System", "!elite factions **Systen Name**");
-        embed.addField("Get Celestial Bodies in a System", "!elite bodies **Systen Name**");
-
-        msg.channel.send({ embed });
-      //
-      // System
-      //
-      } else if (command === "system") {
+      if (command === "system") {
         embed.setTitle(starSystem.name)
           .setURL("https://www.edsm.net/en/system/id/" + starSystem.id + "/name/")
           .addField("Permit Required?", starSystem.requirePermit ? "Yes" : "No", true);
