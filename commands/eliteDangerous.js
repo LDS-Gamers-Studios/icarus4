@@ -14,7 +14,7 @@ async function updateFactionStatus(bot) {
     let topic = "[LDS 2314 / LDS Enterprises]  Influence: " + influence + "%   -   State: " + faction.state +
       "   -   LDS 2314 Controlling Faction: " + starSystem.information.faction;
 
-    let channelID = 549808289811267602;
+    let channelID = "549808289811267602";
     let channel = bot.channels.get(channelID);
 
     channel.setTopic(topic);
@@ -62,7 +62,7 @@ const Module = new Augur.Module()
             "July", "August", "September", "October", "November", "December"
           ];
 
-          msg.channel.send(`The current date/time in Elite is ${monthNames[d.getUTCMonth()]} ${d.getUTCDate()}, ${(d.getUTCFullYear() + 1286)}, ${d.getUTCHours()}:${d.getUTCMinutes}. (UTC + 1286 years)`);
+          msg.channel.send(`The current date/time in Elite is ${monthNames[d.getUTCMonth()]} ${d.getUTCDate()}, ${(d.getUTCFullYear() + 1286)}, ${d.getUTCHours()}:${d.getUTCMinutes()}. (UTC + 1286 years)`);
           return;
         }
 
@@ -177,7 +177,7 @@ const Module = new Augur.Module()
       let bot = Module.handler.client;
       updateFactionStatus(bot);
       // Every 6 hours seems alright for channel description updates. The rate limit is actually once every 5 minutes, so we're more than clear.
-      return setInterval(updateFactionStatus, 6 * 60 * 60 * 1000, bot); 
+      return setInterval(updateFactionStatus, 6 * 60 * 60 * 1000, bot);
     } catch (e) { u.alertError(e, "Elite Dangerous Clockwork Error"); }
 });
 
