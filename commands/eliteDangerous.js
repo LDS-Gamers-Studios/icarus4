@@ -55,6 +55,14 @@ const Module = new Augur.Module()
 
           msg.channel.send({ embed });
           return;
+        } else if (command === "time") {
+          let d = new Date();
+          const monthNames = ["January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+          ];
+
+          msg.channel.send("The current date/time in Elite is " + monthNames[d.getUTCMonth()] + " " + d.getUTCDate() + ", " + (d.getUTCFullYear() + 1286) + ". (UTC + 1286 years)");
+          return;
         }
 
         let starSystem = await elite.getSystemInfo(remainder);
