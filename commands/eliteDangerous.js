@@ -62,7 +62,7 @@ const Module = new Augur.Module()
             "July", "August", "September", "October", "November", "December"
           ];
 
-          msg.channel.send(`The current date/time in Elite is ${monthNames[d.getUTCMonth()]} ${d.getUTCDate()}, ${(d.getUTCFullYear() + 1286)}, ${d.getUTCHours()}:${d.getUTCMinutes}. (UTC + 1286 years)`);
+          msg.channel.send(`The current date/time in Elite is ${monthNames[d.getUTCMonth()]} ${d.getUTCDate()}, ${(d.getUTCFullYear() + 1286)}, ${d.getUTCHours()}:${d.getUTCMinutes()}. (UTC + 1286 years)`);
           return;
         }
 
