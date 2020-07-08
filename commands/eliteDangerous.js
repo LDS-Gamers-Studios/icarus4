@@ -4,6 +4,23 @@ const Augur = require("augurbot"),
   u = require("../utils/utils"),
   elite = require("../utils/eliteDangerousAPI");
 
+async function updateFactionStatus(bot) {
+  try {
+    let starSystem = await elite.getSystemInfo("LDS+2314");
+    let faction = starSystem.factions.find(f => f.name === "LDS Enterprises");
+    let influence = Math.round(faction.influence * 10000) / 100;
+
+    // Discord has a topic size limit of 250 characters, but this will never pass that.
+    let topic = "[LDS 2314 / LDS Enterprises]  Influence: " + influence + "%   -   State: " + faction.state +
+      "   -   LDS 2314 Controlling Faction: " + starSystem.information.faction;
+
+    let channelID = 549808289811267602;
+    let channel = bot.channels.get(channelID);
+
+    channel.setTopic(topic);
+  } catch (e) { u.alertError(e, "Faction Status Update Error"); }
+}
+
 const Module = new Augur.Module()
   .addCommand({
     name: "elite",
@@ -31,12 +48,21 @@ const Module = new Augur.Module()
           //
         } else if (command === "help") {
           embed.addField("Get Elite's Server Status", "!elite status");
+          embed.addField("Get The In-Game Time", "!elite time");
           embed.addField("Get System Information", "!elite system **System Name**");
           embed.addField("Get Stations in a System", "!elite stations **System Name**\n(Note: Will not show Fleet Carriers)");
           embed.addField("Get Factions in a System", "!elite factions **System Name**");
           embed.addField("Get Celestial Bodies in a System", "!elite bodies **System Name**");
 
           msg.channel.send({ embed });
+          return;
+        } else if (command === "time") {
+          let d = new Date();
+          const monthNames = ["January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+          ];
+
+          msg.channel.send(`The current date/time in Elite is ${monthNames[d.getUTCMonth()]} ${d.getUTCDate()}, ${(d.getUTCFullYear() + 1286)}, ${d.getUTCHours()}:${d.getUTCMinutes}. (UTC + 1286 years)`);
           return;
         }
 
@@ -133,7 +159,7 @@ const Module = new Augur.Module()
             .setURL(starSystem.bodiesURL);
 
           for (let body of starSystem.bodies) {
-            //                                                                                 Yes, this double slash is intentional
+            //                                                                                 This double slash is intentional
             let url = encodeURI("https://www.edsm.net/en/system/bodies/id/" + starSystem.id + "//details/idB/" + body.id + "/nameB/");
             let scoopable = body.type === "Star" ? (body.isScoopable ? " (Scoopable)" : " (Not Scoopable)") : "";
             let distance = Math.round(body.distanceToArrival * 10) / 10;
@@ -146,6 +172,13 @@ const Module = new Augur.Module()
         };
       } catch (error) { u.alertError(error, msg); }
     }
+  }).setClockwork(() => {
+    try {
+      let bot = Module.handler.client;
+      updateFactionStatus(bot);
+      // Every 6 hours seems alright for channel description updates. The rate limit is actually once every 5 minutes, so we're more than clear.
+      return setInterval(updateFactionStatus, 6 * 60 * 60 * 1000, bot); 
+    } catch (e) { u.alertError(e, "Elite Dangerous Clockwork Error"); }
 });
 
 module.exports = Module;
