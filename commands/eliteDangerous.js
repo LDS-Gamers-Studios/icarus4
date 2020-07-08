@@ -11,8 +11,8 @@ async function updateFactionStatus(bot) {
     let influence = Math.round(faction.influence * 10000) / 100;
 
     // Discord has a topic size limit of 250 characters, but this will never pass that.
-    let topic = "[LDS 2314 / LDS Enterprises]  Influence: " + faction.influence + "   -   State: " + faction.state +
-      "   -   LDS 2314 Controlling Faction: " + starSystem.information.faction.name;
+    let topic = "[LDS 2314 / LDS Enterprises]  Influence: " + influence + "%   -   State: " + faction.state +
+      "   -   LDS 2314 Controlling Faction: " + starSystem.information.faction;
 
     let channelID = 549808289811267602;
     let channel = bot.channels.get(channelID);
@@ -62,7 +62,7 @@ const Module = new Augur.Module()
             "July", "August", "September", "October", "November", "December"
           ];
 
-          msg.channel.send("The current date/time in Elite is " + monthNames[d.getUTCMonth()] + " " + d.getUTCDate() + ", " + (d.getUTCFullYear() + 1286) + ". (UTC + 1286 years)");
+          msg.channel.send(`The current date/time in Elite is ${monthNames[d.getUTCMonth()]} ${d.getUTCDate()}, ${(d.getUTCFullYear() + 1286)}, ${d.getUTCHours()}:${d.getUTCMinutes}. (UTC + 1286 years)`);
           return;
         }
 
