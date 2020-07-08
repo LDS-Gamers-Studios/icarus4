@@ -17,7 +17,7 @@ async function updateFactionStatus(bot) {
     let channelID = 549808289811267602;
     let channel = bot.channels.get(channelID);
 
-    channel.setTopic(topic)
+    channel.setTopic(topic);
   } catch (e) { u.alertError(e, "Faction Status Update Error"); }
 }
 
