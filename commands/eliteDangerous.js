@@ -48,6 +48,7 @@ const Module = new Augur.Module()
           //
         } else if (command === "help") {
           embed.addField("Get Elite's Server Status", "!elite status");
+          embed.addField("Get The In-Game Time", "!elite time");
           embed.addField("Get System Information", "!elite system **System Name**");
           embed.addField("Get Stations in a System", "!elite stations **System Name**\n(Note: Will not show Fleet Carriers)");
           embed.addField("Get Factions in a System", "!elite factions **System Name**");
