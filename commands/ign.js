@@ -186,7 +186,7 @@ const Module = new Augur.Module()
 
           let helpList = ["```md"];
 
-          for (const category of categories) {
+          for (const category of Ign.categories) {
             let categoryList = ["# " + category];
             for (const [slug, system] of Ign.gameids) {
               if (system.display && system.category == category) categoryList.push(`* ${system.system} (${system.name})`);
