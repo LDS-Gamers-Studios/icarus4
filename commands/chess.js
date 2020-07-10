@@ -20,7 +20,7 @@ const Module = new Augur.Module()
       try {
         let ign = await Module.db.ign.find(msg.author.id, 'chess');
         if (ign) name = ign.ign;
-      }
+      } catch(error) { u.alertError(error, msg); }
     }
 
     if (name) {
