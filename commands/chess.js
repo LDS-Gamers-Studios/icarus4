@@ -8,17 +8,10 @@ const Module = new Augur.Module()
   description: "Get your Chess.com games, using the name saved with `!addIGN`",
   syntax: "[playerName]",
   process: async (msg, suffix) => {
-    let name;
-    if (u.userMentions(msg)) {
+    let name = suffix;
+    if (!suffix || u.userMentions(msg)) {
       try {
-        name = (await Module.db.ign.find(u.userMentions(msg).first().id, 'chess')).ign;
-      } catch(error) { u.alertError(error, msg); }
-    } else if (suffix) {
-    //if (suffix) {
-      name = suffix;
-    } else {
-      try {
-        name = (await Module.db.ign.find(msg.author.id, 'chess')).ign;
+        name = (await Module.db.ign.find((u.userMentions(msg)?.first() ?? msg.author).id, 'chess'))?.ign;
       } catch(error) { u.alertError(error, msg); }
     }
 
