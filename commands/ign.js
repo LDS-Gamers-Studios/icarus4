@@ -204,6 +204,7 @@ const Module = new Augur.Module()
           Module.commands.forEach(command => {
             command.info = command.info.replace("{helpList}", helpList);
           });
+          fulfill(true);
         }
       });
     }),
