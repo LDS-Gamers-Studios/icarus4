@@ -495,6 +495,8 @@ Module
 
             let member = await msg.guild.fetchMember(user);
             if (member) {
+              if (member.roles.has(Module.config.roles.trusted)) await member.removeRole(Module.config.roles.trusted);
+              await member.addRoles([Module.config.roles.muted, Module.config.roles.untrusted]);
               await member.send(`You were banned from ${msg.guild.name} for violating our code of conduct.${(reason ? ("\n" + reason) : "")}`).catch(() => blocked(member));
               bans.add(member.id);
               await member.ban({days: 2, reason: reason});
