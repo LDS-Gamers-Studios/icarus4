@@ -55,7 +55,8 @@ async function testBirthdays(bot) {
         "375047444599275543",
         "375047691253579787",
         "375047792487432192",
-        "543065980096741386"
+        "543065980096741386",
+        "731895666577506345"
       ];
       let members = bot.guilds.get(ldsg).members;
       let apicall = 0;
