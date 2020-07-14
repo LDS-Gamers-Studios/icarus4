@@ -220,15 +220,23 @@ const Module = new Augur.Module()
   process: async (msg, suffix) => {
     try {
       const Jimp = require("jimp");
-      let color = parseInt(suffix.replace(/<@!?\d+>/g, ""), 10) || (10 * (Math.floor(Math.random() * 35) + 1));
+      let color;
       let original;
+
+      let urlexp = /https?:\/\/\S+ \d+/;
+      let match;
 
       if (msg.attachments.size > 0) {
         original = msg.attachments.first().url;
+        color = parseInt(suffix.replace(/<@!?\d+>/g, ""), 10);
+      } else if (match = urlexp.exec(suffix)) {
+        original = match[1];
+        color = parseInt(match[2], 10);
       } else {
-        let target = msg.mentions.users.first() || msg.author;
-        original = target.displayAvatarURL;
+        original = (msg.mentions.users.first() || msg.author).displayAvatarURL;
+        color = parseInt(suffix.replace(/<@!?\d+>/g, ""), 10);
       }
+      color = color || (10 * (Math.floor(Math.random() * 35) + 1));
 
       let image = await Jimp.read(original);
       image.color([
