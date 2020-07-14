@@ -1040,7 +1040,7 @@ Module
     if (!newMember.roles.has(Module.config.roles.trusted) || newMember.roles.has(Module.config.roles.untrusted)) {
       const embed = u.embed()
         .setTimestamp()
-        .setAuthor(newMember.displayName, newUser.displayAvatarURL)
+        .setAuthor(oldUser.username, oldUser.displayAvatarURL)
         .setTitle("User Update");
       if (oldUser.tag != newUser.tag) {
         embed.addField("**Username Update**", `**Old:** ${oldUser.tag}\n**New:** ${newUser.tag}`);
