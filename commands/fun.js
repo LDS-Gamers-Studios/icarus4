@@ -223,7 +223,7 @@ const Module = new Augur.Module()
       let color;
       let original;
 
-      let urlexp = /(https?:\/\/\S+)\s+?(\d+)?/;
+      let urlexp = /(https?:\/\/\S+)(:?\s+)?(\d*)/;
       let match;
 
       if (msg.attachments.size > 0) {
