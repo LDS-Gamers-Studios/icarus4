@@ -58,7 +58,7 @@ const Utils = {
     }, t, msg);
     return Promise.resolve(msg);
   },
-  embed: (data) => new Discord.RichEmbed(data).setColor(config.color).setFooter("This post brought to you by Big Pharma™️"),
+  embed: (data) => new Discord.RichEmbed(data).setColor(config.color).setFooter("This post,
   errorLog: errorLog,
   escapeText: (txt) => txt.replace(/(\*|_|`|~|\\|\|)/g, '\\$1'),
   getUser: function(msg, user, strict = false) {
