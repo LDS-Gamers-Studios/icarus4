@@ -257,6 +257,13 @@ const Module = new Augur.Module()
         roles.set(rows[i].roletag, rows[i].roleid);
       Module.commands.find(c => c.name == "add").info = "Gives you one of the following roles:\n```md\n* " + Array.from(roles.keys()).join("\n* ") + "```";
       Module.commands.find(c => c.name == "remove").info = "Remove one of the following roles:\n```md\n* " + Array.from(roles.keys()).join("\n* ") + "```";
+
+      const fs = require("fs");
+      const roleData = {};
+      for (const [tag, roleId] of roles) {
+        roleData[tag] = roleId;
+      }
+      fs.writeFileSync("./storage/roleInfo.json", JSON.stringify(roleData));
     }
   });
 });
