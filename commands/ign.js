@@ -201,9 +201,9 @@ const Module = new Augur.Module()
 
           helpList = helpList.join("\n");
 
-          Module.commands.forEach(command => {
+          for (const command of Module.commands) {
             command.info = command.info.replace("{helpList}", helpList);
-          });
+          }
           fulfill(true);
         }
       });
