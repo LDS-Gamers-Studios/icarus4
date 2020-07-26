@@ -579,8 +579,8 @@ const Module = new Augur.Module()
       size = 10;
       mineCount = 30;
     } else if (suffix === "hard") {
-      size = 15;
-      mineCount = 90;
+      size = 13;
+      mineCount = 60;
     } else {
       quickText(msg, "Invalid difficulty. `easy`, `medium`, and `hard` are valid.");
       return;
@@ -601,7 +601,7 @@ const Module = new Augur.Module()
 
       for (let i = -1; i <= 1; i++) {
         for (let j = -1; j <= 1; j++) {
-          let isInvalidSpace = (x < 0) || (x >= size) || (y < 0) || (y >= size);
+          let isInvalidSpace = ((x + i) < 0) || ((x + i) >= size) || ((y + j) < 0) || ((y + j) >= size);
           if (!isInvalidSpace && mineSpaces.includes((y + j) * size + x + i)) {
             count++;
           }
