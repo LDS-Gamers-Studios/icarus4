@@ -644,7 +644,6 @@ const Module = new Augur.Module()
         board[x].push(getMineCount(x, y));
       }
     }
-    console.log(board);
 
     // Generating the output string. Please clean this is there's a better way to do it.
     let numbers = {
