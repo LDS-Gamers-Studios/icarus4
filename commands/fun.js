@@ -563,6 +563,104 @@ const Module = new Augur.Module()
     ], "wut.gif");
   }
 })
+.addCommand({
+  name: "minesweeper",
+  description: "Play a game of Minesweeper! (Square boards only!)",
+  aliases: ["mines", "sweeper"],
+  category: "Silly",
+  syntax: "!minesweeper [board size] [mine count]",
+  process: (msg, suffix) => {
+    let params = suffix.split(" ");
+    let size = parseInt(params[0]);
+    // Did the math. If it's greater than ~16, it has the possibility of exceeding 2000 characters.
+    if (size.isNan || size < 1 || size > 15) {
+      quickText(msg, "Invalid board size. See `!help` for usage.");
+    }
+    let mineCount = parseInt(params[1]);
+    if (mineCount.isNan || mineCount < 1 || mineCount > size * size) {
+      quickText(msg, "Invalid mine count. See `!help` for usage.");
+    }
+
+    // getI or geti didn't seem like the best names for this case
+    function get_i(x, y) {
+      return x + (y * size);
+    }
+
+    // Getting all possible board spaces
+    let possibleSpaces = Array.from({ length: size * size }, (v, k) => k);
+    // Finding out where the mines will be
+    let mineSpaces = [];
+    for (let i = 0; i < mineCount; i++) {
+      const random = Math.floor(Math.random() * possibleSpaces.length);
+      mineSpaces.push(possibleSpaces[random]);
+      possibleSpaces.splice(random, 1);
+    }
+
+    // This spaghetti code is just sad
+    function getMineCount(x, y) {
+      let count = 0;
+
+      if (x > 0) {
+        if (y > 0) {
+          if (mineSpaces.includes(get_i(x - 1, y - 1))) { count++; }
+        }
+        if (y < size - 1) {
+          if (mineSpaces.includes(get_i(x - 1, y + 1))) { count++; }
+        }
+        if (mineSpaces.includes(get_i(x - 1, y))) { count++; }
+      }
+      if (x < size - 1) {
+        if (y > 0) {
+          if (mineSpaces.includes(get_i(x + 1, y - 1))) { count++; }
+        }
+        if (y < size - 1) {
+          if (mineSpaces.includes(get_i(x + 1, y + 1))) { count++; }
+        }
+        if (mineSpaces.includes(get_i(x + 1, y))) { count++; }
+      }
+
+      if (y > 0) {
+        if (mineSpaces.includes(get_i(x, y - 1))) { count++; }
+      }
+      if (y < size - 1) {
+        if (mineSpaces.includes(get_i(x, y + 1))) { count++; }
+      }
+
+      return count;
+    }
+
+    // Creating the final board
+    let board = [];
+    for (let x = 0; x < size; x++) {
+      board.push([]);
+      for (let y = 0; y < size; y++) {
+        let i = get_i(x, y);
+        if (mineSpaces.includes(i)) {
+          board[x].push(10);
+          continue;
+        }
+        board[x].push(getMineCount(x, y));
+      }
+    }
+    console.log(board);
+
+    // Generating the output string. Please clean this is there's a better way to do it.
+    let numbers = {
+      0: ":zero:", 1: ":one:", 2: ":two:", 3: ":three:",
+      4: ":four:", 5: ":five:", 6: ":six:", 7: ":seven:",
+      8: ":eight:", 9: ":nine:", 10: ":bomb:"
+    }
+    let output = "";
+    for (let y = 0; y < size; y++) {
+      for (let x = 0; x < size; x++) {
+        output += numbers[board[x][y]] + "";
+      }
+      output += "\n";
+    }
+
+    quickText(msg, output);
+  }
+})
 .addEvent("messageReactionAdd", (reaction, user) => {
   if ((reaction.message.channel.id == "121755900313731074") && (reaction.emoji.name == "♻️")) {
     reaction.removeAll();
