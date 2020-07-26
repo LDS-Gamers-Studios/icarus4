@@ -62,12 +62,12 @@ const colors = new Collection([
 */
 
 const inventory = new Collection([
-	//["114499378936283143", "697257738010493049"],
-	//["96360253850935296" , "697257737133883435"],
-	//["205826273639923722", "697257740443058208"],
-	//["96345401078087680" , "697257736789819393"],
+	["114499378936283143", "697257738010493049"],
+	["96360253850935296" , "697257737133883435"],
+	["205826273639923722", "697257740443058208"],
+	["96345401078087680" , "697257736789819393"],
 	["692463991670177792", "697257750677159946"],
-	//["503066022912196608", "697257747250675772"],
+	["503066022912196608", "697257747250675772"],
 	["416256900963893248", "697257744402612224"],
 	["318427374309998592", "697257742502723745"],
 	["121783903630524419", "697257739973558283"],
@@ -257,6 +257,13 @@ const Module = new Augur.Module()
         roles.set(rows[i].roletag, rows[i].roleid);
       Module.commands.find(c => c.name == "add").info = "Gives you one of the following roles:\n```md\n* " + Array.from(roles.keys()).join("\n* ") + "```";
       Module.commands.find(c => c.name == "remove").info = "Remove one of the following roles:\n```md\n* " + Array.from(roles.keys()).join("\n* ") + "```";
+
+      const fs = require("fs");
+      const roleData = {};
+      for (const [tag, roleId] of roles) {
+        roleData[tag] = roleId;
+      }
+      fs.writeFileSync("./storage/roleInfo.json", JSON.stringify(roleData));
     }
   });
 });

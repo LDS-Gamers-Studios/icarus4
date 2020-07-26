@@ -20,6 +20,16 @@ class GameSystem {
     this.display = (this.category != "Personal");
     this.link = data.link;
   }
+
+  toObject() {
+    return ({
+      system: this.system,
+      name: this.name,
+      category: this.category,
+      display: this.display,
+      link: this.link
+    });
+  }
 }
 
 function embedIGN(user, igns) {
@@ -166,41 +176,57 @@ const Module = new Augur.Module()
   }
 })
 .addEvent("loadConfig", () => {
-  Module.config.sheets.get("IGN").getRows((e, rows) => {
-    if (e) u.alertError(e, "Error loading IGNs.");
-    else {
-      for (let i = 0; i < rows.length; i++)
-        Ign.gameids.set(rows[i].system, new GameSystem(rows[i]));
+  Promise.all([
+    new Promise((fulfill, reject) => {
+      Module.config.sheets.get("IGN").getRows((e, rows) => {
+        if (e) reject(e);
+        else {
+          for (let i = 0; i < rows.length; i++)
+            Ign.gameids.set(rows[i].system, new GameSystem(rows[i]));
 
-      let helpList = ["```md"];
+          let helpList = ["```md"];
 
-      Ign.categories.forEach(category => {
-        let categoryList = ["# " + category];
-        for (const [slug, system] of Ign.gameids) {
-          if (system.display && system.category == category) categoryList.push(`* ${system.system} (${system.name})`);
-        }
-        if (categoryList.length > 1) {
-          helpList = helpList.concat(categoryList);
-          helpList.push("");
+          for (const category of Ign.categories) {
+            let categoryList = ["# " + category];
+            for (const [slug, system] of Ign.gameids) {
+              if (system.display && system.category == category) categoryList.push(`* ${system.system} (${system.name})`);
+            }
+            if (categoryList.length > 1) {
+              helpList = helpList.concat(categoryList);
+              helpList.push("");
+            }
+          };
+
+          helpList.push("```");
+
+          helpList = helpList.join("\n");
+
+          for (const command of Module.commands) {
+            command.info = command.info.replace("{helpList}", helpList);
+          }
+          fulfill(true);
         }
       });
-
-      helpList.push("```");
-
-      helpList = helpList.join("\n");
-
-      Module.commands.forEach(command => {
-        command.info = command.info.replace("{helpList}", helpList);
+    }),
+    new Promise((fulfill, reject) => {
+      Module.config.sheets.get("IGN Aliases").getRows((e, rows) => {
+        if (e) reject(e);
+        else {
+          for (let i = 0; i < rows.length; i++)
+            Ign.aliases.set(rows[i].alias, rows[i].system);
+          fulfill(true);
+        }
       });
-    }
-  });
-  Module.config.sheets.get("IGN Aliases").getRows((e, rows) => {
-    if (e) u.alertError(e, "Error loading IGN Aliases.");
-    else {
-      for (let i = 0; i < rows.length; i++)
-        Ign.aliases.set(rows[i].alias, rows[i].system);
-    }
-  });
+    })
+  ]).then(r => {
+    const fs = require("fs");
+
+    fs.writeFileSync("./storage/ignInfo.json", JSON.stringify({
+      categories: Ign.categories,
+      aliases: Array.from(Ign.aliases.entries()),
+      gameids: Array.from(Ign.gameids.entries())
+    }));
+  }).catch(error => u.alertError(error, "IGN Load"));
 })
 .setUnload(() => {
   const path = require("path");

@@ -11,14 +11,15 @@ const Module = new Augur.Module()
     let name;
     if (u.userMentions(msg)) {
       try {
-        name = (await Module.db.ign.find(u.userMentions(msg).first().id, 'chess')).ign;
+        let ign = await Module.db.ign.find(u.userMentions(msg).first().id, 'chess');
+        if (ign) name = ign.ign;
       } catch(error) { u.alertError(error, msg); }
     } else if (suffix) {
-    //if (suffix) {
       name = suffix;
     } else {
       try {
-        name = (await Module.db.ign.find(msg.author.id, 'chess')).ign;
+        let ign = await Module.db.ign.find(msg.author.id, 'chess');
+        if (ign) name = ign.ign;
       } catch(error) { u.alertError(error, msg); }
     }
 
