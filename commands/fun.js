@@ -1,5 +1,6 @@
 const Augur = require("augurbot"),
   u = require("../utils/utils");
+const emoji = require('../utils/emojiCharacters.js');
 
 function quickFile(msg, file, name = null, showName = true) {
   if (Array.isArray(file))
@@ -579,7 +580,7 @@ const Module = new Augur.Module()
       size = 10;
       mineCount = 30;
     } else if (suffix === "hard") {
-      size = 13;
+      size = 14;
       mineCount = 60;
     } else {
       quickText(msg, "Invalid difficulty. `easy`, `medium`, and `hard` are valid.");
@@ -625,15 +626,11 @@ const Module = new Augur.Module()
     }
 
     // Generating the output string. Please clean this is there's a better way to do it.
-    let numbers = {
-      0: "zero", 1: "one", 2: "two", 3: "three",
-      4: "four", 5: "five", 6: "six", 7: "seven",
-      8: "eight", 9: "bomb"
-    }
     let output = "";
     for (let y = 0; y < size; y++) {
       for (let x = 0; x < size; x++) {
-        output += "||:" + numbers[board[x][y]] + ":||";
+        let num = board[x][y];
+        output += "||:" + (num === 9 ? "💣" : emoji[num]) + ":||";
       }
       output += "\n";
     }
