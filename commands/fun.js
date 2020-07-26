@@ -565,27 +565,25 @@ const Module = new Augur.Module()
 })
 .addCommand({
   name: "minesweeper",
-  description: "Play a game of Minesweeper! (Square boards only!)",
+  description: "Play a game of Minesweeper!",
   aliases: ["mines", "sweeper"],
   category: "Silly",
-  syntax: "!minesweeper [board size] [mine count]",
+  syntax: "!minesweeper [easy | medium | hard]",
   process: (msg, suffix) => {
-    let params = suffix.split(" ");
-    let size = parseInt(params[0]);
-    // Did the math. If it's greater than ~16, it has the possibility of exceeding 2000 characters.
-    if (size.isNan || size < 1 || size > 15) {
-      quickText(msg, "Invalid board size. See `!help` for usage.");
-      return;
-    }
-    let mineCount = parseInt(params[1]);
-    if (mineCount.isNan || mineCount < 1 || mineCount > size * size) {
-      quickText(msg, "Invalid mine count. See `!help` for usage.");
-      return;
-    }
+    let size = 0;
+    let mineCount = 0;
 
-    // getI or geti didn't seem like the best names for this case
-    function get_i(x, y) {
-      return x + (y * size);
+    if (suffix === "easy") {
+      size = mineCount = 5;
+    } else if (suffix === "medium" || suffix === "") {
+      size = 10;
+      mineCount = 30;
+    } else if (suffix === "hard") {
+      size = 15;
+      mineCount = 90;
+    } else {
+      quickText(msg, "Invalid difficulty. `easy`, `medium`, and `hard` are valid.");
+      return;
     }
 
     // Getting all possible board spaces
@@ -598,34 +596,16 @@ const Module = new Augur.Module()
       possibleSpaces.splice(random, 1);
     }
 
-    // This spaghetti code is just sad
     function getMineCount(x, y) {
       let count = 0;
 
-      if (x > 0) {
-        if (y > 0) {
-          if (mineSpaces.includes(get_i(x - 1, y - 1))) { count++; }
+      for (let i = -1; i <= 1; i++) {
+        for (let j = -1; j <= 1; j++) {
+          let isInvalidSpace = (x < 0) || (x >= size) || (y < 0) || (y >= size);
+          if (!isInvalidSpace && mineSpaces.includes((y + j) * size + x + i)) {
+            count++;
+          }
         }
-        if (y < size - 1) {
-          if (mineSpaces.includes(get_i(x - 1, y + 1))) { count++; }
-        }
-        if (mineSpaces.includes(get_i(x - 1, y))) { count++; }
-      }
-      if (x < size - 1) {
-        if (y > 0) {
-          if (mineSpaces.includes(get_i(x + 1, y - 1))) { count++; }
-        }
-        if (y < size - 1) {
-          if (mineSpaces.includes(get_i(x + 1, y + 1))) { count++; }
-        }
-        if (mineSpaces.includes(get_i(x + 1, y))) { count++; }
-      }
-
-      if (y > 0) {
-        if (mineSpaces.includes(get_i(x, y - 1))) { count++; }
-      }
-      if (y < size - 1) {
-        if (mineSpaces.includes(get_i(x, y + 1))) { count++; }
       }
 
       return count;
@@ -636,9 +616,8 @@ const Module = new Augur.Module()
     for (let x = 0; x < size; x++) {
       board.push([]);
       for (let y = 0; y < size; y++) {
-        let i = get_i(x, y);
-        if (mineSpaces.includes(i)) {
-          board[x].push(10);
+        if (mineSpaces.includes(x + (y * size))) {
+          board[x].push(9);
           continue;
         }
         board[x].push(getMineCount(x, y));
@@ -649,7 +628,7 @@ const Module = new Augur.Module()
     let numbers = {
       0: "zero", 1: "one", 2: "two", 3: "three",
       4: "four", 5: "five", 6: "six", 7: "seven",
-      8: "eight", 9: "nine", 10: "bomb"
+      8: "eight", 9: "bomb"
     }
     let output = "";
     for (let y = 0; y < size; y++) {
