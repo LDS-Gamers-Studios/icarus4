@@ -630,7 +630,7 @@ const Module = new Augur.Module()
     for (let y = 0; y < size; y++) {
       for (let x = 0; x < size; x++) {
         let num = board[x][y];
-        output += "||:" + (num === 9 ? "💣" : emoji[num]) + ":||";
+        output += "||" + (num === 9 ? "💣" : emoji[num]) + "||";
       }
       output += "\n";
     }
