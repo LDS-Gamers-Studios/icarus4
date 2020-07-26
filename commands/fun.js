@@ -575,10 +575,12 @@ const Module = new Augur.Module()
     // Did the math. If it's greater than ~16, it has the possibility of exceeding 2000 characters.
     if (size.isNan || size < 1 || size > 15) {
       quickText(msg, "Invalid board size. See `!help` for usage.");
+      return;
     }
     let mineCount = parseInt(params[1]);
     if (mineCount.isNan || mineCount < 1 || mineCount > size * size) {
       quickText(msg, "Invalid mine count. See `!help` for usage.");
+      return;
     }
 
     // getI or geti didn't seem like the best names for this case
