@@ -5,6 +5,7 @@ const Rank = {
   excludeChannels: [
     "269137380751966208", // discord rpg
     "153309871297658880", // clip submissions
+    "737557773000245298", // highlight reel
     "203518149809799168", // bot lobby
     "363020585988653057", // LDSG Team
     "405405857099284490", // star board
