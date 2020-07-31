@@ -569,21 +569,22 @@ const Module = new Augur.Module()
   description: "Play a game of Minesweeper!",
   aliases: ["mines", "sweeper"],
   category: "Silly",
-  syntax: "!minesweeper [easy | medium | hard]",
+  syntax: "[easy | medium | hard]",
   process: (msg, suffix) => {
     let size = 0;
     let mineCount = 0;
 
-    if (suffix === "easy") {
+    suffix = suffix.toLowerCase();
+    if (suffix.startsWith("e")) {
       size = mineCount = 5;
-    } else if (suffix === "medium" || suffix === "") {
+    } else if (suffix.startsWith("m") || suffix === "") {
       size = 10;
       mineCount = 30;
-    } else if (suffix === "hard") {
+    } else if (suffix.startsWith("h")) {
       size = 14;
       mineCount = 60;
     } else {
-      quickText(msg, "Invalid difficulty. `easy`, `medium`, and `hard` are valid.");
+      msg.channel.send("Invalid difficulty. `easy`, `medium`, and `hard` are valid.");
       return;
     }
 
@@ -599,13 +600,11 @@ const Module = new Augur.Module()
 
     function getMineCount(x, y) {
       let count = 0;
-
       for (let i = -1; i <= 1; i++) {
+        if ((x + i) < 0 || (x + i) >= size) continue;
         for (let j = -1; j <= 1; j++) {
-          let isInvalidSpace = ((x + i) < 0) || ((x + i) >= size) || ((y + j) < 0) || ((y + j) >= size);
-          if (!isInvalidSpace && mineSpaces.includes((y + j) * size + x + i)) {
-            count++;
-          }
+          if ((y + j) < 0 || (y + j) >= size) continue;
+          if (mineSpaces.includes((y + j) * size + x + i)) count++;
         }
       }
 
@@ -625,17 +624,9 @@ const Module = new Augur.Module()
       }
     }
 
-    // Generating the output string. Please clean this is there's a better way to do it.
-    let output = "";
-    for (let y = 0; y < size; y++) {
-      for (let x = 0; x < size; x++) {
-        let num = board[x][y];
-        output += "||" + (num === 9 ? "💣" : emoji[num]) + "||";
-      }
-      output += "\n";
-    }
+    let output = board.map(row => row.map(num => `||${num == 9 ? "💣" : emoji[num]}||`).join("")).join("\n");
 
-    quickText(msg, output);
+    msg.channel.send(output);
   }
 })
 .addEvent("messageReactionAdd", (reaction, user) => {
