@@ -590,6 +590,11 @@ const Module = new Augur.Module()
 
     // Getting all possible board spaces
     let possibleSpaces = Array.from({ length: size * size }, (v, k) => k);
+    // Remove 4 corners, corners can't be mines
+    possibleSpaces.splice(0, 1);
+    possibleSpaces.splice(size - 1, 1);
+    possibleSpaces.splice((size - 1) * size, 1);
+    possibleSpaces.splice((size * size) - 1, 1);
     // Finding out where the mines will be
     let mineSpaces = [];
     for (let i = 0; i < mineCount; i++) {
@@ -626,7 +631,7 @@ const Module = new Augur.Module()
 
     let output = board.map(row => row.map(num => `||${num == 9 ? "💣" : emoji[num]}||`).join("")).join("\n");
 
-    msg.channel.send(output);
+    msg.channel.send("(Tip: Corners aren never mines)\n" + output);
   }
 })
 .addEvent("messageReactionAdd", (reaction, user) => {
