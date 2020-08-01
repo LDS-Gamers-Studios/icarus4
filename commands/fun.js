@@ -449,6 +449,75 @@ const Module = new Augur.Module()
     } catch(e) { u.alertError(e, msg); }
   }
 })
+.addCommand({name: "minesweeper",
+  description: "Play a game of Minesweeper!",
+  aliases: ["mines", "sweeper"],
+  category: "Silly",
+  syntax: "[easy | medium | hard]",
+  process: (msg, suffix) => {
+    let size = 0;
+    let mineCount = 0;
+
+    suffix = suffix.toLowerCase();
+    if (suffix.startsWith("e")) {
+      size = mineCount = 5;
+    } else if (suffix.startsWith("m") || suffix === "") {
+      size = 10;
+      mineCount = 30;
+    } else if (suffix.startsWith("h")) {
+      size = 14;
+      mineCount = 60;
+    } else {
+      msg.channel.send("Invalid difficulty. `easy`, `medium`, and `hard` are valid.");
+      return;
+    }
+
+    // Getting all possible board spaces
+    let possibleSpaces = Array.from({ length: size * size }, (v, k) => k);
+    // Remove 4 corners, corners can't be mines
+    possibleSpaces.splice((size * size) - 1, 1);
+    possibleSpaces.splice((size - 1) * size, 1);
+    possibleSpaces.splice(size - 1, 1);
+    possibleSpaces.splice(0, 1);
+    // Finding out where the mines will be
+    let mineSpaces = [];
+    for (let i = 0; i < mineCount; i++) {
+      const random = Math.floor(Math.random() * possibleSpaces.length);
+      mineSpaces.push(possibleSpaces[random]);
+      possibleSpaces.splice(random, 1);
+    }
+
+    function getMineCount(x, y) {
+      let count = 0;
+      for (let i = -1; i <= 1; i++) {
+        if ((x + i) < 0 || (x + i) >= size) continue;
+        for (let j = -1; j <= 1; j++) {
+          if ((y + j) < 0 || (y + j) >= size) continue;
+          if (mineSpaces.includes((y + j) * size + x + i)) count++;
+        }
+      }
+
+      return count;
+    }
+
+    // Creating the final board
+    let board = [];
+    for (let x = 0; x < size; x++) {
+      board.push([]);
+      for (let y = 0; y < size; y++) {
+        if (mineSpaces.includes(x + (y * size))) {
+          board[x].push(9);
+          continue;
+        }
+        board[x].push(getMineCount(x, y));
+      }
+    }
+
+    let output = board.map(row => row.map(num => `||${num == 9 ? "💣" : emoji[num]}||`).join("")).join("\n");
+
+    msg.channel.send("(Tip: Corners aren never mines)\n" + output);
+  }
+})
 .addCommand({name: "ohsnap",
   description: "Oh, snap!",
   aliases: ["snap"],
@@ -562,76 +631,6 @@ const Module = new Augur.Module()
       "https://i.imgur.com/Mbwmjge.gif", // Bobahorse
       "https://giphy.com/gifs/hulu-snl-saturday-night-live-nbc-3o7TKQ8kAP0f9X5PoY" // SNL
     ], "wut.gif");
-  }
-})
-.addCommand({
-  name: "minesweeper",
-  description: "Play a game of Minesweeper!",
-  aliases: ["mines", "sweeper"],
-  category: "Silly",
-  syntax: "[easy | medium | hard]",
-  process: (msg, suffix) => {
-    let size = 0;
-    let mineCount = 0;
-
-    suffix = suffix.toLowerCase();
-    if (suffix.startsWith("e")) {
-      size = mineCount = 5;
-    } else if (suffix.startsWith("m") || suffix === "") {
-      size = 10;
-      mineCount = 30;
-    } else if (suffix.startsWith("h")) {
-      size = 14;
-      mineCount = 60;
-    } else {
-      msg.channel.send("Invalid difficulty. `easy`, `medium`, and `hard` are valid.");
-      return;
-    }
-
-    // Getting all possible board spaces
-    let possibleSpaces = Array.from({ length: size * size }, (v, k) => k);
-    // Remove 4 corners, corners can't be mines
-    possibleSpaces.splice(0, 1);
-    possibleSpaces.splice(size - 1, 1);
-    possibleSpaces.splice((size - 1) * size, 1);
-    possibleSpaces.splice((size * size) - 1, 1);
-    // Finding out where the mines will be
-    let mineSpaces = [];
-    for (let i = 0; i < mineCount; i++) {
-      const random = Math.floor(Math.random() * possibleSpaces.length);
-      mineSpaces.push(possibleSpaces[random]);
-      possibleSpaces.splice(random, 1);
-    }
-
-    function getMineCount(x, y) {
-      let count = 0;
-      for (let i = -1; i <= 1; i++) {
-        if ((x + i) < 0 || (x + i) >= size) continue;
-        for (let j = -1; j <= 1; j++) {
-          if ((y + j) < 0 || (y + j) >= size) continue;
-          if (mineSpaces.includes((y + j) * size + x + i)) count++;
-        }
-      }
-
-      return count;
-    }
-
-    // Creating the final board
-    let board = [];
-    for (let x = 0; x < size; x++) {
-      board.push([]);
-      for (let y = 0; y < size; y++) {
-        if (mineSpaces.includes(x + (y * size))) {
-          board[x].push(9);
-          continue;
-        }
-        board[x].push(getMineCount(x, y));
-      }
-    }
-
-    let output = board.map(row => row.map(num => `||${num == 9 ? "💣" : emoji[num]}||`).join("")).join("\n");
-
-    msg.channel.send("(Tip: Corners aren never mines)\n" + output);
   }
 })
 .addEvent("messageReactionAdd", (reaction, user) => {
