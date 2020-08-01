@@ -515,7 +515,7 @@ const Module = new Augur.Module()
 
     let output = board.map(row => row.map(num => `||${num == 9 ? "💣" : emoji[num]}||`).join("")).join("\n");
 
-    msg.channel.send("(Tip: Corners aren never mines)\n" + output);
+    msg.channel.send(`**Mines: ${mineCount}** (Tip: Corners aren never mines)\n${output}`);
   }
 })
 .addCommand({name: "ohsnap",
