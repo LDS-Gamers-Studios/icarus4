@@ -57,9 +57,18 @@ const Module = new Augur.Module()
           permissionOverwrites: [
             { id: msg.client.user.id, allow: "VIEW_CHANNEL" },
             { id: Module.config.ldsg, deny: "VIEW_CHANNEL" },
-            { id: sponsor.id, allow: ["VIEW_CHANNEL", "MANAGE_CHANNELS", "MANAGE_MESSAGES", "MANAGE_WEBHOOKS"] },
+            { id: sponsor.id, allow: ["VIEW_CHANNEL", "MANAGE_CHANNELS", "MANAGE_MESSAGES", "MANAGE_ROLES", "MANAGE_WEBHOOKS"] },
           ]
         }, "Sponsor Perk");
+
+        sponsorChannels.set(sponsor.id, {
+          sponsor: sponsor.id,
+          channel: channel.id,
+          permissions: {
+            allow: null,
+            deny: null
+          }
+        });
 
         try {
           Module.config.sheets.get("Sponsor Channels").addRow({
@@ -69,7 +78,7 @@ const Module = new Augur.Module()
           }, u.noop);
         } catch(error) { u.alertError(error, "Save Sponsor Channel Info"); }
 
-        channel.send(`${sponsor}, welcome to your private channel! You should have some administrative abilities for this channel (including changing the name and description), as well as the ability to add people to the channel with \`!coolkids @user(s)\`. If you would like to change default permissions for users in the channel, please contact a member of Management directly.`);
+        channel.send(`${sponsor}, welcome to your private channel! Thank you for being a Pro Sponsor! Your contributions each month are very much appreciated! Please accept this channel as a token of our appreciation.\n\nYou should have some administrative abilities for this channel (including changing the name and description), as well as the ability to add people to the channel with \`!coolkids @user(s)\`. If you would like to change default permissions for users in the channel, please contact a member of Management directly.`);
       }
     } catch(e) {
       u.alertError(e, msg);
