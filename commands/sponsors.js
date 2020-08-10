@@ -52,18 +52,21 @@ const Module = new Augur.Module()
           continue;
         }
 
-        let channel = await msg.guild.createChannel(`${sponsor.displayName}-hangout`, [
-          { id: msg.client.user.id, allow: "VIEW_CHANNEL" },
-          { id: Module.config.ldsg, deny: "VIEW_CHANNEL" },
-          { id: sponsor.id, allow: ["VIEW_CHANNEL", "MANAGE_CHANNELS", "MANAGE_MESSAGES", "MANAGE_WEBHOOKS"] },
-        ], "Sponsor Perk");
+        let channel = await msg.guild.createChannel(`${sponsor.displayName}-hangout`, {
+          parent: "742400003137470613",
+          permissionOverwrites: [
+            { id: msg.client.user.id, allow: "VIEW_CHANNEL" },
+            { id: Module.config.ldsg, deny: "VIEW_CHANNEL" },
+            { id: sponsor.id, allow: ["VIEW_CHANNEL", "MANAGE_CHANNELS", "MANAGE_MESSAGES", "MANAGE_WEBHOOKS"] },
+          ]
+        }, "Sponsor Perk");
 
         try {
-          await Module.config.sheets.get("Sponsor Channels").addRow({
+          Module.config.sheets.get("Sponsor Channels").addRow({
             sponsorname: sponsor.displayName,
             sponsorid: sponsor.id,
             channelid: channel.id
-          });
+          }, u.noop);
         } catch(error) { u.alertError(error, "Save Sponsor Channel Info"); }
 
         channel.send(`${sponsor}, welcome to your private channel! You should have some administrative abilities for this channel (including changing the name and description), as well as the ability to add people to the channel with \`!coolkids @user(s)\`. If you would like to change default permissions for users in the channel, please contact a member of Management directly.`);
