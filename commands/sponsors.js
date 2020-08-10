@@ -93,7 +93,7 @@ const Module = new Augur.Module()
       let ldsg = Module.handler.client.guilds.get(Module.config.ldsg);
       sponsorChannels.clear();
       for (let row of rows) {
-        if (!(ldsg.members.has(row.sponsorid) && ldsgmembers.get(row.sponsorid).roles.has(proSponsor))) continue;
+        if (!(ldsg.members.has(row.sponsorid) && ldsg.members.get(row.sponsorid).roles.has(proSponsor))) continue;
         sponsorChannels.set(row.sponsorid, {
           sponsor: row.sponsorid,
           channel: row.channelid,
