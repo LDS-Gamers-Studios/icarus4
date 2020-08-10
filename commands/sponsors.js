@@ -78,7 +78,7 @@ const Module = new Augur.Module()
   Module.config.sheets.get("Sponsor Channels").getRows((e, rows) => {
     if (e) u.alertError(e, "Error loading sponsor channels.");
     else {
-      let ldsg = Module.client.guilds.get(Module.config.ldsg);
+      let ldsg = Module.handler.client.guilds.get(Module.config.ldsg);
       sponsorChannels.clear();
       for (let row of rows) {
         if (!(ldsg.members.has(row.sponsorid) && ldsgmembers.get(row.sponsorid).roles.has(proSponsor))) continue;
