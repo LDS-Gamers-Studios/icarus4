@@ -52,11 +52,11 @@ const Module = new Augur.Module()
           continue;
         }
 
-        let channel = await msg.guild.createChannel(`${sponsor.displayName}-hangout`, {[
+        let channel = await msg.guild.createChannel(`${sponsor.displayName}-hangout`, [
           { id: msg.client.user.id, allow: "VIEW_CHANNEL" },
           { id: Module.config.ldsg, deny: "VIEW_CHANNEL" },
           { id: sponsor.id, allow: ["VIEW_CHANNEL", "MANAGE_CHANNELS", "MANAGE_MESSAGES", "MANAGE_WEBHOOKS"] },
-        ]},"Sponsor Perk");
+        ], "Sponsor Perk");
 
         try {
           await Module.config.sheets.get("Sponsor Channels").addRow({
