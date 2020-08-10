@@ -85,7 +85,7 @@ const Module = new Augur.Module()
         sponsorChannels.set(row.sponsorid, {
           sponsor: row.sponsorid,
           channel: row.channelid,
-          {
+          permissions: {
             allow: row.allowedperms,
             deny: row.deniedperms
           }
