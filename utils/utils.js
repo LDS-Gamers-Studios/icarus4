@@ -151,11 +151,12 @@ const Utils = {
         let keepGoing = false;
         try {
           // Query it as a Snowflake first, otherwise search by username
-          let mem = await guildMembers.fetch(q) || await guildMembers.fetch({query: q});
+          let mem = (await guildMembers.fetch(q)) || (await guildMembers.fetch({query: q}));
 
-          if (mem instanceof Discord.Collection && mem.size == 1)
+          if (mem instanceof Discord.Collection && mem.size == 1) {
             // Treat a multiple-match search result as a failed search
             mem = mem.first(); // Convert the Collection into a GuildMember
+          }
 
           if (mem instanceof Discord.GuildMember) {
             // Either the Snowflake search worked, or there was exactly one username match
