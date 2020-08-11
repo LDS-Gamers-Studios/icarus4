@@ -150,22 +150,18 @@ const Utils = {
         let q = parse.shift(); // Get next potential user/member
         let keepGoing = false;
         try {
-          // Query it as a Snowflake first
-          let mem = await guildMembers.fetch(q);
+          // Query it as a Snowflake first, otherwise search by username
+          let mem = await guildMembers.fetch(q) || await guildMembers.fetch({query: q});
 
-          if (mem) {
+          if (mem instanceof Discord.Collection && mem.size == 1)
+            // Treat a multiple-match search result as a failed search
+            mem = mem.first(); // Convert the Collection into a GuildMember
+
+          if (mem instanceof Discord.GuildMember) {
+            // Either the Snowflake search worked, or there was exactly one username match
             userMentions.set(mem.id, member ? mem : mem.user);
             keepGoing = true;
-          } else {
-            // If not a Snowflake, run a search query
-            let mem = await guildMembers.fetch({query: q});
-
-            if (mem.size == 1) { // If there's more than one match, stop trying to fetch members.
-              mem = mem.first(); // Convert the Collection into a GuildMember
-              userMentions.set(mem.id, member ? mem : mem.user);
-              keepGoing = true;
-            }
-          }          
+          }
         } catch (e) {
           Utils.errorHandler(e, msg);
         }
