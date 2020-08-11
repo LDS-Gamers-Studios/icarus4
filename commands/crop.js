@@ -6,55 +6,52 @@ const Module = new Augur.Module()
   description: "Randomly crop the last image posted by a user",
   syntax: "crop",
   aliases: ["crop"],
-  process: (msg, suffix) => {
-    let processed = false;
-    msg.channel.fetchMessages({ limit: 100 }).then(async messages => {
-      try {
-        for (const [key, value] of messages) {
-          if (processed || value.author.bot){
-            continue;
-          }
-          if (value.attachments.size > 0){
-            let a = value.attachments.first();
-            processed = true;
-            try {
-              const Jimp = require("jimp");
-              const cropped = await Jimp.read(a.url);
+  process: async (msg, suffix) => {
+    try {
+      let processed = false;
+      let messages = await msg.channel.messages.fetch({ limit: 100 });
+      for (const [messageId, message] of messages) {
+        if (message.author.bot) continue;
+        if (message.attachments.size > 0) {
+          let a = message.attachments.first();
+          processed = true;
 
-              let ogw = cropped.bitmap.width
-              let ogh = cropped.bitmap.height
+          const Jimp = require("jimp");
+          const cropped = await Jimp.read(a.url);
 
-              // width
-              let max = ogw * 9 / 10;
-              let min = ogw / 10;
-              let nw = Math.floor(Math.random() * (max - min) + min);
+          let ogw = cropped.bitmap.width
+          let ogh = cropped.bitmap.height
 
-              // height
-              max = ogh * 9 / 10;
-              min = ogh / 10;
-              let nh = Math.floor(Math.random() * (max - min) + min);
+          // width
+          let max = ogw * 9 / 10;
+          let min = ogw / 10;
+          let nw = Math.floor(Math.random() * (max - min) + min);
 
-              //starting x
-              max = ogw - nw;
-              min = 1;
-              let startX = Math.floor(Math.random() * (max - min) + min);
+          // height
+          max = ogh * 9 / 10;
+          min = ogh / 10;
+          let nh = Math.floor(Math.random() * (max - min) + min);
 
-              //starting y
-              max = ogh - nh;
-              min = 1;
-              let startY = Math.floor(Math.random() * (max - min) + min);
+          //starting x
+          max = ogw - nw;
+          min = 1;
+          let startX = Math.floor(Math.random() * (max - min) + min);
 
-              cropped.crop(startX, startY, nw, nh)
-              const canvas = new Jimp(nw, nh, 0x000000);
-              canvas.blit(cropped,0,0);
-              await msg.channel.send({files: [await canvas.getBufferAsync(Jimp.MIME_PNG)]});
-            } catch(e) { u.errorHandler(e, msg) }
-          }
+          //starting y
+          max = ogh - nh;
+          min = 1;
+          let startY = Math.floor(Math.random() * (max - min) + min);
+
+          cropped.crop(startX, startY, nw, nh)
+          const canvas = new Jimp(nw, nh, 0x000000);
+          canvas.blit(cropped,0,0);
+          await msg.channel.send({files: [await canvas.getBufferAsync(Jimp.MIME_PNG)]});
+          break;
         }
-      } catch(e) { u.errorHandler(e, msg); }
-    })
-    .catch(e => u.errorHandler(e, msg));
-    u.clean(msg);
+      }
+      if (!processed) msg.reply("I couldn't find any recent images to crop!").then(u.clean);
+      u.clean(msg);
+    } catch(error) { u.errorHandler(error, msg); }
   }
 });
 
