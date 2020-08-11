@@ -150,12 +150,22 @@ const Utils = {
         let q = parse.shift(); // Get next potential user/member
         let keepGoing = false;
         try {
-          let mem = await guildMembers.fetch({query: q});
-          if (mem.size == 1) { // If there's more than one match, stop trying to fetch members.
-            mem = mem.first(); // Convert the Collection into a GuildMember
+          // Query it as a Snowflake first
+          let mem = await guildMembers.fetch(q);
+
+          if (mem) {
             userMentions.set(mem.id, member ? mem : mem.user);
             keepGoing = true;
-          }
+          } else {
+            // If not a Snowflake, run a search query
+            let mem = await guildMembers.fetch({query: q});
+
+            if (mem.size == 1) { // If there's more than one match, stop trying to fetch members.
+              mem = mem.first(); // Convert the Collection into a GuildMember
+              userMentions.set(mem.id, member ? mem : mem.user);
+              keepGoing = true;
+            }
+          }          
         } catch (e) {
           Utils.errorHandler(e, msg);
           Utils.errorHandler(e, "The previous error happened while fetching user mentions");
