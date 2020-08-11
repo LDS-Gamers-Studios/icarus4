@@ -11,7 +11,7 @@ function runTag(msg) {
       .replace(/<@author>/ig, msg.author)
       .replace(/<@authorname>/ig, msg.member.displayName);
     if ((/(<@target>)|(<@targetname>)/i).test(response)) {
-      if (u.userMentions(msg)) {
+      if (u.userMentions(msg).size > 0) {
         let target = u.userMentions(msg).first();
         response = response.replace(/<@target>/ig, target.toString())
           .replace(/<@targetname>/ig, msg.guild.members.get(target.id).displayName);

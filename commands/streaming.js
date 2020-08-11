@@ -373,7 +373,7 @@ const Module = new Augur.Module()
     u.clean(msg);
     let bot = msg.client;
 
-    if (u.userMentions(msg)) {
+    if (u.userMentions(msg).size > 0) {
       msg.react("👌");
       for (const [id, user] of u.userMentions(msg)) {
         try {
@@ -400,7 +400,7 @@ const Module = new Augur.Module()
     u.clean(msg);
     let bot = msg.client;
 
-    if (u.userMentions(msg)) {
+    if (u.userMentions(msg).size > 0) {
       msg.react("👌");
       for (const [id, user] of u.userMentions(msg)) {
         try {
@@ -428,7 +428,7 @@ const Module = new Augur.Module()
       let user = false,
       name = false;
 
-      if (u.userMentions(msg)) user = u.userMentions(msg).first();
+      if (u.userMentions(msg).size > 0) user = u.userMentions(msg).first();
       else if (!suffix) user = msg.author;
 
       if (user) {
@@ -614,7 +614,7 @@ const Module = new Augur.Module()
       let user = false,
       name = false;
 
-      if (u.userMentions(msg)) {
+      if (u.userMentions(msg).size > 0) {
         user = u.userMentions(msg).first();
       } else if (!suffix) {
         user = msg.author;
@@ -666,7 +666,7 @@ const Module = new Augur.Module()
   category: "Streaming",
   process: (msg) => {
     u.clean(msg);
-    if (u.userMentions(msg)) {
+    if (u.userMentions(msg).size > 0) {
       msg.react("")
       u.userMentions(msg).forEach(user => {
         let member = msg.guild.members.get(user.id);
@@ -729,7 +729,7 @@ const Module = new Augur.Module()
       let user = false,
         name = false;
 
-      if (u.userMentions(msg)) {
+      if (u.userMentions(msg).size > 0) {
         user = u.userMentions(msg).first();
       } else if (!suffix) {
         user = msg.author;

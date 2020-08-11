@@ -50,7 +50,7 @@ const Module = new Augur.Module()
     } else if ((setting == 'prefix') || (setting == 'command')) {
       // PREFIX
       let userMentions = u.userMentions(msg);
-      if (userMentions && ((userMentions.size > 1) || ((userMentions.size == 1) && (userMentions.first().id != bot.user.id)))) {
+      if (userMentions.size > 0) {
         msg.reply("you cannot set the command prefix to mention any user but me.").then(u.clean);
       } else {
         Module.db.server.saveSetting(msg.guild, 'prefix', value);

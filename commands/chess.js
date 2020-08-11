@@ -9,7 +9,7 @@ const Module = new Augur.Module()
   syntax: "[playerName]",
   process: async (msg, suffix) => {
     let name;
-    if (u.userMentions(msg)) {
+    if (u.userMentions(msg).size > 0) {
       try {
         let ign = await Module.db.ign.find(u.userMentions(msg).first().id, 'chess');
         if (ign) name = ign.ign;
@@ -45,7 +45,7 @@ const Module = new Augur.Module()
         } else { u.errorHandler(error, msg); }
       }
     } else {
-      if (u.userMentions(msg)) msg.reply(`${u.userMentions(msg).first().username} hasn't saved a Chess.com IGN!`).then(u.clean);
+      if (u.userMentions(msg).size > 0) msg.reply(`${u.userMentions(msg).first().username} hasn't saved a Chess.com IGN!`).then(u.clean);
       else msg.reply("you need to tell me who to search for or set an ign with `!addIGN chess name`.").then(u.clean);
     }
   }

@@ -20,7 +20,7 @@ const Module = new Augur.Module()
   syntax: "[@user]",
   process: async function (msg) {
     try {
-      let user = (u.userMentions(msg) ? u.userMentions(msg).first() : msg.author);
+      let user = u.userMentions(msg).first() || msg.author;
 
       let member = msg.client.guilds.get(Module.config.ldsg).members.get(user.id);
       let response = null;

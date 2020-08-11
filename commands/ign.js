@@ -66,7 +66,7 @@ const Module = new Augur.Module()
   process: async function(msg, suffix) {
     try {
       let userMentions = u.userMentions(msg);
-      if (userMentions) {
+      if (userMentions.size > 0) {
         var user = userMentions.first();
         var systems = suffix.replace(/<@!?\d+>/ig, '').toLowerCase().trim();
       } else {

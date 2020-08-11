@@ -363,7 +363,7 @@ Module
 
       let userMentions = u.userMentions(msg);
       let channelMentions = msg.mentions.channels;
-      if (userMentions) {
+      if (userMentions.size > 0) {
         userMentions.forEach(async (userId) => {
           try {
             let data = await Module.db.ankle.getUserSummary(userId, time);
@@ -474,7 +474,7 @@ Module
   permissions: (msg) => (msg.guild && (msg.member.hasPermission("BAN_MEMBERS") || msg.member.roles.has(Module.config.roles.mod))),
   process: (msg, suffix) => {
     u.clean(msg, 0);
-    if (u.userMentions(msg)) {
+    if (u.userMentions(msg).size > 0) {
       let reason = suffix.replace(/<@!?\d+>/ig, "").trim();
       // Get highest role that isn't "Live"
       const bannerHighRole = msg.member.roles.filter(r => r.id != "281135201407467520").sort((a, b) => b.position - a.position).first();
@@ -561,7 +561,7 @@ Module
   permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && (msg.member.roles.has(Module.config.roles.mod) || msg.member.roles.has(Module.config.roles.management))),
   process: async (msg, suffix) => {
     u.clean(msg, 0);
-    if (u.userMentions(msg)) {
+    if (u.userMentions(msg).size > 0) {
       try {
         let ldsg = msg.guild;
         userId = u.userMentions(msg).first();
@@ -593,7 +593,7 @@ Module
   process: (msg, suffix) => {
     u.clean(msg, 0);
     let reason = suffix.replace(/<@!?\d+>/ig, "").trim();
-    if (u.userMentions(msg)) {
+    if (u.userMentions(msg).size > 0) {
       let ldsg = msg.guild;
       // Get highest role that isn't "Live"
       const kickerHighRole = msg.member.roles.filter(r => r.id != "281135201407467520").sort((a, b) => b.position - a.position).first();
@@ -637,7 +637,7 @@ Module
   permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && (msg.member.roles.has(Module.config.roles.mod) || msg.member.roles.has(Module.config.roles.management))),
   process: (msg) => {
     u.clean(msg, 0);
-    if (u.userMentions(msg)) {
+    if (u.userMentions(msg).size > 0) {
       u.userMentions(msg).forEach(function(userId) {
         msg.guild.fetchMember(userId).then(member => {
           member.addRole("253214700446285825");
@@ -657,7 +657,7 @@ Module
   permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && (msg.member.roles.has(Module.config.roles.mod) || msg.member.roles.has(Module.config.roles.management))),
   process: (msg, suffix) => {
     u.clean(msg, 0);
-    if (u.userMentions(msg)) {
+    if (u.userMentions(msg).size > 0) {
       let duration = parseInt(suffix.replace(/<@!?\d+>/ig, '').toLowerCase().trim(), 10);
       u.userMentions(msg).forEach(async (user) => {
         try {
@@ -755,7 +755,7 @@ Module
   process: async (msg, suffix) => {
     u.clean(msg, 0);
     let setNick = suffix.replace(/<@!?\d+>/g, "").trim();
-    if (u.userMentions(msg)) {
+    if (u.userMentions(msg).size > 0) {
       u.userMentions(msg).forEach(async user => {
         try {
           const {names, colors, adjectives} = require("../data/nameParts.json");
@@ -846,7 +846,7 @@ Module
   permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && (msg.member.roles.has(Module.config.roles.mod) || msg.member.roles.has(Module.config.roles.management))),
   process: (msg) => {
     u.clean(msg, 0);
-    if (u.userMentions(msg)) {
+    if (u.userMentions(msg).size > 0) {
       u.userMentions(msg).forEach(function(userId) {
         msg.guild.fetchMember(userId).then(member => {
           member.addRole(Module.config.roles.trusted);
@@ -909,7 +909,7 @@ Module
   permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && (msg.member.roles.has(Module.config.roles.mod) || msg.member.roles.has(Module.config.roles.management))),
   process: (msg) => {
     u.clean(msg, 0);
-    if (u.userMentions(msg)) {
+    if (u.userMentions(msg).size > 0) {
       u.userMentions(msg).forEach(function(userId) {
         msg.guild.fetchMember(userId).then(member => {
           member.removeRole(Module.config.roles.muted);
@@ -930,7 +930,7 @@ Module
   permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && (msg.member.roles.has(Module.config.roles.mod) || msg.member.roles.has(Module.config.roles.management))),
   process: (msg) => {
     u.clean(msg, 0);
-    if (u.userMentions(msg)) {
+    if (u.userMentions(msg).size > 0) {
       u.userMentions(msg).forEach(function(userId) {
         msg.guild.fetchMember(userId).then(member => {
           member.removeRole(Module.config.roles.trusted);
@@ -957,7 +957,7 @@ Module
   permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && (msg.member.roles.has(Module.config.roles.mod) || msg.member.roles.has(Module.config.roles.management))),
   process: (msg, suffix) => {
     u.clean(msg, 0);
-    if (u.userMentions(msg)) {
+    if (u.userMentions(msg).size > 0) {
       let comment = suffix.replace(/<@!?\d+>/ig, '').replace(/\s\s+/g, ' ').trim();
       let value = comment.substring(0, comment.indexOf(" "));
 

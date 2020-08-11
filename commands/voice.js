@@ -359,7 +359,7 @@ const Module = new Augur.Module()
   process: (msg, suffix) => {
     let enabled = suffix.replace(/<@!?\d+>/ig, "").toLowerCase().trim();
     let targets = u.userMentions(msg);
-    if (!targets) {
+    if (targets.size == 0) {
       msg.reply("you need to tell me who to take notes on!");
       return;
     } else if (enabled == "false") {
