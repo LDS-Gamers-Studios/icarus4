@@ -33,7 +33,7 @@ const Utils = {
       console.error(`${msg.author.username} in ${(msg.guild ? `${msg.guild.name} > ${msg.channel.name}` : "DM")}: ${msg.cleanContent}`);
       const client = msg.client;
       msg.channel.send("I've run into an error. I've let my devs know.")
-        .then(u.clean);
+        .then(Utils.clean);
       embed.addField("User", msg.author.username, true)
         .addField("Location", (msg.guild ? `${msg.guild.name} > ${msg.channel.name}` : "DM"), true)
         .addField("Command", msg.cleanContent || "`undefined`", true);
