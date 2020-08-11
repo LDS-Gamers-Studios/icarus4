@@ -169,7 +169,7 @@ const Utils = {
         } catch (e) {
           Utils.errorHandler(e, msg);
         }
-      } while (keepGoing && parse.size > 0);
+      } while (keepGoing && parse.length > 0);
     }
     return userMentions;
   }
