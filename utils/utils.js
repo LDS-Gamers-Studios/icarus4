@@ -160,7 +160,7 @@ const Utils = {
           Utils.errorHandler(e, msg);
           Utils.errorHandler(e, "The previous error happened while fetching user mentions");
         }
-      } while (keepGoing);
+      } while (keepGoing && parse.size > 0);
     }
     return userMentions;
   }
