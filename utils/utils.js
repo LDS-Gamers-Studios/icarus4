@@ -33,7 +33,7 @@ const Utils = {
       console.error(`${msg.author.username} in ${(msg.guild ? `${msg.guild.name} > ${msg.channel.name}` : "DM")}: ${msg.cleanContent}`);
       const client = msg.client;
       msg.channel.send("I've run into an error. I've let my devs know.")
-        .then(u.clean);
+        .then(Utils.clean);
       embed.addField("User", msg.author.username, true)
         .addField("Location", (msg.guild ? `${msg.guild.name} > ${msg.channel.name}` : "DM"), true)
         .addField("Command", msg.cleanContent || "`undefined`", true);
@@ -140,6 +140,34 @@ const Utils = {
     // such as when the bot mention is the command prefix
     let userMentions = (member ? msg.mentions.members : msg.mentions.users);
     if (userMentions.has(msg.client.user.id)) userMentions.delete(msg.client.user.id);
+    
+    // Now, if mentions don't exist, run queries until they fail
+    if (userMentions.size == 0) {
+      guildMembers = msg.guild.members;
+      let parse = msg.content.trim().split(" ");
+      parse.shift(); // Ditch the command
+      do {
+        let q = parse.shift(); // Get next potential user/member
+        let keepGoing = false;
+        try {
+          // Query it as a Snowflake first, otherwise search by username
+          let mem = (await guildMembers.fetch(q)) || (await guildMembers.fetch({query: q}));
+
+          if (mem instanceof Discord.Collection && mem.size == 1) {
+            // Treat a multiple-match search result as a failed search
+            mem = mem.first(); // Convert the Collection into a GuildMember
+          }
+
+          if (mem instanceof Discord.GuildMember) {
+            // Either the Snowflake search worked, or there was exactly one username match
+            userMentions.set(mem.id, member ? mem : mem.user);
+            keepGoing = true;
+          }
+        } catch (e) {
+          Utils.errorHandler(e, msg);
+        }
+      } while (keepGoing && parse.length > 0);
+    }
     return userMentions;
   }
 };
