@@ -50,7 +50,7 @@ function checkStreams(bot) {
       if (liveEL.size > 0) extraLifeEmbed(bot, liveEL);
     }
 
-  } catch(e) { u.alertError(e, "Stream Check"); }
+  } catch(e) { u.errorHandler(e, "Stream Check"); }
 };
 
 async function extraLifeEmbed(bot, liveEL) {
@@ -67,7 +67,7 @@ async function extraLifeEmbed(bot, liveEL) {
         try {
           let streams = await twitch.streams.getStreams({userName: twitchChannels.filter((v, i) => i < 100)});
           fulfill({service: "twitch", channels: streams.data});
-        } catch(e) { u.alertError(e, msg); }
+        } catch(e) { u.errorHandler(e, msg); }
       }),
       new Promise((fulfill, reject) => {
         mixer.request("GET", `channels?where=token:in:${mixerChannels.join(";")}`)
@@ -117,7 +117,7 @@ async function extraLifeEmbed(bot, liveEL) {
     bot.channels.get("96335850576556032").send(embed);
 
   } catch (e) {
-    u.alertError(e, msg);
+    u.errorHandler(e, msg);
   }
 };
 
@@ -206,10 +206,10 @@ function processApplications() {
         Module.handler.client.channels.get("146289578674749440")
           .send(embed)
           .then(() => fs.unlinkSync(path))
-          .catch(e => u.alertError(e, "Delete Approved Streamer Application Error"));
+          .catch(e => u.errorHandler(e, "Delete Approved Streamer Application Error"));
       }
     });
-  } catch(e) { u.alertError(e, "Streaming Application Check"); }
+  } catch(e) { u.errorHandler(e, "Streaming Application Check"); }
 }
 
 async function processMixer(bot, key, channel) {
@@ -241,7 +241,7 @@ async function processMixer(bot, key, channel) {
       if (member && liveRole.members.has(member.id)) member.removeRole(liveRole);
     }
   } catch(e) {
-    u.alertError(e, "Process Mixer");
+    u.errorHandler(e, "Process Mixer");
   }
 };
 
@@ -287,7 +287,7 @@ async function processTwitch(bot, key, channel) {
       });
     }
   } catch(e) {
-    u.alertError(e, "Process Twitch");
+    u.errorHandler(e, "Process Twitch");
   }
 };
 
@@ -319,7 +319,7 @@ async function processYouTube(bot, key, channel) {
       if (liveRole.members.has(member.id)) member.removeRole(liveRole);
     }
   } catch(e) {
-    u.alertError(e, "Process YouTube");
+    u.errorHandler(e, "Process YouTube");
   }
 };
 
@@ -386,7 +386,7 @@ const Module = new Augur.Module()
           } else {
             msg.reply(`${member.displayName} needs to be trusted first!`);
           }
-        } catch(error) { u.alertError(error, msg); }
+        } catch(error) { u.errorHandler(error, msg); }
       }
     } else msg.reply("you need to tell me who to approve!").then(u.clean);
   },
@@ -413,7 +413,7 @@ const Module = new Augur.Module()
           } else {
             msg.reply(`${member.displayName} needs to be trusted first!`);
           }
-        } catch(error) { u.alertError(error, msg); }
+        } catch(error) { u.errorHandler(error, msg); }
       }
     } else msg.reply("you need to tell me who to approve!").then(u.clean);
   },
@@ -448,7 +448,7 @@ const Module = new Augur.Module()
         msg.channel.send(mixerEmbed(res));
       }
     } catch(e) {
-      u.alertError(e, msg);
+      u.errorHandler(e, msg);
     }
   }
 })
@@ -524,7 +524,7 @@ const Module = new Augur.Module()
       }
     } catch(e) {
       // msg.channel.send("I couldn't find a Twitch channel for " + decodeURIComponent(name)).then(u.clean);
-      u.alertError(e, msg);
+      u.errorHandler(e, msg);
     }
   }
 })
@@ -545,7 +545,7 @@ const Module = new Augur.Module()
           try {
             let streams = await twitch.streams.getStreams({userName: twitchChannels.slice(0, 100)});
             fulfill({service: "twitch", channels: streams.data});
-          } catch(e) { u.alertError(e, msg); reject(e); }
+          } catch(e) { u.errorHandler(e, msg); reject(e); }
         }),
         new Promise((fulfill, reject) => {
           mixer.request("GET", `channels?where=token:in:${mixerChannels.join(";")}`)
@@ -599,7 +599,7 @@ const Module = new Augur.Module()
       u.botSpam(msg).send(embed);
 
     } catch (e) {
-      u.alertError(e, msg);
+      u.errorHandler(e, msg);
     }
   },
   permissions: (msg) => msg.guild
@@ -645,10 +645,10 @@ const Module = new Augur.Module()
         }
       } catch(e) {
         // msg.channel.send("I couldn't find a Twitch channel for " + decodeURIComponent(name)).then(u.clean);
-        u.alertError(e, msg);
+        u.errorHandler(e, msg);
       }
     } catch(e) {
-      u.alertError(e, msg);
+      u.errorHandler(e, msg);
     }
   }
 })
@@ -697,7 +697,7 @@ const Module = new Augur.Module()
         fs.writeFileSync("./data/streams.json", JSON.stringify(bonusStreams, null, "\t"));
         u.clean(msg);
       } else return msg.reply("you need to tell me a platform (twitch/mixer) and at least one channel to watch!").then(u.clean);
-    } catch(e) { u.alertError(e, msg); }
+    } catch(e) { u.errorHandler(e, msg); }
   }
 })
 .addCommand({name: "unwatchchannel",
@@ -715,7 +715,7 @@ const Module = new Augur.Module()
         fs.writeFileSync("./data/streams.json", JSON.stringify(bonusStreams, null, "\t"));
         u.clean(msg);
       } else return msg.reply("you need to tell me a platform (twitch/mixer) and at least one channel to unwatch!").then(u.clean);
-    } catch(e) { u.alertError(e, msg); }
+    } catch(e) { u.errorHandler(e, msg); }
   }
 })
 .addCommand({name: "youtube",
@@ -752,16 +752,16 @@ const Module = new Augur.Module()
       } else {
         msg.channel.send(`I couldn't find channel info for YouTube user \`${name}\``).then(u.clean);
       }
-    } catch(e) { u.alertError(e, msg); }
+    } catch(e) { u.errorHandler(e, msg); }
   }
 })
 .addEvent("guildMemberUpdate", (oldMember, newMember) => {
   let twitchSub = "338056125062578176";
   if (oldMember.roles.has(twitchSub) && !newMember.roles.has(twitchSub)) {
-    newMember.send("It looks like your Twitch subscription to LDS Gamers has expired!\n\nTwitch Prime subscriptions need to be resubbed on a monthly basis. If this was unintentional, please consider resubbing at <https://www.twitch.tv/ldsgamers>. It helps keep the website and various game servers running. Thanks for the support! <:hexlogo:447251297033256962>").catch(u.ignoreError);
+    newMember.send("It looks like your Twitch subscription to LDS Gamers has expired!\n\nTwitch Prime subscriptions need to be resubbed on a monthly basis. If this was unintentional, please consider resubbing at <https://www.twitch.tv/ldsgamers>. It helps keep the website and various game servers running. Thanks for the support! <:hexlogo:447251297033256962>").catch(u.noop);
     newMember.client.channels.get("506575671242260490").send(`**${newMember.displayName}**'s Twitch Sub has expired!`);
   } else if (!oldMember.roles.has(twitchSub) && newMember.roles.has(twitchSub)) {
-    newMember.send("Thanks for becoming an LDS Gamers Twitch Subscriber! People like you help keep the website and various game servers running. If you subscribed with a Twitch Prime sub, those need to be renewed monthly. You'll get a notification if I notice it lapse. Thanks for the support! <:hexlogo:447251297033256962>").catch(u.ignoreError);
+    newMember.send("Thanks for becoming an LDS Gamers Twitch Subscriber! People like you help keep the website and various game servers running. If you subscribed with a Twitch Prime sub, those need to be renewed monthly. You'll get a notification if I notice it lapse. Thanks for the support! <:hexlogo:447251297033256962>").catch(u.noop);
     newMember.client.channels.get("506575671242260490").send(`**${newMember.displayName}** has become a Twitch Sub!`);
   }
 })
@@ -781,7 +781,7 @@ const Module = new Augur.Module()
     let interval = 5 * 60 * 1000;
     checkStreams(bot);
     return setInterval(checkStreams, interval, bot);
-  } catch(e) { u.alertError(e, "Streaming Clockwork"); }
+  } catch(e) { u.errorHandler(e, "Streaming Clockwork"); }
 });
 
 module.exports = Module;

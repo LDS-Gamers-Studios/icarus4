@@ -143,7 +143,7 @@ const Module = new Augur.Module()
       card.crop(0, 0, 300, Math.min(rankOffset + 73 * Math.ceil((badges.length) / 4), 533));
 
       await msg.channel.send({files: [await card.getBufferAsync(Jimp.MIME_PNG)]});
-    } catch(e) { u.alertError(e, msg); }
+    } catch(e) { u.errorHandler(e, msg); }
   }
 })
 .addCommand({name: "spotlight",
@@ -183,7 +183,7 @@ const Module = new Augur.Module()
           msg.channel.send({embed: embed});
 
         }
-      } catch(e) { u.alertError(e, msg); }
+      } catch(e) { u.errorHandler(e, msg); }
     });
   }
 });

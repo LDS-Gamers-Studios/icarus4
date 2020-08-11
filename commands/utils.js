@@ -61,7 +61,7 @@ const Module = new Augur.Module()
       } else {
         msg.reply("you need to use one of the following formats:\n> DD MM YYYY HH:MM PST/MDT/EST/Etc Your Reminder Text\n> in N hours/days/weeks/months Your Reminder Text");
       }
-    } catch(error) { u.alertError(error, msg); }
+    } catch(error) { u.errorHandler(error, msg); }
   }
 })
 .addCommand({name: "timer",
@@ -102,9 +102,9 @@ const Module = new Augur.Module()
             user.send({embed}).catch(u.noop);
           }
           await Module.db.reminder.complete(reminder);
-        } catch(e) { u.alertError(e, "Complete Reminder"); }
+        } catch(e) { u.errorHandler(e, "Complete Reminder"); }
       }
-    } catch(error) { u.alertError(error, "Execute Reminders"); }
+    } catch(error) { u.errorHandler(error, "Execute Reminders"); }
   }, 5 * 60000);
 });
 

@@ -35,7 +35,7 @@ const Module = new Augur.Module()
       if (embed.fields.length == 0) embed.addField("Community Tournaments", "No upcoming community tournaments found.");
       else embed.description += "\n\nCommunity Tournaments:";
       msg.channel.send(embed);
-    } catch(e) { u.alertError(e, msg); }
+    } catch(e) { u.errorHandler(e, msg); }
   }
 })
 .addCommand({name: "champion",

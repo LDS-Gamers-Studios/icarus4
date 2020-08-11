@@ -18,7 +18,7 @@ async function updateFactionStatus(bot) {
     let channel = bot.channels.get(channelID);
 
     channel.setTopic(topic);
-  } catch (e) { u.alertError(e, "Faction Status Update Error"); }
+  } catch (e) { u.errorHandler(e, "Faction Status Update Error"); }
 }
 
 const Module = new Augur.Module()
@@ -170,7 +170,7 @@ const Module = new Augur.Module()
         } else {
           msg.channel.send("I didn't understand that command. See `!elite help`.").then(u.clean);
         };
-      } catch (error) { u.alertError(error, msg); }
+      } catch (error) { u.errorHandler(error, msg); }
     }
   }).setClockwork(() => {
     try {
@@ -178,7 +178,7 @@ const Module = new Augur.Module()
       updateFactionStatus(bot);
       // Every 6 hours seems alright for channel description updates. The rate limit is actually once every 5 minutes, so we're more than clear.
       return setInterval(updateFactionStatus, 6 * 60 * 60 * 1000, bot);
-    } catch (e) { u.alertError(e, "Elite Dangerous Clockwork Error"); }
+    } catch (e) { u.errorHandler(e, "Elite Dangerous Clockwork Error"); }
 });
 
 module.exports = Module;

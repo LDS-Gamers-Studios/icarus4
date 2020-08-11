@@ -25,7 +25,7 @@ function getStats(channel) {
           }
 
           for (const [channel, interval] of attempts) {
-            Module.handler.client.channels.get(channel).send({embed}).catch(e => u.alertError(e, "F@H Post"));
+            Module.handler.client.channels.get(channel).send({embed}).catch(e => u.errorHandler(e, "F@H Post"));
             clearInterval(interval);
           }
           attempts.clear();
@@ -33,7 +33,7 @@ function getStats(channel) {
         } else {
           fulfill(false);
         }
-      } catch(error) { u.alertError(error, "F@H Posting"); }
+      } catch(error) { u.errorHandler(error, "F@H Posting"); }
     });
   });
 }
@@ -52,7 +52,7 @@ const Module = new Augur.Module()
       let success = await getStats(msg.channel);
       if (!success)
         msg.channel.send("I'm having trouble connecting to the Folding @ Home website. I'll keep trying!");
-    } catch(e) { u.alertError(e, msg); }
+    } catch(e) { u.errorHandler(e, msg); }
   }
 })
 .setUnload(() => {

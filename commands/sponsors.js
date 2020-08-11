@@ -26,7 +26,7 @@ const Module = new Augur.Module()
           VIEW_CHANNEL: true
         }, "Pro Sponsor Invite");
         channel.send(`Welcome, ${member}!`);
-      } catch(error) { u.alertError(error, msg); }
+      } catch(error) { u.errorHandler(error, msg); }
     }
   }
 })
@@ -76,19 +76,19 @@ const Module = new Augur.Module()
             sponsorid: sponsor.id,
             channelid: channel.id
           }, u.noop);
-        } catch(error) { u.alertError(error, "Save Sponsor Channel Info"); }
+        } catch(error) { u.errorHandler(error, "Save Sponsor Channel Info"); }
 
         channel.send(`${sponsor}, welcome to your private channel! Thank you for being a Pro Sponsor! Your contributions each month are very much appreciated! Please accept this channel as a token of our appreciation.\n\nYou should have some administrative abilities for this channel (including changing the name and description), as well as the ability to add people to the channel with \`!coolkids @user(s)\`. If you would like to change default permissions for users in the channel, please contact a member of Management directly.`);
       }
     } catch(e) {
-      u.alertError(e, msg);
+      u.errorHandler(e, msg);
     }
   },
   permissions: (msg) => msg.guild
 })
 .addEvent("loadConfig", () => {
   Module.config.sheets.get("Sponsor Channels").getRows((e, rows) => {
-    if (e) u.alertError(e, "Error loading sponsor channels.");
+    if (e) u.errorHandler(e, "Error loading sponsor channels.");
     else {
       let ldsg = Module.handler.client.guilds.get(Module.config.ldsg);
       sponsorChannels.clear();

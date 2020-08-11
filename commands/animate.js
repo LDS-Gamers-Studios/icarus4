@@ -19,7 +19,7 @@ async function reload(msg) {
         }
       }
     } while (reactions.size > 0)
-  } catch(e) { u.alertError(e, "Animation Reload Error"); }
+  } catch(e) { u.errorHandler(e, "Animation Reload Error"); }
 }
 
 async function animate(msg, frames, delay = 1000) {
@@ -31,7 +31,7 @@ async function animate(msg, frames, delay = 1000) {
     if (frames.length > 0) nextFrame(m, frames, delay);
     else m.react("🔁");
     reload(m);
-  } catch(e) { u.alertError(e, "Animate Error"); }
+  } catch(e) { u.errorHandler(e, "Animate Error"); }
 }
 
 function nextFrame(msg, frames, delay = 1000) {
@@ -40,7 +40,7 @@ function nextFrame(msg, frames, delay = 1000) {
       let m = await msg.edit(frames.shift());
       if (frames.length > 0) nextFrame(m, frames, delay);
       else m.react("🔁");
-    } catch(e) { u.alertError(e, "Animate nextFrame Error"); }
+    } catch(e) { u.errorHandler(e, "Animate nextFrame Error"); }
   }, delay);
 };
 
@@ -112,7 +112,7 @@ const Module = new Augur.Module()
         reload(msg);
       }
     }
-  } catch(e) { u.alertError(e, "Animation Load Error"); }
+  } catch(e) { u.errorHandler(e, "Animation Load Error"); }
 });
 
 module.exports = Module;

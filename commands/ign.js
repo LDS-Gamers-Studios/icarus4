@@ -84,7 +84,7 @@ const Module = new Augur.Module()
       if (embed) msg.channel.send({embed: embed});
       else msg.channel.send("It looks like " + (member ? member.displayName : user.username) + " hasn't saved an IGN with `!addign` yet.").then(u.clean);
     } catch(e) {
-      u.alertError(e, msg);
+      u.errorHandler(e, msg);
     }
   }
 })
@@ -130,7 +130,7 @@ const Module = new Augur.Module()
         Module.handler.execute("ign", msg, system);
       } else msg.channel.send(system + " isn't a valid system.").then(u.clean);
     } catch(e) {
-      u.alertError(e, msg);
+      u.errorHandler(e, msg);
     }
   }
 })
@@ -171,7 +171,7 @@ const Module = new Augur.Module()
         } else msg.channel.send(`No members have saved an IGN for ${Ign.gameids.get(suffix).name}.`);
       } else msg.reply(suffix + " isn't a valid system.").then(u.clean);
     } catch(e) {
-      u.alertError(e, msg);
+      u.errorHandler(e, msg);
     }
   }
 })
@@ -226,7 +226,7 @@ const Module = new Augur.Module()
       aliases: Array.from(Ign.aliases.entries()),
       gameids: Array.from(Ign.gameids.entries())
     }));
-  }).catch(error => u.alertError(error, "IGN Load"));
+  }).catch(error => u.errorHandler(error, "IGN Load"));
 })
 .setUnload(() => {
   const path = require("path");

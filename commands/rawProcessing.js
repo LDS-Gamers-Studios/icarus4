@@ -40,9 +40,9 @@ const Module = new Augur.Module()
       if (packet.t === 'MESSAGE_REACTION_REMOVE') {
         client.emit('messageReactionRemove', reaction, client.users.get(packet.d.user_id));
       }
-    } catch(e) { u.alertError(e, "Error in rawProcessing.js after fetching "); }
+    } catch(e) { u.errorHandler(e, "Error in rawProcessing.js after fetching "); }
   } catch(e) {
-    u.alertError(e, "Couldn't fetch message during raw event processing.");
+    u.errorHandler(e, "Couldn't fetch message during raw event processing.");
   }
 
 });

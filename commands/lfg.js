@@ -41,7 +41,7 @@ async function reloadList(msg, game) {
       msg = await msg.edit(embed);
       reloadList(msg, game);
     } else msg.delete();
-  } catch(e) { u.alertError(e, "LFG Reload Error"); }
+  } catch(e) { u.errorHandler(e, "LFG Reload Error"); }
 }
 
 function removePlayer(player, games) {
@@ -247,7 +247,7 @@ const Module = new Augur.Module()
         u.botSpam(msg).send(embed);
       }
     } catch(e) {
-      u.alertError(e, msg);
+      u.errorHandler(e, msg);
     }
   },
   permissions: (msg) => msg.guild
@@ -257,7 +257,7 @@ const Module = new Augur.Module()
 })
 .addEvent("loadConfig", () => {
   Module.config.sheets.get("WIP Channel Defaults").getRows((e, rows) => {
-    if (e) u.alertError(e, "Error loading WIP channel defaults.");
+    if (e) u.errorHandler(e, "Error loading WIP channel defaults.");
     else {
       for (let i = 0; i < rows.length; i++)
         gameDefaults.set(rows[i].channelid, rows[i].gamename);
@@ -279,7 +279,7 @@ const Module = new Augur.Module()
     });
 
     return setInterval(writeData, 60000);
-  } catch(e) { u.alertError(e, "LFG Clockwork Error"); }
+  } catch(e) { u.errorHandler(e, "LFG Clockwork Error"); }
 });
 
 module.exports = Module;

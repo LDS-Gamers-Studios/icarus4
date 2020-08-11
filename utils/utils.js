@@ -8,58 +8,50 @@ const errorLog = new Discord.WebhookClient(config.error.id, config.error.token),
   serverSettings = new Map();
 
 const Utils = {
-  alertError: function(error, msg = null) {
-    if (!error) return;
-
-    let errorInfo = new Discord.RichEmbed()
-    .setTimestamp()
-    .setTitle(error.name);
-
-    if (typeof msg == "string") {
-      errorInfo.addField("Message", msg);
-    } else if (msg) {
-      let bot = msg.client;
-      if (bot.shard) errorInfo.addField("Shard", bot.shard.id, true);
-
-      msg.channel.send("I've run into an error. I've let my owner know.")
-        .then(m => m.delete(10000));
-
-      errorInfo
-      .addField("User", msg.author.username, true)
-      .addField("Location", (msg.guild ? `${msg.guild.name} > ${msg.channel.name}` : "PM"), true)
-      .addField("Command", msg.cleanContent || "`undefined`", true)
-    }
-
-    let errorStack = (error.stack ? error.stack : error.toString());
-    if (errorStack.length > 1024) errorStack = errorStack.slice(0, 1000);
-
-    errorInfo.addField("Error", errorStack);
-
-    errorLog.send(errorInfo);
-
-    console.error(Date());
-    if (typeof msg == "string") console.error(msg);
-    else if (msg) console.error(`${msg.author.username} in ${(msg.guild ? (msg.guild.name + " > " + msg.channel.name) : "DM")}: ${msg.cleanContent}`);
-    console.trace(error);
-  },
-  botSpam: function(msg) {
-    if (msg.guild && msg.channel.id != "209046676781006849") {
-      let botspam = db.server.getSetting(msg.guild, "botspam");
-      if (botspam && (botspam != msg.channel.id)) {
-        msg.reply(`I've placed your results in <#${botspam}> to keep things nice and tidy in here. Hurry before they get cold!`)
+  botSpam: (msg) => {
+    if (msg.guild && (msg.guild.id == config.ldsg) && (msg.channel.id != "209046676781006849") && (msg.channel.id != config.channels.botspam)) {
+      msg.reply(`I've placed your results in <#${botspam}> to keep things nice and tidy in here. Hurry before they get cold!`)
         .then(Utils.clean);
-        return msg.guild.channels.get(botspam);
-      } else return msg.channel;
+      return msg.guild.channels.get(config.channels.botspam);
     } else return msg.channel;
   },
   clean: function(msg, t = 20000) {
     setTimeout((m) => {
-      if (msg.deletable && !msg.deleted) m.delete();
+      if (m.deletable && !m.deleted) m.delete();
     }, t, msg);
     return Promise.resolve(msg);
   },
-  embed: (data) => new Discord.RichEmbed(data).setColor(config.color),
-  errorLog: errorLog,
+  embed: (data) => new Discord.MessageEmbed(data).setColor(config.color).setTimestamp(),
+  errorHandler: function(error, msg = null) {
+    if (!error) return;
+
+    console.error(Date());
+
+    let embed = Utils.embed().setTitle(error.name);
+
+    if (msg instanceof Discord.Message) {
+      console.error(`${msg.author.username} in ${(msg.guild ? `${msg.guild.name} > ${msg.channel.name}` : "DM")}: ${msg.cleanContent}`);
+      const client = msg.client;
+      msg.channel.send("I've run into an error. I've let my devs know.")
+        .then(u.clean);
+      embed.addField("User", msg.author.username, true)
+        .addField("Location", (msg.guild ? `${msg.guild.name} > ${msg.channel.name}` : "DM"), true)
+        .addField("Command", msg.cleanContent || "`undefined`", true);
+    } else if (typeof msg === "string") {
+      console.error(msg);
+      embed.addField("Message", msg);
+    }
+
+    console.trace(error);
+
+    let stack = (error.stack ? error.stack : error.toString());
+    if (stack.length > 1024) stack = stack.slice(0, 1000);
+
+    embed.addField("Error", stack);
+    errorLog.send(embed);
+  },
+  errorLog,
+  escape: (text, options = {}) => Discord.escapeMarkdown(text, options),
   escapeText: (txt) => txt.replace(/(\*|_|`|~|\\|\|)/g, '\\$1'),
   getUser: function(msg, user, strict = false) {
     // Finds a user in the same guild as the message.
@@ -68,7 +60,7 @@ const Utils = {
     if (user.length == 0 || !msg.guild) return (msg.guild ? msg.member : msg.author);
 
     let lcUser = user.toLowerCase();
-    let memberCollection = msg.guild.members;
+    let memberCollection = msg.guild.members.cache;
 
     let myFn = (element) => false;
     // If there's a discriminator given, look for exact match
@@ -97,8 +89,6 @@ const Utils = {
 
     return foundUser;
   },
-  init: (Handler) => db.init(Handler),
-  ignoreError: (e) => {},
   noop: () => {},
   paginator: async function(msg, pager, elements, page = 0, perPage = 1) {
     try {
@@ -132,32 +122,25 @@ const Utils = {
 
         embed.setFooter(`Page ${page + 1} / ${totalPages}`);
         m.edit({embed});
-        m.reactions.filter(r => r.me).forEach(r => r.remove());
+        for (const [rid, r] of m.reactions.cache) {
+          if (!r.me) continue;
+          else r.remove();
+        }
       } else await msg.channel.send({embed: pager(elements, page, msg)});
     } catch(e) { Utils.alertError(e, msg); }
   },
-  parse: function(msg) {
-    let prefix = Utils.prefix(msg);
-    let message = msg.content;
-    if (message.startsWith(prefix) && !msg.author.bot) {
-      let parse = message.slice(prefix.length).trim().split(" ");
-      let command = parse.shift().toLowerCase();
-      return {command: command, suffix: parse.join(" ")};
-    }
-  },
-  prefix: function(msg) {
-    if (msg.guild) return db.server.getSetting(msg.guild, "prefix");
-    else return config.prefix;
+  path: (...segments) => {
+    const path = require("path");
+    return path.resolve(path.dirname(require.main.filename), ...segments);
   },
   properCase: (txt) => txt.split(" ").map(word => (word[0].toUpperCase() + word.substr(1).toLowerCase())).join(" "),
   rand: (array) => array[Math.floor(Math.random() * array.length)],
-  userMentions: function(msg) {
+  userMentions: (msg, member = false) => {
     // Useful to ensure the bot isn't included in the mention list,
     // such as when the bot mention is the command prefix
-    let bot = msg.client;
-    let userMentions = msg.mentions.users;
-    if (userMentions.has(bot.user.id)) userMentions.delete(bot.user.id);
-    return (userMentions.size > 0 ? userMentions : null);
+    let userMentions = (member ? msg.mentions.members : msg.mentions.users);
+    if (userMentions.has(msg.client.user.id)) userMentions.delete(msg.client.user.id);
+    return userMentions;
   }
 };
 

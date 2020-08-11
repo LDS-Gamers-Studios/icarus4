@@ -29,7 +29,7 @@ const Module = new Augur.Module()
         await msg.client.destroy();
         process.exit();
       }
-    } catch(e) { u.alertError(e, msg); }
+    } catch(e) { u.errorHandler(e, msg); }
   },
   permissions: (msg) => Module.config.adminId.includes(msg.author.id)
 })
@@ -41,7 +41,7 @@ const Module = new Augur.Module()
       msg.react("👌");
       let botTesting = await msg.client.channels.get("209046676781006849").overwritePermissions(msg.author, { VIEW_CHANNEL: true });
       botTesting.send(`Well, I guess ${msg.author} is my dev now. Please do others a favor and let them find their own way in, rather than telling them. :grin:`);
-    } catch(e) { u.alertError(e, msg); }
+    } catch(e) { u.errorHandler(e, msg); }
   }
 })
 .addCommand({name: "ping",
@@ -136,7 +136,7 @@ const Module = new Augur.Module()
 
         msg.channel.send({embed: embed});
       }
-    } catch(e) { u.alertError(e, msg); }
+    } catch(e) { u.errorHandler(e, msg); }
   }
 })
 .addCommand({name: "reload",
@@ -201,7 +201,7 @@ const Module = new Augur.Module()
     .setDescription((Module.handler.client.shard ? ("Shard " + Module.handler.client.shard.id) : "Bot") + " has disconnected. I will try restarting the bot.");
     await u.errorLog.send({embed});
     process.exit();
-  } catch(error) { u.alertError(error); process.exit(); }
+  } catch(error) { u.errorHandler(error); process.exit(); }
 })
 .setInit((reload) => {
   if (!reload) {
@@ -210,10 +210,10 @@ const Module = new Augur.Module()
   }
 
   doc.useServiceAccountAuth(google.creds, (err) => {
-    if (err) u.alertError(err, "Google Authentication - Config Sheet");
+    if (err) u.errorHandler(err, "Google Authentication - Config Sheet");
     else {
       doc.getInfo((e, r) => {
-        if (e) u.alertError(e, "Fetch Google Config Sheet Error");
+        if (e) u.errorHandler(e, "Fetch Google Config Sheet Error");
         else {
           const sheets = r.worksheets;
           Module.config.sheets = new Map();

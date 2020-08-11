@@ -136,7 +136,7 @@ const Module = new Augur.Module()
         await member.removeRoles(Array.from(inventory.values()));
         await member.addRole(toAdd);
         msg.react("👌");
-      } catch(e) { u.alertError(e, msg); }
+      } catch(e) { u.errorHandler(e, msg); }
     }
   }
 })
@@ -149,7 +149,7 @@ const Module = new Augur.Module()
       let member = ldsg.members.get(msg.author.id);
       await member.removeRoles(Array.from(inventory.values()));
       msg.react("👌");
-    } catch(error) { u.alertError(error, msg); }
+    } catch(error) { u.errorHandler(error, msg); }
   }
 })
 .addCommand({name: "inventory",
@@ -252,7 +252,7 @@ const Module = new Augur.Module()
 })
 .addEvent("loadConfig", () => {
   Module.config.sheets.get("Opt-In Roles").getRows((e, rows) => {
-    if (e) u.alertError(e, "Error loading opt-in roles.");
+    if (e) u.errorHandler(e, "Error loading opt-in roles.");
     else {
       for (let i = 0; i < rows.length; i++)
         roles.set(rows[i].roletag, rows[i].roleid);

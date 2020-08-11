@@ -182,7 +182,7 @@ async function playSound(guildId) {
       });
     }
   } catch(e) {
-    u.alertError(e, "Voice playSound() error");
+    u.errorHandler(e, "Voice playSound() error");
   }
 }
 
@@ -229,7 +229,7 @@ const Module = new Augur.Module()
 
         await channel.overwritePermissions(msg.guild.id, {CONNECT: false});
         await msg.react("🔒");
-      } catch(e) { u.alertError(e, msg); }
+      } catch(e) { u.errorHandler(e, msg); }
     } else {
       msg.reply("you need to be in a community voice channel to use this command!").then(u.clean);
     }
@@ -291,7 +291,7 @@ const Module = new Augur.Module()
           }
           msg.react("👌");
         } else msg.reply("I couldn't find any songs on that playlist.").then(u.clean);
-      } catch(error) { u.alertError(error, msg); }
+      } catch(error) { u.errorHandler(error, msg); }
     } else if (ytdl.validateURL(suffix)) {
       try {
         let info = await ytdl.getBasicInfo(suffix);
@@ -305,7 +305,7 @@ const Module = new Augur.Module()
         if (!queue.has(msg.guild.id)) queue.set(msg.guild.id, new Queue());
         queue.get(msg.guild.id).add(channel, sound);
         msg.react("👌");
-      } catch(error) { u.alertError(error, msg); }
+      } catch(error) { u.errorHandler(error, msg); }
     } else {
       msg.reply("that wasn't a valid YouTube link!").then(u.clean);
     }
@@ -347,7 +347,7 @@ const Module = new Augur.Module()
             queue.get(msg.guild.id).add(channel, sound);
           } else msg.reply("I couldn't find any sounds for " + suffix);
         } catch(e) {
-          u.alertError(e, msg);
+          u.errorHandler(e, msg);
         }
       } else msg.reply("I'm not going to make that sound.").then(u.clean);
     }
@@ -418,7 +418,7 @@ const Module = new Augur.Module()
 .addEvent("loadConfig", () => {
   let ldsg = Module.handler.client.guilds.get(Module.config.ldsg);
   Module.config.sheets.get("Voice Channel Names").getRows((e, rows) => {
-    if (e) u.alertError(e, "Error loading voice channel names.");
+    if (e) u.errorHandler(e, "Error loading voice channel names.");
     else {
       for (let i = 0; i < rows.length; i++) {
         roomList.push(rows[i].name);
@@ -447,7 +447,7 @@ const Module = new Augur.Module()
           if (!connection.dispatcher) {
             connection.playStream("https://www.youtube.com/watch?v=HWwDPd7LvNs");
           }
-        } catch(error) { u.alertError(error, "Start Taking Notes."); }
+        } catch(error) { u.errorHandler(error, "Start Taking Notes."); }
       }, 250, member);
     } else {
       // Hold Up!
@@ -457,7 +457,7 @@ const Module = new Augur.Module()
           if (connection && (connection.channel.id == member.voiceChannel.id) && connection.dispatcher) {
             connection.dispatcher.pause();
           }
-        } catch(error) { u.alertError(error, "Pause Taking Notes."); }
+        } catch(error) { u.errorHandler(error, "Pause Taking Notes."); }
       }, 500, member);
     }
   }
@@ -468,7 +468,7 @@ const Module = new Augur.Module()
     if (oldMember.voiceChannel && (oldMember.voiceChannel.members.size == 0) && isCommunityVoice(oldMember.voiceChannel)) {
       // REMOVE OLD VOICE CHANNEL
       let oldChannelName = oldMember.voiceChannel.name;
-      await oldMember.voiceChannel.delete().catch(e => u.alertError(e, "Could not delete empty voice channel."));
+      await oldMember.voiceChannel.delete().catch(e => u.errorHandler(e, "Could not delete empty voice channel."));
       let name = roomList.find(room => oldChannelName.startsWith(room));
       if (name && !guild.channels.find(c => c.name.startsWith(name))) availableNames.add(name);
     }
@@ -489,7 +489,7 @@ const Module = new Augur.Module()
           id: Module.config.roles.muted,
           deny: ["VIEW_CHANNEL", "CONNECT", "SEND_MESSAGES", "SPEAK"]
         }]);
-      } catch(e) { u.alertError(e, "Voice message creation error."); }
+      } catch(e) { u.errorHandler(e, "Voice message creation error."); }
     }
   }
 
@@ -503,7 +503,7 @@ const Module = new Augur.Module()
           if (connection.dispatcher) connection.dispatcher.end();
           await connection.disconnect();
         }
-      } catch(error) { u.alertError(error, "Notes Disconnect."); }
+      } catch(error) { u.errorHandler(error, "Notes Disconnect."); }
     }
     if (newMember.voiceChannel){
       // Member Joined
@@ -514,7 +514,7 @@ const Module = new Augur.Module()
           await connection.disconnect();
         }
         await newMember.voiceChannel.join();
-      } catch(error) { u.alertError(error, "Notes Join."); }
+      } catch(error) { u.errorHandler(error, "Notes Join."); }
     }
   }
 });

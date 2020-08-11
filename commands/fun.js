@@ -44,8 +44,8 @@ async function testBirthdays(bot) {
             var birthdayLangs = require("../data/birthday.json");
             let msgs = birthdayLangs.map(lang => member.send(flair[Math.floor(Math.random() * flair.length)] + " " + lang));
             Promise.all(msgs).then(() => {
-              member.send(":birthday: :confetti_ball: :tada: A very happy birthday to you, from LDS Gamers! :tada: :confetti_ball: :birthday:").catch(u.ignoreError);
-            }).catch(u.ignoreError);
+              member.send(":birthday: :confetti_ball: :tada: A very happy birthday to you, from LDS Gamers! :tada: :confetti_ball: :birthday:").catch(u.noop);
+            }).catch(u.noop);
           } catch (e) { continue; }
         }
       }
@@ -83,12 +83,12 @@ async function testBirthdays(bot) {
               if (user.currentXP > 0) {
                 bot.channels.get(ldsg).send(`${member} has been part of the server for ${years} ${(years > 1 ? "years" : "year")}! Glad you're with us!`);
               }
-            } catch (e) { u.alertError(e, "Announce Cake Day Error"); continue; }
+            } catch (e) { u.errorHandler(e, "Announce Cake Day Error"); continue; }
           }
-        } catch(e) { u.alertError(e, "Fetch Cake Day Error"); }
+        } catch(e) { u.errorHandler(e, "Fetch Cake Day Error"); }
       }
     }
-  } catch(e) { u.alertError(e, "Cake Day Error"); }
+  } catch(e) { u.errorHandler(e, "Cake Day Error"); }
 }
 
 const Module = new Augur.Module()
@@ -179,8 +179,8 @@ const Module = new Augur.Module()
         let msgs = birthdayLangs.map(lang => birthday.send(flair[Math.floor(Math.random() * flair.length)] + " " + lang));
 
         Promise.all(msgs).then(() => {
-          birthday.send(":birthday: :confetti_ball: :tada: A very happy birthday to you, from LDS Gamers! :tada: :confetti_ball: :birthday:").catch(u.ignoreError);
-        }).catch(u.ignoreError);
+          birthday.send(":birthday: :confetti_ball: :tada: A very happy birthday to you, from LDS Gamers! :tada: :confetti_ball: :birthday:").catch(u.noop);
+        }).catch(u.noop);
       });
     } else {
       msg.reply("you need to tell me who to celebrate!");
@@ -205,7 +205,7 @@ const Module = new Augur.Module()
       ]);
 
       await msg.channel.send({files: [await av.getBufferAsync(Jimp.MIME_PNG)]});
-    } catch(e) { u.alertError(e, msg); }
+    } catch(e) { u.errorHandler(e, msg); }
   }
 })
 .addCommand({name: "chaos",
@@ -244,7 +244,7 @@ const Module = new Augur.Module()
         { apply: "hue", params: [color] }
       ]);
       await msg.channel.send({files: [await image.getBufferAsync(Jimp.MIME_PNG)]});
-    } catch(e) { u.alertError(e, msg); }
+    } catch(e) { u.errorHandler(e, msg); }
   }
 })
 .addCommand({name: "disagree",
@@ -293,7 +293,7 @@ const Module = new Augur.Module()
       canvas.blit(avatar, 120, 0);
 
       await msg.channel.send({files: [await canvas.getBufferAsync(Jimp.MIME_PNG)]});
-    } catch(e) { u.alertError(e, msg); }
+    } catch(e) { u.errorHandler(e, msg); }
   }
 })
 .addCommand({name: "fine",
@@ -384,7 +384,7 @@ const Module = new Augur.Module()
       msg.channel.send("Hug" + ((msg.mentions.users.size > 1) ? "s" : "") + " on the way!").then(u.clean);
 
       // Include this for bug-hunting.
-      //msg.client.channels.get("209046676781006849").send(`Hugs being sent from ${msg.author.username} to: ${msg.mentions.users.map(u => u).join(", ")}`).catch(e => u.alertError(e, msg));
+      //msg.client.channels.get("209046676781006849").send(`Hugs being sent from ${msg.author.username} to: ${msg.mentions.users.map(u => u).join(", ")}`).catch(e => u.errorHandler(e, msg));
 
       msg.mentions.users.forEach(async function(user) {
         try {
@@ -398,7 +398,7 @@ const Module = new Augur.Module()
           .catch(e => {
             msg.reply(`I couldn't send a hug to ${msg.guild.members.get(user.id).displayName}. Maybe they blocked me? :shrug:`).then(u.clean);
           });
-        } catch(e) { u.alertError(e, msg); }
+        } catch(e) { u.errorHandler(e, msg); }
       });
     } else {
       msg.reply("who do you want to hug?").then(u.clean);
@@ -446,7 +446,7 @@ const Module = new Augur.Module()
       let name = (msg.cleanContent.toLowerCase().endsWith("luigi") ? "luigi" : "mario");
       await msg.channel.edit({name});
       await msg.channel.send({files: [ml]});
-    } catch(e) { u.alertError(e, msg); }
+    } catch(e) { u.errorHandler(e, msg); }
   }
 })
 .addCommand({name: "minesweeper",
@@ -644,7 +644,7 @@ const Module = new Augur.Module()
     let bot = Module.handler.client;
     testBirthdays(bot);
     return setInterval(testBirthdays, 60 * 60 * 1000, bot);
-  } catch(e) { u.alertError(e, "Birthday Clockwork Error"); }
+  } catch(e) { u.errorHandler(e, "Birthday Clockwork Error"); }
 });
 
 module.exports = Module;

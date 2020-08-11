@@ -48,12 +48,12 @@ const Module = new Augur.Module()
               const canvas = new Jimp(nw, nh, 0x000000);
               canvas.blit(cropped,0,0);
               await msg.channel.send({files: [await canvas.getBufferAsync(Jimp.MIME_PNG)]});
-            } catch(e) { u.alertError(e, msg) }
+            } catch(e) { u.errorHandler(e, msg) }
           }
         }
-      } catch(e) { u.alertError(e, msg); }
+      } catch(e) { u.errorHandler(e, msg); }
     })
-    .catch(e => u.alertError(e, msg));
+    .catch(e => u.errorHandler(e, msg));
     u.clean(msg);
   }
 });

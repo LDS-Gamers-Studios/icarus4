@@ -17,7 +17,7 @@ const Module = new Augur.Module()
     else {
       oxford.find(escape(suffix), (err, defs) => {
         if (err && err == "No such entry found") return msg.reply(`I couldn't find a definition for ${suffix}.`);
-        else if (err) return u.alertError(err, msg);
+        else if (err) return u.errorHandler(err, msg);
         defs = defs.results.filter(d => d.word.toLowerCase() == suffix.toLowerCase());
 
         let embed = u.embed()

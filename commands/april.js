@@ -29,7 +29,7 @@ const Module = new Augur.Module()
         });
       }
     }
-  } catch(e) { u.alertError(e, msg); }
+  } catch(e) { u.errorHandler(e, msg); }
 });
 
 module.exports = Module;

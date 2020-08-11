@@ -59,7 +59,7 @@ const Module = new Augur.Module()
           if (opt) await poll.react(opt);
         }
       }
-    } catch(e) { u.alertError(e, msg); }
+    } catch(e) { u.errorHandler(e, msg); }
   },
   permissions: (msg) => msg.guild && msg.channel.permissionsFor(msg.client.user).has("ADD_REACTIONS")
 });

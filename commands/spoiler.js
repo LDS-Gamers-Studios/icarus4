@@ -30,7 +30,7 @@ const Module = new Augur.Module()
       };
       await Module.db.spoiler.save(spoiler);
       await m.react("💬");
-    } catch(e) { u.alertError(e, msg); }
+    } catch(e) { u.errorHandler(e, msg); }
   }
 })
 .addEvent("messageReactionAdd", (reaction, user) => {
@@ -47,9 +47,9 @@ const Module = new Augur.Module()
           .setTitle(`Spoiler${(spoiler.channelName ? (" in #" + spoiler.channelName) : "")}${(spoiler.topic ? " about " + spoiler.topic : "")}:`);
 
           user.send(embed);
-        }).catch(e => u.alertError(e, "Send spoiler to user error"));
+        }).catch(e => u.errorHandler(e, "Send spoiler to user error"));
       }
-    }).catch(e => u.alertError(e, "Fetch spoiler error"));
+    }).catch(e => u.errorHandler(e, "Fetch spoiler error"));
   }
 })
 .setUnload(() => true);

@@ -13,7 +13,7 @@ const Module = new Augur.Module()
 .addEvent("loadConfig", () => {
   Module.config.sheets.get("Alerts").getRows((e, rows) => {
     if (e) {
-      u.alertError(e, "Error loading alerts.");
+      u.errorHandler(e, "Error loading alerts.");
     } else {
       for (const row of rows) alerts.set(row.webhookid, {role: row.pingid, name: row.alertname});
     }

@@ -54,7 +54,7 @@ const Module = new Augur.Module()
       }
       msg.channel.send(response);
     } catch(e) {
-      u.alertError(e, msg);
+      u.errorHandler(e, msg);
     }
   }
 })
@@ -102,7 +102,7 @@ const Module = new Augur.Module()
       msg.guild.channels.get("121752198731268099").send(announce);
 
       Module.db.user.resetXP();
-    } catch(e) { u.alertError(e, msg); }
+    } catch(e) { u.errorHandler(e, msg); }
   }
 })
 .addCommand({name: "trackxp",
@@ -179,9 +179,9 @@ const Module = new Augur.Module()
           }
         }
         active.clear();
-      } catch(e) { u.alertError(e, "Rank clockwork update"); }
+      } catch(e) { u.errorHandler(e, "Rank clockwork update"); }
     }, 60000, bot);
-  } catch(e) { u.alertError(e, "Rank outer clockwork"); }
+  } catch(e) { u.errorHandler(e, "Rank outer clockwork"); }
 });
 
 module.exports = Module;

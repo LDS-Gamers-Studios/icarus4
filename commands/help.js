@@ -35,7 +35,7 @@ const Module = new Augur.Module()
         commands.filter(c => c.category == category && !c.hidden).sort((a, b) => a.name.localeCompare(b.name)).forEach((command) => {
           embed.addField(prefix + command.name + " " + command.syntax, (command.description ? command.description : "Description"));
           if (i == 20) {
-            msg.author.send(embed).catch(e => u.alertError(u, msg));
+            msg.author.send(embed).catch(e => u.errorHandler(u, msg));
             embed = u.embed().setTitle(msg.client.user.username + " Commands" + (msg.guild ? ` in ${msg.guild.name}.` : ".") + " (Cont.)")
             .setURL("https://my.ldsgamers.com/commands")
             .setDescription(`You have access to the following commands. For more info, type \`${prefix}help <command>\`.`);
@@ -45,7 +45,7 @@ const Module = new Augur.Module()
         });
       });
 
-      msg.author.send(embed).catch(e => u.alertError(e, msg));
+      msg.author.send(embed).catch(e => u.errorHandler(e, msg));
     } else { // SINGLE COMMAND HELP
       let command = null;
       if (commands.has(suffix)) command = commands.get(suffix);
@@ -59,7 +59,7 @@ const Module = new Augur.Module()
 
         if (command.aliases.length > 0) embed.addField("Aliases", command.aliases.map(a => `!${a}`).join(", "));
 
-        msg.author.send(embed).catch(e => u.alertError(e, msg));
+        msg.author.send(embed).catch(e => u.errorHandler(e, msg));
       } else {
         msg.reply("I don't have a command by that name.").then(u.clean);
       }

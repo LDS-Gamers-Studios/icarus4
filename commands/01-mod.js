@@ -38,7 +38,7 @@ async function toEnglish(msg) {
     const [translation, data] = await translate.translate(msg.cleanContent, "en");
     msg.client.channels.get("543147492275912724").send(`${u.escapeText(msg.member.displayName)} (${data.data.translations[0].detectedSourceLanguage})${(msg.editedAt ? " [Edited]" : "")}: ${translation}`);
     return (translation ? translation : "");
-  } catch(e) { u.alertError(e, msg); return ""; }
+  } catch(e) { u.errorHandler(e, msg); return ""; }
 }
 
 function processMessageLanguage(msg, edited = false) {
@@ -124,7 +124,7 @@ function processDiscordInvites(msg) {
         warnCard(msg, "Unknown Discord Server Invite");
         u.clean(msg, 0);
         msg.channel.send("It is difficult to know what will be in another Discord server at any given time. *If* you feel that this server is appropriate to share, please only do so in direct messages.");
-      } else u.alertError(e, msg);
+      } else u.errorHandler(e, msg);
     });
   }
 };
@@ -149,7 +149,7 @@ async function warnCard(msg, filtered = null, call = false) {
             message: msg.id,
           };
           await Module.db.ankle.save(ankle);
-        } catch(e) { u.alertError(e, "Saving Ankle"); }
+        } catch(e) { u.errorHandler(e, "Saving Ankle"); }
       }
     }
 
@@ -203,7 +203,7 @@ async function warnCard(msg, filtered = null, call = false) {
         await card.react(cardReactions[i]);
       }
     }
-  } catch(e) { u.alertError(e, "Mod Card Creation"); }
+  } catch(e) { u.errorHandler(e, "Mod Card Creation"); }
 }
 
 async function processCardReaction(reaction, mod, infraction) {
@@ -333,7 +333,7 @@ async function processCardReaction(reaction, mod, infraction) {
 
         member.send(`${response}\n\n**${mod.username}** has issued this warning.`, quote)
         .catch(() => blocked(member));
-        //.catch(e => u.alertError(e, "Warning DM"));
+        //.catch(e => u.errorHandler(e, "Warning DM"));
       }
 
       embed.fields = embed.fields.filter(f => !f.name || !f.name.startsWith("Jump"));
@@ -343,7 +343,7 @@ async function processCardReaction(reaction, mod, infraction) {
       message.edit({embed});
     }
 
-  } catch(e) { u.alertError(e, "Mod Card Reaction"); }
+  } catch(e) { u.errorHandler(e, "Mod Card Reaction"); }
 }
 
 const Module = new Augur.Module();
@@ -384,7 +384,7 @@ Module
             } else {
               msg.channel.send(msg.guild.members.get(userId.id).displayName + " still has all their ankles!");
             }
-          } catch (e) { u.alertError(e, `Handling lost ankles for user: ${userId}`); }
+          } catch (e) { u.errorHandler(e, `Handling lost ankles for user: ${userId}`); }
         });
       }
       if (channelMentions.size > 0) {
@@ -408,7 +408,7 @@ Module
             } else {
               msg.channel.send(`No users have lost any ankles in ${channelId}!`);
             }
-          } catch (e) { u.alertError(e, `Handling lost ankles for channel: ${channelId}`); }
+          } catch (e) { u.errorHandler(e, `Handling lost ankles for channel: ${channelId}`); }
         });
       }
       if (!userMentions && channelMentions.size == 0) { // No user or channel mentions, give high summary
@@ -443,7 +443,7 @@ Module
         }
         await msg.channel.send(response.join("\n"));
       }
-    } catch (e) { u.alertError(e, msg); }
+    } catch (e) { u.errorHandler(e, msg); }
   }
 })
 .addCommand({name: "announce",
@@ -502,8 +502,8 @@ Module
               await member.ban({days: 2, reason: reason});
               msg.client.channels.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** banned **${u.escapeText(member.displayName)}**${(reason ? (" for " + reason) : "")}`);
             } else msg.reply("That user is no longer part of the server.").then(u.clean);
-          } catch(e) { u.alertError(e, msg); }
-        } catch(e) { u.alertError(e, "Role Rank Comparison (Ban)"); }
+          } catch(e) { u.errorHandler(e, msg); }
+        } catch(e) { u.errorHandler(e, "Role Rank Comparison (Ban)"); }
       });
     } else {
       msg.reply("you need to tell me who to ban!")
@@ -578,7 +578,7 @@ Module
           });
         }
         msg.channel.send(response.join("\n"), {split: true});
-      } catch(e) { u.alertError(e, m); }
+      } catch(e) { u.errorHandler(e, m); }
     } else {
       msg.reply("you need to tell me whose summary you want to view.")
         .then(u.clean);
@@ -620,8 +620,8 @@ Module
               await member.kick(reason);
               msg.client.channels.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** kicked **${u.escapeText(member.displayName)}**${reason ? (" for " + reason) : ""}`);
             }
-          } catch(e) { u.alertError(e, msg); }
-        } catch(e) { u.alertError(e, "Role Rank Comparison (Kick)"); }
+          } catch(e) { u.errorHandler(e, msg); }
+        } catch(e) { u.errorHandler(e, "Role Rank Comparison (Kick)"); }
       });
     } else {
       msg.reply("you need to tell me who to kick!")
@@ -675,7 +675,7 @@ Module
               msg.client.channels.get(modLogs).send(`ℹ️ **${u.escapeText(member.displayName)}** has automatically been unmuted after ${timeout} minutes.`);
             }, (duration * 60000), member, duration);
           }
-        } catch(e) { u.alertError(e, msg); }
+        } catch(e) { u.errorHandler(e, msg); }
       });
     } else {
       msg.reply("you need to tell me which users to mute!")
@@ -714,7 +714,7 @@ Module
           .setTimestamp();
 
           msg.client.channels.get(modLogs).send(card);
-        } catch(e) { u.alertError(e, msg); }
+        } catch(e) { u.errorHandler(e, msg); }
       });
     } else {
       msg.reply("you need to tell me who and what the note is.")
@@ -743,7 +743,7 @@ Module
         msg.reply("you need to tell me how many to delete.")
           .then(u.clean);
       }
-    } catch(e) { u.alertError(e, msg); }
+    } catch(e) { u.errorHandler(e, msg); }
   }
 })
 .addCommand({name: "rename",
@@ -791,19 +791,19 @@ Module
             .setTimestamp();
 
             msg.client.channels.get(modLogs).send(card);
-          } catch(e) { u.alertError(e, msg); }
+          } catch(e) { u.errorHandler(e, msg); }
 
           try {
             member.send(`Your nickname has been changed in ${msg.guild.name} from ${oldNick} to ${newNick}. Please contact a moderator or member of the management team if you have questions regarding the change.`).catch(() => blocked(member));
           } catch(e) {
             // msg.channel.send("Could not inform user of the nickname change.")
             //   .then(u.clean);
-            u.alertError(e, msg);
+            u.errorHandler(e, msg);
           }
         } catch(e) {
           // msg.channel.send(`Could not change ${userId}'s nickname to ${newNick}.`)
           //   .then(u.clean);
-          u.alertError(e, msg);
+          u.errorHandler(e, msg);
         }
       });
     } else {
@@ -886,7 +886,7 @@ Module
       if (response.length > 0)
         msg.channel.send(response.sort((a, b) => b.posts - a.posts).map(m => `${m.member}: ${m.posts} posts, joined ${m.member.joinedAt.toLocaleDateString()}`).join("\n"), {split: true});
       else msg.channel.send(`No untrusted users with ${threshold} posts found.`);
-    } catch(e) { u.alertError(e, msg); }
+    } catch(e) { u.errorHandler(e, msg); }
   }
 })
 .addCommand({name: "unfilter",
@@ -994,7 +994,7 @@ Module
           .setTimestamp();
 
           msg.client.channels.get(modLogs).send(card);
-        } catch(e) { u.alertError(e, msg); }
+        } catch(e) { u.errorHandler(e, msg); }
       });
     } else msg.reply("you need to tell me who and what the infraction is.").then(u.clean);
   }
@@ -1012,7 +1012,7 @@ Module
       CONNECT: false,
       SEND_MESSAGES: false,
       SPEAK: false
-    }).catch(e => u.alertError(e, "Update new channel permissions."));
+    }).catch(e => u.errorHandler(e, "Update new channel permissions."));
   }
 })
 .addEvent("guildBanAdd", (guild, user) => {
@@ -1028,7 +1028,7 @@ Module
       let flag = await Module.db.infraction.getByFlag(message.id);
       if (flag) processCardReaction(reaction, user, flag);
     }
-  } catch(e) { u.alertError(e, "Card Reaction Processing"); }
+  } catch(e) { u.errorHandler(e, "Card Reaction Processing"); }
 })
 .addEvent("messageUpdate", (old, msg) => {
   if (msg.guild && msg.member && msg.guild.id == Module.config.ldsg) return processMessageLanguage(msg, true);

@@ -40,7 +40,7 @@ function runTag(msg) {
     let list = Array.from(tags.get(msg.guild.id).values()).map(c => prefix + c.tag).sort();
 
     embed.setDescription(list.join("\n"));
-    msg.author.send(embed).catch(u.ignoreError);
+    msg.author.send(embed).catch(u.noop);
   }
 }
 
@@ -79,7 +79,7 @@ const Module = new Augur.Module()
           msg.reply(`I couldn't find the command \`${u.prefix(msg)}${newTag}\` to alter.`);
       } else
         msg.reply("you need to tell me the command name and the intended command response.").then(u.clean);
-    } catch(e) { u.alertError(e, msg); }
+    } catch(e) { u.errorHandler(e, msg); }
   },
   permissions: (msg) => msg.guild && (msg.member.permissions.has("MANAGE_GUILD") || msg.member.permissions.has("ADMINISTRATOR") || Module.config.adminId.includes(msg.author.id))
 })

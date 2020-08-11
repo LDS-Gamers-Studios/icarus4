@@ -228,7 +228,7 @@ const Module = new Augur.Module()
         msg.channel.send(`Sorry, I don't have information for the ${date.getFullYear()} manual yet.`).then(u.clean);
       }
 
-    } catch(error) { u.alertError(error, msg); }
+    } catch(error) { u.errorHandler(error, msg); }
   }
 })
 .addCommand({name: "conference",
