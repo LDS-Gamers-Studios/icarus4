@@ -140,6 +140,27 @@ const Utils = {
     // such as when the bot mention is the command prefix
     let userMentions = (member ? msg.mentions.members : msg.mentions.users);
     if (userMentions.has(msg.client.user.id)) userMentions.delete(msg.client.user.id);
+    
+    // Now, if mentions don't exist, run queries until they fail
+    if (userMentions.size == 0) {
+      guildMembers = msg.guild.members;
+      let parse = message.trim().split(" ");
+      parse.shift(); // Ditch the command
+      do {
+        let q = parse.shift(); // Get next potential user/member
+        let keepGoing = false;
+        try {
+          let mem = await guildMembers.fetch({query: q});
+          if (mem.size == 1) { // If there's more than one match, stop trying to fetch members.
+            mem = mem.first(); // Convert the Collection into a GuildMember
+            userMentions.set(mem.id, member ? mem : mem.user);
+            keepGoing = true;
+          }
+        } catch (e) {
+          Utils.errorHandler(e);
+        }
+      } while (keepGoing);
+    }
     return userMentions;
   }
 };
