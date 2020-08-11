@@ -1,31 +1,19 @@
-const Augur = require("augurbot"),
+const {AugurClient} = require("augurbot"),
   config = require("./config/config.json"),
-  fs = require("fs"),
-  path = require("path"),
   u = require("./utils/utils");
 
-function loadCommands(Handler) {
-  Handler.db.init(Handler.client);
-  Handler.client.on("ready", () => console.log("Ready at:", Date()));
-  fs.readdirSync("./commands").filter(file => file.endsWith(".js")).forEach(command => {
-    Handler.register(path.resolve(process.cwd(), "./commands/", command));
-  });
-}
-
-const Handler = new Augur.Handler(config, {
-  errorHandler: u.alertError,
-  parse: u.parse
+const client = new AugurClient(config, {
+  clientOptions: {
+    disableMentions: "everyone"
+  },
+  commands: "./commands",
+  errorHandler: u.errorHandler
 });
 
-Handler.start().then(loadCommands);
+client.login();
 
 // LAST DITCH ERROR HANDLING
-process.on("unhandledRejection", (error, p) => {
-  p.catch(e => u.alertError(e, "Unhandled Rejection"));
-//  u.alertError(error, "Unhandled Rejection");
-});
-process.on("uncaughtException", (error) => {
-  u.alertError(error, "Uncaught Exception");
-});
+process.on("unhandledRejection", (error, p) => p.catch(e => u.errorHandler(e, "Unhandled Rejection")));
+process.on("uncaughtException", (error) => u.errorHandler(error, "Uncaught Exception"));
 
-module.exports = {Handler: Handler, bot: Handler.client};
+module.exports = client;

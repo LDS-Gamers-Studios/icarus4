@@ -1,6 +1,6 @@
 {
   "name": "icarus3",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "Discord bot for the LDSG Community",
   "main": "icarus.js",
   "scripts": {
@@ -16,12 +16,12 @@
   "dependencies": {
     "@ffmpeg-installer/ffmpeg": "^1.0.19",
     "@google-cloud/translate": "^2.1.4",
-    "augurbot": "^1.2.1",
+    "augurbot": "^2.0.8",
     "beam-client-node": "^2.0.0",
     "body-parser": "^1.19.0",
     "cheerio": "^1.0.0-rc.3",
     "chess-web-api": "^1.0.9",
-    "discord.js": "^11.6.4",
+    "discord.js": "^12.2.0",
     "dubapi": "^1.6.9",
     "express": "^4.17.1",
     "express-session": "^1.16.2",
