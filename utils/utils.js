@@ -144,7 +144,7 @@ const Utils = {
     // Now, if mentions don't exist, run queries until they fail
     if (userMentions.size == 0) {
       guildMembers = msg.guild.members;
-      let parse = message.trim().split(" ");
+      let parse = msg.content.trim().split(" ");
       parse.shift(); // Ditch the command
       do {
         let q = parse.shift(); // Get next potential user/member
