@@ -157,7 +157,8 @@ const Utils = {
             keepGoing = true;
           }
         } catch (e) {
-          Utils.errorHandler(e);
+          Utils.errorHandler(e, msg);
+          Utils.errorHandler(e, "The previous error happened while fetching user mentions");
         }
       } while (keepGoing);
     }
