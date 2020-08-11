@@ -16,7 +16,7 @@
   "dependencies": {
     "@ffmpeg-installer/ffmpeg": "^1.0.19",
     "@google-cloud/translate": "^2.1.4",
-    "augurbot": "^2.0.8",
+    "augurbot": "^2.0.9",
     "beam-client-node": "^2.0.0",
     "body-parser": "^1.19.0",
     "cheerio": "^1.0.0-rc.3",
