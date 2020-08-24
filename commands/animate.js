@@ -14,7 +14,7 @@ async function reload(msg) {
         let reaction = reactions.first();
         let frames = await Module.db.animation.fetch(msg.id);
         if (frames) {
-          let m = await reaction.message.clearReactions();
+          let m = await reaction.message.reactions.removeAll();
           nextFrame(m, frames.frames);
         }
       }
@@ -103,12 +103,13 @@ const Module = new Augur.Module()
 })
 .setInit(async () => {
   try {
-    let bot = Module.handler.client;
+    let bot = Module.client;
     let animations = await Module.db.animation.fetchAll();
     for (let i = 0; i < animations.length; i++) {
       let animation = animations[i];
-      if (animation.channelId && bot.channels.has(animation.channelId)) {
-        let msg = await bot.channels.get(animation.channelId).fetchMessage(animation.animationId);
+      let channel = await bot.channels.fetch(animation.channelId);
+      if (animation.channelId && channel) {
+        let msg = await channel.fetchMessage(animation.animationId);
         reload(msg);
       }
     }

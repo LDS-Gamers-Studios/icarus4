@@ -19,9 +19,9 @@ const Module = new Augur.Module()
 
       let files = fs.readdirSync(path.resolve(process.cwd(), "./commands"));
 
-      files.forEach(file => {
-        Module.handler.unload(path.resolve(process.cwd(), "./commands/", file));
-      });
+      for (let file of files) {
+        Module.client.unload(path.resolve(process.cwd(), "./commands/", file));
+      }
 
       if (msg.client.shard) {
         msg.client.shard.broadcastEval("this.destroy().then(() => process.exit())");
@@ -35,11 +35,11 @@ const Module = new Augur.Module()
 })
 .addCommand({name: "iamyourdev",
   hidden: true,
-  permissions: msg => msg.channel.type == "dm" && msg.client.guilds.get(Module.config.ldsg).members.has(msg.author.id),
+  permissions: msg => msg.channel.type == "dm" && msg.client.guilds.cache.get(Module.config.ldsg).members.cache.has(msg.author.id),
   process: async (msg) => {
     try {
       msg.react("👌");
-      let botTesting = await msg.client.channels.get("209046676781006849").overwritePermissions(msg.author, { VIEW_CHANNEL: true });
+      let botTesting = await msg.client.channels.cache.get("209046676781006849").createOverwrite(msg.author, { VIEW_CHANNEL: true });
       botTesting.send(`Well, I guess ${msg.author} is my dev now. Please do others a favor and let them find their own way in, rather than telling them. :grin:`);
     } catch(e) { u.errorHandler(e, msg); }
   }
@@ -62,7 +62,7 @@ const Module = new Augur.Module()
   aliases: ["setgame", "game"],
   process: (msg, suffix) => {
     if (suffix) msg.client.user.setActivity(suffix);
-    else msg.client.user.setGame("");
+    else msg.client.user.setActivity("");
     msg.react("👌");
   },
   permissions: (msg) => (Module.config.adminId.includes(msg.author.id))
@@ -105,7 +105,7 @@ const Module = new Augur.Module()
   process: async function(msg, suffix) {
     try {
       let bot = msg.client;
-      let Handler = Module.handler;
+      let Handler = bot;
 
       let embed = u.embed()
       .setAuthor(bot.user.username + " Heartbeat", bot.user.displayAvatarURL)
@@ -148,11 +148,11 @@ const Module = new Augur.Module()
   process: (msg, suffix) => {
     u.clean(msg);
     let path = require("path");
-    let files = (suffix ? suffix.split(" ") : fs.readdirSync(path.resolve(process.cwd(), "./commands")));
+    let files = (suffix ? suffix.split(" ") : fs.readdirSync(path.resolve(process.cwd(), "./commands"))).filter(f => f.endsWith(".js"));
 
-    files.filter(f => f.endsWith(".js")).forEach(file => {
-      Module.handler.reload(path.resolve(process.cwd(), "./commands/", file));
-    });
+    for (let file of files) {
+      Module.client.reload(path.resolve(process.cwd(), "./commands/", file));
+    }
 
     msg.react("👌");
   },
@@ -201,11 +201,11 @@ const Module = new Augur.Module()
     .setDescription((Module.handler.client.shard ? ("Shard " + Module.handler.client.shard.id) : "Bot") + " has disconnected. I will try restarting the bot.");
     await u.errorLog.send({embed});
     process.exit();
-  } catch(error) { u.errorHandler(error); process.exit(); }
+  } catch(error) { u.errorHandler(error, "Bot Disconnect"); process.exit(); }
 })
 .setInit((reload) => {
   if (!reload) {
-    Module.handler.client.guilds.get(Module.config.ldsg).fetchMembers();
+    Module.client.guilds.cache.get(Module.config.ldsg).fetchMembers();
     u.errorLog.send(u.embed().setTimestamp().setDescription("Bot is ready!"));
   }
 
@@ -220,7 +220,7 @@ const Module = new Augur.Module()
           for (let i = 0; i < sheets.length; i++) {
             Module.config.sheets.set(sheets[i].title, sheets[i]);
           }
-          Module.handler.client.emit("loadConfig");
+          Module.client.emit("loadConfig");
         }
       });
     }
