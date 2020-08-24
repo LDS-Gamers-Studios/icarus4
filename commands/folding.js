@@ -2,10 +2,11 @@ const Augur = require("augurbot");
 const request = require("request");
 const u = require("../utils/utils");
 
-const attempts = new Map();
+const attempts = new Set();
 
 function getStats(channel) {
-  return new Promise((fulfill, reject) => {
+  if (attempts.size == 0) return Promise.resolve(true);
+  else return new Promise((fulfill, reject) => {
     request("https://stats.foldingathome.org/api/team/238415", async function(error, response, body) {
       try {
         if (!error && response.statusCode == 200) {
@@ -24,9 +25,8 @@ function getStats(channel) {
             embed.addField(contrib.name, `**Profile:** [[Link]](https://stats.foldingathome.org/donor/${contrib.name})\n**Work Units:** ${contrib.wus}\n**Credit:** ${contrib.credit}${(contrib.rank ? "\n**Rank:** " + contrib.rank : "")}`, true);
           }
 
-          for (const [channel, interval] of attempts) {
-            Module.handler.client.channels.get(channel).send({embed}).catch(e => u.errorHandler(e, "F@H Post"));
-            clearInterval(interval);
+          for (const channel of attempts) {
+            Module.client.channels.cache.get(channel).send({embed}).catch(e => u.errorHandler(e, "F@H Post"));
           }
           attempts.clear();
           fulfill(true);
@@ -38,27 +38,25 @@ function getStats(channel) {
   });
 }
 
-function postStats(embed) {
-}
-
 const Module = new Augur.Module()
 .addCommand({name: "fah",
   aliases: ["foldingathome", "folding", "folding@home"],
   description: "LDSG Folding@home Stats",
   process: async (msg) => {
     try {
-      if (attempts.has(msg.channel.id)) clearInterval(attempts.get(msg.channel.id));
-      attempts.set(msg.channel.id, setInterval(getStats, 60000, msg.channel));
+      attempts.add(msg.channel.id);
       let success = await getStats(msg.channel);
       if (!success)
         msg.channel.send("I'm having trouble connecting to the Folding @ Home website. I'll keep trying!");
     } catch(e) { u.errorHandler(e, msg); }
   }
 })
+.setClockwork(() => {
+  try {
+    return setInterval(getStats, 10 * 60000);
+  } catch(error) { u.errorHandler(error, "F@H Clockwork"); }
+})
 .setUnload(() => {
-  for (const [channel, interval] of attempts) {
-    clearInterval(interval);
-  }
   attempts.clear();
 });
 

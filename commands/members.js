@@ -21,25 +21,6 @@ function userEmbed(member) {
 }
 
 const Module = new Augur.Module()
-.addCommand({name: "avatar",
-  description: "Get a user's avatar",
-  syntax: "[@user]",
-  category: "Members",
-  process: (msg) => {
-    let user = (msg.mentions.users.size > 0 ? msg.mentions.users.first() : msg.author);
-    if (user.avatarURL) {
-      let member = ((msg.guild) ? msg.guild.members.get(user.id) : null);
-      let name = (member ? member.displayName : user.username);
-      let embed = u.embed()
-        .setAuthor(name)
-        .setDescription(u.escapeText(name) + "'s Avatar")
-        .setImage(user.avatarURL);
-      msg.channel.send({embed: embed});
-    } else {
-      msg.reply(user + " has not set an avatar.").then(u.clean);
-    }
-  },
-})
 .addCommand({name: "info",
   description: "Check when a user joined the server",
   syntax: "[@user]",
