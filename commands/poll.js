@@ -20,8 +20,8 @@ const Module = new Augur.Module()
         },
         method: "POST",
         body: JSON.stringify({
-          title: title,
-          options: options,
+          title,
+          options,
           multi: true,
           dupcheck: "normal",
           captcha: true
@@ -31,14 +31,13 @@ const Module = new Augur.Module()
           console.error("ERROR", err);
         } else {
           body = JSON.parse(body);
-          let embed = u.embed();
-          embed
+          let embed = u.embed()
             .setAuthor("New poll from " + msg.author.username)
             .setTimestamp()
             .setTitle(decodeURI(body.title))
             .setURL(`https://www.strawpoll.me/${body.id}`)
             .setDescription("Vote now!\n" + body.options.map(o => "· " + decodeURI(o)).join("\n"));
-          msg.channel.send(embed);
+          msg.channel.send({embed});
         }
       });
     }
@@ -50,7 +49,7 @@ const Module = new Augur.Module()
   process: async (msg, suffix) => {
     try {
       u.clean(msg);
-      const poll = (await msg.channel.fetchMessages()).filter(m => (m.author.id == msg.author.id) && (m.id != msg.id)).first();
+      const poll = (await msg.channel.messages.fetch()).filter(m => (m.author.id == msg.author.id) && (m.id != msg.id)).first();
       if (!poll) msg.reply("I couldn't find a recent message from you to seed!").then(u.clean);
       else {
         const options = suffix.toLowerCase().replace(/[^0-9a-z]/g, "");
