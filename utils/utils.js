@@ -129,6 +129,21 @@ const Utils = {
       } else await msg.channel.send({embed: pager(elements, page, msg)});
     } catch(e) { Utils.alertError(e, msg); }
   },
+  parse: (msg) => {
+    for (let prefix of [config.prefix, `<@${msg.client.user.id}>`, `<@!${msg.client.user.id}>`]) {
+      if (!msg.content.startsWith(prefix)) continue;
+      let parts = msg.content.split(" ");
+      let command, suffix;
+      if (parts[0] == prefix) {
+        parts.shift();
+        command = parts.shift();
+      } else {
+        command = parts.shift().substr(prefix.length);
+      }
+      suffix = parts.join(" ");
+      return {command, suffix};
+    }
+  },
   path: (...segments) => {
     const path = require("path");
     return path.resolve(path.dirname(require.main.filename), ...segments);
