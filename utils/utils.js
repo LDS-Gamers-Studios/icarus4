@@ -10,7 +10,7 @@ const errorLog = new Discord.WebhookClient(config.error.id, config.error.token),
 const Utils = {
   botSpam: (msg) => {
     if (msg.guild && (msg.guild.id == config.ldsg) && (msg.channel.id != "209046676781006849") && (msg.channel.id != config.channels.botspam)) {
-      msg.reply(`I've placed your results in <#${botspam}> to keep things nice and tidy in here. Hurry before they get cold!`)
+      msg.reply(`I've placed your results in <#${config.channels.botspam}> to keep things nice and tidy in here. Hurry before they get cold!`)
         .then(Utils.clean);
       return msg.guild.channels.get(config.channels.botspam);
     } else return msg.channel;
@@ -140,7 +140,7 @@ const Utils = {
     // such as when the bot mention is the command prefix
     let userMentions = (member ? msg.mentions.members : msg.mentions.users);
     if (userMentions.has(msg.client.user.id)) userMentions.delete(msg.client.user.id);
-    
+
     // Now, if mentions don't exist, run queries until they fail
     if (userMentions.size == 0) {
       guildMembers = msg.guild.members;
