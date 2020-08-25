@@ -10,7 +10,7 @@ const Module = new Augur.Module()
       if (error || response.statusCode != 200) msg.reply("sorry, I ran into an error").then(u.clean);
       else {
         let quote = JSON.parse(body.replace(/\\'/g, "'"));
-        msg.channel.send("```" + quote.quoteText + "\n  - " + quote.quoteAuthor + "```");
+        msg.channel.send(`> ${quote.quoteText}\n> - ${quote.quoteAuthor}`);
       }
     });
   }

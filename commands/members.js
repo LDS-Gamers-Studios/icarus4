@@ -5,17 +5,15 @@ const Augur = require("augurbot"),
   Discord = require("discord.js");
 
 function userEmbed(member) {
-  let roles = member.roles.map(role => role.name);
-  let roleString = roles.join(", ");
+  let roleString = member.roles.cache.map(role => role.name).join(", ");
   if (roleString.length > 1024) roleString = roleString.substr(0, roleString.indexOf(", ", 1000)) + " ...";
   let embed = u.embed()
     .setTitle(u.escapeText(member.displayName))
     .addField("ID", member.id, true)
     .addField("Joined", member.joinedAt.toUTCString(), true)
     .addField("Account Created", member.user.createdAt.toUTCString(), true)
-    .addField("Roles", roleString, true);
-
-  if (member.user.displayAvatarURL) embed.setThumbnail(member.user.displayAvatarURL);
+    .addField("Roles", roleString, true)
+    .setThumbnail(member.user.displayAvatarURL({size: 32}));
 
   return embed;
 }
@@ -27,27 +25,19 @@ const Module = new Augur.Module()
   category: "Members",
   process: (msg, suffix) => {
     let users = null;
-    let mentions = msg.mentions.users;
 
-    if (!suffix) users = [msg.author];
-    else if (mentions) users = mentions;
-    else if (suffix) {
-      users = suffix.split(/ ?\| ?/);
-      if (users.length > 4) { msg.channel.send("Limit of 4 users at once").then(u.clean).catch(console.error); return; }
-    }
+    if (!suffix) users = [msg.member];
+    else if (msg.mentions.members.size > 0) users = Array.from(msg.mentions.members.values());
+    else if (suffix) users = [suffix];
 
-    users.forEach(user => {
-      let member = null;
-      if (user.id) {
-        member = msg.guild.members.get(user.id);
-      } else {
-        member = msg.guild.members.find('displayName', user);
-      }
+    for (let user of users) {
+      let member = user;
+      if (typeof member == "string") member = await msg.guild.members.fetch({query: user, limit: 1});
 
       if (member) {
         msg.channel.send({embed: userEmbed(member), disableEveryone: true});
       } else msg.channel.send("User \"" + user + "\" not found");
-    });
+    }
   },
   permissions: (msg) => msg.guild
 })
@@ -57,9 +47,9 @@ const Module = new Augur.Module()
   category: "Members",
   hidden: true,
   process: (msg, suffix) => {
-    Module.handler.execute("info", msg, suffix);
-    Module.handler.execute("rank", msg, suffix);
-    Module.handler.execute("infractionsummary", msg, suffix);
+    Module.client.commands.execute("info", msg, suffix);
+    Module.client.commands.execute("rank", msg, suffix);
+    Module.client.commands.execute("infractionsummary", msg, suffix);
   },
   permissions: (msg) => msg.guild
 })
@@ -71,10 +61,10 @@ const Module = new Augur.Module()
     let members = msg.guild.members;
     let online = 0;
 
-    members.forEach(function(member) {
+    for (const [id, member] of msg.guild.members) {
       if (member.presence.status != "offline")
-        online++;
-    });
+      online++;
+    }
 
     let response = `📈 **Members:**\n${msg.guild.memberCount} Members\n${online} Online`;
     msg.channel.send(response).catch(console.error);
@@ -95,12 +85,12 @@ const Module = new Augur.Module()
       const font = await Jimp.loadFont(Jimp.FONT_SANS_16_WHITE);
       const card = await Jimp.read("./storage/background.jpg");
 
-      const target = (msg.mentions.members.size > 0 ? msg.mentions.members.first() : msg.member);
+      const target = msg.mentions.members.first() || msg.member;
 
       const rank = await Module.db.user.findXPRank(target);
       const badges = badgeData(target.roles);
 
-      const avatar = await Jimp.read(target.user.avatarURL.replace(/\?size=\d+/, "") + "?size=64");
+      const avatar = await Jimp.read(target.user.displayAvatarURL({size: 64}));
 
       card.blit(avatar, 8, 8)
       .print(font, 80, 8, target.displayName.replace(/[^\x00-\x7F]/g, ""), 212)
@@ -146,23 +136,22 @@ const Module = new Augur.Module()
             .setURL(`${memberUrl}#member-spotlight`)
             .setDescription('Our community is filled with amazing people. Know someone that deserves the spotlight? Nominate them by sending CJ Stormblessed a message!');
 
-          let discordUser = null;
+          let member = null;
 
           if (msg.guild && (msg.guild.id == Module.config.ldsg)) {
-            discordUser = await msg.guild.fetchMember(discordId);
-          } else discordUser = await msg.client.fetchUser(discordId);
+            member = await msg.guild.fetchMember(discordId);
+          }
 
-          let avatar = (discordUser.user ? discordUser.user.avatarURL : discordUser.avatarURL);
-          let image = (avatar)?(avatar):("http://ldsgamers.com" + $('.member-image > img')[0].attribs.src);
+          let avatar = member.user.displayAvatarURL();
+          let image = (avatar ? avatar : ("http://ldsgamers.com" + $('.member-image > img')[0].attribs.src));
 
           //let communityContent = `__**MEMBER SPOTLIGHT**__\nOur community is filled with amazing people. Know someone that deserves the spotlight? Nominate them here: <http://ldsg.io/nominate>\n\nThe spotlight currently shines on **<@${discordId}>**!\n\n${text} ...\n\nTo read more, go to <${memberUrl}#member-spotlight>.`;
           //msg.channel.send(communityContent, {"file": {"attachment": image}}).catch(console.error);
 
-          embed.addField('Current Spotlight', `The spotlight currently shines on **${(discordUser.displayName ? discordUser.displayName : discordUser.username)}**!\n\n${text} ...\n[READ MORE](${memberUrl}#member-spotlight)`)
+          embed.addField('Current Spotlight', `The spotlight currently shines on **${member.displayName}**!\n\n${text} ...\n[READ MORE](${memberUrl}#member-spotlight)`)
             .setThumbnail(image);
 
-          msg.channel.send({embed: embed});
-
+          msg.channel.send({embed});
         }
       } catch(e) { u.errorHandler(e, msg); }
     });

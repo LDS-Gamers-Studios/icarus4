@@ -18,13 +18,13 @@ const Module = new Augur.Module()
   category: "LDSG",
   aliases: ["patreon", "paypal", "venmo"],
   process: (msg) => {
-    let  embed = u.embed()
+    let embed = u.embed()
       .setTitle("Donate to LDSG")
       .setDescription("Interested in helping out?\nDonations are used to help fund game servers, giveaways, and other benefits for the community.")
       .addField("Patreon - Recurring Donation", "[Donate on Patreon](https://patreon.com/LDSGamers)")
       .addField("PayPal - One-time Donation", "[Donate on PayPal](https://paypal.me/LDSGToast)")
       .addField("Venmo - One-time Donation", "[Donate on Venmo](https://venmo.com/LDSGamers) Code: `5374`");
-    msg.channel.send({embed: embed}).catch(e => u.errorHandler(e, msg));
+    msg.channel.send({embed}).catch(e => u.errorHandler(e, msg));
   }
 })
 .addCommand({name: "extralife",
@@ -107,18 +107,17 @@ const Module = new Augur.Module()
   description: "Link to LDGS Snapchat",
   category: "LDSG",
   process: (msg) => {
-    msg.channel.startTyping();
-    msg.channel.send("**Follow LDSG on Snapchat!**", {"file": "https://cdn.discordapp.com/attachments/193042027066163200/277968968214511616/snapchat.jpg"})
-      .then(m => {m.channel.stopTyping()}).catch(e => u.errorHandler(e, msg));
+    msg.channel.send("**Follow LDSG on Snapchat!**", {files: ["https://cdn.discordapp.com/attachments/193042027066163200/277968968214511616/snapchat.jpg"]})
+    .catch(e => u.errorHandler(e, msg));
   }
 })
 .addCommand({name: "store",
-description: "Check out some cool stuff!",
-aliases: ["shop"],
-category: "LDSG",
-process: (msg) => {
-  msg.channel.send("Check out the new store!\n<https://ldsgamers.com/shop>").catch(e => u.errorHandler(e, msg));
-}
+  description: "Check out some cool stuff!",
+  aliases: ["shop"],
+  category: "LDSG",
+  process: (msg) => {
+    msg.channel.send("Check out the new store!\n<https://ldsgamers.com/shop>").catch(e => u.errorHandler(e, msg));
+  }
 })
 .addCommand({name: "team",
   description: "Get to know the LDSG Team!",

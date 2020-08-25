@@ -48,16 +48,16 @@ const Module = new Augur.Module()
   hidden: true,
   category: "Mission",
   permissions: (msg) => Module.config.adminId.includes(msg.author.id),
-  process: (msg, suffix) => {
-    let missionData = parseMission(suffix);
-    if (missionData.error) msg.reply(missionData.error).then(u.clean);
-    else {
-      Module.db.mission.dave(missionData).then(mission => {
-        msg.guild.fetchMember(missionData.discordId).then(member => {
-          if (member) msg.channel.send(`Saved data for **${member.displayName}**`).then(u.clean);
-        });
-      });
-    }
+  process: async (msg, suffix) => {
+    try {
+      let missionData = parseMission(suffix);
+      if (missionData.error) msg.reply(missionData.error).then(u.clean);
+      else {
+        let mission = await Module.db.mission.save(missionData);
+        let member = await msg.guild.members.fetch(missionData.discordId);
+        if (member) msg.channel.send(`Saved data for **${member.displayName}**`).then(u.clean);
+      }
+    } catch(error) { u.errorHandler(error, msg); }
   }
 })
 .addCommand({name: "missionreturn",
@@ -66,25 +66,26 @@ const Module = new Augur.Module()
   hidden: true,
   category: "Mission",
   permissions: (msg) => Module.config.adminId.includes(msg.author.id),
-  process: (msg) => {
-    msg.mentions.users.forEach(user => {
-      Module.db.mission.delete(user.id).then(() => {
-        msg.reply(`I removed ${user.username} from the missionary list!`).then(u.clean);
-      });
-    });
+  process: async (msg) => {
+    try {
+      for (let [id, member] of msg.mentions.members) {
+        await Module.db.mission.delete(member.id);
+        msg.reply(`I removed ${member.displayName} from the missionary list!`).then(u.clean);
+      }
+    } catch(error) { u.errorHandler(error, msg); }
   }
 })
 .addCommand({name: "missionaries",
   description: "Displays LDSG Missionaries (that we know about)",
   category: "Mission",
   hidden: true,
-  process: (msg) => {
-    Module.db.mission.findAll().then(missionaries => {
-      Promise.all(missionaries.map(m => msg.guild.fetchMember(m.discordId))).then(members => {
-        members = members.map((m, i) => `**${m.displayName}**: ${missionaries[i].mission} Mission, returns ${missionaries[i].returns}`);
-        msg.channel.send("**Current LDSG Missionaries:**\n" + members.join("\n"));
-      });
-    });
+  process: async (msg) => {
+    try {
+      let missionaries = await Module.db.mission.findAll();
+      let members = await Promise.all(missionaries.map(m => msg.guild.fetchMember(m.discordId)));
+      members = members.map((m, i) => `**${m.displayName}**: ${missionaries[i].mission} Mission, returns ${missionaries[i].returns}`);
+      msg.channel.send("**Current LDSG Missionaries:**\n" + members.join("\n"));
+    } catch(error) { u.errorHandler(error, msg); }
   }
 });
 
