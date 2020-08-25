@@ -145,6 +145,35 @@ const Module = new Augur.Module()
     } catch(e) { u.errorHandler(e, msg); }
   }
 })
+.addCommand({name: "invert",
+  description: "Invert an avatar or attached image",
+  category: "Silly",
+  process: async (msg, suffix) => {
+    try {
+      let original;
+
+      let urlexp = /\<?(https?:\/\/\S+)\>?(?:\s+)?(\d*)/;
+      let match;
+
+      if (msg.attachments.size > 0) {
+        original = msg.attachments.first().url;
+      } else if (match = urlexp.exec(suffix)) {
+        original = match[1];
+      } else {
+        original = (msg.mentions.users.first() || msg.author).displayAvatarURL({size: 512});
+      }
+
+      let img = await Jimp.read(original);
+      for (let x = 0; x < img.bitmap.width; x++) {
+        for (let y = 0; y < img.bitmap.height; y++) {
+          let {r, g, b, a} = Jimp.intToRGBA(img.getPixelColor(x, y));
+          img.setPixelColor(Jimp.rgbaToInt(255 - r, 255 - g, 255 - b, a), x, y);
+        }
+      }
+      msg.channel.send({files: [await img.getBufferAsync(Jimp.MIME_PNG)]});
+    } catch(error) { u.errorHandler(error, msg); }
+  }
+})
 .addCommand({name: "popart",
   description: "'Pop art' an avatar or attached image",
   category: "Silly",
