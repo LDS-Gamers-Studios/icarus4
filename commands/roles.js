@@ -92,52 +92,52 @@ const inventory = new Collection([
 const Module = new Augur.Module()
 .addCommand({name: "add",
   description: "Add an opt-in role",
-  syntax: Object.keys(roles).join(" | "),
+  syntax: "[role tag]",
   aliases: ["addchannel", "addrole"],
   category: "Members",
-  process: (msg, suffix) => {
-    if (roles.has(suffix.toLowerCase())) {
-      let ldsg = msg.client.guilds.get(Module.config.ldsg);
-      let modLogs = msg.client.channels.get("506575671242260490");
-      let role = ldsg.roles.get(roles.get(suffix.toLowerCase()));
+  process: async (msg, suffix) => {
+    try {
+      if (roles.has(suffix.toLowerCase())) {
+        let ldsg = msg.client.guilds.cache.get(Module.config.ldsg);
+        let modLogs = msg.client.channels.cache.get(Module.config.channels.modlogs);
+        let role = ldsg.roles.cache.get(roles.get(suffix.toLowerCase()));
 
-      ldsg.fetchMember(msg.author.id).then(member => {
-        if (member) member.addRole(role).then((member) => {
-          msg.react("👌");
-          modLogs.send(`ℹ️ **${member.displayName}** added the ${role.name} role.`);
-        });
-      });
-    } else {
-      msg.reply("you didn't give me a valid role to apply.")
+        let member = await ldsg.members.fetch(msg.author.id);
+        if (member) await member.addRole(role);
+        msg.react("👌");
+        modLogs.send(`ℹ️ **${member.displayName}** added the ${role.name} role.`);
+      } else {
+        msg.reply("you didn't give me a valid role to apply.")
         .then(u.clean);
-    }
+      }
+    } catch(error) { u.errorHandler(error, msg); }
   }
 })
 .addCommand({name: "equip",
   description: "Equip a color from your inventory.",
   category: "Members",
   process: async (msg, suffix) => {
-    let ldsg = msg.client.guilds.get(Module.config.ldsg);
-    let member = ldsg.members.get(msg.author.id);
-    let role = ldsg.roles.find(r => r.name.toLowerCase() == suffix.toLowerCase());
-    if (!role) {
-      u.clean(msg);
-      msg.reply("sorry, that's not a role on the server. Check `!inventory` to see what you can equip.").then(u.clean);
-    } else if (!member.roles.has(role.id)) {
-      u.clean(msg);
-      msg.reply("sorry, you don't have that role. Check `!inventory` to see what you can equip.").then(u.clean);
-    } else if (!inventory.has(role.id)) {
-      u.clean(msg);
-      msg.reply("sorry, that role isn't equippable. Check `!inventory` to see what you can equip.").then(u.clean);
-    } else {
-      // The role exists, the member has it, and it's equippable
-      try {
-        let toAdd = ldsg.roles.get(inventory.get(role.id));
-        await member.removeRoles(Array.from(inventory.values()));
-        await member.addRole(toAdd);
+    try {
+      let ldsg = msg.client.guilds.cache.get(Module.config.ldsg);
+      let member = await ldsg.members.fetch(msg.author.id);
+      let role = ldsg.roles.cache.find(r => r.name.toLowerCase() == suffix.toLowerCase());
+      if (!role) {
+        u.clean(msg);
+        msg.reply("sorry, that's not a role on the server. Check `!inventory` to see what you can equip.").then(u.clean);
+      } else if (!member.roles.cache.has(role.id)) {
+        u.clean(msg);
+        msg.reply("sorry, you don't have that role. Check `!inventory` to see what you can equip.").then(u.clean);
+      } else if (!inventory.has(role.id)) {
+        u.clean(msg);
+        msg.reply("sorry, that role isn't equippable. Check `!inventory` to see what you can equip.").then(u.clean);
+      } else {
+        // The role exists, the member has it, and it's equippable
+        let toAdd = inventory.get(role.id);
+        await member.roles.remove(Array.from(inventory.values()));
+        await member.roles.add(toAdd);
         msg.react("👌");
-      } catch(e) { u.errorHandler(e, msg); }
-    }
+      }
+    } catch(e) { u.errorHandler(e, msg); }
   }
 })
 .addCommand({name: "unequip",
@@ -145,9 +145,9 @@ const Module = new Augur.Module()
   category: "Members",
   process: async (msg) => {
     try {
-      let ldsg = msg.client.guilds.get(Module.config.ldsg);
-      let member = ldsg.members.get(msg.author.id);
-      await member.removeRoles(Array.from(inventory.values()));
+      let ldsg = msg.client.guilds.cache.get(Module.config.ldsg);
+      let member = await ldsg.members.fetch(msg.author.id);
+      await member.roles.remove(Array.from(inventory.values()));
       msg.react("👌");
     } catch(error) { u.errorHandler(error, msg); }
   }
@@ -155,14 +155,16 @@ const Module = new Augur.Module()
 .addCommand({name: "inventory",
   description: "Check your color inventory.",
   category: "Members",
-  process: (msg) => {
-    let member = msg.client.guilds.get(Module.config.ldsg).members.get(msg.author.id);
-    let roles = member.roles.filter(r => inventory.has(r.id));
-    if (roles.size == 0) {
-      u.botSpam(msg).send(msg.author + ", you don't have any colors in your inventory!");
-    } else {
-      u.botSpam(msg).send(`${msg.author}, you have the following role colors that you can equip through \`!equip name\`:\n${roles.map(r => r.name).join("\n")}`);
-    }
+  process: async (msg) => {
+    try {
+      let member = await msg.client.guilds.cache.get(Module.config.ldsg).members.fetch(msg.author.id);
+      let roles = member.roles.cache.filter(r => inventory.has(r.id));
+      if (roles.size == 0) {
+        u.botSpam(msg).send(msg.author + ", you don't have any colors in your inventory!");
+      } else {
+        u.botSpam(msg).send(`${msg.author}, you have the following role colors that you can equip through \`!equip name\`:\n${roles.map(r => r.name).join("\n")}`);
+      }
+    } catch(error) { u.errorHandler(error, msg); }
   }
 })
 .addCommand({name: "remove",
@@ -170,22 +172,22 @@ const Module = new Augur.Module()
   syntax: Object.keys(roles).join(" | "),
   aliases: ["removechannel", "removerole"],
   category: "Members",
-  process: (msg, suffix) => {
-    if (roles.has(suffix.toLowerCase())) {
-      let ldsg = msg.client.guilds.get(Module.config.ldsg);
-      let modLogs = msg.client.channels.get("506575671242260490");
-      let role = ldsg.roles.get(roles.get(suffix.toLowerCase()));
+  process: async (msg, suffix) => {
+    try {
+      if (roles.has(suffix.toLowerCase())) {
+        let ldsg = msg.client.guilds.cache.get(Module.config.ldsg);
+        let modLogs = msg.client.channels.cache.get(Module.config.channels.modlogs);
+        let role = ldsg.roles.cache.get(roles.get(suffix.toLowerCase()));
 
-      ldsg.fetchMember(msg.author).then(member => {
-        if (member) member.removeRole(role).then((member) => {
-          msg.react("👌");
-          modLogs.send(`ℹ️ **${member.displayName}** removed the ${role.name} role.`);
-        });
-      });
-    } else {
-      msg.reply("you didn't give me a valid role to remove.")
+        let member = await ldsg.members.fetch(msg.author);
+        if (member) await member.removeRole(role);
+        msg.react("👌");
+        modLogs.send(`ℹ️ **${member.displayName}** removed the ${role.name} role.`);
+      } else {
+        msg.reply("you didn't give me a valid role to remove.")
         .then(u.clean);
-    }
+      }
+    } catch(error) { u.errorHandler(error, msg); }
   }
 })
 .addCommand({name: "role",
@@ -195,9 +197,8 @@ const Module = new Augur.Module()
   category: "Members",
   process: (msg, suffix) => {
     if (suffix) {
-      let guild = msg.guild;
-      let role = guild.roles.find(r => r.name.toLowerCase() == suffix.toLowerCase());
-      if (role && role.members.size > 0) msg.channel.send(`Members with the ${role.name} role:\n\`\`\`${role.members.map(m => m.displayName).sort().join("\n")}\`\`\``, {split: {prepend: "```", append: "```"}});
+      let role = msg.guild.roles.cache.find(r => r.name.toLowerCase() == suffix.toLowerCase());
+      if (role && role.members.cache.size > 0) msg.channel.send(`Members with the ${role.name} role:\n\`\`\`${role.members.cache.map(m => m.displayName).sort().join("\n")}\`\`\``, {split: {prepend: "```", append: "```"}});
       else msg.channel.send("I couldn't find any members with that role. :shrug:");
     } else {
       msg.reply("you need to tell me a role to find!")
@@ -214,7 +215,7 @@ const Module = new Augur.Module()
   process: (msg, suffix) => {
     if (!suffix) msg.reply("you need to tell me a role name!").then(u.clean);
     else {
-      let role = msg.guild.roles.find(r => r.name.toLowerCase() == suffix.toLowerCase());
+      let role = msg.guild.roles.cache.find(r => r.name.toLowerCase() == suffix.toLowerCase());
       if (!role) msg.reply(`I couldn't find a role named ${suffix}.`);
       else msg.channel.send(`${role.name}: ${role.id}`, {code: true});
     }
@@ -223,25 +224,25 @@ const Module = new Augur.Module()
 })
 .addEvent("guildMemberUpdate", (oldMember, newMember) => {
   if (newMember.guild.id == Module.config.ldsg) {
-    if (newMember.roles.size > oldMember.roles.size) {
+    if (newMember.roles.cache.size > oldMember.roles.cache.size) {
       // Role added
-      for (const [id, role] of newMember.roles) {
-        if (!oldMember.roles.has(id) && inventory.has(id)) {
+      for (const [id, role] of newMember.roles.cache) {
+        if (!oldMember.roles.cache.has(id) && inventory.has(id)) {
           // New equippable!
-          if (newMember.roles.some((r) => inventory.find(i => i == r.id))) {
+          if (newMember.roles.cache.some((r) => inventory.find(i => i == r.id))) {
             // They already have a role equipped
             newMember.send(`You now have the color-equippable role **${role.name}**! You can equip the color with the \`!equip ${role.name}\` command.`).catch(u.noop);
           } else {
-            newMember.addRole(inventory.get(id));
+            newMember.roles.add(inventory.get(id));
             newMember.send(`You now have the color-equippable role **${role.name}**! This has automatically been equipped for you. You can unequip it with the \`!unequip\` command.`).catch(u.noop);
           }
         }
       }
       Module.db.user.updateRoles(newMember);
-    } else if (newMember.roles.size < oldMember.roles.size) {
+    } else if (newMember.roles.cache.size < oldMember.roles.cache.size) {
       // Role removed
       for (const [id, role] of oldMember.roles) {
-        if (!newMember.roles.has(id) && inventory.has(id)) {
+        if (!newMember.roles.cache.has(id) && inventory.has(id)) {
           // Lost equippable!
           newMember.removeRole(inventory.get(id));
         }
@@ -256,8 +257,8 @@ const Module = new Augur.Module()
     else {
       for (let i = 0; i < rows.length; i++)
         roles.set(rows[i].roletag, rows[i].roleid);
-      Module.commands.find(c => c.name == "add").info = "Gives you one of the following roles:\n```md\n* " + Array.from(roles.keys()).join("\n* ") + "```";
-      Module.commands.find(c => c.name == "remove").info = "Remove one of the following roles:\n```md\n* " + Array.from(roles.keys()).join("\n* ") + "```";
+      Module.client.commands.find(c => c.name == "add").info = "Gives you one of the following roles:\n```md\n* " + Array.from(roles.keys()).join("\n* ") + "```";
+      Module.client.commands.find(c => c.name == "remove").info = "Remove one of the following roles:\n```md\n* " + Array.from(roles.keys()).join("\n* ") + "```";
 
       const fs = require("fs");
       const roleData = {};

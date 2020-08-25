@@ -33,23 +33,25 @@ const Module = new Augur.Module()
     } catch(e) { u.errorHandler(e, msg); }
   }
 })
-.addEvent("messageReactionAdd", (reaction, user) => {
+.addEvent("messageReactionAdd", async (reaction, user) => {
   if (reaction.emoji.name == "💬" && !user.bot) {
     let message = reaction.message;
-    Module.db.spoiler.fetch(message.id).then(spoiler => {
+    try {
+      let spoiler = await Module.db.spoiler.fetch(message.id);
       if (spoiler) {
-        let bot = Module.handler.client;
-        bot.fetchUser(spoiler.authorId).then(author => {
+        let bot = Module.client;
+        try {
+          let author = await bot.users.fetch(spoiler.authorId);
           let embed = u.embed()
-          .setAuthor(spoiler.authorName, author.displayAvatarURL)
+          .setAuthor(spoiler.authorName, author.displayAvatarURL({size: 16}))
           .setDescription(spoiler.content)
           .setTimestamp(spoiler.timestamp)
           .setTitle(`Spoiler${(spoiler.channelName ? (" in #" + spoiler.channelName) : "")}${(spoiler.topic ? " about " + spoiler.topic : "")}:`);
 
-          user.send(embed);
-        }).catch(e => u.errorHandler(e, "Send spoiler to user error"));
+          user.send({embed}).catch(u.noop);
+        } catch(e) { u.errorHandler(e, "Send Spoiler Error"); }
       }
-    }).catch(e => u.errorHandler(e, "Fetch spoiler error"));
+    } catch(error) { u.errorHandler(error, "Fetch Spoiler Error"); }
   }
 })
 .setUnload(() => true);

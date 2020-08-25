@@ -12,8 +12,8 @@ const Module = new Augur.Module()
   permissions: (msg) => msg.guild && (msg.guild.id == Module.config.ldsg) && sponsorChannels.has(msg.member.id),
   process: async (msg) => {
     u.clean(msg, 0);
-    let sponsorInfo = sponsorChannels.get(msg.member.id);
-    let channel = msg.guild.channels.get(sponsorInfo.channel);
+    let channelId = sponsorChannels.get(msg.member.id);
+    let channel = msg.guild.channels.get(channelId);
 
     if (msg.mentions.members.size == 0) {
       msg.reply("you need to tell me who to invite to your channel!");
@@ -22,7 +22,7 @@ const Module = new Augur.Module()
 
     for (const [memberId, member] of msg.mentions.members) {
       try {
-        await channel.overwritePermissions(member.id, {
+        await channel.createOverwrite(member.id, {
           VIEW_CHANNEL: true
         }, "Pro Sponsor Invite");
         channel.send(`Welcome, ${member}!`);
@@ -35,7 +35,7 @@ const Module = new Augur.Module()
   suffix: "@sponsor(s)",
   info: "Creates a private channel for a Pro Sponsor, where they can invite individuals to hang out.",
   category: "Admin",
-  permissions: (msg) => msg.guild && (msg.guild.id == Module.config.ldsg) && (msg.member.roles.has(Module.config.roles.management) || msg.member.roles.has("205826273639923722")),
+  permissions: (msg) => msg.guild && (msg.guild.id == Module.config.ldsg) && (msg.member.roles.cache.has(Module.config.roles.management) || msg.member.roles.cache.has("205826273639923722")),
   process: async (msg) => {
     try {
       u.clean(msg);
@@ -46,9 +46,9 @@ const Module = new Augur.Module()
       }
 
       for (const [sponsorId, sponsor] of msg.mentions.members) {
-        if (!sponsor.roles.has(proSponsor)) continue;
+        if (!sponsor.roles.cache.has(proSponsor)) continue;
         if (sponsorChannels.has(sponsor.id)) {
-          msg.reply(`${sponsor} already has a channel at ${msg.guild.channels.get(sponsorChannels.get(sponsor.id).channel)}!`).then(u.clean);
+          msg.reply(`${sponsor} already has a channel at ${msg.guild.channels.cache.get(sponsorChannels.get(sponsor.id))}!`).then(u.clean);
           continue;
         }
 
@@ -61,14 +61,7 @@ const Module = new Augur.Module()
           ]
         }, "Sponsor Perk");
 
-        sponsorChannels.set(sponsor.id, {
-          sponsor: sponsor.id,
-          channel: channel.id,
-          permissions: {
-            allow: null,
-            deny: null
-          }
-        });
+        sponsorChannels.set(sponsor.id, channel.id);
 
         try {
           Module.config.sheets.get("Sponsor Channels").addRow({
@@ -90,18 +83,11 @@ const Module = new Augur.Module()
   Module.config.sheets.get("Sponsor Channels").getRows((e, rows) => {
     if (e) u.errorHandler(e, "Error loading sponsor channels.");
     else {
-      let ldsg = Module.handler.client.guilds.get(Module.config.ldsg);
+      let ldsg = Module.client.guilds.cache.get(Module.config.ldsg);
       sponsorChannels.clear();
       for (let row of rows) {
-        if (!(ldsg.members.has(row.sponsorid) && ldsg.members.get(row.sponsorid).roles.has(proSponsor))) continue;
-        sponsorChannels.set(row.sponsorid, {
-          sponsor: row.sponsorid,
-          channel: row.channelid,
-          permissions: {
-            allow: row.allowedperms,
-            deny: row.deniedperms
-          }
-        });
+        if (!(ldsg.members.cache.has(row.sponsorid) && ldsg.members.cache.get(row.sponsorid).roles.cache.has(proSponsor))) continue;
+        sponsorChannels.set(row.sponsorid, row.channelid);
       }
     }
   });
