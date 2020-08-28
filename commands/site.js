@@ -31,7 +31,7 @@ const Module = new Augur.Module()
   let routers = fs.readdirSync(path.resolve(process.cwd(), "./site/private"))
   .filter(r => r.endsWith(".js"))
   .map(f => f.slice(0, -3));
-  
+
   for (let route of routers) {
     let router = require(path.resolve(process.cwd(), "./site/private", route));
     if (route == "root") route = "";
@@ -66,7 +66,7 @@ const Module = new Augur.Module()
     delete require.cache[require.resolve(path.resolve(routerPath, route))];
   };
 
-  for (let file of ["./data/roles.json", "./utils/IgnInfo.js"]) {
+  for (let file of ["./data/roles.json", "./data/daedalus.json", "./utils/IgnInfo.js"]) {
     delete require.cache[require.resolve(path.resolve(process.cwd(), file))];
   };
 });
