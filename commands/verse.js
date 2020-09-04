@@ -27,10 +27,7 @@ function nb(title, abbr, work, aliases = []) {
 
   abbr = abbr.toLowerCase().replace(/ /g, "-");
 
-  books[abbr] = {
-    title: title,
-    work: work
-  }
+  books[abbr] = { title, work };
 
   if (title.toLowerCase().replace(/ /g, "-") != abbr)
     aliases.push(title);
@@ -242,7 +239,7 @@ const Module = new Augur.Module()
 
       request(url, (err, response, body) => {
         if (err) {
-          console.error(err);
+          u.errorHandler(err, msg);
         } else {
           $ = cheerio.load(body);
           let link = $("section.results a").first().attr("href");
@@ -250,9 +247,9 @@ const Module = new Augur.Module()
           else msg.reply("I couldn't find any results for that.").then(u.clean);
         }
       });
-  } else {
-    msg.reply("you need to tell me what you want to search!");
-  }
+    } else {
+      msg.reply("you need to tell me what you want to search!");
+    }
   }
 })
 .addCommand({name: "verse",
@@ -263,9 +260,9 @@ const Module = new Augur.Module()
   category: "Gospel",
   process: (msg, suffix) => {
     if (!suffix || suffix == "random" || suffix == "rand" || suffix == "r")
-      suffix = highlights[Math.floor(Math.random() * highlights.length)];
+      suffix = u.rand(highlights);
 
-    if (suffix.toLowerCase().startsWith("add ") && msg.guild && (msg.guild.id == Module.config.ldsg) && (msg.member.roles.has(Module.config.roles.mod) || msg.member.roles.has(Module.config.roles.management))) {
+    if (suffix.toLowerCase().startsWith("add ") && msg.guild && (msg.guild.id == Module.config.ldsg) && (msg.member.roles.cache.has(Module.config.roles.mod) || msg.member.roles.cache.has(Module.config.roles.management))) {
       let verse = suffix.substr(4).trim();
       if (addVerse(verse)) {
         suffix = verse;
@@ -299,7 +296,7 @@ const Module = new Augur.Module()
   if ((msg.channel.parentID == "363016072200454146") && !u.parse(msg) && !msg.author.bot) {
     let match = null;
     while (match = searchExp.exec(msg.cleanContent))
-      Module.handler.execute("verse", msg, match[0]);
+      Module.client.commands.execute("verse", msg, match[0]);
   }
 })
 .setInit(() => {

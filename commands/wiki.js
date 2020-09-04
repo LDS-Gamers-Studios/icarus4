@@ -35,12 +35,12 @@ const Module = new Augur.Module()
               embed.setThumbnail("https:" + img.first().attr("src"));
             }
           }
-          msg.channel.send(embed);
+          msg.channel.send({embed});
         } else {
           msg.reply(`I couldn't find a result for \`${suffix}\` on <https://en.wikipedia.org>.`);
         }
       } else msg.reply("I'm not going to search for that. :rolling_eyes:").then(u.clean);
-    } catch(e) { u.errorLog(e, msg); }
+    } catch(e) { u.errorHandler(e, msg); }
   }
 });
 

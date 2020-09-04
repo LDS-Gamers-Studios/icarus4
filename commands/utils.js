@@ -12,14 +12,13 @@ const Module = new Augur.Module()
     if (suffix && suffix.includes("|")) {
 
       let decideText = ["I choose", "I pick", "I decided"];
-      decideText = decideText[Math.floor(Math.random() * decideText.length)];
+      decideText = u.rand(decideText);
 
-      let choices = suffix.split("|");
-      let chosen = choices[Math.floor(Math.random() * choices.length)].trim();
+      let chosen = u.rand(suffix.split("|")).trim();
 
       msg.reply(`${decideText} **${chosen}**`);
     } else {
-      msg.reply("you need to give me two or more choices!").then(u.clean);
+      msg.reply("you need to give me two or more choices! `a | b`").then(u.clean);
     }
   }
 })
@@ -93,7 +92,7 @@ const Module = new Augur.Module()
       let reminders = await Module.db.reminder.fetchReminders();
       for (reminder of reminders) {
         try {
-          let user = Module.handler.client.users.get(reminder.discordId);
+          let user = Module.client.users.get(reminder.discordId);
           if (user) {
             let embed = u.embed()
             .setTitle("REMINDER")
