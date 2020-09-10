@@ -8,6 +8,7 @@ const errorLog = new Discord.WebhookClient(config.error.id, config.error.token),
   serverSettings = new Map();
 
 const Utils = {
+  Collection: Discord.Collection,
   botSpam: (msg) => {
     if (msg.guild && (msg.guild.id == config.ldsg) && (msg.channel.id != "209046676781006849") && (msg.channel.id != config.channels.botspam)) {
       msg.reply(`I've placed your results in <#${config.channels.botspam}> to keep things nice and tidy in here. Hurry before they get cold!`)
