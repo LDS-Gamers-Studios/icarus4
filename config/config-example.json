@@ -18,7 +18,7 @@
   },
   "color": [248, 154, 34],
   "db": {
-    "model": "models/mongo-models.js",
+    "model": "utils/dbModels.js",
     "db": "",
     "settings": {
       "useNewUrlParser": true,

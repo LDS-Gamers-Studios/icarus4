@@ -1,15 +1,15 @@
-const Animation = require("./Animation.model"),
-  Ankle = require("./Ankle.model"),
-  Bank = require("./Bank.model"),
-  Ign = require("./Ign.model"),
-  Infraction = require("./Infraction.model"),
-  Missionary = require("./Missionary.model"),
-  Remind = require("./Remind.model"),
-  Server = require("./Server.model"),
-  Spoiler = require("./Spoiler.model"),
-  Star = require("./Star.model"),
-  Tag = require("./Tag.model"),
-  User = require("./User.model"),
+const Animation = require("../models/Animation.model"),
+  Ankle = require("../models/Ankle.model"),
+  Bank = require("../models/Bank.model"),
+  Ign = require("../models/Ign.model"),
+  Infraction = require("../models/Infraction.model"),
+  Missionary = require("../models/Missionary.model"),
+  Remind = require("../models/Remind.model"),
+  Server = require("../models/Server.model"),
+  Spoiler = require("../models/Spoiler.model"),
+  Star = require("../models/Star.model"),
+  Tag = require("../models/Tag.model"),
+  User = require("../models/User.model"),
   config = require("../config/config.json"),
   mongoose = require("mongoose");
 
@@ -199,6 +199,7 @@ const models = {
   ign: {
     delete: (userId, system) => {
       return new Promise((fulfill, reject) => {
+        if (userId.id) userId = userId.id;
         Ign.findOneAndRemove(
           { discordId: userId, system: system },
           (err, ign) => {
@@ -211,6 +212,7 @@ const models = {
     find: (userId, system = null) => {
       return new Promise((fulfill, reject) => {
         let query = null;
+        if (userId.id) userId = userId.id;
 
         if (system && Array.isArray(system)) query = Ign.find({discordId: userId, system: {$in: system} });
         else if (system && typeof userId == "string") query = Ign.findOne({discordId: userId, system: system });
@@ -236,6 +238,7 @@ const models = {
     },
     save: (userId, system, name) => {
       return new Promise((fulfill, reject) => {
+        if (userId.id) userId = userId.id;
         Ign.findOneAndUpdate(
           { discordId: userId, system: system },
           { $set: { ign: name } },
