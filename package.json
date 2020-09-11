@@ -14,6 +14,7 @@
   "license": "MIT",
   "homepage": "https://bitbucket.org/Gaiwecoor/icarus3#readme",
   "dependencies": {
+    "@discordjs/opus": "^0.3.2",
     "@ffmpeg-installer/ffmpeg": "^1.0.19",
     "@google-cloud/translate": "^2.1.4",
     "augurbot": "^2.0.11",
@@ -27,6 +28,7 @@
     "express-session": "^1.16.2",
     "ffmpeg": "0.0.4",
     "ffmpeg-binaries": "^4.0.0",
+    "ffmpeg-static": "^4.2.7",
     "fluent-ffmpeg": "^2.1.2",
     "google-spreadsheet": "^2.0.7",
     "jimp": "^0.6.4",
