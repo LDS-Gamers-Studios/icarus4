@@ -11,16 +11,13 @@ const bannedWords = new RegExp(banned.words.join("|"), "i"),
   pf = new profanityFilter(),
 	scamLinks = new RegExp(`\\b(${banned.scam.join("|").replace(".", "\.")})`, "i");
 
-// Imports the Google Cloud client library
-const {Translate} = require('@google-cloud/translate');
-const googleId = require("../config/google_api.json").creds.project_id;
-const translate = new Translate({googleId});
-
 const bans = new USet();
+const mutes = new u.Collection();
+
 const cardReactions = ["👤", "✅", "⚠", "⛔", "🛑", "🔇"];
 
 function blocked(member) {
-  return member.client.channels.get(modLogs).send(`I think ${member} has me blocked. *sadface*`);
+  return member.client.channels.cache.get(modLogs).send(`I think ${member} has me blocked. *sadface*`);
 }
 
 function filter(msg, text) {
@@ -31,14 +28,6 @@ function filter(msg, text) {
     warnCard(msg, filtered);
     return true;
   } else return false;
-}
-
-async function toEnglish(msg) {
-  try {
-    const [translation, data] = await translate.translate(msg.cleanContent, "en");
-    msg.client.channels.get("543147492275912724").send(`${u.escapeText(msg.member.displayName)} (${data.data.translations[0].detectedSourceLanguage})${(msg.editedAt ? " [Edited]" : "")}: ${translation}`);
-    return (translation ? translation : "");
-  } catch(e) { u.errorHandler(e, msg); return ""; }
 }
 
 function processMessageLanguage(msg, edited = false) {
@@ -59,7 +48,7 @@ function processMessageLanguage(msg, edited = false) {
         msg.reply("that link is generally believed to be to a scam/phishing site. Please be careful!");
         warnCard(msg, ["Suspected scam links"].concat(match));
         return true;
-      } else if (!msg.member.roles.has(Module.config.roles.trusted)) {
+      } else if (!msg.member.roles.cache.has(Module.config.roles.trusted)) {
         // General untrusted link flag
         warnCard(msg, "Links prior to being trusted");
       }
@@ -72,11 +61,7 @@ function processMessageLanguage(msg, edited = false) {
     }
 
     // SOFT LANGUAGE FILTER
-    if (msg.channel.id == "543113993112518676") {
-      toEnglish(msg).then(translation => filter(msg, translation));
-    } else {
-      filter(msg, msg.cleanContent);
-    }
+    filter(msg, msg.cleanContent);
 
     if (msg.embeds.length > 0) {
       for (let embed of msg.embeds) {
@@ -100,15 +85,12 @@ function processMessageLanguage(msg, edited = false) {
 
 function processDiscordInvites(msg) {
   let bot = msg.client;
-  let invites = msg.cleanContent.match(/(http(s)?:\/\/)?discord(\.gg(\/invite)?|app\.com\/invite)\/\w+/ig);
+  let invites = msg.cleanContent.match(/(http(s)?:\/\/)?discord(\.gg(\/invite)?|app\.com\/invite|\.com\/invite)\/\w+/ig)/;
 
   if (invites) {
     let modLog = [];
 
-    invites = invites.map(inv => {
-      inv = inv.replace(/(http(s)?:\/\/)?discord(\.gg(\/invite)?|app\.com\/invite)\//ig, "").replace(/\//g, "").trim();
-      return bot.fetchInvite(inv);
-    });
+    invites = invites.map(inv => bot.fetchInvite(inv.trim()));
 
     Promise.all(invites).then((invites) => {
       if (invites.length > 0) {
@@ -134,8 +116,9 @@ async function warnCard(msg, filtered = null, call = false) {
     let infractionSummary = await Module.db.infraction.getSummary(msg.author.id);
 
     let embed = u.embed()
+    .setTimetamp()
     .setColor("#FF0000")
-    .setAuthor(msg.member.displayName, msg.author.displayAvatarURL)
+    .setAuthor(msg.member.displayName, msg.author.displayAvatarURL()({dynamic: true}))
     .setDescription(msg.cleanContent + (msg.editedAt ? "\n[Edited]" : ""));
 
     filtered = (Array.isArray(filtered) ? filtered.join(", ") : filtered);
@@ -160,31 +143,34 @@ async function warnCard(msg, filtered = null, call = false) {
 
     // Minecraft Filter
     if (msg.channel.id == "121033996439257092")
-      msg.client.channels.get('114490357474918401').send(embed);
+      msg.client.channels.cache.get('114490357474918401').send({embed});
 
     if (msg.author.bot)
       embed.setFooter("The user is a bot and the flag likely originated elsewhere. No reactions will be processed.");
 
-    let card = await msg.client.channels.get(modLogs).send(embed);
+    let card = await msg.client.channels.cache.get(modLogs).send({embed});
 
     if (call) {
       msg.delete();
 
-      let ldsg = msg.client.guilds.get(Module.config.ldsg);
+      let ldsg = msg.client.guilds.cache.get(Module.config.ldsg);
 
-      let callToArms = [ldsg.roles.get('503066022912196608')]; // Discord Mods
+      let callToArms = [ldsg.roles.cache.get('503066022912196608')]; // Discord Mods
       if (msg.author.bot) {
         callToArms.push("The message has been deleted. The member was *not* muted, on account of being a bot.");
       } else {
-        if (!msg.member.roles.has(Module.config.roles.muted)) {
-          await msg.member.addRole(ldsg.roles.get(Module.config.roles.muted));
-          if (msg.member.voiceChannel) msg.member.setMute(true);
-          ldsg.channels.get("356657507197779968").send(`${msg.member}, you have been auto-muted in ${msg.guild.name}. Please review our Code of Conduct. A member of the management team will be available to discuss more details.\n\nhttp://ldsgamers.com/code-of-conduct`);
+        if (!msg.member.roles.cache.has(Module.config.roles.muted)) {
+          await msg.member.roles.add(ldsg.roles.cache.get(Module.config.roles.muted));
+          if (msg.member.voice.channel) {
+            msg.member.voice.setMute(true);
+            msg.member.voice.setDeaf(true);
+          }
+          ldsg.channels.cache.get("356657507197779968").send(`${msg.member}, you have been auto-muted in ${msg.guild.name}. Please review our Code of Conduct. A member of the management team will be available to discuss more details.\n\nhttp://ldsgamers.com/code-of-conduct`);
         }
         callToArms.push("The mute role has been applied and message deleted.");
       }
 
-      await msg.client.channels.get(modLogs).send(callToArms.join("\n"));
+      await msg.client.channels.cache.get(modLogs).send(callToArms.join("\n"));
     }
 
     if (!msg.author.bot)  {
@@ -208,7 +194,7 @@ async function warnCard(msg, filtered = null, call = false) {
 
 async function processCardReaction(reaction, mod, infraction) {
   try {
-    if (reaction.users.filter(u => !u.bot).size > 1) return;
+    if (reaction.users.cache.filter(u => !u.bot).size > 1) return;
     let message = reaction.message;
     reaction = reaction.emoji.name;
     let embed = u.embed(message.embeds[0]);
@@ -226,7 +212,7 @@ async function processCardReaction(reaction, mod, infraction) {
 
         message.edit({embed});
       }
-    } else if (embed.color != 16292386) {
+    } else if (embed.color != 0xf89a22) {
       /***************************************
       **  Only process non-processed cards  **
       ***************************************/
@@ -235,9 +221,9 @@ async function processCardReaction(reaction, mod, infraction) {
       /*********************
       **  Post Full Info  **
       *********************/
-      let member = message.guild.members.get(infraction.discordId);
+      let member = message.guild.members.cache.get(infraction.discordId);
 
-      let roleString = member.roles.map(role => role.name).join(", ");
+      let roleString = member.roles.cache.map(role => role.name).join(", ");
       if (roleString.length > 1024) roleString = roleString.substr(0, roleString.indexOf(", ", 1000)) + " ...";
 
       let userDoc = await Module.db.user.fetchUser(member.id);
@@ -246,9 +232,8 @@ async function processCardReaction(reaction, mod, infraction) {
 
       let infractionDescription = [`**${u.escapeText(member.displayName)}** has had **${infractionSummary.count}** infraction(s) in the last **${infractionSummary.time}** days, totalling **${infractionSummary.points}** points.`];
       if ((infractionSummary.count > 0) && (infractionSummary.detail.length > 0)) {
-        for (let i = 0; i < infractionSummary.detail.length; i++) {
-          let record = infractionSummary.detail[i];
-          let mod = message.guild.members.get(record.mod);
+        for (let record of infractionSummary.detail) {
+          let mod = message.guild.members.cache.get(record.mod);
           infractionDescription.push(`${record.timestamp.toLocaleDateString()} (${record.value}) pts, modded by ${mod.displayName}): ${record.description}`);
         }
       }
@@ -257,8 +242,9 @@ async function processCardReaction(reaction, mod, infraction) {
       if (infractionDescription.length > 2048) infractionDescription = infractionDescription.substr(0, infractionDescription.indexOf("\n", 1950)) + "\n...";
 
       let infoEmbed = u.embed()
-      .setAuthor(member.displayName, (member.user.displayAvatarURL ? member.user.displayAvatarURL : null))
-      .setThumbnail(member.user.displayAvatarURL)
+      .setTimestamp()
+      .setAuthor(member.displayName, member.user.displayAvatarURL())
+      .setThumbnail(member.user.displayAvatarURL())
       .setDescription(infractionDescription)
       .addField("ID", member.id)
       .addField("Joined", member.joinedAt.toUTCString(), true)
@@ -266,7 +252,6 @@ async function processCardReaction(reaction, mod, infraction) {
       .addField("Roles", roleString)
       .addField("Activity", `Posts: ${parseInt(userDoc.posts, 10).toLocaleString()}`, true)
       message.channel.send({embed: infoEmbed, disableEveryone: true});
-      //Infraction Summary
     } else if (reaction == cardReactions[1]) {
       /********************
       **  Ignore a flag  **
@@ -276,20 +261,20 @@ async function processCardReaction(reaction, mod, infraction) {
       embed.setColor(0x00FF00);
       embed.addField("Resolved", mod.username + " cleared the flag.");
       embed.fields = embed.fields.filter(f => !f.name.startsWith("Jump"));
-      await message.clearReactions();
+      await message.reactions.removeAll();
       message.edit({embed});
     } else if (cardReactions.includes(reaction)) {
       /**************************
       **  Warn as appropriate  **
       **************************/
       try {
-        let msg = await message.guild.channels.get(infraction.channel).fetchMessage(infraction.message);
+        let msg = await message.guild.channels.cache.get(infraction.channel).messages.fetch(infraction.message);
         if (msg) u.clean(msg, 0);
       } catch(e) { u.noop(); }
 
       embed.setColor(0x0000FF);
       infraction.mod = mod.id;
-      let member = message.guild.members.get(infraction.discordId);
+      let member = message.guild.members.cache.get(infraction.discordId);
 
       if (reaction == cardReactions[2]) {         // Minor infraction
         infraction.value = 1;
@@ -302,14 +287,19 @@ async function processCardReaction(reaction, mod, infraction) {
         embed.addField("Resolved", mod.username + " issued a 10 point warning.");
       } else if (reaction == cardReactions[5]) {  // Mute
         infraction.value = 10;
-        if (member && !member.roles.has(Module.config.roles.muted)) {
-          // Only mute them if they weren't already muted.
-          await member.addRole(Module.config.roles.muted);
-          if (member.voiceChannel) await member.setMute(true);
-          message.client.channels.get("356657507197779968").send(`${member}, you have been muted in ${message.guild.name}. Please review our Code of Conduct. A member of the management team will be available to discuss more details.\n\nhttp://ldsgamers.com/code-of-conduct`);
+        if (member && !member.roles.cache.has(Module.config.roles.muted)) {
+          try {
+            // Only mute them if they weren't already muted.
+            await member.roles.add(Module.config.roles.muted);
+            await member.roles.add(Module.config.roles.untrusted);
+            if (member.voice.channel) {
+              await member.voice.setMute(true);
+              await member.voice.setDeaf(true);
+            };
+            message.client.channels.cache.get("356657507197779968").send(`${member}, you have been muted in ${message.guild.name}. Please review our Code of Conduct. A member of the management team will be available to discuss more details.\n\nhttp://ldsgamers.com/code-of-conduct`);
+          } catch(error) { u.errorHandler(error, "Mute user via card"); }
         } else if (!member) {
-          let memberRoles = (await Module.db.user.fetchUser(infraction.discordId)).roles;
-          let roles = message.guild.roles.filter(r => memberRoles.includes(r.id) || r.id == Module.config.roles.muted);
+          let roles = (await Module.db.user.fetchUser(infraction.discordId)).roles.concat(Module.config.roles.muted, Module.config.roles.untrusted);
           await Module.db.user.updateRoles({
             id: infraction.discordId,
             roles
@@ -324,16 +314,15 @@ async function processCardReaction(reaction, mod, infraction) {
 
       if (member) {
         let quote = u.embed()
-        .setAuthor(u.escapeText(member.displayName), member.user.displayAvatarURL)
-        .addField("Channel", `#${message.guild.channels.get(infraction.channel).name}`)
+        .setAuthor(u.escapeText(member.displayName), member.user.displayAvatarURL())
+        .addField("Channel", `#${message.guild.channels.cache.get(infraction.channel).name}`)
         .setDescription(message.embeds[0].description)
         .setTimestamp(message.createdAt);
 
         let response = "We have received one or more complaints regarding content you posted. We have reviewed the content in question and have determined, in our sole discretion, that it is against our code of conduct (<https://ldsgamers.com/code-of-conduct>). This content was removed on your behalf. As a reminder, if we believe that you are frequently in breach of our code of conduct or are otherwise acting inconsistently with the letter or spirit of the code, we may limit, suspend or terminate your access to the LDSG Discord server.";
 
-        member.send(`${response}\n\n**${mod.username}** has issued this warning.`, quote)
+        member.send(`${response}\n\n**${mod.username}** has issued this warning.`, {embed: quote})
         .catch(() => blocked(member));
-        //.catch(e => u.errorHandler(e, "Warning DM"));
       }
 
       embed.fields = embed.fields.filter(f => !f.name || !f.name.startsWith("Jump"));
@@ -342,7 +331,6 @@ async function processCardReaction(reaction, mod, infraction) {
       await message.clearReactions();
       message.edit({embed});
     }
-
   } catch(e) { u.errorHandler(e, "Mod Card Reaction"); }
 }
 
@@ -355,60 +343,60 @@ Module
 .addCommand({name: "ankles",
   description: "View lost ankles",
   category: "Mod",
-  permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && (msg.member.roles.has(Module.config.roles.mod) || msg.member.roles.has(Module.config.roles.management))),
+  permissions: (msg) => (msg.guild && (msg.member.roles.cache.has(Module.config.roles.mod) || msg.member.roles.cache.has(Module.config.roles.management))),
   process: async (msg, suffix) => {
     try {
       let time = parseInt(suffix.replace(/<@!?\d+>/ig, '').replace(msg.mentions.CHANNELS_PATTERN, '').trim(), 10) || 10000;
       let since = new Date(Date.now() - (time * 24 * 60 * 60 * 1000));
 
-      let userMentions = u.userMentions(msg);
+      let userMentions = u.userMentions(msg, true);
       let channelMentions = msg.mentions.channels;
       if (userMentions.size > 0) {
-        userMentions.forEach(async (userId) => {
+        for (const [memberId, member] of userMentions) {
           try {
-            let data = await Module.db.ankle.getUserSummary(userId, time);
+            let data = await Module.db.ankle.getUserSummary(memberId, time);
             if (data.perChannel.size > 0) {
               data.perChannel = data.perChannel.sort((v0, v1) => v1 - v0);
 
               let response = [];
               if (since < new Date(2020, 4, 22)) {
-                response.push(`${userId} has lost ${data.total} ankles since 4/22/2020 in ${data.perChannel.size} channels:\`\`\``);
+                response.push(`${member} has lost ${data.total} ankles since 4/22/2020 in ${data.perChannel.size} channels:\`\`\``);
               } else {
-                response.push(`${userId} has lost ${data.total} ankles over the last ${time} days in ${data.perChannel.size} channels:\`\`\``)
+                response.push(`${member} has lost ${data.total} ankles over the last ${time} days in ${data.perChannel.size} channels:\`\`\``);
               }
 
               for (const [chanId, count] of data.perChannel) {
-                response.push(`#${msg.guild.channels.get(chanId).name}: ${count} ankles lost.`);
+                response.push(`#${msg.guild.channels.cache.get(chanId).name}: ${count} ankles lost.`);
               }
               await msg.channel.send(response.join("\n") + "```");
             } else {
-              msg.channel.send(msg.guild.members.get(userId.id).displayName + " still has all their ankles!");
+              msg.channel.send(member.displayName + " still has all their ankles!");
             }
-          } catch (e) { u.errorHandler(e, `Handling lost ankles for user: ${userId}`); }
-        });
+          } catch (e) { u.errorHandler(e, `Handling lost ankles for user: ${member.displayName}`); }
+        }
       }
       if (channelMentions.size > 0) {
-        channelMentions.forEach(async (channelId) => {
+        for (let [channelId, channel] of channelMentions) {
           try {
-            let data = await Module.db.ankle.getChannelSummary(channelId, time);
+            let data = await Module.db.ankle.getChannelSummary(channel, time);
             if (data.perUser.size > 0) {
               data.perUser = data.perUser.sort((v0, v1) => v1 - v0);
 
               let response = [];
               if (since < new Date(2020, 4, 22)) {
-                response.push(`${data.perUser.size} users have lost ${data.total} ankles since 4/22/2020 in ${channelId}:\`\`\``);
+                response.push(`${data.perUser.size} users have lost ${data.total} ankles since 4/22/2020 in ${channel}:\`\`\``);
               } else {
-                response.push(`${data.perUser.size} users have lost ${data.total} ankles over the last ${time} days in ${channelId}:\`\`\``);
+                response.push(`${data.perUser.size} users have lost ${data.total} ankles over the last ${time} days in ${channel}:\`\`\``);
               }
 
               for (const [userId, count] of data.perUser) {
-                response.push(`${msg.guild.members.get(userId).displayName}: ${count} ankles lost.`);
+                response.push(`${msg.guild.members.cache.get(userId).displayName}: ${count} ankles lost.`);
               }
               await msg.channel.send(response.join("\n") + "```");
             } else {
-              msg.channel.send(`No users have lost any ankles in ${channelId}!`);
+              msg.channel.send(`No users have lost any ankles in ${channel}!`);
             }
-          } catch (e) { u.errorHandler(e, `Handling lost ankles for channel: ${channelId}`); }
+          } catch (e) { u.errorHandler(e, `Handling lost ankles for channel: ${channel.name}`); }
         });
       }
       if (!userMentions && channelMentions.size == 0) { // No user or channel mentions, give high summary
@@ -427,7 +415,7 @@ Module
           response.push("Top 5 users:```");
           let displayCount = 0;
           for (const [userId, count] of data.perUser) {
-            response.push(`${msg.guild.members.get(userId).displayName}: ${count} ankles lost.`);
+            response.push(`${msg.guild.members.cache.get(userId).displayName}: ${count} ankles lost.`);
             if (++displayCount == 5) break;
           }
           response[response.length-1] += "```";
@@ -436,7 +424,7 @@ Module
           response.push("Top 5 channels:```");
           let displayCount = 0;
           for (const [chanId, count] of data.perChannel) {
-            response.push(`${msg.guild.channels.get(chanId).name}: ${count} ankles lost.`);
+            response.push(`${msg.guild.channels.cache.get(chanId).name}: ${count} ankles lost.`);
             if (++displayCount == 5) break;
           }
           response.push("```");
@@ -450,19 +438,20 @@ Module
   description: "Announce a post!",
   syntax: "<messageId> (in channel with message)",
   category: "Mod",
-  permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && msg.member.roles.has(Module.config.roles.management)),
-  process: (msg, suffix) => {
+  permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && msg.member.roles.cache.has(Module.config.roles.management)),
+  process: async (msg, suffix) => {
     if (suffix) {
-      msg.channel.fetchMessage(suffix).then(message => {
+      try {
+        let message = msg.channel.messages.fetch(suffix);
         let author = message.member;
         let embed = u.embed()
-          .setAuthor(author.displayName, author.user.displayAvatarURL)
+          .setAuthor(author.displayName, author.user.displayAvatarURL())
           .setTimestamp(message.createdAt)
           .setDescription(message.content);
         if (message.attachments && (message.attachments.size > 0))
-          embed.attachFile(message.attachments.first().proxyURL);
-        msg.client.channels.get("121752198731268099").send(embed);
-      }).catch(e => { msg.reply("I couldn't find that message.").then(u.clean); });
+          embed.attachFiles([message.attachments.first().proxyURL]);
+        msg.client.channels.cache.get("121752198731268099").send(embed);
+      } catch(error) { msg.reply("I couldn't find that message.").then(u.clean); };
     } else msg.reply("you need to tell me a message ID.").then(u.clean);
     u.clean(msg, 0);
   }
@@ -471,84 +460,90 @@ Module
   syntax: "<@user>",
   category: "Mod",
   description: "Ban mentioned user",
-  permissions: (msg) => (msg.guild && (msg.member.hasPermission("BAN_MEMBERS") || msg.member.roles.has(Module.config.roles.mod))),
-  process: (msg, suffix) => {
+  permissions: (msg) => (msg.guild && (msg.member.hasPermission("BAN_MEMBERS") || msg.member.roles.cache.has(Module.config.roles.mod))),
+  process: async (msg, suffix) => {
     u.clean(msg, 0);
-    if (u.userMentions(msg).size > 0) {
-      let reason = suffix.replace(/<@!?\d+>/ig, "").trim();
-      // Get highest role that isn't "Live"
-      const bannerHighRole = msg.member.roles.filter(r => r.id != "281135201407467520").sort((a, b) => b.position - a.position).first();
-      u.userMentions(msg).forEach(async user => {
-        try {
-          // Make sure banner's highest role is higher than ban-ee's highest role
-          const toBeBanned = await msg.guild.fetchMember(user);
-          const bannedHighRole = toBeBanned.roles.filter(r => r.id != "281135201407467520").sort((a, b) => b.position - a.position).first();
-          if (bannerHighRole.comparePositionTo(bannedHighRole) <= 0) return;
-          try {
-            let infraction = {
-              discordId: user.id,
-              description: (reason ? reason : "Member ban"),
+    const bannerHighRole = msg.member.roles.cache.filter(r => r.id != "281135201407467520").sort((a, b) => b.comparePositionTo(a)).first();
+    const mentions = /<@!?(\d+)>/ig;
+    const reason = suffix.replace(mentions, "").trim() || "[Member Ban]: Violating the Code of Conduct";
+    let match;
+    let banCount = 0;
+    while (match = mentions.exec(suffix)) {
+      userId = match[1];
+      try {
+        bans.add(userId);
+        let member = await msg.guild.members.fetch(userId);
+        if (member) {
+          const bannedHighRole = member.roles.cache.filter(r => r.id != "281135201407467520").sort((a, b) => b.comparePositionTo(a)).first();
+          if (bannerHighRole.comparePositionTo(bannedHighRole) <= 0) {
+            msg.reply(`you cannot ban ${member.displayName}!`);
+            continue;
+          } else {
+            const infraction = {
+              discordId: member.id,
+              description: reason,
               value: 30,
               mod: msg.author.id
             };
-            let inf = await Module.db.infraction.save(infraction);
-
-            let member = await msg.guild.fetchMember(user);
-            if (member) {
-              if (member.roles.has(Module.config.roles.trusted)) await member.removeRole(Module.config.roles.trusted);
-              await member.addRoles([Module.config.roles.muted, Module.config.roles.untrusted]);
-              await member.send(`You were banned from ${msg.guild.name} for violating our code of conduct.${(reason ? ("\n" + reason) : "")}`).catch(() => blocked(member));
-              bans.add(member.id);
-              await member.ban({days: 2, reason: reason});
-              msg.client.channels.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** banned **${u.escapeText(member.displayName)}**${(reason ? (" for " + reason) : "")}`);
-            } else msg.reply("That user is no longer part of the server.").then(u.clean);
-          } catch(e) { u.errorHandler(e, msg); }
-        } catch(e) { u.errorHandler(e, "Role Rank Comparison (Ban)"); }
-      });
+            await (member.send(`You were banned from ${msg.guild.name} for ${reason}`).catch(() => blocked(member)));
+            await member.ban({days: 2, reason});
+            msg.client.channels.cache.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** banned **${u.escapeText(member.displayName)}** for ${reason}`);
+          }
+        } else {
+          msg.guild.members.ban(userId, {days: 2, reason});
+        }
+        let memberDoc = await Module.db.user.fetchUser(userId);
+        memberDoc.roles = memberDoc.roles.filter(r => r != Module.config.roles.trusted).concat(Module.config.roles.muted, Module.config.roles.untrusted);
+        await Module.db.user.update(userId, {roles: memberDoc.roles});
+        banCount++;
+      } catch(error) { u.errorHandler(error, msg); }
+    }
+    if (banCount > 0) {
+      msg.reply(`${banCount} user(s) banned.`).then(u.clean);
     } else {
-      msg.reply("you need to tell me who to ban!")
-        .then(u.clean);
+      msg.reply("you need to tell me who to ban!").then(u.clean);
     }
   }
 })
 .addCommand({name: "channelactivity",
   description: "See how active a channel has been over the last two weeks",
   category: "Mod",
-  permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && (msg.member.roles.has(Module.config.roles.management) || msg.member.roles.has("205826273639923722"))),
-  process: (msg) => {
-    const {Collection} = require("discord.js");
-    let last = Date.now() - (14 * 24 * 60 * 60 * 1000);
-    let channels = msg.guild.channels.filter(c => (c.type == "text" && c.permissionsFor(msg.client.user).has("VIEW_CHANNEL") && (c.parentID != "363019058158895117")));
-    let fetch = channels.map(c => c.fetchMessages({limit: 100}));
-    let stats = new Collection(channels.map(c => ([c.id, {id: c.id, name: c.name, messages: 0}])));
-    Promise.all(fetch).then(channelMsgs => {
+  permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && (msg.member.roles.cache.has(Module.config.roles.management) || msg.member.roles.cache.has("205826273639923722"))),
+  process: async (msg) => {
+    try {
+      const last = Date.now() - (14 * 24 * 60 * 60 * 1000);
+      const channels = msg.guild.channels.cache.filter(c => (c.type == "text" && c.permissionsFor(msg.client.user).has("VIEW_CHANNEL") && (c.parentID != "363019058158895117")));
+      const fetch = channels.map(c => c.message.fetch({limit: 100}));
+      const stats = new u.Collection(channels.map(c => ([c.id, {id: c.id, name: c.name, messages: 0}])));
+
+      const channelMsgs = await Promise.all(fetch);
+
       for (let messages of channelMsgs) {
         messages = messages.filter(m => m.createdTimestamp > last);
-        if (messages.size > 0) {
+        if (messages.size > 0)
           stats.get(messages.first().channel.id).messages = messages.size;
-        }
       }
       msg.channel.send(
         stats
-          .filter(c => c.messages < 25)
-          .sort((a, b) => b.messages - a.messages)
-          .map(channel => `<#${channel.id}>: ${channel.messages}`)
-          .join("\n"),
+        .filter(c => c.messages < 25)
+        .sort((a, b) => b.messages - a.messages)
+        .map(channel => `<#${channel.id}>: ${channel.messages}`)
+        .join("\n"),
         {split: true}
       );
-    });
+    } catch(error) { u.errorHandler(error, msg); }
   }
 })
 .addCommand({name: "filter",
   description: "Add a word to the language filter",
   category: "Mod",
   hidden: true,
-  permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && (msg.member.roles.has(Module.config.roles.management) || msg.member.roles.has("205826273639923722"))),
+  permissions: (msg) => (msg.guild && (msg.member.roles.cache.has(Module.config.roles.management) || msg.member.roles.cache.has("205826273639923722"))),
   process: (msg, suffix) => {
     u.clean(msg, 0);
     suffix = suffix.toLowerCase().trim();
     if (pf.add_word(suffix)) {
-      msg.client.channels.get(modLogs).send(`ℹ️ **${msg.member.displayName}** has added "${suffix}" to the language filter.`);
+      msg.client.channels.cache.get(modLogs).send(`ℹ️ **${msg.member.displayName}** has added "${suffix}" to the language filter.`);
     }
   }
 })
@@ -558,71 +553,68 @@ Module
   category: "Mod",
   aliases: ["warnsummary", "warningsummary"],
   hidden: true,
-  permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && (msg.member.roles.has(Module.config.roles.mod) || msg.member.roles.has(Module.config.roles.management))),
+  permissions: (msg) => (msg.guild && (msg.member.roles.cache.has(Module.config.roles.mod) || msg.member.roles.cache.has(Module.config.roles.management))),
   process: async (msg, suffix) => {
     u.clean(msg, 0);
-    if (u.userMentions(msg).size > 0) {
-      try {
-        let ldsg = msg.guild;
-        userId = u.userMentions(msg).first();
-        let member = await ldsg.fetchMember(userId);
-        let time = parseInt(suffix.replace(/<@!?\d+>/ig, '').trim(), 10);
-        if (!Number.isInteger(time)) time = 28;
-        let data = await Module.db.infraction.getSummary(member.id, time);
-        let response = [`**${u.escapeText(member.displayName)}** has had **${data.count}** infraction(s) in the last **${data.time}** day(s), totaling **${data.points}** points.`];
+    const guild = msg.guild;
+    const time = parseInt(suffix.replace(/<@!?\d+>/ig, '').trim(), 10) || 28;
+    let members = u.userMentions(msg, true);
+    if (members.size > 0) {
+      for (const [memberId, member] of members) {
+        try {
+          let data = await Module.db.infraction.getSummary(member.id, time);
+          let response = [`**${u.escapeText(member.displayName)}** has had **${data.count}** infraction(s) in the last **${data.time}** day(s), totaling **${data.points}** points.`];
 
-        if ((data.count > 0) && (data.detail.length > 0)) {
-          data.detail.forEach(record => {
-            let mod = ldsg.members.get(record.mod);
-            response.push(`${record.timestamp.toLocaleDateString()} (${record.value} pts, modded by ${mod.displayName}): ${record.description}`);
-          });
-        }
-        msg.channel.send(response.join("\n"), {split: true});
-      } catch(e) { u.errorHandler(e, m); }
-    } else {
-      msg.reply("you need to tell me whose summary you want to view.")
-        .then(u.clean);
-    }
+          if ((data.count > 0) && (data.detail.length > 0)) {
+            for (let record of data.detail) {
+              let mod = guild.members.cache.get(record.mod);
+              response.push(`${record.timestamp.toLocaleDateString()} (${record.value} pts, modded by ${mod ? mod.displayName || "Unknown Mod"}): ${record.description}`);
+            }
+          }
+          msg.channel.send(response.join("\n"), {split: true});
+        } catch(e) { u.errorHandler(e, m); }
+      }
+    } else msg.reply("you need to tell me whose summary to view!").then(u.clean);
   }
 })
 .addCommand({name: "kick",
   syntax: "<@user(s)> [reason]",
   description: "Kick a user from the server.",
   category: "Mod",
-  permissions: (msg) => (msg.guild && (msg.member.hasPermission("KICK_MEMBERS") || msg.member.roles.has(Module.config.roles.mod))),
-  process: (msg, suffix) => {
+  permissions: (msg) => (msg.guild && (msg.member.hasPermission("KICK_MEMBERS") || msg.member.roles.cache.has(Module.config.roles.mod))),
+  process: async (msg, suffix) => {
     u.clean(msg, 0);
-    let reason = suffix.replace(/<@!?\d+>/ig, "").trim();
-    if (u.userMentions(msg).size > 0) {
-      let ldsg = msg.guild;
+    const members = u.userMentions(msg, true);
+    if (members.size > 0) {
+      let reason = suffix.replace(/<@!?\d+>/ig, "").trim() || "[Member Kick] Violating the Code of Conduct";
+      let guild = msg.guild;
       // Get highest role that isn't "Live"
-      const kickerHighRole = msg.member.roles.filter(r => r.id != "281135201407467520").sort((a, b) => b.position - a.position).first();
-      u.userMentions(msg).forEach(async user => {
+      const kickerHighRole = msg.member.roles.cache.filter(r => r.id != "281135201407467520").sort((a, b) => b.comparePositionTo(a)).first();
+      for (const [memberId, member] of members) {
         try {
           // Make sure kicker's highest role is higher than kick-ee's highest role
-          const toBeKicked = await msg.guild.fetchMember(user);
-          const kickedHighRole = toBeKicked.roles.filter(r => r.id != "281135201407467520").sort((a, b) => b.position - a.position).first();
-          if (kickerHighRole.comparePositionTo(kickedHighRole) <= 0) return;
-          try {
-            let infraction = {
-              discordId: user.id,
-              description: (reason ? reason : "Member kick"),
-              value: 20,
-              mod: msg.author.id
-            };
-            let inf = await Module.db.infraction.save(infraction);
+          const kickedHighRole = member.roles.cache.filter(r => r.id != "281135201407467520").sort((a, b) => b.comparePositionTo(a)).first();
+          if (kickerHighRole.comparePositionTo(kickedHighRole) <= 0) {
+            msg.reply(`you can't kick ${member}!`).then(u.clean);
+            continue;
+          }
+          let infraction = {
+            discordId: member.id,
+            description: reason,
+            value: 20,
+            mod: msg.author.id
+          };
+          let inf = await Module.db.infraction.save(infraction);
 
-            let member = await ldsg.fetchMember(user);
-            if (member) {
-              if (member.roles.has(Module.config.roles.trusted)) await member.removeRole(Module.config.roles.trusted);
-              await member.addRoles([Module.config.roles.muted, Module.config.roles.untrusted]);
-              await member.send(`You were kicked from ${ldsg.name} for ${reason ? reason : "violating our code of conduct"}.`).catch(() => blocked(member));
-              await member.kick(reason);
-              msg.client.channels.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** kicked **${u.escapeText(member.displayName)}**${reason ? (" for " + reason) : ""}`);
-            }
-          } catch(e) { u.errorHandler(e, msg); }
-        } catch(e) { u.errorHandler(e, "Role Rank Comparison (Kick)"); }
-      });
+          await member.send(`You were kicked from ${guild.name} for ${reason}`).catch(() => blocked(member));
+          await member.kick(reason);
+          msg.client.channels.cache.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** kicked **${u.escapeText(member.displayName)}** for ${reason}`);
+
+          let memberDoc = await Module.db.user.fetchUser(userId);
+          memberDoc.roles = memberDoc.roles.filter(r => r != Module.config.roles.trusted).concat(Module.config.roles.muted, Module.config.roles.untrusted);
+          await Module.db.user.update(userId, {roles: memberDoc.roles});
+        } catch(e) { u.errorHandler(e, msg); }
+      }
     } else {
       msg.reply("you need to tell me who to kick!")
         .then(u.clean);
@@ -634,67 +626,71 @@ Module
   description: "Note an LDSG Lady",
   category: "Mod",
   hidden: true,
-  permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && (msg.member.roles.has(Module.config.roles.mod) || msg.member.roles.has(Module.config.roles.management))),
+  permissions: (msg) => (msg.guild && (msg.member.roles.cache.has(Module.config.roles.mod) || msg.member.roles.cache.has(Module.config.roles.management))),
   process: (msg) => {
     u.clean(msg, 0);
-    if (u.userMentions(msg).size > 0) {
-      u.userMentions(msg).forEach(function(userId) {
-        msg.guild.fetchMember(userId).then(member => {
-          member.addRole("253214700446285825");
-          msg.client.channels.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** added **${u.escapeText(member.displayName)}** to the LDSG Lady group.`);
-        });
-      });
-    } else {
-      msg.reply("you need to tell me which users to add to the role!")
-      .then(u.clean);
-    }
+    let members = u.userMentions(msg, true);
+    if (members.size > 0) {
+      for (const [memberId, member] of u.userMentions(msg, true)) {
+        try {
+          member.roles.add("253214700446285825");
+          msg.client.channels.cache.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** added **${u.escapeText(member.displayName)}** to the LDSG Lady group.`);
+        } catch(error) { u.errorHandler(error, msg); }
+      }
+    } else msg.reply("you need to tell me who to apply the role to!").then(u.clean);
   }
 })
 .addCommand({name: "mute",
   syntax: "<@user> [time]",
   description: "Mute a user.",
   category: "Mod",
-  permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && (msg.member.roles.has(Module.config.roles.mod) || msg.member.roles.has(Module.config.roles.management))),
-  process: (msg, suffix) => {
+  permissions: (msg) => (msg.guild && (msg.member.roles.cache.has(Module.config.roles.mod) || msg.member.roles.cache.has(Module.config.roles.management))),
+  process: async (msg, suffix) => {
     u.clean(msg, 0);
-    if (u.userMentions(msg).size > 0) {
-      let duration = parseInt(suffix.replace(/<@!?\d+>/ig, '').toLowerCase().trim(), 10);
-      u.userMentions(msg).forEach(async (user) => {
+    let duration = parseInt(suffix.replace(/<@!?\d+>/ig, '').toLowerCase().trim(), 10);
+    let members = u.userMentions(msg, true);
+    if (members.size > 0) {
+      for (const [memberId, member] of members) {
         try {
-          let member = await msg.guild.fetchMember(user);
-          if (member && !member.roles.has(Module.config.roles.muted)) {
-            member.addRole(Module.config.roles.muted);
-            if (member.voiceChannel) member.setMute(true);
-            msg.client.channels.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** muted **${u.escapeText(member.displayName)}**${(duration ? " for " + duration + " minutes." : "")}`);
-            msg.client.channels.get("356657507197779968").send(`${member}, you have been muted in ${msg.guild.name}. Please review our Code of Conduct. A member of the management team will be available to discuss more details.\n\nhttp://ldsgamers.com/code-of-conduct`);
-          }
-          if (duration) {
-            setTimeout(function(unlucky, timeout) {
-              unlucky.removeRole(Module.config.roles.muted);
-              if (unlucky.voiceChannel) unlucky.setMute(false);
-              msg.client.channels.get(modLogs).send(`ℹ️ **${u.escapeText(member.displayName)}** has automatically been unmuted after ${timeout} minutes.`);
-            }, (duration * 60000), member, duration);
-          }
-        } catch(e) { u.errorHandler(e, msg); }
-      });
-    } else {
-      msg.reply("you need to tell me which users to mute!")
-        .then(u.clean);
-    }
+          if (member && !member.roles.cache.has(Module.config.roles.muted)) {
+            await member.roles.add(Module.config.roles.muted);
+            await member.voice.setMute(true);
+            await member.voice.setDeaf(true);
+
+            msg.client.channels.cache.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** muted **${u.escapeText(member.displayName)}**${(duration ? " for " + duration + " minutes." : "")}`);
+            msg.client.channels.cache.get("356657507197779968").send(`${member}, you have been muted in ${msg.guild.name}. Please review our Code of Conduct. A member of the management team will be available to discuss more details.\n\nhttp://ldsgamers.com/code-of-conduct`);
+
+              if (duration) {
+                if (mutes.has(memberId)) clearTimeout(mutes.get(memberId));
+
+                mutes.set(memberId,
+                  setTimeout(async (member, duration) => {
+                    try {
+                      await member.roles.remove(Module.config.roles.muted);
+                      await member.voice.setMute(false);
+                      await member.voice.setDeaf(false);
+                      msg.client.channels.cache.get(modLogs).send(`ℹ️ **${u.escapeText(member.displayName)}** has automatically been unmuted after ${timeout} minutes.`);
+                    } catch(error) { u.errorHandler(error, "Unmute Timeout"); }
+                  }, (duration * 60000), member, duration);
+                );
+              }
+            }
+          } catch(e) { u.errorHandler(e, msg); }
+        }
+    } else msg.reply("you need to tell me who to mute!").then(u.clean);
   }
 })
 .addCommand({name: "note",
   syntax: "<@user> <message>",
   description: "Record a mod note",
   category: "Mod",
-  permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && (msg.member.roles.has(Module.config.roles.mod) || msg.member.roles.has(Module.config.roles.management))),
+  permissions: (msg) => (msg.guild && (msg.member.roles.cache.has(Module.config.roles.mod) || msg.member.roles.cache.has(Module.config.roles.management))),
   process: (msg, suffix) => {
     u.clean(msg, 0);
     let comment = suffix.replace(/<@!?\d+>/ig, '').replace(/\s\s+/g, ' ').trim();
-    if (u.userMentions(msg) && comment) {
-      u.userMentions(msg).forEach(async userId => {
+    if (comment) {
+      for (const [memberId, member] of u.userMentions(msg, true)) {
         try {
-          let member = await msg.guild.fetchMember(userId);
           let inf = await Module.db.infraction.save({
             discordId: member.id,
             value: 0,
@@ -705,17 +701,17 @@ Module
           });
           let summary = await Module.db.infraction.getSummary(member.id);
 
-          let card = u.embed()
+          let embed = u.embed()
           .setColor("#0000FF")
-          .setAuthor(u.escapeText(member.displayName), member.user.displayAvatarURL)
+          .setAuthor(u.escapeText(member.displayName), member.user.displayAvatarURL())
           .setDescription(comment)
           .addField("Resolved", `${msg.author.username} added a note.`)
           .addField(`Infraction Summary (${summary.time} Days) `, `Infractions: ${summary.count}\nPoints: ${summary.points}`)
           .setTimestamp();
 
-          msg.client.channels.get(modLogs).send(card);
+          msg.client.channels.cache.get(modLogs).send({embed});
         } catch(e) { u.errorHandler(e, msg); }
-      });
+      }
     } else {
       msg.reply("you need to tell me who and what the note is.")
         .then(u.clean);
@@ -729,16 +725,16 @@ Module
   permissions: (msg) => (msg.guild && msg.channel.permissionsFor(msg.member).has("MANAGE_MESSAGES")),
   process: async (msg, suffix) => {
     try {
-      let purge = parseInt(suffix, 10);
+      let purge = parseInt(suffix, 10) || 0;
       let num = purge + 1;
       let channel = msg.channel;
-      if (num) {
+      if (num > 0) {
         while (num > 0) {
           let deleting = Math.min(num, 50)
           await channel.bulkDelete(deleting);
           num -= deleting;
         }
-        channel.client.channels.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** purged ${purge} messages in ${msg.channel}`);
+        msg.guild.channels.cache.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** purged ${purge} messages in ${msg.channel}`);
       } else {
         msg.reply("you need to tell me how many to delete.")
           .then(u.clean);
@@ -755,60 +751,41 @@ Module
   process: async (msg, suffix) => {
     u.clean(msg, 0);
     let setNick = suffix.replace(/<@!?\d+>/g, "").trim();
-    if (u.userMentions(msg).size > 0) {
-      u.userMentions(msg).forEach(async user => {
-        try {
-          const {names, colors, adjectives} = require("../data/nameParts.json");
-          let member = await msg.guild.fetchMember(user);
-          let oldNick = member.displayName;
-          let newNick = setNick;
+    const {names, colors, adjectives} = require("../data/nameParts.json");
+    for (const [memberId, member] of u.userMentions(msg, true)) {
+      try {
+        let oldNick = member.displayName;
+        let newNick = setNick;
 
-          while (!newNick || newNick.length > 32) {
-            newNick = u.rand(adjectives) + " " + u.rand(colors) + " " + u.rand(names);
-          }
-
-          member.setNickname(newNick)
-
-          let comment = `Set nickname to ${newNick} from ${oldNick}.`;
-
-          try {
-            let inf = await Module.db.infraction.save({
-              discordId: member.id,
-              value: 0,
-              description: comment,
-              message: msg.id,
-              channel: msg.channel.id,
-              mod: msg.author.id
-            });
-            let summary = await Module.db.infraction.getSummary(member.id);
-
-            let card = u.embed()
-            .setColor("#0000FF")
-            .setAuthor(u.escapeText(member.displayName), member.user.displayAvatarURL)
-            .setDescription(comment)
-            .addField("Resolved", `${msg.author.username} changed the user's nickname from ${oldNick} to ${newNick}.`)
-            .addField(`Infraction Summary (${summary.time} Days) `, `Infractions: ${summary.count}\nPoints: ${summary.points}`)
-            .setTimestamp();
-
-            msg.client.channels.get(modLogs).send(card);
-          } catch(e) { u.errorHandler(e, msg); }
-
-          try {
-            member.send(`Your nickname has been changed in ${msg.guild.name} from ${oldNick} to ${newNick}. Please contact a moderator or member of the management team if you have questions regarding the change.`).catch(() => blocked(member));
-          } catch(e) {
-            // msg.channel.send("Could not inform user of the nickname change.")
-            //   .then(u.clean);
-            u.errorHandler(e, msg);
-          }
-        } catch(e) {
-          // msg.channel.send(`Could not change ${userId}'s nickname to ${newNick}.`)
-          //   .then(u.clean);
-          u.errorHandler(e, msg);
+        while (!newNick || newNick.length > 32) {
+          newNick = u.rand(adjectives) + " " + u.rand(colors) + " " + u.rand(names);
         }
-      });
-    } else {
-      msg.reply("you need to tell me whose nickname to change!")
-        .then(u.clean);
+
+        await member.setNickname(newNick)
+
+        let comment = `Set nickname to ${newNick} from ${oldNick}.`;
+
+        let inf = await Module.db.infraction.save({
+          discordId: member.id,
+          value: 0,
+          description: comment,
+          message: msg.id,
+          channel: msg.channel.id,
+          mod: msg.author.id
+        });
+        let summary = await Module.db.infraction.getSummary(member.id);
+
+        let embed = u.embed()
+          .setColor("#0000FF")
+          .setAuthor(u.escapeText(member.displayName), member.user.displayAvatarURL())
+          .setDescription(comment)
+          .addField("Resolved", `${msg.author.username} changed the user's nickname from ${oldNick} to ${newNick}.`)
+          .addField(`Infraction Summary (${summary.time} Days) `, `Infractions: ${summary.count}\nPoints: ${summary.points}`)
+          .setTimestamp();
+
+        msg.client.channels.cache.get(modLogs).send({embed});
+        member.send(`Your nickname has been changed in ${msg.guild.name} from ${oldNick} to ${newNick}. Please contact a moderator or member of the management team if you have questions regarding the change.`).catch(() => blocked(member));
+      } catch(e) { u.errorHandler(e, msg); }
     }
   }
 })
@@ -820,17 +797,17 @@ Module
   permissions: (msg) => Module.config.adminId.includes(msg.author.id),
   process: async (msg) => {
     u.clean(msg);
-    let members = msg.mentions.members;
+    let members = u.userMentions(msg, true);
     if (members && members.size > 0) {
       let swagoteer = "441267815622639616";
-      members.forEach(async (member) => {
-        if (member.roles.has(swagoteer)) {
+      for (const [memberId, member] of members) {
+        if (member.roles.cache.has(swagoteer)) {
           member.send("Thanks for your purchase from LDSG!").catch(() => blocked(member));
         } else {
-          let m = await member.addRole(swagoteer);
-          m.send("Thanks for your purchase from LDSG! You've been awarded the **Swagoteer** role!").catch(() => blocked(m));
+          await member.roles.add(swagoteer);
+          member.send("Thanks for your purchase from LDSG! You've been awarded the **Swagoteer** role!").catch(() => blocked(m));
         }
-      });
+      }
       msg.reply(`I added the *Swagoteer* role to ${members.map(m => m.displayName).join(", ")}`)
         .then(u.clean);
     } else {
@@ -843,23 +820,20 @@ Module
   syntax: "<@user>",
   description: "Trust a user",
   category: "Mod",
-  permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && (msg.member.roles.has(Module.config.roles.mod) || msg.member.roles.has(Module.config.roles.management))),
-  process: (msg) => {
+  permissions: (msg) => (msg.guild && (msg.member.roles.cache.has(Module.config.roles.mod) || msg.member.roles.cache.has(Module.config.roles.management))),
+  process: async (msg) => {
     u.clean(msg, 0);
-    if (u.userMentions(msg).size > 0) {
-      u.userMentions(msg).forEach(function(userId) {
-        msg.guild.fetchMember(userId).then(member => {
-          member.addRole(Module.config.roles.trusted);
-          if (member.roles.has(Module.config.roles.untrusted))
-            member.removeRole(Module.config.roles.untrusted);
-          try {
-            member.send("You have been marked as \"Trusted\" in " + msg.guild.name + ". This means you are now permitted to post images and links in chat. Please remember to follow the Code of Conduct when doing so.\n<http://ldsgamers.com/code-of-conduct>").catch(() => blocked(member));
-          } catch (e) {
-            msg.client.channels.get(modLogs).send(`ℹ️ I think ${msg.member} has blocked me.`);
-          }
-          msg.client.channels.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** trusted **${u.escapeText(member.displayName)}**`);
-        });
-      });
+    let members = u.userMentions(msg, true);
+    if (members.size > 0) {
+      for (const [memberId, member] of members) {
+        try {
+          await member.roles.add(Module.config.roles.trusted);
+          if (member.roles.cache.has(Module.config.roles.untrusted))
+            member.roles.remove(Module.config.roles.untrusted);
+          member.send("You have been marked as \"Trusted\" in " + msg.guild.name + ". This means you are now permitted to post images and links in chat. Please remember to follow the Code of Conduct when doing so.\n<http://ldsgamers.com/code-of-conduct>").catch(() => blocked(member));
+          msg.client.channels.cache.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** trusted **${u.escapeText(member.displayName)}**`);
+        } catch(error) { u.errorHandler(error, msg); }
+      }
     } else {
       msg.reply("you need to tell me which users to trust!")
         .then(u.clean);
@@ -870,22 +844,22 @@ Module
   description: "List semi-active (15 posts or more) untrusted users",
   category: "Mod",
   hidden: true,
-  permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && (msg.member.roles.has(Module.config.roles.mod) || msg.member.roles.has(Module.config.roles.management))),
+  permissions: (msg) => (msg.guild && (msg.member.roles.cache.has(Module.config.roles.mod) || msg.member.roles.cache.has(Module.config.roles.management))),
   process: async (msg, suffix) => {
     try {
       let threshold = parseInt(suffix, 10) || 15;
-      const ldsg = msg.guild;
+      const guild = msg.guild;
       let users = await Module.db.user.getUsers({posts: {$gt: threshold}});
       let response = [];
       for (const user of users) {
-        let member = ldsg.members.get(user.discordId);
-        if (member && !member.roles.has(Module.config.roles.trusted) & !member.roles.has(Module.config.roles.untrusted)) {
+        let member = ldsg.members.cache.get(user.discordId);
+        if (member && !member.roles.cache.has(Module.config.roles.trusted) & !member.roles.cache.has(Module.config.roles.untrusted)) {
           response.push({member: member, posts: user.posts});
         }
       }
       if (response.length > 0)
         msg.channel.send(response.sort((a, b) => b.posts - a.posts).map(m => `${m.member}: ${m.posts} posts, joined ${m.member.joinedAt.toLocaleDateString()}`).join("\n"), {split: true});
-      else msg.channel.send(`No untrusted users with ${threshold} posts found.`);
+      else msg.channel.send(`No untrusted users with ${threshold}+ posts found.`);
     } catch(e) { u.errorHandler(e, msg); }
   }
 })
@@ -893,12 +867,12 @@ Module
   description: "Remove a word from the language filter",
   category: "Mod",
   hidden: true,
-  permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && (msg.member.roles.has(Module.config.roles.management) || msg.member.roles.has("205826273639923722"))),
+  permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && (msg.member.roles.cache.has(Module.config.roles.management) || msg.member.roles.cache.has("205826273639923722"))),
   process: (msg, suffix) => {
     suffix = suffix.toLowerCase().trim();
     if (pf.remove_word(suffix)) {
       msg.react("👌");
-      msg.client.channels.get(modLogs).send(`ℹ️ **${msg.member.displayName}** has removed "${suffix}" from the language filter.`);
+      msg.client.channels.cache.get(modLogs).send(`ℹ️ **${msg.member.displayName}** has removed "${suffix}" from the language filter.`);
     }
   }
 })
@@ -906,17 +880,23 @@ Module
   syntax: "<@user>",
   description: "Unmute a user", hidden: true,
   category: "Mod",
-  permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && (msg.member.roles.has(Module.config.roles.mod) || msg.member.roles.has(Module.config.roles.management))),
-  process: (msg) => {
+  permissions: (msg) => (msg.guild && (msg.member.roles.cache.has(Module.config.roles.mod) || msg.member.roles.cache.has(Module.config.roles.management))),
+  process: async (msg) => {
     u.clean(msg, 0);
-    if (u.userMentions(msg).size > 0) {
-      u.userMentions(msg).forEach(function(userId) {
-        msg.guild.fetchMember(userId).then(member => {
-          member.removeRole(Module.config.roles.muted);
-          if (member.voiceChannel) member.setMute(false);
-          msg.client.channels.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** unmuted **${u.escapeText(member.displayName)}**`);
-        });
-      });
+    let members = u.userMentions(msg, true);
+    if (members.size > 0) {
+      for (const [memberId, member] of members) {
+        try {
+          if (mutes.has(memberId)) {
+            clearTimeout(mutes.get(memberId));
+            mutes.delete(memberId);
+          }
+          member.roles.remove(Module.config.roles.muted);
+          member.voice.setMute(false);
+          member.voice.setDeaf(false);
+          msg.client.channels.cache.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** unmuted **${u.escapeText(member.displayName)}**`);
+        } catch(error) { u.errorHandler(error, msg); }
+      }
     } else {
       msg.reply("you need to tell me which users to unmute!")
         .then(u.clean);
@@ -927,22 +907,18 @@ Module
   syntax: "<@user>",
   description: "Untrust a user.", hidden: true,
   category: "Mod",
-  permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && (msg.member.roles.has(Module.config.roles.mod) || msg.member.roles.has(Module.config.roles.management))),
+  permissions: (msg) => (msg.guild && (msg.member.roles.cache.has(Module.config.roles.mod) || msg.member.roles.cache.has(Module.config.roles.management))),
   process: (msg) => {
     u.clean(msg, 0);
-    if (u.userMentions(msg).size > 0) {
-      u.userMentions(msg).forEach(function(userId) {
-        msg.guild.fetchMember(userId).then(member => {
-          member.removeRole(Module.config.roles.trusted);
-          member.addRole(Module.config.roles.untrusted);
-          try {
-            member.send("You have been removed from \"Trusted\" in " + msg.guild.name + ". This means you no longer have the ability to post images. Please remember to follow the Code of Conduct when posting images or links.\n<http://ldsgamers.com/code-of-conduct>").catch(() => blocked(member));
-          } catch (e) {
-            msg.client.channels.get(modLogs).send(`ℹ️ I think ${msg.member} has blocked me.`);
-          }
-          msg.client.channels.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** untrusted **${u.escapeText(member.displayName)}**`);
-        });
-      });
+    let members = u.userMentiosn(msg, true);
+    if (members.size > 0) {
+      for (const [memberId, member] of members) {
+        member.roles.remove(Module.config.roles.trusted);
+        member.roles.add(Module.config.roles.untrusted);
+        member.send("You have been removed from \"Trusted\" in " + msg.guild.name + ". This means you no longer have the ability to post images. Please remember to follow the Code of Conduct when posting images or links.\n<http://ldsgamers.com/code-of-conduct>").catch(() => blocked(member));
+
+        msg.client.channels.cache.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** untrusted **${u.escapeText(member.displayName)}**`);
+      }
     } else {
       msg.reply("you need to tell me which users to untrust!")
         .then(u.clean);
@@ -954,10 +930,11 @@ Module
   description: "Record a warning",
   category: "Mod",
   aliases: ["infraction", "warning"],
-  permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && (msg.member.roles.has(Module.config.roles.mod) || msg.member.roles.has(Module.config.roles.management))),
+  permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && (msg.member.roles.cache.has(Module.config.roles.mod) || msg.member.roles.cache.has(Module.config.roles.management))),
   process: (msg, suffix) => {
     u.clean(msg, 0);
-    if (u.userMentions(msg).size > 0) {
+    let members = u.userMentions(msg, true);
+    if (members.size > 0) {
       let comment = suffix.replace(/<@!?\d+>/ig, '').replace(/\s\s+/g, ' ').trim();
       let value = comment.substring(0, comment.indexOf(" "));
 
@@ -969,9 +946,8 @@ Module
       if (Number.isInteger(value)) comment = comment.substr(comment.indexOf(" ")+1);
       else value = 1;
 
-      u.userMentions(msg).forEach(async userId => {
+      for (const [memberId, member] of members) {
         try {
-          let member = await msg.guild.fetchMember(userId);
           let inf = await Module.db.infraction.save({
             discordId: member.id,
             value: value,
@@ -983,19 +959,19 @@ Module
           let summary = await Module.db.infraction.getSummary(member.id);
 
           let response = "We have received one or more complaints regarding content you posted. We have reviewed the content in question and have determined, in our sole discretion, that it is against our code of conduct (<http://ldsgamers.com/code-of-conduct>). This content was removed on your behalf. As a reminder, if we believe that you are frequently in breach of our code of conduct or are otherwise acting inconsistently with the letter or spirit of the code, we may limit, suspend or terminate your access to the LDSG discord server.";
-          member.send(`${response}\n\n**${msg.author.username}** has issued you a warning for:\n${comment}`).catch(() => blocked(member));
+          member.send(`${response}\n\n**${msg.member.displayName}** has issued you a warning for:\n${comment}`).catch(() => blocked(member));
 
-          let card = u.embed()
-          .setColor("#0000FF")
-          .setAuthor(u.escapeText(member.displayName), member.user.displayAvatarURL)
-          .setDescription(comment)
-          .addField("Resolved", `${msg.author.username} issued a ${value} point warning.`)
-          .addField(`Infraction Summary (${summary.time} Days) `, `Infractions: ${summary.count}\nPoints: ${summary.points}`)
-          .setTimestamp();
+          let embed = u.embed()
+            .setColor("#0000FF")
+            .setAuthor(u.escapeText(member.displayName), member.user.displayAvatarURL())
+            .setDescription(comment)
+            .addField("Resolved", `${msg.author.username} issued a ${value} point warning.`)
+            .addField(`Infraction Summary (${summary.time} Days) `, `Infractions: ${summary.count}\nPoints: ${summary.points}`)
+            .setTimestamp();
 
-          msg.client.channels.get(modLogs).send(card);
+          msg.client.channels.cache.get(modLogs).send({embed});
         } catch(e) { u.errorHandler(e, msg); }
-      });
+      }
     } else msg.reply("you need to tell me who and what the infraction is.").then(u.clean);
   }
 });
@@ -1006,8 +982,8 @@ Module
 Module
 .addEvent("channelCreate", (channel) => {
   if (channel.guild && (channel.guild.id == Module.config.ldsg)) {
-    let muted = channel.guild.roles.get(Module.config.roles.muted);
-    channel.overwritePermissions(muted, {
+    let muted = channel.guild.roles.cache.get(Module.config.roles.muted);
+    channel.createOverwrite(muted, {
       VIEW_CHANNEL: false,
       CONNECT: false,
       SEND_MESSAGES: false,
@@ -1016,7 +992,7 @@ Module
   }
 })
 .addEvent("guildBanAdd", (guild, user) => {
-  if ((guild.id == Module.config.ldsg) && !bans.has(user.id)) guild.client.channels.get(modLogs).send(`**${user.username}** has been banned.`);
+  if ((guild.id == Module.config.ldsg) && !bans.has(user.id)) guild.client.channels.cache.get(modLogs).send(`**${user.username}** has been banned.`);
 })
 .addEvent("message", (msg) => {
   if (msg.guild && msg.member && msg.guild.id == Module.config.ldsg) return processMessageLanguage(msg);
@@ -1035,22 +1011,22 @@ Module
 })
 .addEvent("userUpdate", (oldUser, newUser) => {
   let ldsg = newUser.client.guilds.get(Module.config.ldsg);
-  if (ldsg.members.has(newUser.id)) {
-    let newMember = ldsg.members.get(newUser.id);
-    if (!newMember.roles.has(Module.config.roles.trusted) || newMember.roles.has(Module.config.roles.untrusted)) {
+  if (ldsg.members.cache.has(newUser.id)) {
+    let newMember = ldsg.members.cache.get(newUser.id);
+    if (!newMember.roles.cache.has(Module.config.roles.trusted) || newMember.roles.cache.has(Module.config.roles.untrusted)) {
       const embed = u.embed()
         .setTimestamp()
-        .setAuthor(oldUser.username, oldUser.displayAvatarURL)
+        .setAuthor(oldUser.username, oldUser.displayAvatarURL())
         .setTitle("User Update");
       if (oldUser.tag != newUser.tag) {
         embed.addField("**Username Update**", `**Old:** ${oldUser.tag}\n**New:** ${newUser.tag}`);
       }
       if (oldUser.avatar != newUser.avatar) {
-        embed.addField("**Avatar Update**", "See Below").setImage(newUser.displayAvatarURL);
+        embed.addField("**Avatar Update**", "See Below").setImage(newUser.displayAvatarURL());
       } else {
-        embed.setThumbnail(newUser.displayAvatarURL);
+        embed.setThumbnail(newUser.displayAvatarURL());
       }
-      ldsg.channels.get("725797487129919488").send({embed});
+      ldsg.channels.cache.get("725797487129919488").send({embed});
     }
   }
 });
