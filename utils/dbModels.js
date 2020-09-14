@@ -765,7 +765,7 @@ const models = {
       return new Promise((fulfill, reject) => {
         User.findOne({discordId: member.id}, (err, user) => {
           if (user) {
-            user.set({roles: Array.from(member.roles.keys())});
+            user.set({roles: Array.from(member.roles.cache.keys())});
             user.save((err, newUser) => {
               if (err) reject(err);
               else fulfill(newUser);
