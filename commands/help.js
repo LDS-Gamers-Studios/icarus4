@@ -11,7 +11,7 @@ const Module = new Augur.Module()
     u.clean(msg);
 
     let prefix = Module.config.prefix;
-    let commands = Module.commands.filter(c => c.permissions(msg));
+    let commands = Module.client.commands.filter(c => c.permissions(msg));
 
     let embed = u.embed()
     .setURL("https://my.ldsgamers.com/commands")
@@ -48,7 +48,7 @@ const Module = new Augur.Module()
     } else { // SINGLE COMMAND HELP
       let command = null;
       if (commands.has(suffix)) command = commands.get(suffix);
-      else if (Module.commands.aliases.has(suffix)) command = Module.commands.aliases.get(suffix);
+      else if (Module.client.commands.aliases.has(suffix)) command = Module.client.commands.aliases.get(suffix);
       if (command) {
         embed
         .setTitle(prefix + command.name + " help")
