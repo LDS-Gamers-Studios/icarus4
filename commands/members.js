@@ -23,21 +23,23 @@ const Module = new Augur.Module()
   description: "Check when a user joined the server",
   syntax: "[@user]",
   category: "Members",
-  process: (msg, suffix) => {
-    let users = null;
+  process: async (msg, suffix) => {
+    try {
+      let users = null;
 
-    if (!suffix) users = [msg.member];
-    else if (msg.mentions.members.size > 0) users = Array.from(msg.mentions.members.values());
-    else if (suffix) users = [suffix];
+      if (!suffix) users = [msg.member];
+      else if (msg.mentions.members.size > 0) users = Array.from(msg.mentions.members.values());
+      else if (suffix) users = [suffix];
 
-    for (let user of users) {
-      let member = user;
-      if (typeof member == "string") member = await msg.guild.members.fetch({query: user, limit: 1});
+      for (let user of users) {
+        let member = user;
+        if (typeof member == "string") member = await msg.guild.members.fetch({query: user, limit: 1});
 
-      if (member) {
-        msg.channel.send({embed: userEmbed(member), disableEveryone: true});
-      } else msg.channel.send("User \"" + user + "\" not found");
-    }
+        if (member) {
+          msg.channel.send({embed: userEmbed(member), disableEveryone: true});
+        } else msg.channel.send("User \"" + user + "\" not found");
+      }
+    } catch(error) { u.errorHandler(error, msg); }
   },
   permissions: (msg) => msg.guild
 })
