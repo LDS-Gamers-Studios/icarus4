@@ -57,7 +57,7 @@ const Module = new Augur.Module()
           permissionOverwrites: [
             { id: msg.client.user.id, allow: "VIEW_CHANNEL" },
             { id: Module.config.ldsg, deny: "VIEW_CHANNEL" },
-            { id: sponsor.id, allow: ["VIEW_CHANNEL", "MANAGE_CHANNELS", "MANAGE_MESSAGES", "MANAGE_ROLES", "MANAGE_WEBHOOKS"] },
+            { id: sponsor.id, allow: ["VIEW_CHANNEL", "MANAGE_CHANNELS", "MANAGE_MESSAGES", "MANAGE_WEBHOOKS"] },
           ]
         }, "Sponsor Perk");
 
