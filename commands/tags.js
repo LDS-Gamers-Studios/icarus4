@@ -84,10 +84,10 @@ const Module = new Augur.Module()
   },
   permissions: (msg) => msg.member && (msg.member.permissions.has("MANAGE_GUILD") || msg.member.permissions.has("ADMINISTRATOR") || Module.config.adminId.includes(msg.author.id))
 })
-.setInit(async () => {
+.addEvent("ready", async () => {
   try {
     let cmds = await Module.db.tags.fetchTags();
-    cmds = cmds.filter(c => Module.client.guilds.has(c.serverId));
+    cmds = cmds.filter(c => Module.client.guilds.cache.has(c.serverId));
     console.log(`Loaded ${cmds.length} custom commands${(Module.client.shard ? " on Shard " + Module.client.shard.id : "")}.`);
     for (let cmd of cmds) {
       if (!tags.has(cmd.serverId)) tags.set(cmd.serverId, new Map());
