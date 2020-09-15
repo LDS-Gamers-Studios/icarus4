@@ -203,9 +203,11 @@ const Module = new Augur.Module()
     process.exit();
   } catch(error) { u.errorHandler(error, "Bot Disconnect"); process.exit(); }
 })
+.addEvent("ready", () => {
+  Module.client.guilds.cache.get(Module.config.ldsg).members.fetch();
+})
 .setInit((reload) => {
   if (!reload) {
-    Module.client.guilds.cache.get(Module.config.ldsg).members.fetch();
     u.errorLog.send(u.embed().setTimestamp().setDescription("Bot is ready!"));
   }
 
