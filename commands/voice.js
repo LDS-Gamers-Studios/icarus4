@@ -387,7 +387,7 @@ const Module = new Augur.Module()
     else {
       for (let i = 0; i < rows.length; i++) {
         roomList.push(rows[i].name);
-        if (!ldsg.channels.find(c => c.name.startsWith(rows[i].name))) availableNames.add(rows[i].name);
+        if (!ldsg.channels.cache.find(c => c.name.startsWith(rows[i].name))) availableNames.add(rows[i].name);
       }
     }
   });
