@@ -8,86 +8,90 @@ Pull requests from the community are welcome.
 
 ## The Augur Handler
 
-Within your base file, require `augurbot` and create a new instance of a `Handler`:
+Within your base file, require `augurbot` and create a new instance of `AugurClient`:
 ```
-const Augur = require("augurbot");
-const Handler = new Augur.Handler(config, options);
+const {AugurClient} = require("augurbot");
+const client = new AugurClient(config, options);
 
-function loadCommands() {
-  // Load commands
-}
-
-Handler.start()
-.then(loadCommands);
+client.login();
 ```
 
-The Handler will create the Discord Client, log it in, listen for events, and process commands.
+The AugurClient will create the Discord Client, log it in using the token provided in `config.token`, listen for events, and process commands. Any gateway intents are automatically calculated based on `config.events`.
 
-### Options
+### The `config` Object
 
-Minimum properties in `config` include:
+Minimum required properties in `config` include:
 
-* `token` (string): Your bot's Discord token to log in.
+* `events` (array): An array of discord.js events to process, including `message` and `messageUpdate`, if your bot will be processing message commands. Gateway intents will be automatically calculated based on the `events` supplied.
 
-* `prefix` (string): A default prefix for commands.
+Additional optional properties include:
 
-* `events` (array): An array of discord.js events to process.
+* `db` (object): An object, including a `model` property which is the path to your database model, relative to the base file.
 
-* `db` (string): Path to your database model, relative to the base file.
+* `prefix` (string): A default prefix for commands. Defaults to `!`.
+
+* `processDMs` (boolean): Whether to process messages in DMs. Defaults to `true`.
+
+* `token` (string): Your bot's Discord token to log in. If provided in the `config` object, it does not need to be passed when `client.login()` is called. If omitted, it *must* be passed with `client.login(token)` when logging in.
+
+* Any other properties you wish to be able to access from your command modules.
+
+### The `options` Object
 
 The `options` object is optional, but may include:
 
-* `bot` (object): An object containing options to be passed to the new Discord.Client().
+* `clientOptions` (object): An object containing options to be passed to the new Discord.Client(). Gateway intents are automatically calulated based on `config.events`. If you would like to override the calculated intents, provide your own intents as usual for Discord.js.
 
-* `commands` (array): An array of command files to load upon receiving the first `ready` event.
+* `commands` (string): A directory, relative to the base file, containing any command modules you wish to automatically load.
 
-* `errorHandler` (function): An function accepting `error` and `message` as its arguments. This will replace the default error handling function.
+* `errorHandler`: A function accepting `error` and `message` as its arguments. This will replace the default error handling function.
 
-* `parse` (function): A function accepting `message` as its argument, returning an object with `command` and `suffix` properties. This will replace the default parsing function. (Useful in case different servers use different prefixes, for example.)
+* `parse` (async function): An asynchronous function accepting `message` as its argument, returning an object with `command` and `suffix` properties. This will replace the default parsing function. (Useful in case different servers use different prefixes, for example.)
 
-### Handler Properties
+### AugurClient Properties
 
 Properties of the Handler class:
 
-* `aliases`: Collection of commands, keyed by alias.
+* `augurOptions` (object): The options object passed to the client upon initialization.
 
-* `client`: Instance of the Discord Client.
+* `clockwork` (ClockworkHandler extends Collection):
 
-* `clockwork`: Collection of intervals, keyed by command file.
+  A collection of functions to be run by an interval.
+  * `register(Module)`: Registers clockwork functions from a Module. Automatically called by `client.moduleHandler.register(Module)`.
+  * `unload(filepath)`: Unload a clockwork function from memory. Automatically called by `client.moduleHandler.unload(filepath)`.
 
-* `commandCount`: Number of commands processed by the Handler.
+* `commands` (CommandHandler extends Collection):
 
-* `commands`: Collection of commands, keyed by command name.
+  A collection of commands, keyed by command name.
+  * `aliases` (Collection): Collection of commands, keyed by alias.
+  * `client` (AugurClient): The client.
+  * `commandCount` (Number): Integer of how many commands have been executed via `commands.execute()`.
+  * `execute(commandName, message, suffix)` (async function): Execute a command function. Automatically called by the event handler.
+  * `register(Module)` (function): Registers commands from a Module. Automatically called by `client.moduleHandler.register(Module)`.
 
 * `config`: The `config` object passed to the Handler.
 
 * `db`: Your loaded database model.
 
-* `events`: Collection of arrays of event handlers, keyed by command file.
+* `events` (EventHandler extends Collection):
 
-* `options`: The `options` object passed to the Handler.
+  A collection of event handlers, keyed by event then keyed by filepath.
+  * `register(Module)`: Registers event handlers from a Module. Automatically called by `client.moduleHandler.register(Module)`.
 
-* `init`: Whether the Discord Client has received its first `ready` event.
+* `moduleHandler` (ModuleHandler):
 
-* `unload`: Collection of functions to run on unloading a command file, keyed by command file.
+  Helper functions for loading/unloading/reloading Augur Modules.
+  * `register(Module, data)`: Register the module with optional data.
+  * `reload(filepath)`: Reload a module from a filepath, reregistering the module with data supplied by the command's `.unload()` function.
+  * `unload(filepath)`: Unload a module from memory.
 
-### Handler Methods
+### AugurClient Methods
 
 Methods of the Handler class:
 
 * `errorHandler(error, message)`: Error handling function.
 
-* `execute(commandName, message, suffix)`: Execute a command function.
-
 * `parse(message)`: Parse a message into its command name and suffix. Returns an object containing `command` (string) and `suffix` (string).
-
-* `register(filename)`: Register a new command module.
-
-* `reload(filename)`: Reload a command file.
-
-* `start()`: Log in the Discord Client and start event handlers. Returns a promise which resolves upon the first `ready` event.
-
-* `unload(filename)`: Unload clockwork functions, event handlers, and commands associated with the command file.
 
 ---
 
@@ -111,14 +115,14 @@ In between, you can add one or more commands and event handlers, as well as a cl
 
 * `db`: The loaded database model.
 
-* `handler`: The Augur Handler which loaded the command module.
+* `client`: The Augur client which loaded the command module.
 
 All of the following methods are chainable:
 
 ### Clockwork
 The function passed to the `.setClockwork()` method should return an interval which will continue to run in the background. The interval is cleared and reloaded when the module is reloaded. Note that the clockwork function is run *after* the intialization function.
 ```
-Module.setClockwork(function(bot) {
+Module.setClockwork(function() {
   return setInterval();
 });
 ```
