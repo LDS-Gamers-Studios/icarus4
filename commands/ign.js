@@ -106,7 +106,13 @@ const Module = new Augur.Module()
       let system = name.shift().toLowerCase();
       if (name.length < 1) {
         let ign = await Module.db.ign.delete(msg.author.id, system);
-        if (ign) msg.channel.send(`Removed IGN "${ign.ign}" for ${ign.system}`).then(u.clean);
+        if (ign) {
+          msg.channel.send(`Removed IGN "${ign.ign}" for ${ign.system}`).then(u.clean);
+        } else if (Ign.aliases.has(system)) {
+          system = Ign.aliases.get(system);
+          ign = await Module.db.ign.delete(msg.author.id, system);
+          if (ign) msg.channel.send(`Removed IGN "${ign.ign}" for ${ign.system}`).then(u.clean);
+        }
         return;
       }
       name = name.join(" ");
