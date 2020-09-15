@@ -70,7 +70,7 @@ const Module = new Augur.Module()
               u.botSpam(msg).send(responses.join("\n"));
             }
           } else {
-            msg.channel.send((msg.guild ? msg.guild.members.get(user.id).displayName : user.username) + " has not set a Gamertag or PSN Name with `!addign`. You can still search with `!destiny <action> <ign> <console>`")
+            msg.channel.send((msg.guild ? msg.guild.members.cache.get(user.id).displayName : user.username) + " has not set a Gamertag or PSN Name with `!addign`. You can still search with `!destiny <action> <ign> <console>`")
             .then(u.clean);
           }
         } else {
@@ -136,7 +136,7 @@ const Module = new Augur.Module()
               u.botSpam(msg).send(responses.join("\n"));
             }
           } else {
-            msg.channel.send((msg.guild ? msg.guild.members.get(user.id).displayName : user.username) + " has not set a Gamertag, Battle.net name, or PSN Name with `!addign`. You can still search with `!destiny2 <action> <ign> <console>`")
+            msg.channel.send((msg.guild ? msg.guild.members.cache.get(user.id).displayName : user.username) + " has not set a Gamertag, Battle.net name, or PSN Name with `!addign`. You can still search with `!destiny2 <action> <ign> <console>`")
             .then(u.clean);
           }
         } else {
@@ -204,7 +204,7 @@ const Module = new Augur.Module()
               u.botSpam(msg).send("No stats found for saved user names on " + igns.map(ign => ign.system).join(", "));
             }
           } else {
-            msg.channel.send((msg.guild ? msg.guild.members.get(user.id).displayName : user.username) + " has not set a Gamertag, Epic Games Battletag, or PSN Name with `!addign`. You can still search with `!fortnite <action> <ign> <console>`")
+            msg.channel.send((msg.guild ? msg.guild.members.cache.get(user.id).displayName : user.username) + " has not set a Gamertag, Epic Games Battletag, or PSN Name with `!addign`. You can still search with `!fortnite <action> <ign> <console>`")
             .then(u.clean);
           }
         } else {
@@ -272,7 +272,7 @@ const Module = new Augur.Module()
               u.botSpam(msg).send(responses.join("\n"));
             }
           } else {
-            msg.channel.send((msg.guild ? msg.guild.members.get(user.id).displayName : user.username) + " has not set a Gamertag, PSN Name, or Battlenet Name with `!addign`. You can still search with `!overwatch <action> <ign> <console>`")
+            msg.channel.send((msg.guild ? msg.guild.members.cache.get(user.id).displayName : user.username) + " has not set a Gamertag, PSN Name, or Battlenet Name with `!addign`. You can still search with `!overwatch <action> <ign> <console>`")
             .then(u.clean);
           }
         } else {
