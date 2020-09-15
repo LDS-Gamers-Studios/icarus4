@@ -205,7 +205,7 @@ const Module = new Augur.Module()
 })
 .setInit((reload) => {
   if (!reload) {
-    Module.client.guilds.cache.get(Module.config.ldsg).fetchMembers();
+    Module.client.guilds.cache.get(Module.config.ldsg).members.fetch();
     u.errorLog.send(u.embed().setTimestamp().setDescription("Bot is ready!"));
   }
 
