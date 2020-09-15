@@ -1,6 +1,6 @@
 {
-  "name": "icarus3",
-  "version": "3.1.0",
+  "name": "icarus4",
+  "version": "4.0.0",
   "description": "Discord bot for the LDSG Community",
   "main": "icarus.js",
   "scripts": {
@@ -8,11 +8,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://Gaiwecoor@bitbucket.org/Gaiwecoor/icarus3.git"
+    "url": "git+https://github.com/Gaiwecoor/icarus4.git"
   },
   "author": "Kevin \"Gaiwecoor\" Dixon",
   "license": "MIT",
-  "homepage": "https://bitbucket.org/Gaiwecoor/icarus3#readme",
+  "homepage": "https://github.com/Gaiwecoor/icarus4",
   "dependencies": {
     "@discordjs/opus": "^0.3.2",
     "@ffmpeg-installer/ffmpeg": "^1.0.19",
