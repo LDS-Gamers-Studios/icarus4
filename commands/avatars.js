@@ -16,7 +16,7 @@ async function popart(msg, initialTransform) {
     } else if (match = urlexp.exec(suffix)) {
       original = match[1];
     } else {
-      original = (msg.mentions.users.first() || msg.author).displayAvatarURL({size: 256});
+      original = (msg.mentions.users.first() || msg.author).displayAvatarURL({size: 256, format: "jpg"});
     }
 
     const img = await Jimp.read(original);
@@ -73,7 +73,7 @@ const Module = new Augur.Module()
   process: async (msg) => {
     try {
       let target = msg.mentions.users.first() || msg.author;
-      let av = await Jimp.read(target.displayAvatarURL({size: 512}));
+      let av = await Jimp.read(target.displayAvatarURL({size: 512, format: "png"}));
       av.color([
         { apply: "desaturate", params: [100] },
         { apply: "saturate", params: [47.7] },
@@ -102,7 +102,7 @@ const Module = new Augur.Module()
         original = match[1];
         color = parseInt(match[2], 10);
       } else {
-        original = (msg.mentions.users.first() || msg.author).displayAvatarURL({size: 512});
+        original = (msg.mentions.users.first() || msg.author).displayAvatarURL({size: 512, format: "png"});
         color = parseInt(suffix.replace(/<@!?\d+>/g, ""), 10);
       }
       color = color || (10 * (Math.floor(Math.random() * 35) + 1));
@@ -122,7 +122,7 @@ const Module = new Augur.Module()
     try {
       const arm = "https://cdn.discordapp.com/attachments/488887953939103775/545672817354735636/509442648080121857.png";
       const target = msg.mentions.users.first() || msg.author;
-      const staticURL = target.displayAvatarURL({size: 128, dynamic: false});
+      const staticURL = target.displayAvatarURL({size: 128, dynamic: false, format: "png"});
 
       const right = await Jimp.read(arm);
       const mask = await Jimp.read("./storage/mask.png");
@@ -159,7 +159,7 @@ const Module = new Augur.Module()
       } else if (match = urlexp.exec(suffix)) {
         original = match[1];
       } else {
-        original = (msg.mentions.users.first() || msg.author).displayAvatarURL({size: 512});
+        original = (msg.mentions.users.first() || msg.author).displayAvatarURL({size: 512, format: "png"});
       }
 
       let img = await Jimp.read(original);
