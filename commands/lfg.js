@@ -59,10 +59,10 @@ const Module = new Augur.Module()
 
             reacted = reactions.size;
             if (reacted) {
-              let embed = currentPlayers(m, game);
+              let embed = currentPlayers(m, suffix);
               await m.clearReactions();
               m = await m.edit({embed});
-              reloadList(msg, game);
+              reloadList(msg, suffix);
             } else u.clean(m);
           } while (reacted);
         } catch(e) { u.errorHandler(e, "LFG Reload Error"); }
