@@ -72,7 +72,7 @@ class Queue {
           await voiceConnection.disconnect();
           voiceConnection = await channel.join();
         } else if (!voiceConnection) {
-          voiceConnection = await channel.join());
+          voiceConnection = await channel.join();
         }
 
         let stream = (sound.type == "yt" ? ytdl(sound.link, {filter: "audioonly"}) : sound.link);
