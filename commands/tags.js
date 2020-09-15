@@ -94,6 +94,12 @@ const Module = new Augur.Module()
     }
   } catch(error) { u.errorHandler(error, "Load Custom Tags"); }
 })
+.setInit(data => {
+  if (data) {
+    for (const [key, value] of data) tags.set(key, value);
+  }
+})
+.setUnload(() => tags)
 .addEvent("message", (msg) => {
   if (msg.guild && tags.has(msg.guild.id)) return runTag(msg);
 })
