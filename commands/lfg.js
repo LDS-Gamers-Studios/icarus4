@@ -72,7 +72,7 @@ const Module = new Augur.Module()
         for (const [memberId, member] of members) {
           if (member.user.bot) continue;
           let game = member.presence.activities.filter(a => a.type == "PLAYING")[0];
-          if (game && !games.has(game.name)) games.set(game, {game, players: 0});
+          if (game && !games.has(game.name)) games.set(game.name, {game: game.name, players: 0});
           if (game) games.get(game.name).players++;
         }
 
