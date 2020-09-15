@@ -103,7 +103,7 @@ const Module = new Augur.Module()
         let role = ldsg.roles.cache.get(roles.get(suffix.toLowerCase()));
 
         let member = await ldsg.members.fetch(msg.author.id);
-        if (member) await member.addRole(role);
+        if (member) await member.roles.add(role);
         msg.react("👌");
         modLogs.send(`ℹ️ **${member.displayName}** added the ${role.name} role.`);
       } else {
@@ -180,7 +180,7 @@ const Module = new Augur.Module()
         let role = ldsg.roles.cache.get(roles.get(suffix.toLowerCase()));
 
         let member = await ldsg.members.fetch(msg.author);
-        if (member) await member.removeRole(role);
+        if (member) await member.roles.remove(role);
         msg.react("👌");
         modLogs.send(`ℹ️ **${member.displayName}** removed the ${role.name} role.`);
       } else {
@@ -244,7 +244,7 @@ const Module = new Augur.Module()
       for (const [id, role] of oldMember.roles) {
         if (!newMember.roles.cache.has(id) && inventory.has(id)) {
           // Lost equippable!
-          newMember.removeRole(inventory.get(id));
+          newMember.roles.remove(inventory.get(id));
         }
       }
       Module.db.user.updateRoles(newMember);
