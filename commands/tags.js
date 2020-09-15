@@ -76,7 +76,7 @@ const Module = new Augur.Module()
           tags.get(cmd.serverId).delete(cmd.tag);
           msg.react("👌");
         } else
-          msg.reply(`I couldn't find the command \`${u.prefix(msg)}${newTag}\` to alter.`);
+          msg.reply(`I couldn't find the command \`${Module.config.prefix}${newTag}\` to alter.`);
       } else
         msg.reply("you need to tell me the command name and the intended command response.").then(u.clean);
     } catch(e) { u.errorHandler(e, msg); }
