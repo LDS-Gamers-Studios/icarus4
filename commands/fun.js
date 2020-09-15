@@ -541,8 +541,7 @@ const Module = new Augur.Module()
 })
 .setClockwork(() => {
   try {
-    let bot = Module.handler.client;
-    testBirthdays(bot);
+    let bot = Module.client;
     return setInterval(testBirthdays, 60 * 60 * 1000, bot);
   } catch(e) { u.errorHandler(e, "Birthday Clockwork Error"); }
 });
