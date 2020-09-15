@@ -41,8 +41,9 @@ const Module = new Augur.Module()
 
       if (!suffix && gameDefaults.has(msg.channel.id)) suffix = gameDefaults.get(msg.channel.id);
 
-      let members = await msg.guild.members.fetch({withPresences: true});
-
+      //let members = await msg.guild.members.fetch({withPresences: true});
+      let members = msg.guild.members.cache;
+      
       if (suffix) {
         let embed = currentPlayers(msg, suffix);
         let m = await msg.channel.send({embed});
