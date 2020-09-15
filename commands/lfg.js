@@ -60,7 +60,7 @@ const Module = new Augur.Module()
             reacted = reactions.size;
             if (reacted) {
               let embed = currentPlayers(m, suffix);
-              await m.clearReactions();
+              await m.reactions.removeAll();
               m = await m.edit({embed});
               reloadList(msg, suffix);
             } else u.clean(m);
