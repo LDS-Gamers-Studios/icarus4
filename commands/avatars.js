@@ -37,7 +37,7 @@ async function popart(msg, initialTransform) {
     canvas.blit(img, 8, 8);
 
     return canvas;
-  } catch(error) { u.alertError(error, msg); }
+  } catch(error) { u.errorHandler(error, msg); }
 }
 
 const Module = new Augur.Module()
