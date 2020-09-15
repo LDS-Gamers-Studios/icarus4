@@ -16,7 +16,7 @@ async function popart(msg, initialTransform) {
     } else if (match = urlexp.exec(suffix)) {
       original = match[1];
     } else {
-      original = (msg.mentions.users.first() || msg.author).displayAvatarURL({size: 256, format: "jpg"});
+      original = (msg.mentions.users.first() || msg.author).displayAvatarURL({size: 256, format: "png"});
     }
 
     const img = await Jimp.read(original);
