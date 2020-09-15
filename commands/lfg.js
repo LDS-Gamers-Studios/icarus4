@@ -43,7 +43,7 @@ const Module = new Augur.Module()
 
       //let members = await msg.guild.members.fetch({withPresences: true});
       let members = msg.guild.members.cache;
-      
+
       if (suffix) {
         let embed = currentPlayers(msg, suffix);
         let m = await msg.channel.send({embed});
@@ -72,7 +72,7 @@ const Module = new Augur.Module()
         for (const [memberId, member] of members) {
           if (member.user.bot) continue;
           let game = member.presence.activities.filter(a => a.type == "PLAYING")[0];
-          if (game && !games.has(game.name)) games.set(game, {game, player: 0});
+          if (game && !games.has(game.name)) games.set(game, {game, players: 0});
           if (game) games.get(game.name).players++;
         }
 
