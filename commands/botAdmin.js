@@ -148,12 +148,13 @@ const Module = new Augur.Module()
   process: (msg, suffix) => {
     u.clean(msg);
     let path = require("path");
-    let files = (suffix ? suffix.split(" ") : fs.readdirSync(path.resolve(process.cwd(), "./commands"))).filter(f => f.endsWith(".js"));
+    let files = (suffix ? suffix.split(" ") : fs.readdirSync(path.resolve(__dirname)).filter(file => file.endsWith(".js")));
 
-    for (let file of files) {
-      Module.client.reload(path.resolve(process.cwd(), "./commands/", file));
+    for (const file of files) {
+      try {
+        msg.client.moduleHandler.reload(path.resolve(__dirname, file));
+      } catch(error) { msg.client.errorHandler(error, msg); }
     }
-
     msg.react("👌");
   },
   permissions: (msg) => Module.config.adminId.includes(msg.author.id)
