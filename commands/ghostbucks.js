@@ -187,7 +187,7 @@ const Module = new Augur.Module()
               msg.reply(`You can't just *take* ${gb}, silly.`).then(u.clean);
             } else if (admin || (value <= account.balance)) {
               let receipt = await Module.db.bank.addCurrency(deposit);
-              let balance = await Module.db.bank.getBalance(memberId);
+              let balance = await Module.db.bank.getBalance(discordId);
               msg.channel.send(`${gb}${receipt.value} sent to ${member} for ${reason}`).then(u.clean);
               msg.client.channels.cache.get(modLogs).send(`**${msg.member.displayName}** gave **${member.displayName}** ${gb}${receipt.value} for ${reason}`);
               member.send(`You were just awarded ${gb}${receipt.value} from ${msg.member.displayName} for ${reason}\nYou now have a total of ${gb}${balance.balance} in your LDSG account.`).catch(u.noop);
