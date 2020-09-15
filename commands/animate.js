@@ -44,6 +44,23 @@ function nextFrame(msg, frames, delay = 1000) {
   }, delay);
 };
 
+async function loadAnimations() {
+  try {
+    let bot = Module.client;
+    if (bot.readyAt) {
+      let animations = await Module.db.animation.fetchAll();
+      for (let i = 0; i < animations.length; i++) {
+        let animation = animations[i];
+        let channel = await bot.channels.fetch(animation.channelId);
+        if (animation.channelId && channel) {
+          let msg = await channel.messages.fetch(animation.animationId);
+          reload(msg);
+        }
+      }
+    }
+  } catch(e) { u.errorHandler(e, "Animation Load Error"); }
+}
+
 const Module = new Augur.Module()
 .addCommand({name: "mariokart",
   description: "Mario Kart frame animation.",
@@ -101,19 +118,7 @@ const Module = new Augur.Module()
     animate(msg, frames);
   }
 })
-.addEvent("ready", async () => {
-  try {
-    let bot = Module.client;
-    let animations = await Module.db.animation.fetchAll();
-    for (let i = 0; i < animations.length; i++) {
-      let animation = animations[i];
-      let channel = await bot.channels.fetch(animation.channelId);
-      if (animation.channelId && channel) {
-        let msg = await channel.fetchMessage(animation.animationId);
-        reload(msg);
-      }
-    }
-  } catch(e) { u.errorHandler(e, "Animation Load Error"); }
-});
+.addEvent("ready", loadAnimations)
+.setInit(loadAnimations);
 
 module.exports = Module;
