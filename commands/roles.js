@@ -198,7 +198,7 @@ const Module = new Augur.Module()
   process: (msg, suffix) => {
     if (suffix) {
       let role = msg.guild.roles.cache.find(r => r.name.toLowerCase() == suffix.toLowerCase());
-      if (role && role.members.cache.size > 0) msg.channel.send(`Members with the ${role.name} role:\n\`\`\`${role.members.cache.map(m => m.displayName).sort().join("\n")}\`\`\``, {split: {prepend: "```", append: "```"}});
+      if (role && role.members.size > 0) msg.channel.send(`Members with the ${role.name} role:\n\`\`\`${role.members.map(m => m.displayName).sort().join("\n")}\`\`\``, {split: {prepend: "```", append: "```"}});
       else msg.channel.send("I couldn't find any members with that role. :shrug:");
     } else {
       msg.reply("you need to tell me a role to find!")
