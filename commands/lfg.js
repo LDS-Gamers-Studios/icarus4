@@ -15,7 +15,7 @@ function currentPlayers(msg, game) {
   for (let [memberId, member] of msg.guild.members.cache) {
     if (member.user.bot) continue;
     let presence = member.presence.activities.filter(a => a.type == "PLAYING" && a.name.toLowerCase().startsWith(game.toLowerCase()))[0];
-    if (presence) players.push(`• ${u.escapeText(m.displayName)}`);
+    if (presence) players.push(`• ${u.escapeText(member.displayName)}`);
   }
 
   players.sort((a, b) => a.localeCompare(b));
