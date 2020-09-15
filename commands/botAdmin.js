@@ -20,7 +20,7 @@ const Module = new Augur.Module()
       let files = fs.readdirSync(path.resolve(process.cwd(), "./commands"));
 
       for (let file of files) {
-        Module.client.unload(path.resolve(process.cwd(), "./commands/", file));
+        Module.client.moduleHandler.unload(path.resolve(process.cwd(), "./commands/", file));
       }
 
       if (msg.client.shard) {
