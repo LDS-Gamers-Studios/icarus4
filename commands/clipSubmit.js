@@ -4,7 +4,7 @@ const Augur = require("augurbot"),
   trelloConfig = require("../config/trello.json");
 
 function processClips(msg1, msg2 = null) {
-  let msg = (msg2 ? msg2 : msg1);
+  let msg = msg2 || msg1;
   if (!msg.author.bot && msg.channel.id == "153309871297658880") {
     let linkTest = /http(s)?:\/\/[\w\.\/\?\=\%\&\-]+/gi,
       links = [],
@@ -36,14 +36,13 @@ function processClips(msg1, msg2 = null) {
       try {
         Trello.send(trelloConfig, card, function(err, result) {
           if (err) {
-            console.error(err);
+            u.errorHandler(err, "Post Clip Submit to Trello");
           } else {
             msg.react("👌");
           }
         });
-      }
-      catch(err) {
-        console.error("Something went wrong with posting to the Trello board:", err);
+      } catch(error) {
+        u.errorHandler(error, msg);
       }
     }
   }

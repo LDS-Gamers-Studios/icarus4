@@ -18,8 +18,7 @@ const Module = new Augur.Module()
   app.disable("view cache");
 
   app.use((req, res, next) => {
-    res.locals.handler = Module.handler;
-    res.locals.bot = Module.handler.client;
+    res.locals.bot = Module.client;
     next();
   });
 
@@ -29,14 +28,15 @@ const Module = new Augur.Module()
   app.use(bodyParser.urlencoded({extended: true}));
 
   // Load Routers
-  fs.readdirSync(path.resolve(process.cwd(), "./site/private"))
+  let routers = fs.readdirSync(path.resolve(process.cwd(), "./site/private"))
   .filter(r => r.endsWith(".js"))
-  .map(f => f.slice(0, -3))
-  .forEach(route => {
+  .map(f => f.slice(0, -3));
+
+  for (let route of routers) {
     let router = require(path.resolve(process.cwd(), "./site/private", route));
     if (route == "root") route = "";
     app.use(`/${route}`, router);
-  });
+  };
 
   // Default to Static
   app.use(Express.static("./site/public"));
@@ -54,7 +54,6 @@ const Module = new Augur.Module()
     if (err) console.error(err);
     else console.log("Listening on port", site.port);
   });
-
 })
 .setUnload(() => {
   server.close();
@@ -63,13 +62,13 @@ const Module = new Augur.Module()
   let routers = fs.readdirSync(routerPath);
   routers = routers.filter(r => r.endsWith(".js"));
 
-  routers.forEach(route => {
+  for (let route of routers) {
     delete require.cache[require.resolve(path.resolve(routerPath, route))];
-  });
+  };
 
-  ["./data/roles.json", "./utils/IgnInfo.js"].forEach(file => {
+  for (let file of ["./data/roles.json", "./data/daedalus.json", "./utils/IgnInfo.js"]) {
     delete require.cache[require.resolve(path.resolve(process.cwd(), file))];
-  });
+  };
 });
 
 module.exports = Module;

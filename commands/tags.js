@@ -11,20 +11,21 @@ function runTag(msg) {
       .replace(/<@author>/ig, msg.author)
       .replace(/<@authorname>/ig, msg.member.displayName);
     if ((/(<@target>)|(<@targetname>)/i).test(response)) {
-      if (u.userMentions(msg)) {
-        let target = u.userMentions(msg).first();
+      let mentions = u.userMentions(msg, true);
+      if (mentions.size > 0) {
+        let target = mentions.first();
         response = response.replace(/<@target>/ig, target.toString())
-          .replace(/<@targetname>/ig, msg.guild.members.get(target.id).displayName);
+          .replace(/<@targetname>/ig, target.displayName);
       } else return msg.reply("You need to `@mention` a user with that command!").then(u.clean);
     }
     if (tag.attachment) {
       msg.channel.send(
         response,
         {
-          file: {
+          files: [{
             attachment: process.cwd() + "/storage/" + tag._id,
             name: tag.attachment
-          }
+          }]
         }
       );
     } else msg.channel.send(response);
@@ -40,7 +41,7 @@ function runTag(msg) {
     let list = Array.from(tags.get(msg.guild.id).values()).map(c => prefix + c.tag).sort();
 
     embed.setDescription(list.join("\n"));
-    msg.author.send(embed).catch(u.ignoreError);
+    msg.author.send({embed}).catch(u.noop);
   }
 }
 
@@ -63,7 +64,7 @@ const Module = new Augur.Module()
           let cmd = await Module.db.tags.addTag({
             serverId: msg.guild.id,
             tag: newTag,
-            response: response,
+            response,
             attachment: (attachment ? attachment.filename : null),
             url: (attachment ? attachment.url : null)
           });
@@ -79,19 +80,20 @@ const Module = new Augur.Module()
           msg.reply(`I couldn't find the command \`${u.prefix(msg)}${newTag}\` to alter.`);
       } else
         msg.reply("you need to tell me the command name and the intended command response.").then(u.clean);
-    } catch(e) { u.alertError(e, msg); }
+    } catch(e) { u.errorHandler(e, msg); }
   },
-  permissions: (msg) => msg.guild && (msg.member.permissions.has("MANAGE_GUILD") || msg.member.permissions.has("ADMINISTRATOR") || Module.config.adminId.includes(msg.author.id))
+  permissions: (msg) => msg.member && (msg.member.permissions.has("MANAGE_GUILD") || msg.member.permissions.has("ADMINISTRATOR") || Module.config.adminId.includes(msg.author.id))
 })
-.setInit(() => {
-  Module.db.tags.fetchTags().then(cmds => {
-    cmds = cmds.filter(c => Module.handler.client.guilds.has(c.serverId));
-    console.log(`Loaded ${cmds.length} custom commands${(Module.handler.client.shard ? " on Shard " + Module.handler.client.shard.id : "")}.`);
-    cmds.forEach(cmd => {
+.setInit(async () => {
+  try {
+    let cmds = await Module.db.tags.fetchTags();
+    cmds = cmds.filter(c => Module.client.guilds.has(c.serverId));
+    console.log(`Loaded ${cmds.length} custom commands${(Module.client.shard ? " on Shard " + Module.client.shard.id : "")}.`);
+    for (let cmd of cmds) {
       if (!tags.has(cmd.serverId)) tags.set(cmd.serverId, new Map());
       tags.get(cmd.serverId).set(cmd.tag, cmd);
-    });
-  });
+    }
+  } catch(error) { u.errorHandler(error, "Load Custom Tags"); }
 })
 .addEvent("message", (msg) => {
   if (msg.guild && tags.has(msg.guild.id)) return runTag(msg);

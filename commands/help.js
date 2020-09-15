@@ -10,12 +10,12 @@ const Module = new Augur.Module()
     msg.react("👌");
     u.clean(msg);
 
-    let prefix = u.prefix(msg);
-    let commands = Module.handler.commands.filter(c => c.permissions(msg));
+    let prefix = Module.config.prefix;
+    let commands = Module.client.commands.filter(c => c.permissions(msg));
 
     let embed = u.embed()
     .setURL("https://my.ldsgamers.com/commands")
-    .setThumbnail(msg.client.user.displayAvatarURL);
+    .setThumbnail(msg.client.user.displayAvatarURL({size: 128}));
 
     if (!suffix) { // FULL HELP
       embed
@@ -31,25 +31,24 @@ const Module = new Augur.Module()
       categories.unshift("General");
 
       let i = 1;
-      categories.forEach(category => {
-        commands.filter(c => c.category == category && !c.hidden).sort((a, b) => a.name.localeCompare(b.name)).forEach((command) => {
+      for (let category of categories) {
+        for (let [name, command] of commands.filter(c => c.category == category && !c.hidden).sort((a, b) => a.name.localeCompare(b.name))) {
           embed.addField(prefix + command.name + " " + command.syntax, (command.description ? command.description : "Description"));
           if (i == 20) {
-            msg.author.send(embed).catch(e => u.alertError(u, msg));
+            msg.author.send(embed).catch(e => u.errorHandler(u, msg));
             embed = u.embed().setTitle(msg.client.user.username + " Commands" + (msg.guild ? ` in ${msg.guild.name}.` : ".") + " (Cont.)")
             .setURL("https://my.ldsgamers.com/commands")
             .setDescription(`You have access to the following commands. For more info, type \`${prefix}help <command>\`.`);
             i = 0;
           }
           i++;
-        });
-      });
-
-      msg.author.send(embed).catch(e => u.alertError(e, msg));
+        }
+      }
+      msg.author.send(embed).catch(e => u.errorHandler(e, msg));
     } else { // SINGLE COMMAND HELP
       let command = null;
       if (commands.has(suffix)) command = commands.get(suffix);
-      else if (Module.handler.aliases.has(suffix)) command = Module.handler.aliases.get(suffix);
+      else if (Module.client.commands.aliases.has(suffix)) command = Module.client.commands.aliases.get(suffix);
       if (command) {
         embed
         .setTitle(prefix + command.name + " help")
@@ -59,7 +58,7 @@ const Module = new Augur.Module()
 
         if (command.aliases.length > 0) embed.addField("Aliases", command.aliases.map(a => `!${a}`).join(", "));
 
-        msg.author.send(embed).catch(e => u.alertError(e, msg));
+        msg.author.send(embed).catch(e => u.errorHandler(e, msg));
       } else {
         msg.reply("I don't have a command by that name.").then(u.clean);
       }

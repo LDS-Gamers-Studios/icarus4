@@ -18,19 +18,17 @@ const Module = new Augur.Module()
 .addCommand({name: "rank",
   description: "View your chat rank",
   syntax: "[@user]",
+  permissions: (msg) => msg.guild && msg.guild.id == Module.config.ldsg,
   process: async function (msg) {
     try {
-      let user = (u.userMentions(msg) ? u.userMentions(msg).first() : msg.author);
-
-      let member = msg.client.guilds.get(Module.config.ldsg).members.get(user.id);
+      let member = u.userMentions(msg, true).first() || msg.member;
       let response = null;
 
-      let memberInfo = await Module.db.user.fetchUser(user);
+      let memberInfo = await Module.db.user.fetchUser(member);
 
       if (memberInfo.excludeXP || member.user.bot) {
-        if (msg.member && msg.member.roles.has(Module.config.roles.mod)) {
-          let userInfo = await Module.db.user.fetchUser(member)
-          response = `> **${u.escapeText(member.displayName)}** Activity: ${userInfo.posts} posts.`;
+        if (msg.member.roles.cache.has(Module.config.roles.mod)) {
+          response = `> **${u.escapeText(member.displayName)}** Activity: ${memberInfo.posts} posts.`;
         } else {
           let snark = [
             "don't got time for dat.",
@@ -44,8 +42,8 @@ const Module = new Augur.Module()
         userDoc.level = Rank.level(userDoc.totalXP);
         userDoc.nextLevel = parseInt(Rank.minXp(userDoc.level + 1), 10).toLocaleString();
         response = u.embed()
-        .setAuthor(member.displayName, (member.user.displayAvatarURL ? member.user.displayAvatarURL : null))
-        .addField("Rank", `Season: ${userDoc.currentRank}/${msg.client.guilds.get(Module.config.ldsg).memberCount}\nLifetime: ${userDoc.lifeRank}/${msg.client.guilds.get(Module.config.ldsg).memberCount}`, true)
+        .setAuthor(member.displayName, member.user.displayAvatarURL({dynamic: true}))
+        .addField("Rank", `Season: ${userDoc.currentRank}/${msg.guild.memberCount}\nLifetime: ${userDoc.lifeRank}/${msg.guild.memberCount}`, true)
         .addField("Level", `Current Level: ${userDoc.level}\nNext Level: ${userDoc.nextLevel} XP`, true)
         .addField("Exp.", `Season: ${parseInt(userDoc.currentXP, 10).toLocaleString()} XP\nLifetime: ${parseInt(userDoc.totalXP, 10).toLocaleString()} XP`, true)
         .setTitle("LDSG Chat Ranking")
@@ -54,7 +52,7 @@ const Module = new Augur.Module()
       }
       msg.channel.send(response);
     } catch(e) {
-      u.alertError(e, msg);
+      u.errorHandler(e, msg);
     }
   }
 })
@@ -67,32 +65,33 @@ const Module = new Augur.Module()
     try {
       let gb = "<:gb:493084576470663180>";
       let dist = parseInt(suffix, 10) || 0;
-      let guild = await msg.guild.fetchMembers();
-      let users = await Module.db.user.getUsers({currentXP: {$gt: 0}});
-      users = users.filter(u => guild.members.has(u.discordId));
+      let members = await msg.guild.members.fetch();
+      let users = (await Module.db.user.getUsers({currentXP: {$gt: 0}}))
+        .filter(u => members.has(u.discordId));
       let totalXP = users.reduce((a, c) => a + c.currentXP, 0);
       let rate = dist / totalXP;
       let top3 = users
         .sort((a, b) => b.currentXP - a.currentXP)
         .filter((u, i) => i < 3)
-        .map((u, i) => `${(i + 1)}) ${guild.members.get(u.discordId)}`)
+        .map((u, i) => `${(i + 1)}) ${members.get(u.discordId)}`)
         .join("\n");
 
       if (dist) {
-        for (let i = 0; i < users.length; i++) {
+        let i = 0;
+        for (let user of users) {
           let user = users[i];
           let award = Math.round(rate * user.currentXP);
           if (award) {
-            setTimeout(async (user, award) => {
+            setTimeout(async (user, value) => {
               Module.db.bank.addCurrency({
                 discordId: user.discordId,
                 description: "Chat Rank Reset - " + (new Date()).toDateString(),
-                value: award,
+                value,
                 mod: msg.author.id
               }).then(deposit => {
                 guild.members.get(deposit.discordId).send(`${guild.name} Chat Ranks have been reset! You've been awarded ${gb}${deposit.value} for your participation this season!`).catch(u.noop);
               });
-            }, 1100 * i, user, award);
+            }, 1100 * i++, user, award);
           }
         }
       }
@@ -102,52 +101,50 @@ const Module = new Augur.Module()
       msg.guild.channels.get("121752198731268099").send(announce);
 
       Module.db.user.resetXP();
-    } catch(e) { u.alertError(e, msg); }
+    } catch(e) { u.errorHandler(e, msg); }
   }
 })
 .addCommand({name: "trackxp",
   description: "Tell Icarus whether to track your chat XP.",
   aliases: ["chatxp"],
   syntax: "true | false",
-  process: (msg, suffix) => {
-    suffix = suffix.toLowerCase();
-    u.clean(msg);
-    if (!suffix || suffix == "true" || suffix == "on") {
-      Module.db.user.update(msg.author, {excludeXP: false})
-      .then((user) => {
+  process: async (msg, suffix) => {
+    try {
+      suffix = suffix.toLowerCase();
+      u.clean(msg);
+      if (!suffix || suffix == "true" || suffix == "on") {
+        await Module.db.user.update(msg.author, {excludeXP: false});
         msg.react("👌").catch(u.noop);
-      });
-    } else if (suffix == "false" || suffix == "off") {
-      Module.db.user.update(msg.author, {excludeXP: true})
-      .then((user) => {
+      } else if (suffix == "false" || suffix == "off") {
+        await Module.db.user.update(msg.author, {excludeXP: true});
         msg.react("👌").catch(u.noop);
-      });
-    } else {
-      msg.reply("you need to tell me `on` or `off`.").then(u.clean);
-    }
+      } else {
+        msg.reply("you need to tell me `on` or `off`.").then(u.clean);
+      }
+    } catch(error) { u.errorHandler(msg, error); }
   }
 })
 .addEvent("message", (msg) => {
-  if (msg.guild && (msg.guild.id == Module.config.ldsg) && !active.has(msg.author.id) && !(Rank.excludeChannels.includes(msg.channel.id) || Rank.excludeChannels.includes(msg.channel.parentID)) && !msg.webhookID && !msg.member.roles.has(Module.config.roles.muted) && !u.parse(msg) && !msg.author.bot)
+  if (msg.guild && (msg.guild.id == Module.config.ldsg) && !active.has(msg.author.id) && !(Rank.excludeChannels.includes(msg.channel.id) || Rank.excludeChannels.includes(msg.channel.parentID)) && !msg.webhookID && !u.parse(msg) && !msg.author.bot)
     active.add(msg.author.id);
 })
 .setClockwork(() => {
   try {
-    let bot = Module.handler.client;
+    let bot = Module.client;
     return setInterval(async function(bot) {
       try {
         let response = await Module.db.user.addXp(active);
         if (response.users.length > 0) {
-          const ldsg = bot.guilds.get(Module.config.ldsg);
+          const ldsg = bot.guilds.cache.get(Module.config.ldsg);
           for (const user of response.users) {
-            let member = ldsg.members.get(user.discordId);
+            let member = ldsg.members.cache.get(user.discordId);
 
-            if ((user.posts % 25 == 0) && !member.roles.has(Module.config.roles.trusted) && !member.roles.has(Module.config.roles.untrusted)) {
+            if ((user.posts % 25 == 0) && !member.roles.cache.has(Module.config.roles.trusted) && !member.roles.cache.has(Module.config.roles.untrusted)) {
               let {Collection} = require("discord.js");
               let modLogs = ldsg.channels.get("506575671242260490");
-              let gai = ldsg.members.get(Module.config.ownerId);
+              let gai = ldsg.members.cache.get(Module.config.ownerId);
               await modLogs.send(`${member} has posted ${user.posts} times in chat without being trusted!`);
-              Module.handler.execute("fullinfo", {
+              Module.client.commands.execute("fullinfo", {
                 author: gai.user,
                 channel: modLogs,
                 client: bot,
@@ -169,8 +166,8 @@ const Module = new Augur.Module()
                 let message = u.rand(Rank.messages) + " " + u.rand(Rank.levelPhrase).replace("%LEVEL%", lvl);
 
                 if (Rank.rewards.has(lvl)) {
-                  let reward = bot.guilds.get(Module.config.ldsg).roles.get(Rank.rewards.get(lvl).id);
-                  member.addRole(reward);
+                  let reward = ldsg.roles.cache.get(Rank.rewards.get(lvl).id);
+                  member.roles.add(reward);
                   message += `\n\nYou have been awarded the ${reward.name} role!`;
                 }
                 member.send(message).catch(u.noop);
@@ -179,9 +176,9 @@ const Module = new Augur.Module()
           }
         }
         active.clear();
-      } catch(e) { u.alertError(e, "Rank clockwork update"); }
+      } catch(e) { u.errorHandler(e, "Rank clockwork update"); }
     }, 60000, bot);
-  } catch(e) { u.alertError(e, "Rank outer clockwork"); }
+  } catch(e) { u.errorHandler(e, "Rank outer clockwork"); }
 });
 
 module.exports = Module;

@@ -1,10 +1,7 @@
 const Augur = require("augurbot"),
   u = require("../utils/utils"),
-  mod_log = "506575671242260490",
   milestone = 4000,
   pizza = false;
-
-var r = (parts) => parts[Math.floor(Math.random() * parts.length)];
 
 const Module = new Augur.Module()
 .addEvent("guildMemberAdd", async (member) => {
@@ -14,22 +11,21 @@ const Module = new Augur.Module()
       let bot = member.client;
 
       let user = await Module.db.user.fetchUser(member.id);
-      let general = bot.channels.get("96335850576556032"); // #general
-      let welcomeChannel = bot.channels.get("121751722308796416"); // #welcome
-      let modLogs = bot.channels.get(mod_log); // #mod-logs
+      let general = guild.channels.cache.get(Module.config.ldsg); // #general
+      let welcomeChannel = guild.channels.cache.get(Module.config.channels.welcome); // #welcome
+      let modLogs = guild.channels.cache.get(Module.config.channels.modlogs); // #mod-logs
 
       let embed = u.embed()
       .setDescription("Account Created:\n" + member.user.createdAt.toLocaleDateString())
-      .setTimestamp();
+      .setTimestamp()
+      .setThumbnail(member.user.displayAvatarURL({dynamic: true}));
 
-      if (member.user.avatarURL) embed.setThumbnail(member.user.avatarURL);
-
-      let welcomeString = "";
+      let welcomeString;
 
       if (user) { // Member is returning
         if (user.roles.length > 0) member = await member.addRoles(user.roles.filter(role => guild.roles.has(role)));
 
-        let roleString = member.roles.map(role => role.name).join(", ");
+        let roleString = member.roles.cache.map(role => role.name).join(", ");
         if (roleString.length > 1024) roleString = roleString.substr(0, roleString.indexOf(", ", 1000)) + " ...";
 
         embed.setTitle(member.displayName + " has rejoined the server.")
@@ -58,12 +54,12 @@ const Module = new Augur.Module()
           "How'd you find us?",
           "What platforms/games do you play?"
         ];
-        welcomeString = `${r(welcome)}, ${member}! ${r(info1)} ${welcomeChannel} ${r(info2)}. ${r(info3)}`;
+        welcomeString = `${u.rand(welcome)}, ${member}! ${u.rand(info1)} ${welcomeChannel} ${u.rand(info2)}. ${u.rand(info3)}\n\nLooking for roles? Try \`!help addrole\` over in <#${Module.config.channels.botspam}>`;
         embed.setTitle(member.displayName + " has joined the server.");
 
         Module.db.user.newUser(member.id);
       }
-      modLogs.send(embed);
+      modLogs.send({embed});
       if (pizza && (guild.members.size < milestone)) welcomeString += `\n*${milestone - guild.members.size} more members until we have a pizza party!*`;
       if (!member.roles.has(Module.config.roles.muted) && !member.user.bot)
         general.send(welcomeString);
@@ -72,7 +68,7 @@ const Module = new Augur.Module()
         modLogs.send(`:tada: :confetti_ball: We're now at ${milestone} members! :confetti_ball: :tada:\n*pinging for effect: <@96335658997526528> <@111232201848295424>*`);
       }
     }
-  } catch(e) { u.alertError(e, "New Member Add"); }
+  } catch(e) { u.errorHandler(e, "New Member Add"); }
 })
 .addEvent("guildMemberRemove", (member) => {
   if (member.guild.id == Module.config.ldsg) {
@@ -83,7 +79,7 @@ const Module = new Augur.Module()
         "Joined: " + member.joinedAt.toLocaleDateString(),
         "Posts: " + user.posts
       ];
-      member.client.channels.get(mod_log).send(response.join("\n"));
+      member.guild.channels.cache.get(Module.config.channels.modlogs).send(response.join("\n"));
     });
   }
 });

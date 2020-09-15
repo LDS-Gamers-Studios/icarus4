@@ -14,29 +14,29 @@ function buttermelonEdit(msg) {
     let roll = Math.random();
     if (/bananas/.test(msg.content.toLowerCase())) {
       if (roll < .1)
-        msg.channel.send({files: ["https://cdn.discordapp.com/attachments/154625360514777088/239045323522179073/buttermelons.jpg"]}).catch(console.error);
+        msg.channel.send({files: ["https://cdn.discordapp.com/attachments/154625360514777088/239045323522179073/buttermelons.jpg"]}).catch(u.errorHandler);
       else if (roll < .3)
-        msg.channel.send("*buttermelons").catch(console.error);
+        msg.channel.send("*buttermelons").catch(u.errorHandler);
     } else if (/banana/.test(msg.content.toLowerCase().replace(/(\*|_)/ig, ""))) {
       if (roll < .06)
-        msg.channel.send({files: ["https://cdn.discordapp.com/attachments/136577505418018826/238764601951387648/buttermelon.jpg"]}).catch(console.error);
+        msg.channel.send({files: ["https://cdn.discordapp.com/attachments/136577505418018826/238764601951387648/buttermelon.jpg"]}).catch(u.errorHandler);
       else if (roll < .1)
-        msg.channel.send({files: ["https://cdn.discordapp.com/attachments/96335850576556032/374995339997872128/YigaButtermelon_web.png"]}).catch(console.error);
+        msg.channel.send({files: ["https://cdn.discordapp.com/attachments/96335850576556032/374995339997872128/YigaButtermelon_web.png"]}).catch(u.errorHandler);
       else if (roll < .3)
-        msg.channel.send("*buttermelon").catch(console.error);
+        msg.channel.send("*buttermelon").catch(u.errorHandler);
     }
 
     // Reactions
     let bot = msg.client;
     if ((msg.mentions.users && msg.mentions.users.has(bot.user.id)) || (msg.mentions.roles && msg.mentions.roles.has("96360253850935296")))
-      msg.react(bot.emojis.get(emojis.why)).catch(u.noop);
+      msg.react(bot.emojis.cache.get(emojis.why)).catch(u.noop);
     if (roll < .3) {
       if (/buttermelon/.test(msg.content.toLowerCase()))
-        msg.react(bot.emojis.get(emojis.buttermelon)).catch(u.noop);
+        msg.react(bot.emojis.cache.get(emojis.buttermelon)).catch(u.noop);
       if (/carp/.test(msg.content.toLowerCase()))
         msg.react("🐟").catch(u.noop);
       if (/noice/.test(msg.content.toLowerCase()))
-        msg.react(bot.emojis.get(emojis.noice)).catch(u.noop);
+        msg.react(bot.emojis.cache.get(emojis.noice)).catch(u.noop);
     }
 
     if ((msg.channel.id == "203518149809799168") && (msg.cleanContent.toLowerCase() == "test"))
@@ -50,8 +50,7 @@ const Module = new Augur.Module()
   aliases: ["buttermelonfacts"],
   category: "Silly",
   process: (msg) => {
-    let fact = Math.floor(Math.random() * buttermelon.facts.length);
-    msg.channel.send("🍌 " + buttermelon.facts[fact]).catch(console.error);
+    msg.channel.send("🍌 " + u.rand(buttermelon.facts)).catch(u.errorHandler);
   }
 })
 .addCommand({name: "buttermelonhistory",

@@ -11,9 +11,9 @@ const roomList = [];
 const availableNames = new USet();
 
 const communityVoice = "363014069533540362";
-const isCommunityVoice = (channel) => ((channel.parentID == communityVoice) && (channel.id != "123477839696625664"));
-
-const notes = new Set();
+function isCommunityVoice(channel) {
+  return ((channel.parentID == communityVoice) && (channel.id != "123477839696625664"));
+}
 
 class Queue {
   constructor() {
@@ -27,7 +27,35 @@ class Queue {
     return this;
   }
 
-  pause(t) {
+  async awaitControls(m) {
+    try {
+      let press;
+      while ((press = await m.awaitReactions((reaction, user) => !user.bot && buttons.includes(reaction.emoji.name), {max: 1, time: this.current.length})) && this.pl.id == m.id) {
+        press = press.first();
+        if (press.emoji.name == "⏹️") {
+          this.stop();
+        } else if (press.emoji.name == "⏯️") {
+          if (this.dispatcher && this.dispatcher.paused) this.resume();
+          else this.pause();
+        } else if (press.emoji.name == "⏭️") {
+          this.skip();
+        }
+        for (const [id, user] of press.users.cache)
+          if (id != m.client.user.id) press.remove(user).catch(u.noop);
+      }
+    } catch(error) { u.errorHandler(error, "Playlist Controls"); }
+  }
+
+  connection(guildResolvable) {
+    let client = Module.client;
+    let guildId;
+    if (guildResolvable.guild) guildId = guildResolvable.guild.id;
+    else if (guildResolvable.id) guildId = guildResolvable.id;
+    else guildId = guildResolvable;
+    return client.voice.connections.get(guildId);
+  }
+
+  pause(t = 0) {
     if (this.dispatcher) this.dispatcher.pause();
     if (t) setTimeout(this.resume, t);
     return this;
@@ -39,94 +67,79 @@ class Queue {
       try {
         this.queue = this.queue.remove();
         this.current = sound;
-        let voiceConnection = channel.guild.voiceConnection;
-
+        let voiceConnection = ((channel.guild.voice && channel.guild.voice.connection) ? channel.guild.voice.connection : null);
         if (voiceConnection && voiceConnection.channel.id != channel.id) {
           await voiceConnection.disconnect();
           voiceConnection = await channel.join();
         } else if (!voiceConnection) {
-          voiceConnection = await channel.join();
+          voiceConnection = await channel.join());
         }
 
-        let dispatcher;
-        if (sound.type == "yt") {
-          dispatcher = voiceConnection.playOpusStream(await ytdl(sound.link));
-        } else {
-          dispatcher = voiceConnection.playStream(sound.link);
-        }
+        let stream = (sound.type == "yt" ? ytdl(sound.link, {filter: "audioonly"}) : sound.link);
+        let dispatcher = voiceConnection.play(stream);
         this.dispatcher = dispatcher;
         this.playlist();
-        dispatcher.on("end", (reason) => {
-            if (!this.queue) {
-              if (!this.sticky) voiceConnection.disconnect();
-              if (this.pl) this.playlist();
-              delete this.dispatcher;
-              delete this.current;
-            }
-            else this.play();
-          });
         dispatcher.on("error", (error) => {
           dispatcher.end();
         });
+        dispatcher.on("end", (reason) => {
+          if (!this.queue) {
+            if (!this.sticky) voiceConnection.disconnect();
+            if (this.pl) this.playlist();
+            delete this.dispatcher;
+            delete this.current;
+          } else this.play();
+        });
       } catch(error) {
+        u.errorHandler(error, `Sound playback in ${channel.guild.name}`);
         this.stop();
-        //Module.handler.errorHandler(error, `Sound Playback in ${channel.guild.name}`);
       }
+      this.current = sound;
     }
     return this;
   }
 
   async playlist(msg) {
-    if (this.current) {
-      let list = [this.current];
-      let next = this.queue;
-      let later = {count: 0, duration: 0};
-      let i = 0;
-      while (next && i++ < 5) {
-        list.push(next.value.sound);
-        next = next.after;
-      }
-      while (next) {
-        later.count++;
-        later.duration += next.value.sound.length;
-        next = next.after;
-      }
-      let embed = u.embed().setTimestamp()
-      .setTitle("Current Playlist")
-      .setDescription(
-        list.map((song, i) => `${(i == 0 ? "▶️ " : "")}(${Math.floor(song.length / 3600)}:${(Math.floor(song.length / 60) % 60).toString().padStart(2, "0")}:${(song.length % 60).toString().padStart(2, "0")}) ${song.title}`).join("\n")
-        + (later.count ? `\n${later.count} more songs... (${Math.floor(later.duration / 3600)}:${(Math.floor(later.duration / 60) % 60).toString().padStart(2, "0")}:${(later.duration % 60).toString().padStart(2, "0")})` : "")
-      );
-      if (msg) {
-        let m = await msg.channel.send({embed});
-        if (this.pl && !this.pl.deleted) {
-          this.pl.edit({embed: u.embed().setTimestamp().setTitle("Current Playlist").setURL(m.url).setDescription(`Active playlist has been moved to ${m.url}`)});
-          this.pl.clearReactions().catch(u.noop);
+    try {
+      if (this.current) {
+        let list = [this.current];
+        let next = this.queue;
+        let later = {count: 0, duration: 0};
+        let i = 0;
+        while (next && i++ < 5) {
+          list.push(next.value.sound);
+          next = next.after;
         }
-        this.pl = m;
-        let buttons = ["⏹️", "⏯️", "⏭️"];
-        for (const button of buttons) await m.react(button);
-        let press;
-        while ((press = await m.awaitReactions((reaction, user) => !user.bot && buttons.includes(reaction.emoji.name), {max: 1})) && this.pl.id == m.id) {
-          press = press.first();
-          if (press.emoji.name == "⏹️") {
-            this.stop();
-          } else if (press.emoji.name == "⏯️") {
-            if (this.dispatcher && this.dispatcher.paused) this.resume();
-            else this.pause();
-          } else if (press.emoji.name == "⏭️") {
-            this.skip();
+        while (next) {
+          later.count++;
+          later.duration += next.value.sound.length;
+          next = next.after;
+        }
+        let embed = u.embed().setTimestamp()
+        .setTitle("Current Playlist")
+        .setDescription(
+          list.map((song, i) => `${(i == 0 ? "▶️ " : "")}(${Math.floor(song.length / 3600)}:${(Math.floor(song.length / 60) % 60).toString().padStart(2, "0")}:${(song.length % 60).toString().padStart(2, "0")}) ${song.title}`).join("\n")
+          + (later.count ? `\n${later.count} more songs... (${Math.floor(later.duration / 3600)}:${(Math.floor(later.duration / 60) % 60).toString().padStart(2, "0")}:${(later.duration % 60).toString().padStart(2, "0")})` : "")
+        );
+        if (msg) {
+          let m = await msg.channel.send({embed});
+          if (this.pl && !this.pl.deleted) {
+            this.pl.edit({embed: u.embed().setTimestamp().setTitle("Current Playlist").setURL(m.url).setDescription(`Active playlist has been moved to ${m.url}`)});
+            this.pl.clearReactions().catch(u.noop);
           }
-          for (const [id, user] of press.users)
-            if (id != m.client.user.id) press.remove(user).catch(u.noop);
+          this.pl = m;
+          let buttons = ["⏹️", "⏯️", "⏭️"];
+          for (const button of buttons) await m.react(button);
+          this.awaitControls(m);
+        } else if (this.pl && !this.pl.deleted) {
+          let m = await this.pl.edit({embed});
+          this.awaitControls(m);
         }
-      } else if (this.pl && !this.pl.deleted) {
-        this.pl.edit({embed});
+      } else {
+        if (msg) msg.channel.send("There are no songs currently playing in this server.").then(u.clean);
+        if (this.pl && !this.pl.deleted) this.pl.edit({embed: u.embed().setTimestamp().setTitle("Current Playlist").setDescription("No songs are currently playing.")});
       }
-    } else {
-      if (msg) msg.channel.send("There are no songs currently playing in this server.").then(u.clean);
-      if (this.pl && !this.pl.deleted) this.pl.edit({embed: u.embed().setTimestamp().setTitle("Current Playlist").setDescription("No songs are currently playing.")});
-    }
+    } catch(error) { u.errorHandler(error, "Playlist Update"); }
   }
 
   resume() {
@@ -154,126 +167,105 @@ class Queue {
   }
 }
 
-const queue = new Map();
-
-async function playSound(guildId) {
-  try {
-    let guildQueue = queue.get(guildId).queue;
-    if (guildQueue && guildQueue.length > 0) {
-      let {channel, sound} = guildQueue.shift();
-
-      let voiceConnection = channel.guild.voiceConnection;
-
-      if (voiceConnection && (voiceConnection.channel.id != channel.id)) {
-        await voiceConnection.disconnect();
-        voiceConnection = await channel.join();
-      } else if (!voiceConnection) {
-        voiceConnection = await channel.join();
-      }
-
-      let dispatcher = voiceConnection.playStream(sound);
-
-      dispatcher.on("end", (reason) => {
-        if (guildQueue.length == 0) {
-          voiceConnection.disconnect();
-        } else {
-          playSound(guildId);
-        }
-      });
-    }
-  } catch(e) {
-    u.alertError(e, "Voice playSound() error");
-  }
-}
+const queues = new Map();
 
 const Module = new Augur.Module()
 .addCommand({name: "join",
   description: "Make the bot join voice chat.",
-  permission: msg => msg.guild && msg.member.voiceChannel,
-  process: (msg) => {
-    msg.member.voiceChannel.join();
-    if (!queue.has(msg.guild.id)) queue.set(msg.guild.id, new Queue());
-    queue.get(msg.guild.id).stick(true);
-    msg.react("👌");
+  permission: msg => msg.member && msg.member.voice && msg.member.voice.channel,
+  process: async (msg) => {
+    try {
+      const connection = await msg.member.voice.channel.join();
+      if (!queues.has(msg.guild.id)) queues.set(msg.guild.id, new Queue(connection));
+      queues.get(msg.guild.id).stick(true);
+      msg.react("👌");
+    } catch(error) { u.errorHandler(error, msg); }
   }
 })
 .addCommand({name: "leave",
   description: "Make the bot leave voice chat.",
   permissions: msg => msg.guild,
-  process: (msg) => {
-    if (queue.has(msg.guild.id))
-      queue.get(msg.guild.id).stick(false);
-    if (msg.guild.voiceConnection)
-      msg.guild.voiceConnection.disconnect();
-    msg.react("👌");
+  process: async (msg) => {
+    try {
+      const queue = queues.get(msg.guild.id);
+      if (queue) {
+        queue.stick(false);
+        if (queue.connection) queue.connection.disconnect();
+        queues.delete(msg.guild.id);
+      }
+    } catch(error) { u.errorHandler(error, msg); }
   }
 })
 .addCommand({name: "lock",
   syntax: "[@additionalUser(s)]",
   description: "Locks your current voice channel to new users",
   category: "Voice",
-  permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && msg.member.voiceChannel && isCommunityVoice(msg.member.voiceChannel)),
+  permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && msg.member.voice.channel && isCommunityVoice(msg.member.voice.channel)),
   process: async (msg) => {
-    let channel = msg.member.voiceChannel;
-    if (channel && isCommunityVoice(channel)) {
-      let users = [msg.client.user].concat(Array.from(channel.members.values()), Array.from(msg.mentions.members.values()));
-      let userIds = users.map(u => u.id);
+    try {
+      const channel = msg.member.voice.channel;
+      const users = (Array.from(channel.members.keys())).concat(Array.from(msg.mentions.users.keys()));
 
-      let muted = Module.config.roles.muted;
+      let overwrites = [
+        { // bot
+          id: msg.client.user.id,
+          allow: "CONNECT"
+        }, { // @everyone
+          id: msg.guild.id,
+          deny: "CONNECT"
+        }, { // Muted
+          id: Module.config.roles.muted,
+          deny: ["CONNECT", "SPEAK"]
+        }
+      ].concat(users.map(u => ({
+        id: u.id,
+        allow: "CONNECT"
+      })));
 
-      try {
-        for (const [permissionId, permission] of channel.permissionOverwrites)
-          if ((permissionId != muted) && (permissionId != msg.guild.id) && !userIds.includes(permissionId)) await permission.delete();
-
-        for (let user of users) await channel.overwritePermissions(user, {CONNECT: true});
-
-        await channel.overwritePermissions(msg.guild.id, {CONNECT: false});
-        await msg.react("🔒");
-      } catch(e) { u.alertError(e, msg); }
-    } else {
-      msg.reply("you need to be in a community voice channel to use this command!").then(u.clean);
-    }
+      await channel.overwritePermissions(overwrites);
+      await msg.react("🔒");
+    } catch(error) { u.errorHandler(error, msg); }
   }
 })
 .addCommand({name: "playlist",
   permissions: (msg) => msg.guild,
   aliases: ["pl"],
   syntax: "[skip/stop/pause/resume]",
-  process: (msg, suffix) => {
-    suffix = suffix.toLowerCase();
-    if (queue.has(msg.guild.id)) {
-      let pl = queue.get(msg.guild.id);
-      if (suffix == "skip" || suffix == "next") {
-        pl.skip();
-        msg.react("⏭️");
-      } else if (suffix == "stop") {
-        pl.stop();
-        msg.react("⏹️");
-      } else if (suffix == "pause" || suffix == "resume" || suffix == "unpause") {
-        if (pl.dispatcher && pl.dispatcher.paused) pl.resume();
-        else pl.pause();
-        msg.react("⏯️");
-      } else if (!suffix) {
-        pl.playlist(msg);
-      } else {
-        msg.reply("I don't know what that means.").then(u.clean);
-      }
-    } else {
-      msg.reply("There is no current playlist for this server.").then(u.clean);
-    }
+  process: async (msg, suffix) => {
+    try {
+      suffix = suffix.toLowerCase();
+      if (queues.has(msg.guild.id)) {
+        let pl = queues.get(msg.guild.id);
+        if (suffix == "skip" || suffix == "next") {
+          pl.skip();
+          msg.react("⏭️");
+        } else if (suffix == "stop") {
+          pl.stop();
+          msg.react("⏹️");
+        } else if (suffix == "pause" || suffix == "resume" || suffix == "unpause") {
+          if (pl.connection.dispatcher && pl.connection.dispatcher.paused) pl.resume();
+          else pl.pause();
+          msg.react("⏯️");
+        } else if (!suffix) {
+          pl.playlist(msg);
+        } else {
+          msg.reply("I don't know what that means.").then(u.clean);
+        }
+      } else msg.reply("There is no current playlist for this server.").then(u.clean);
+    } catch(error) { u.errorHandler(error, msg); }
   }
 })
 .addCommand({name: "song",
   description: "Play a song or playlist from YouTube",
   syntax: "<link>",
-  permissions: (msg) => (msg.guild && msg.member.voiceChannel && ((msg.guild.id != Module.config.ldsg) || msg.member.roles.has(Module.config.roles.team) || msg.member.roles.has("114816596341424129"))),
+  permissions: (msg) => (msg.guild && msg.member.voice.channel && ((msg.guild.id != Module.config.ldsg) || msg.member.roles.cache.has(Module.config.roles.team) || msg.member.roles.cache.has("114816596341424129"))),
   process: async (msg, suffix) => {
     if (suffix.startsWith("<") && suffix.endsWith(">")) suffix = suffix.substr(1, suffix.length - 2);
     if (ytpl.validateURL(suffix)) {
       try {
         let items = await ytpl(suffix);
         if (items.items && items.items.length > 0) {
-          if (!queue.has(msg.guild.id)) queue.set(msg.guild.id, new Queue());
+          if (!queues.has(msg.guild.id)) queues.set(msg.guild.id, new Queue());
           for (let song of items.items) {
             let duration = song.duration.split(":").map(n => parseInt(n, 10));
             if (duration.length == 1) duration = duration[0];
@@ -286,12 +278,12 @@ const Module = new Augur.Module()
               type: "yt",
               length: duration
             };
-            let channel = msg.member.voiceChannel;
-            queue.get(msg.guild.id).add(channel, sound);
+            let channel = msg.member.voice.channel;
+            queues.get(msg.guild.id).add(channel, sound);
           }
           msg.react("👌");
         } else msg.reply("I couldn't find any songs on that playlist.").then(u.clean);
-      } catch(error) { u.alertError(error, msg); }
+      } catch(error) { u.errorHandler(error, msg); }
     } else if (ytdl.validateURL(suffix)) {
       try {
         let info = await ytdl.getBasicInfo(suffix);
@@ -301,11 +293,11 @@ const Module = new Augur.Module()
           type: "yt",
           length: parseInt(info.player_response.videoDetails.lengthSeconds, 10)
         };
-        let channel = msg.member.voiceChannel;
-        if (!queue.has(msg.guild.id)) queue.set(msg.guild.id, new Queue());
-        queue.get(msg.guild.id).add(channel, sound);
+        let channel = msg.member.voice.channel;
+        if (!queues.has(msg.guild.id)) queues.set(msg.guild.id, new Queue());
+        queues.get(msg.guild.id).add(channel, sound);
         msg.react("👌");
-      } catch(error) { u.alertError(error, msg); }
+      } catch(error) { u.errorHandler(error, msg); }
     } else {
       msg.reply("that wasn't a valid YouTube link!").then(u.clean);
     }
@@ -317,7 +309,7 @@ const Module = new Augur.Module()
   description: "Plays a sound",
   info: "Plays a matched sound from Freesound.org",
   category: "Voice",
-  permissions: (msg) => (msg.guild && msg.member.voiceChannel && ((msg.guild.id != Module.config.ldsg) || msg.member.roles.has(Module.config.roles.team) || msg.member.roles.has("114816596341424129"))),
+  permissions: (msg) => (msg.guild && msg.member.voice.channel && ((msg.guild.id != Module.config.ldsg) || msg.member.roles.cache.has(Module.config.roles.team) || msg.member.roles.cache.has("114816596341424129"))),
   process: async (msg, suffix) => {
     if (suffix) {
       let pf = new profanityFilter();
@@ -328,9 +320,9 @@ const Module = new Augur.Module()
           let sound = null;
 
           while (!sound && (sounds.length > 0)) {
-            sound = sounds[Math.floor(Math.random() * body.results.length)];
+            sound = u.rand(sounds);
             if ((pf.scan(sound.tags.join(" ")).length > 0) || (pf.scan(sound.description).length > 0)) {
-              body.results = body.results.filter(r => r.id != sound.id);
+              sounds = sounds.filter(r => r.id != sound.id);
               sound = null;
             }
           }
@@ -342,75 +334,48 @@ const Module = new Augur.Module()
               type: "playStream",
               length: sound.duration
             };
-            let channel = msg.member.voiceChannel;
-            if (!queue.has(msg.guild.id)) queue.set(msg.guild.id, new Queue());
-            queue.get(msg.guild.id).add(channel, sound);
+            let channel = msg.member.voice.channel;
+            if (!queues.has(msg.guild.id)) queues.set(msg.guild.id, new Queue());
+            queues.get(msg.guild.id).add(channel, sound);
           } else msg.reply("I couldn't find any sounds for " + suffix);
-        } catch(e) {
-          u.alertError(e, msg);
-        }
+        } catch(error) { u.errorHandler(error, msg); }
       } else msg.reply("I'm not going to make that sound.").then(u.clean);
-    }
-  }
-})
-.addCommand({name: "takenotes",
-  permissions: (msg) => msg.author.id == Module.config.ownerId,
-  hidden: true,
-  process: (msg, suffix) => {
-    let enabled = suffix.replace(/<@!?\d+>/ig, "").toLowerCase().trim();
-    let targets = u.userMentions(msg);
-    if (!targets) {
-      msg.reply("you need to tell me who to take notes on!");
-      return;
-    } else if (enabled == "false") {
-      for (const [id, member] of targets) notes.delete(id);
-    } else {
-      for (const [id, member] of targets) notes.add(id);
-    }
-    msg.react("👌");
+    } else msg.reply("you need to give me a sound to search for!").then(u.clean);
   }
 })
 .addCommand({name: "unlock",
   description: "Unlocks your current voice channel for new users",
   category: "Voice",
   hidden: true,
-  permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && msg.member.voiceChannel && isCommunityVoice(msg.member.voiceChannel)),
+  permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && msg.member.voice.channel && isCommunityVoice(msg.member.voice.channel)),
   process: (msg) => {
-    let channel = msg.member.voiceChannel;
-    if (channel && isCommunityVoice(channel)) {
-      let channelMods = [];
-      let muted = Module.config.roles.muted;
-      channelMods.push(channel.overwritePermissions(msg.guild.id, {CONNECT: null}));
-      channel.permissionOverwrites.forEach(permission => {
-        if ((permission.id != muted) && (permission.id != msg.guild.id)) channelMods.push(permission.delete());
-      });
+    try {
+      const channel = msg.member.voice.channel;
 
-      Promise.all(channelMods).then(() => msg.react("🔓"));
-    } else {
-      msg.reply("you need to be in a community voice channel to use this command!").then(u.clean);
-    }
-  }
-})
-.addCommand({name: "voicecleanup",
-  description: "Removes extra voice channels",
-  category: "Voice",
-  permissions: (msg) => (msg.guild && msg.guild.id == Module.config.ldsg && msg.member.roles.has(Module.config.roles.mod)),
-  process: (msg) => {
-    let channels = msg.guild.channels
-      .filter(c => c.parentID == "363014069533540362" && c.type == "voice" && isCommunityVoice(c) && c.members.size == 0);
-    if (channels.size > 2) {
-      let del = channels.first(channels.size - 2);
-      del.forEach(async channel => await channel.delete("Too many channels"));
-    }
-    msg.react("👌");
+      let overwrites = [
+        { // bot
+          id: msg.client.user.id,
+          allow: "CONNECT"
+        }, { // @everyone
+          id: msg.guild.id,
+          allow: "CONNECT"
+        }, { // Muted
+          id: Module.config.roles.muted,
+          deny: ["CONNECT", "SPEAK"]
+        }
+      ];
+
+      await channel.overwritePermissions(overwrites);
+      await msg.react("🔓");
+    } catch(error) { u.errorHandler(error, msg); }
   }
 })
 .setInit((data) => {
-  if (data) for (const [key, value] of data) queue.set(key, value);
+  if (data) for (const [key, value] of data) queues.set(key, value);
 })
 .setUnload(() => {
   let active = new Map();
-  for (const [key, value] of queue) {
+  for (const [key, value] of queues) {
     if (value.current) active.set(key, value);
   }
   return active;
@@ -418,7 +383,7 @@ const Module = new Augur.Module()
 .addEvent("loadConfig", () => {
   let ldsg = Module.handler.client.guilds.get(Module.config.ldsg);
   Module.config.sheets.get("Voice Channel Names").getRows((e, rows) => {
-    if (e) u.alertError(e, "Error loading voice channel names.");
+    if (e) u.errorHandler(e, "Error loading voice channel names.");
     else {
       for (let i = 0; i < rows.length; i++) {
         roomList.push(rows[i].name);
@@ -427,94 +392,35 @@ const Module = new Augur.Module()
     }
   });
 })
-.addEvent("guildMemberSpeaking", async (member, speaking) => {
-  if (notes.has(member.id) && (member.guild.id == Module.config.ldsg)) {
-    // Only take notes if a noted member is speaking in LDSG.
-    if (speaking) {
-      // Take Notes
-      setTimeout(async (member) => {
-        try {
-          let connection = member.guild.voiceConnection;
-          if (connection && (connection.channel.id != member.voiceChannel.id)) {
-            if (connection.dispatcher) connection.dispatcher.end();
-            await connection.disconnect();
-            connection = await member.voiceChannel.join();
-          } else if (!connection) {
-            connection = await member.voiceChannel.join();
-          }
-          if (connection.dispatcher && connection.dispatcher.paused)
-            connection.dispatcher.resume();
-          if (!connection.dispatcher) {
-            connection.playStream("https://www.youtube.com/watch?v=HWwDPd7LvNs");
-          }
-        } catch(error) { u.alertError(error, "Start Taking Notes."); }
-      }, 250, member);
-    } else {
-      // Hold Up!
-      setTimeout(async (member) => {
-        try {
-          let connection = member.guild.voiceConnection;
-          if (connection && (connection.channel.id == member.voiceChannel.id) && connection.dispatcher) {
-            connection.dispatcher.pause();
-          }
-        } catch(error) { u.alertError(error, "Pause Taking Notes."); }
-      }, 500, member);
-    }
-  }
-})
 .addEvent("voiceStateUpdate", async (oldMember, newMember) => {
   let guild = oldMember.guild;
-  if ((guild.id == Module.config.ldsg) && (oldMember.voiceChannelID != newMember.voiceChannelID)) {
-    if (oldMember.voiceChannel && (oldMember.voiceChannel.members.size == 0) && isCommunityVoice(oldMember.voiceChannel)) {
+  if ((guild.id == Module.config.ldsg) && (oldMember.voice.channelID != newMember.voice.channelID)) {
+    if (oldMember.voice.channel && (oldMember.voice.channel.members.size == 0) && isCommunityVoice(oldMember.voice.channel)) {
       // REMOVE OLD VOICE CHANNEL
-      let oldChannelName = oldMember.voiceChannel.name;
-      await oldMember.voiceChannel.delete().catch(e => u.alertError(e, "Could not delete empty voice channel."));
+      let oldChannelName = oldMember.voice.channel.name;
+      await oldMember.voice.channel.delete().catch(e => u.errorHandler(e, "Could not delete empty voice channel."));
       let name = roomList.find(room => oldChannelName.startsWith(room));
       if (name && !guild.channels.find(c => c.name.startsWith(name))) availableNames.add(name);
     }
-    if (newMember.voiceChannelID && (newMember.voiceChannel.members.size == 1) && isCommunityVoice(newMember.voiceChannel)) {
+    if (newMember.voice.channelID && (newMember.voice.channel.members.size == 1) && isCommunityVoice(newMember.voice.channel)) {
       // CREATE NEW VOICE CHANNEL
-      const bitrate = newMember.voiceChannel.bitrate;
+      const bitrate = newMember.voice.channel.bitrate;
 
-      let name = (availableNames.size > 0 ? availableNames.random() : roomList[Math.floor(Math.random() * roomList.length)]);
+      let name = (availableNames.size > 0 ? availableNames.random() : u.rand(roomList));
       availableNames.delete(name);
       name += ` (${bitrate} kbps)`;
 
       try {
-        await guild.createChannel(name, {
+        await guild.channels.create(name, {
           type: "voice",
           bitrate: bitrate * 1000,
-          parent: communityVoice
-        }, [{
-          id: Module.config.roles.muted,
-          deny: ["VIEW_CHANNEL", "CONNECT", "SEND_MESSAGES", "SPEAK"]
-        }]);
-      } catch(e) { u.alertError(e, "Voice message creation error."); }
-    }
-  }
-
-  // Take Notes Trolling
-  if ((guild.id == Module.config.ldsg) && notes.has(oldMember.id)) {
-    if (oldMember.voiceChannel) {
-      // Member Left
-      try {
-        let connection = guild.voiceConnection;
-        if (connection) {
-          if (connection.dispatcher) connection.dispatcher.end();
-          await connection.disconnect();
-        }
-      } catch(error) { u.alertError(error, "Notes Disconnect."); }
-    }
-    if (newMember.voiceChannel){
-      // Member Joined
-      try {
-        let connection = guild.voiceConnection;
-        if (connection) {
-          if (connection.dispatcher) connection.dispatcher.end();
-          await connection.disconnect();
-        }
-        await newMember.voiceChannel.join();
-      } catch(error) { u.alertError(error, "Notes Join."); }
+          parent: communityVoice,
+          permissionOverwrites: [{
+            id: Module.config.roles.muted,
+            deny: ["VIEW_CHANNEL", "CONNECT", "SEND_MESSAGES", "SPEAK"]
+          }]
+        });
+      } catch(e) { u.errorHandler(e, "Voice message creation error."); }
     }
   }
 });

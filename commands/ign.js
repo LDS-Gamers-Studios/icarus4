@@ -66,25 +66,26 @@ const Module = new Augur.Module()
   process: async function(msg, suffix) {
     try {
       let userMentions = u.userMentions(msg);
-      if (userMentions) {
-        var user = userMentions.first();
-        var systems = suffix.replace(/<@!?\d+>/ig, '').toLowerCase().trim();
+      let user, systems;
+      if (userMentions.size > 0) {
+        user = userMentions.first();
+        systems = suffix.replace(/<@!?\d+>/ig, '').toLowerCase().trim();
       } else {
         let params = suffix.toLowerCase().split(" ");
-        var systems = params.filter(s => Ign.aliases.has(s) || Ign.gameids.has(s)).join(" ");
-        var user = u.getUser(msg, params.filter(s => !(Ign.aliases.has(s) || Ign.gameids.has(s))).join(" "));
+        systems = params.filter(s => Ign.aliases.has(s) || Ign.gameids.has(s)).join(" ");
+        user = u.getUser(msg, params.filter(s => !(Ign.aliases.has(s) || Ign.gameids.has(s))).join(" "));
       }
 
-      let member = ((msg.guild) ? (msg.guild.members.get(user.id)): null);
+      let member = ((msg.guild) ? (msg.guild.members.cache.get(user.id)) : null);
       systems = (systems ? systems.toLowerCase().split(' ').map(s => (Ign.aliases.has(s) ? Ign.aliases.get(s) : s)) : null);
       let igns = await Module.db.ign.find(user.id, systems);
 
       let embed = embedIGN({name: (member ? member.displayName : user.username), avatar: user.displayAvatarURL}, igns);
 
-      if (embed) msg.channel.send({embed: embed});
+      if (embed) msg.channel.send({embed});
       else msg.channel.send("It looks like " + (member ? member.displayName : user.username) + " hasn't saved an IGN with `!addign` yet.").then(u.clean);
     } catch(e) {
-      u.alertError(e, msg);
+      u.errorHandler(e, msg);
     }
   }
 })
@@ -127,10 +128,10 @@ const Module = new Augur.Module()
           }
         }
         let ign = await Module.db.ign.save(msg.author.id, system, name);
-        Module.handler.execute("ign", msg, system);
+        Module.client.commands.execute("ign", msg, system);
       } else msg.channel.send(system + " isn't a valid system.").then(u.clean);
     } catch(e) {
-      u.alertError(e, msg);
+      u.errorHandler(e, msg);
     }
   }
 })
@@ -158,7 +159,7 @@ const Module = new Augur.Module()
           .filter(u => guild.members.has(u.discordId))
           .sort((a, b) => {
             if (suffix != "birthday")
-            return guild.members.get(a.discordId).displayName.toLowerCase().localeCompare(guild.members.get(b.discordId).displayName.toLowerCase())
+              return guild.members.get(a.discordId).displayName.toLowerCase().localeCompare(guild.members.get(b.discordId).displayName.toLowerCase())
             else {
               let aDate = new Date(a.ign);
               let bDate = new Date(b.ign);
@@ -167,11 +168,11 @@ const Module = new Augur.Module()
           })
           .map(user => `· **${u.escapeText(guild.members.get(user.discordId).displayName)}**: ${(user.ign.startsWith("http") ? "<" + u.escapeText(user.ign) + ">" : u.escapeText(user.ign))}`);
 
-          msg.channel.send(`The following members have saved an IGN for ${Ign.gameids.get(suffix).name}:\n` + wePlay.join("\n"), { split: true });
+          msg.channel.send(`__**The following members have saved an IGN for ${Ign.gameids.get(suffix).name}:**__\n` + wePlay.join("\n"), { split: true });
         } else msg.channel.send(`No members have saved an IGN for ${Ign.gameids.get(suffix).name}.`);
       } else msg.reply(suffix + " isn't a valid system.").then(u.clean);
     } catch(e) {
-      u.alertError(e, msg);
+      u.errorHandler(e, msg);
     }
   }
 })
@@ -226,7 +227,7 @@ const Module = new Augur.Module()
       aliases: Array.from(Ign.aliases.entries()),
       gameids: Array.from(Ign.gameids.entries())
     }));
-  }).catch(error => u.alertError(error, "IGN Load"));
+  }).catch(error => u.errorHandler(error, "IGN Load"));
 })
 .setUnload(() => {
   const path = require("path");

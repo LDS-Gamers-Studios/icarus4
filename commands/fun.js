@@ -16,8 +16,8 @@ function quickFile(msg, file, name = null, showName = true) {
 }
 
 function quickText(msg, text) {
-  msg.delete().catch(console.error);
-  msg.channel.send(text).catch(console.error);
+  msg.delete().catch(u.errorHandler);
+  msg.channel.send(text).catch(u.errorHandler);
 }
 
 async function testBirthdays(bot) {
@@ -26,7 +26,7 @@ async function testBirthdays(bot) {
     let ldsg = Module.config.ldsg;
     if (curDate.getHours() == 20) {
       // Birthday Blast
-      let birthdays = await Module.db.ign.getList("birthday");
+      let birthdays = (await Module.db.ign.getList("birthday")).filter(ign => bot.guilds.cache.get(ldsg).members.cache.has(ign.discordId));
       for (let b = 0; b < birthdays.length; b++) {
         let birthday = birthdays[b];
         let date = new Date(birthday.ign);
@@ -39,13 +39,13 @@ async function testBirthdays(bot) {
             ":cake: "
           ];
           try {
-            let member = await bot.guilds.get(ldsg).fetchMember(birthday.discordId);
-            await bot.channels.get(ldsg).send(":birthday: :confetti_ball: :tada: Happy Birthday, " + member + "! :tada: :confetti_ball: :birthday:");
-            var birthdayLangs = require("../data/birthday.json");
-            let msgs = birthdayLangs.map(lang => member.send(flair[Math.floor(Math.random() * flair.length)] + " " + lang));
+            let member = await bot.guilds.cache.get(ldsg).fetchMember(birthday.discordId);
+            await bot.channels.cache.get(ldsg).send(":birthday: :confetti_ball: :tada: Happy Birthday, " + member + "! :tada: :confetti_ball: :birthday:");
+            const birthdayLangs = require("../data/birthday.json");
+            let msgs = birthdayLangs.map(lang => member.send(u.rand(flair) + " " + lang));
             Promise.all(msgs).then(() => {
-              member.send(":birthday: :confetti_ball: :tada: A very happy birthday to you, from LDS Gamers! :tada: :confetti_ball: :birthday:").catch(u.ignoreError);
-            }).catch(u.ignoreError);
+              member.send(":birthday: :confetti_ball: :tada: A very happy birthday to you, from LDS Gamers! :tada: :confetti_ball: :birthday:").catch(u.noop);
+            }).catch(u.noop);
           } catch (e) { continue; }
         }
       }
@@ -59,7 +59,7 @@ async function testBirthdays(bot) {
         "543065980096741386",
         "731895666577506345"
       ];
-      let members = bot.guilds.get(ldsg).members;
+      let members = bot.guilds.cache.get(ldsg).members.cache;
       let apicall = 0;
       for (let [key, member] of members) {
         try {
@@ -80,15 +80,15 @@ async function testBirthdays(bot) {
             // Announce if active
             try {
               let user = await Module.db.user.fetchUser(member.id);
-              if (user.currentXP > 0) {
-                bot.channels.get(ldsg).send(`${member} has been part of the server for ${years} ${(years > 1 ? "years" : "year")}! Glad you're with us!`);
+              if (user.posts > 0) {
+                bot.channels.cache.get(ldsg).send(`${member} has been part of the server for ${years} ${(years > 1 ? "years" : "year")}! Glad you're with us!`);
               }
-            } catch (e) { u.alertError(e, "Announce Cake Day Error"); continue; }
+            } catch (e) { u.errorHandler(e, "Announce Cake Day Error"); continue; }
           }
-        } catch(e) { u.alertError(e, "Fetch Cake Day Error"); }
+        } catch(e) { u.errorHandler(e, "Fetch Cake Day Error"); }
       }
     }
-  } catch(e) { u.alertError(e, "Cake Day Error"); }
+  } catch(e) { u.errorHandler(e, "Cake Day Error"); }
 }
 
 const Module = new Augur.Module()
@@ -122,7 +122,7 @@ const Module = new Augur.Module()
         "Outlook not so good.",
         "Very doubtful."
       ];
-      msg.reply(outcomes[Math.floor(Math.random() * outcomes.length)]);
+      msg.reply(u.rand(outcomes));
     }
   }
 })
@@ -165,8 +165,7 @@ const Module = new Augur.Module()
   syntax: "<@user>", hidden: true,
   category: "Silly",
   process: (msg) => {
-    if (msg.mentions.users && msg.mentions.users.size > 0) {
-      let birthday = msg.mentions.users.first();
+    if (msg.mentions.members && msg.mentions.members.size > 0) {
       let flair = [
         ":tada: ",
         ":confetti_ball: ",
@@ -174,77 +173,27 @@ const Module = new Augur.Module()
         ":gift: ",
         ":cake: "
       ];
-      msg.client.channels.get("96335850576556032").send(":birthday: :confetti_ball: :tada: Happy Birthday, " + birthday + "! :tada: :confetti_ball: :birthday:").then(() => {
-        let birthdayLangs = require("../data/birthday.json");
-        let msgs = birthdayLangs.map(lang => birthday.send(flair[Math.floor(Math.random() * flair.length)] + " " + lang));
+      for (let [id, member] of msg.mentions.members) {
+        msg.client.channels.cache.get(Module.config.ldsg).send(`:birthday: :confetti_ball: :tada: Happy Birthday, ${member}! :tada: :confetti_ball: :birthday:`).then(() => {
+          let birthdayLangs = require("../data/birthday.json");
+          let msgs = birthdayLangs.map(lang => birthday.send(u.rand(flair) + " " + lang));
 
-        Promise.all(msgs).then(() => {
-          birthday.send(":birthday: :confetti_ball: :tada: A very happy birthday to you, from LDS Gamers! :tada: :confetti_ball: :birthday:").catch(u.ignoreError);
-        }).catch(u.ignoreError);
-      });
+          Promise.all(msgs).then(() => {
+            birthday.send(":birthday: :confetti_ball: :tada: A very happy birthday to you, from LDS Gamers! :tada: :confetti_ball: :birthday:").catch(u.noop);
+          }).catch(u.noop);
+        });
+      }
     } else {
       msg.reply("you need to tell me who to celebrate!");
     }
   },
   permissions: (msg) => Module.config.adminId.includes(msg.author.id)
 })
-.addCommand({name: "blurple",
-  description: "Blurple an Avatar",
-  category: "Silly",
-  process: async (msg) => {
-    try {
-      const Jimp = require("jimp");
-      let blurple = "#7289da";
-
-      let target = msg.mentions.users.first() || msg.author;
-      let av = await Jimp.read(target.displayAvatarURL);
-      av.color([
-        { apply: "desaturate", params: [100] },
-        { apply: "saturate", params: [47.7] },
-        { apply: "hue", params: [227] }
-      ]);
-
-      await msg.channel.send({files: [await av.getBufferAsync(Jimp.MIME_PNG)]});
-    } catch(e) { u.alertError(e, msg); }
-  }
-})
 .addCommand({name: "chaos",
   description: "IT'S MADNESS!",
   category: "Silly",
   process: (msg) => {
     quickFile(msg, "https://cdn.discordapp.com/attachments/96335850576556032/452153983931383808/FireGifLDSG.gif", "fire.gif");
-  }
-})
-.addCommand({name: "colorme",
-  description: "Colorize an avatar or attached image",
-  category: "Silly",
-  process: async (msg, suffix) => {
-    try {
-      const Jimp = require("jimp");
-      let color;
-      let original;
-
-      let urlexp = /\<?(https?:\/\/\S+)\>?(?:\s+)?(\d*)/;
-      let match;
-
-      if (msg.attachments.size > 0) {
-        original = msg.attachments.first().url;
-        color = parseInt(suffix.replace(/<@!?\d+>/g, ""), 10);
-      } else if (match = urlexp.exec(suffix)) {
-        original = match[1];
-        color = parseInt(match[2], 10);
-      } else {
-        original = (msg.mentions.users.first() || msg.author).displayAvatarURL;
-        color = parseInt(suffix.replace(/<@!?\d+>/g, ""), 10);
-      }
-      color = color || (10 * (Math.floor(Math.random() * 35) + 1));
-
-      let image = await Jimp.read(original);
-      image.color([
-        { apply: "hue", params: [color] }
-      ]);
-      await msg.channel.send({files: [await image.getBufferAsync(Jimp.MIME_PNG)]});
-    } catch(e) { u.alertError(e, msg); }
   }
 })
 .addCommand({name: "disagree",
@@ -265,48 +214,17 @@ const Module = new Augur.Module()
     quickText(msg, ":fire: :fire: :fire:");
   }
 })
-.addCommand({name: "flex",
-  description: "Show it off.",
-  category: "Silly",
-  process: async (msg) => {
-    try {
-      const Jimp = require("jimp");
-
-      const arm = "https://cdn.discordapp.com/attachments/488887953939103775/545672817354735636/509442648080121857.png";
-      const target = (msg.mentions.users.size > 0 ? msg.mentions.users.first() : msg.author);
-      const staticURL = `https://cdn.discordapp.com/avatars/${target.id}/${target.avatar.replace("a_", "")}.png`;
-
-      const right = await Jimp.read(arm);
-      const mask = await Jimp.read("./storage/mask.png");
-      const avatar = await Jimp.read(staticURL);
-      const canvas = new Jimp(368, 128, 0x00000000);
-
-      if (Math.random() > 0.5) right.flip(false, true);
-      const left = right.clone().flip(true, (Math.random() > 0.5));
-
-      avatar.resize(128, 128);
-      avatar.mask(mask, 0, 0);
-
-      canvas.blit(left, 0, 4);
-      canvas.blit(right, 248, 4);
-
-      canvas.blit(avatar, 120, 0);
-
-      await msg.channel.send({files: [await canvas.getBufferAsync(Jimp.MIME_PNG)]});
-    } catch(e) { u.alertError(e, msg); }
-  }
-})
 .addCommand({name: "fine",
   description: "You're fined.",
   syntax: "<@user>", hidden: true,
   category: "Silly",
   process: (msg) => {
     if (msg.mentions.users.size > 0) {
-      msg.mentions.users.forEach(function(user) {
-        quickText(msg, `${user} You are fined one credit for a violation of the Verbal Morality Statute. Reason Code: 2DANK`);
-      });
+      for (const [id, member] of msg.mentions.members) {
+        quickText(msg, `${member} You are fined one credit for a violation of the Verbal Morality Statute. Reason Code: 2DANK`);
+      }
     } else {
-      msg.reply("you need to let me know who to fine.").then(u.clean).catch(console.error);
+      msg.reply("you need to let me know who to fine.").then(u.clean).catch(u.errorHandler);
     }
   },
   permissions: (msg) => (msg.guild && msg.member.roles.has(Module.config.roles.mod))
@@ -348,9 +266,9 @@ const Module = new Augur.Module()
   aliases: ["rps", "bhs", "sbh", "bsh", "hsb", "shb"],
   category: "Silly",
   process: (msg, suffix) => {
-    if (suffix && (suffix.toLowerCase().startsWith("b") || suffix.toLowerCase().startsWith("h") || suffix.toLowerCase().startsWith("s"))) {
-      let userPick = suffix.toLowerCase()[0];
-      let icarusPick = ["b", "h", "s"][Math.floor(Math.random() * 3)];
+    let userPick = suffix.toLowerCase()[0];
+    if (userPick && ["b", "h", "s"].includes(userPick)) {
+      let icarusPick = u.rand(["b", "h", "s"]);
       let options = {
         "b": { emoji: "<:buttermelon:305039588014161921>", value: 0},
         "h": { emoji: "<:handicorn:305038099254083594>", value: 1},
@@ -378,28 +296,25 @@ const Module = new Augur.Module()
   info: "Sends someone a hug via direct message.",
   category: "Silly",
   permissions: msg => msg.guild,
-  process: (msg, suffix) => {
+  process: async (msg, suffix) => {
     u.clean(msg);
-    if (msg.mentions.users && (msg.mentions.users.size > 0)) {
+    if (msg.mentions.users.size > 0) {
+      let hugs = [
+        "http://24.media.tumblr.com/72f1025bdbc219e38ea4a491639a216b/tumblr_mo6jla4wPo1qe89guo1_1280.gif",
+        "https://cdn.discordapp.com/attachments/96335850576556032/344202091776049152/hug.gif"
+      ];
+
       msg.channel.send("Hug" + ((msg.mentions.users.size > 1) ? "s" : "") + " on the way!").then(u.clean);
 
-      // Include this for bug-hunting.
-      //msg.client.channels.get("209046676781006849").send(`Hugs being sent from ${msg.author.username} to: ${msg.mentions.users.map(u => u).join(", ")}`).catch(e => u.alertError(e, msg));
-
-      msg.mentions.users.forEach(async function(user) {
+      for (const [id, user] of msg.mentions.users) {
         try {
-          user = await msg.client.fetchUser(user.id);
-          let hugs = [
-            "http://24.media.tumblr.com/72f1025bdbc219e38ea4a491639a216b/tumblr_mo6jla4wPo1qe89guo1_1280.gif",
-            "https://cdn.discordapp.com/attachments/96335850576556032/344202091776049152/hug.gif"
-          ];
-          let hug = hugs[Math.floor(Math.random() * hugs.length)];
-          user.send(`Incoming hug from **${msg.author.username}**!`, {"file": {"attachment": hug, "name": "hug.gif"}})
+          let hug = u.rand(hugs);
+          user.send(`Incoming hug from **${msg.author.username}**!`, {files: [{"attachment": hug, "name": "hug.gif"}]})
           .catch(e => {
             msg.reply(`I couldn't send a hug to ${msg.guild.members.get(user.id).displayName}. Maybe they blocked me? :shrug:`).then(u.clean);
           });
-        } catch(e) { u.alertError(e, msg); }
-      });
+        } catch(e) { u.errorHandler(e, msg); }
+      }
     } else {
       msg.reply("who do you want to hug?").then(u.clean);
     }
@@ -411,7 +326,6 @@ const Module = new Augur.Module()
   info: "Dispatching Hype Train",
   category: "Silly",
   process: (msg) => {
-    //quickText(msg, ":steam_locomotive: :regional_indicator_h: :train: :regional_indicator_y: :train: :regional_indicator_p: :train: :regional_indicator_e: :train:");
     quickText(msg, ":steam_locomotive: 🇭 :train: 🇾 :train: 🇵 :train: 🇪 :train:");
   }
 })
@@ -433,20 +347,6 @@ const Module = new Augur.Module()
   category: "Silly",
   process: (msg) => {
     quickFile(msg, "https://cdn.discordapp.com/attachments/96335850576556032/294187421648551936/image.jpg");
-  }
-})
-.addCommand({name: "mario",
-  description: "It's-a me!",
-  category: "Silly",
-  permissions: (msg) => msg.channel.id == "369658907221557248",
-  aliases: ["luigi"],
-  process: async (msg) => {
-    try {
-      const ml = "https://cdn.discordapp.com/attachments/209046676781006849/638413831835615232/413395389501276167.gif";
-      let name = (msg.cleanContent.toLowerCase().endsWith("luigi") ? "luigi" : "mario");
-      await msg.channel.edit({name});
-      await msg.channel.send({files: [ml]});
-    } catch(e) { u.alertError(e, msg); }
   }
 })
 .addCommand({name: "minesweeper",
@@ -565,7 +465,7 @@ const Module = new Augur.Module()
   category: "Silly",
   process: (msg) => {
     u.clean(msg, 0);
-    const repost = msg.channel.messages
+    const repost = msg.channel.messages.cache
       .filter(m => m.attachments.size > 0)
       .last()
       .attachments.first().url;
@@ -644,7 +544,7 @@ const Module = new Augur.Module()
     let bot = Module.handler.client;
     testBirthdays(bot);
     return setInterval(testBirthdays, 60 * 60 * 1000, bot);
-  } catch(e) { u.alertError(e, "Birthday Clockwork Error"); }
+  } catch(e) { u.errorHandler(e, "Birthday Clockwork Error"); }
 });
 
 module.exports = Module;

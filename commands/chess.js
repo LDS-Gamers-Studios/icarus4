@@ -9,18 +9,18 @@ const Module = new Augur.Module()
   syntax: "[playerName]",
   process: async (msg, suffix) => {
     let name;
-    if (u.userMentions(msg)) {
+    if (u.userMentions(msg).size > 0) {
       try {
         let ign = await Module.db.ign.find(u.userMentions(msg).first().id, 'chess');
         if (ign) name = ign.ign;
-      } catch(error) { u.alertError(error, msg); }
+      } catch(error) { u.errorHandler(error, msg); }
     } else if (suffix) {
       name = suffix;
     } else {
       try {
         let ign = await Module.db.ign.find(msg.author.id, 'chess');
         if (ign) name = ign.ign;
-      } catch(error) { u.alertError(error, msg); }
+      } catch(error) { u.errorHandler(error, msg); }
     }
 
     if (name) {
@@ -42,10 +42,10 @@ const Module = new Augur.Module()
       } catch(error) {
         if (error.message == "Not Found" && error.statusCode == 404) {
           msg.reply(`I couldn't find a profile for \`${name}\`.`);
-        } else { u.alertError(error, msg); }
+        } else { u.errorHandler(error, msg); }
       }
     } else {
-      if (u.userMentions(msg)) msg.reply(`${u.userMentions(msg).first().username} hasn't saved a Chess.com IGN!`).then(u.clean);
+      if (u.userMentions(msg).size > 0) msg.reply(`${u.userMentions(msg).first().username} hasn't saved a Chess.com IGN!`).then(u.clean);
       else msg.reply("you need to tell me who to search for or set an ign with `!addIGN chess name`.").then(u.clean);
     }
   }

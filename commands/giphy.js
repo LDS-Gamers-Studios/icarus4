@@ -43,14 +43,14 @@ const Module = new Augur.Module()
                 {max: 1, time: 60000}
               );
 
-              if (reactions.size > 0) reactions.first().message.delete();
-              else m.reactions.get("🚫").remove(bot.user.id);
+              if (reactions.size > 0) m.delete();
+              else m.reactions.cache.get("🚫").users.remove();
 
             } else if (body.data && body.data.rating && !config.rating.includes(body.data.rating.toUpperCase())) {
-              Module.handler.execute("giphy", msg, suffix);
+              Module.client.commands.execute("giphy", msg, suffix);
             } else msg.reply("I couldn't find any gifs for " + suffix).then(u.clean);
           } else msg.reply("I ran into an error:" + JSON.stringify(error)).then(u.clean);
-        } catch(e) { u.alertError(e, msg); }
+        } catch(e) { u.errorHandler(e, msg); }
       });
     } else msg.reply("I'm not going to search for that. :rolling_eyes:").then(u.clean);
   }

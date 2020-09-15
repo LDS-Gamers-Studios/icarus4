@@ -11,9 +11,14 @@
     "steam": "",
     "youtube": ""
   },
+  "channels": {
+    "botspam": "203518149809799168",
+    "modlogs": "506575671242260490",
+    "welcome": "121751722308796416"
+  },
   "color": [248, 154, 34],
   "db": {
-    "model": "models/mongo-models.js",
+    "model": "utils/dbModels.js",
     "db": "",
     "settings": {
       "useNewUrlParser": true,
