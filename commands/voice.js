@@ -348,7 +348,7 @@ const Module = new Augur.Module()
   category: "Voice",
   hidden: true,
   permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && msg.member.voice.channel && isCommunityVoice(msg.member.voice.channel)),
-  process: (msg) => {
+  process: async (msg) => {
     try {
       const channel = msg.member.voice.channel;
 
