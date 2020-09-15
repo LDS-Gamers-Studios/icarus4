@@ -104,34 +104,33 @@ const Module = new Augur.Module()
   permissions: (msg) => (Module.config.ownerId === (msg.author.id)),
   process: async function(msg, suffix) {
     try {
-      let bot = msg.client;
-      let Handler = bot;
+      let client = msg.client;
 
       let embed = u.embed()
-      .setAuthor(bot.user.username + " Heartbeat", bot.user.displayAvatarURL)
+      .setAuthor(client.user.username + " Heartbeat", client.user.displayAvatarURL())
       .setTimestamp();
 
-      if (bot.shard) {
-        let guilds = await bot.shard.fetchClientValues('guilds.size');
+      if (client.shard) {
+        let guilds = await client.shard.fetchClientValues('guilds.cache.size');
         guilds = guilds.reduce((prev, val) => prev + val, 0);
-        let channels = bot.shard.fetchClientValues('channels.size')
+        let channels = client.shard.fetchClientValues('channels.cache.size')
         channels = channels.reduce((prev, val) => prev + val, 0);
-        let mem = bot.shard.broadcastEval("Math.round(process.memoryUsage().rss / 1024 / 1000)");
+        let mem = client.shard.broadcastEval("Math.round(process.memoryUsage().rss / 1024 / 1000)");
         mem = mem.reduce((t, c) => t + c);
         embed
-        .addField("Shards", `Id: ${bot.shard.id}\n(${bot.shard.count} total)`, true)
+        .addField("Shards", `Id: ${client.shard.id}\n(${client.shard.count} total)`, true)
         .addField("Total Bot Reach", `${guilds} Servers\n${channels} Channels`, true)
-        .addField("Shard Uptime", `${Math.floor(bot.uptime / (24 * 60 * 60 * 1000))} days, ${Math.floor(bot.uptime / (60 * 60 * 1000)) % 24} hours, ${Math.floor(bot.uptime / (60 * 1000)) % 60} minutes`, true)
-        .addField("Shard Commands Used", `${Handler.commandCount} (${(Handler.commandCount / (bot.uptime / (60 * 1000))).toFixed(2)}/min)`, true)
+        .addField("Shard Uptime", `${Math.floor(client.uptime / (24 * 60 * 60 * 1000))} days, ${Math.floor(client.uptime / (60 * 60 * 1000)) % 24} hours, ${Math.floor(client.uptime / (60 * 1000)) % 60} minutes`, true)
+        .addField("Shard Commands Used", `${client.commands.commandCount} (${(client.commands.commandCount / (client.uptime / (60 * 1000))).toFixed(2)}/min)`, true)
         .addField("Total Memory", `${mem}MB`, true);
 
         msg.channel.send({embed:embed});
       } else {
         let uptime = process.uptime();
         embed
-        .addField("Uptime", `Discord: ${Math.floor(bot.uptime / (24 * 60 * 60 * 1000))} days, ${Math.floor(bot.uptime / (60 * 60 * 1000)) % 24} hours, ${Math.floor(bot.uptime / (60 * 1000)) % 60} minutes\nProcess: ${Math.floor(uptime / (24 * 60 * 60))} days, ${Math.floor(uptime / (60 * 60)) % 24} hours, ${Math.floor(uptime / (60)) % 60} minutes`, true)
-        .addField("Reach", `${bot.guilds.size} Servers\n${bot.channels.size} Channels\n${bot.users.size} Users`, true)
-        .addField("Commands Used", `${Handler.commandCount} (${(Handler.commandCount / (bot.uptime / (60 * 1000))).toFixed(2)}/min)`, true)
+        .addField("Uptime", `Discord: ${Math.floor(client.uptime / (24 * 60 * 60 * 1000))} days, ${Math.floor(client.uptime / (60 * 60 * 1000)) % 24} hours, ${Math.floor(client.uptime / (60 * 1000)) % 60} minutes\nProcess: ${Math.floor(uptime / (24 * 60 * 60))} days, ${Math.floor(uptime / (60 * 60)) % 24} hours, ${Math.floor(uptime / (60)) % 60} minutes`, true)
+        .addField("Reach", `${client.guilds.cache.size} Servers\n${client.channels.cache.size} Channels\n${client.users.cache.size} Users`, true)
+        .addField("Commands Used", `${client.commands.commandCount} (${(client.commands.commandCount / (client.uptime / (60 * 1000))).toFixed(2)}/min)`, true)
         .addField("Memory", `${Math.round(process.memoryUsage().rss / 1024 / 1000)}MB`, true);
 
         msg.channel.send({embed: embed});
