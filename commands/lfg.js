@@ -84,7 +84,7 @@ const Module = new Augur.Module()
 
         let embed = u.embed()
         .setTitle("Currently played games in " + msg.guild.name)
-        .setDescription(`The top ${Math.min(gameList.length, 25)} games currently being played in ${msg.guild.name} (with more than one player):"`)
+        .setDescription(`The top ${Math.min(gameList.length, 25)} games currently being played in ${msg.guild.name} (with more than one player):`)
         .setTimestamp();
 
         if (gameList.length > 0) {
