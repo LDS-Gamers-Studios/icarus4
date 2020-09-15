@@ -161,7 +161,7 @@ const Module = new Augur.Module()
 .addCommand({name: "repo",
   description: "Get a link to the bot's source code.",
   aliases: ["source"],
-  process: msg => msg.channel.send("Find my repository here:\n<https://bitbucket.org/Gaiwecoor/icarus3/>")
+  process: msg => msg.channel.send("Find my repository here:\n<https://github.com/Gaiwecoor/icarus4>")
 })
 .addCommand({name: "request",
   description: "Request a feature for Icarus",
