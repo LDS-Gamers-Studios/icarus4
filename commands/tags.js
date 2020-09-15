@@ -33,10 +33,9 @@ function runTag(msg) {
   } else if (cmd && (cmd.command == "help") && (tags.get(msg.guild.id).size > 0) && !cmd.suffix) {
     let embed = u.embed()
     .setTitle("Custom tags in " + msg.guild.name)
-    .setThumbnail(msg.guild.iconURL);
+    .setThumbnail(msg.guild.iconURL());
 
-    let prefix = u.prefix(msg);
-    prefix = prefix.replace(/<@!?\d+>/g, `@${msg.guild.members.get(msg.client.user.id).displayName} `);
+    let prefix = Module.config.prefix;
 
     let list = Array.from(tags.get(msg.guild.id).values()).map(c => prefix + c.tag).sort();
 
