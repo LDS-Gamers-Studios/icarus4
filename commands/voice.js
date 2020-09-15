@@ -394,15 +394,17 @@ const Module = new Augur.Module()
 })
 .addEvent("voiceStateUpdate", async (oldMember, newMember) => {
   let guild = oldMember.guild;
-  if ((guild.id == Module.config.ldsg) && (oldMember.voice.channelID != newMember.voice.channelID)) {
-    if (oldMember.voice.channel && (oldMember.voice.channel.members.size == 0) && isCommunityVoice(oldMember.voice.channel)) {
+  let oldVoiceId = (oldMember.voice && oldMember.voice.channelID ? oldMember.voice.channelID : null);
+  let newVoiceId = (newMember.voice && newMember.voice.channelID ? newMember.voice.channelID : null);
+  if ((guild.id == Module.config.ldsg) && (oldVoiceId != newVoiceId)) {
+    if (oldMember.voice && oldMember.voice.channel && (oldMember.voice.channel.members.size == 0) && isCommunityVoice(oldMember.voice.channel)) {
       // REMOVE OLD VOICE CHANNEL
       let oldChannelName = oldMember.voice.channel.name;
       await oldMember.voice.channel.delete().catch(e => u.errorHandler(e, "Could not delete empty voice channel."));
       let name = roomList.find(room => oldChannelName.startsWith(room));
       if (name && !guild.channels.find(c => c.name.startsWith(name))) availableNames.add(name);
     }
-    if (newMember.voice.channelID && (newMember.voice.channel.members.size == 1) && isCommunityVoice(newMember.voice.channel)) {
+    if (newMember.voice && newMember.voice.channel && (newMember.voice.channel.members.size == 1) && isCommunityVoice(newMember.voice.channel)) {
       // CREATE NEW VOICE CHANNEL
       const bitrate = newMember.voice.channel.bitrate;
 
