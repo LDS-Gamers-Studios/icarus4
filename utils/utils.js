@@ -158,7 +158,7 @@ const Utils = {
     if (userMentions.has(msg.client.user.id)) userMentions.delete(msg.client.user.id);
 
     // Now, if mentions don't exist, run queries until they fail
-    if (userMentions.size == 0) {
+    /*if (userMentions.size == 0) {
       guildMembers = msg.guild.members;
       let parse = msg.content.trim().split(" ");
       parse.shift(); // Ditch the command
@@ -183,7 +183,7 @@ const Utils = {
           Utils.errorHandler(e, msg);
         }
       } while (keepGoing && parse.length > 0);
-    }
+    }*/
     return userMentions;
   }
 };
