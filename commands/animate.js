@@ -101,7 +101,7 @@ const Module = new Augur.Module()
     animate(msg, frames);
   }
 })
-.setInit(async () => {
+.addEvent("ready", async () => {
   try {
     let bot = Module.client;
     let animations = await Module.db.animation.fetchAll();
