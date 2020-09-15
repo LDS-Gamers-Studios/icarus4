@@ -485,7 +485,7 @@ const Module = new Augur.Module()
   }
 })
 .addCommand({name: "shrug",
-  description: "¯\_(ツ)_/¯",
+  description: "¯\\_(ツ)_/¯",
   category: "Silly",
   process: (msg) => {
     quickFile(msg, [
