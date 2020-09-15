@@ -241,7 +241,7 @@ const Module = new Augur.Module()
       Module.db.user.updateRoles(newMember);
     } else if (newMember.roles.cache.size < oldMember.roles.cache.size) {
       // Role removed
-      for (const [id, role] of oldMember.roles) {
+      for (const [id, role] of oldMember.roles.cache) {
         if (!newMember.roles.cache.has(id) && inventory.has(id)) {
           // Lost equippable!
           newMember.roles.remove(inventory.get(id));
