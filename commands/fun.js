@@ -67,11 +67,11 @@ async function testBirthdays(bot) {
           if (join && (join.getMonth() == curDate.getMonth()) && (join.getDate() == curDate.getDate()) && (join.getFullYear() < curDate.getFullYear())) {
             let years = curDate.getFullYear() - join.getFullYear();
             for (let i = 1; i <= years; i++) {
-              if (i == years && !member.roles.has(roles[i])) {
+              if (i == years && !member.roles.cache.has(roles[i])) {
                 setTimeout((member, role) => {
                   member.addRole(role);
                 }, 1200 * apicall++, member, roles[i]);
-              } else if (member.roles.has(roles[i])) {
+              } else if (member.roles.cache.has(roles[i])) {
                 setTimeout((member, role) => {
                   member.removeRole(role);
                 }, 1200 * apicall++, member, roles[i]);
@@ -227,7 +227,7 @@ const Module = new Augur.Module()
       msg.reply("you need to let me know who to fine.").then(u.clean).catch(u.errorHandler);
     }
   },
-  permissions: (msg) => (msg.guild && msg.member.roles.has(Module.config.roles.mod))
+  permissions: (msg) => (msg.guild && msg.member.roles.cache.has(Module.config.roles.mod))
 })
 .addCommand({name: "fire",
   description: "Light a fire",
