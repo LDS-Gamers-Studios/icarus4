@@ -381,7 +381,7 @@ const Module = new Augur.Module()
   return active;
 })
 .addEvent("loadConfig", () => {
-  let ldsg = Module.client.guilds.get(Module.config.ldsg);
+  let ldsg = Module.client.guilds.cache.get(Module.config.ldsg);
   Module.config.sheets.get("Voice Channel Names").getRows((e, rows) => {
     if (e) u.errorHandler(e, "Error loading voice channel names.");
     else {
