@@ -92,7 +92,7 @@ const Module = new Augur.Module()
       let reminders = await Module.db.reminder.fetchReminders();
       for (reminder of reminders) {
         try {
-          let user = Module.client.users.get(reminder.discordId);
+          let user = Module.client.users.cache.get(reminder.discordId);
           if (user) {
             let embed = u.embed()
             .setTitle("REMINDER")
