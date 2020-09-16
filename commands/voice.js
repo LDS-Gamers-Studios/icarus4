@@ -190,7 +190,8 @@ const Module = new Augur.Module()
       const queue = queues.get(msg.guild.id);
       if (queue) {
         queue.stick(false);
-        if (queue.connection) queue.connection.disconnect();
+        queue.stop();
+        await msg.guild.voice.connection.disconnect();
         queues.delete(msg.guild.id);
       }
     } catch(error) { u.errorHandler(error, msg); }
