@@ -602,7 +602,6 @@ const Module = new Augur.Module()
   try {
     let bot = Module.client;
     let interval = 5 * 60 * 1000;
-    checkStreams(bot);
     return setInterval(checkStreams, interval, bot);
   } catch(e) { u.errorHandler(e, "Streaming Clockwork"); }
 });
