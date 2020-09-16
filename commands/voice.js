@@ -407,12 +407,12 @@ const Module = new Augur.Module()
 
       let name = (availableNames.size > 0 ? availableNames.random() : u.rand(roomList));
       availableNames.delete(name);
-      name += ` (${bitrate} kbps)`;
+      name += ` (${parseInt(bitrate / 1000, 10)} kbps)`;
 
       try {
         await guild.channels.create(name, {
           type: "voice",
-          bitrate: bitrate * 1000,
+          bitrate: bitrate,
           parent: communityVoice,
           permissionOverwrites: [{
             id: Module.config.roles.muted,
