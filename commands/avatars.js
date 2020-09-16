@@ -57,12 +57,14 @@ const Module = new Augur.Module()
   category: "Members",
   process: (msg) => {
     try {
-      let member = msg.mentions.members.first() || msg.member;
+      let user = msg.mentions.users.first() || msg.author;
+      let member;
+      if (msg.guild) member = msg.mentions.members.first() || msg.member;
       let name = (member ? member.displayName : user.username);
       let embed = u.embed()
       .setAuthor(name)
       .setDescription(u.escapeText(name) + "'s Avatar")
-      .setImage(member.user.displayAvatarURL({size: 512, dynamic: true}));
+      .setImage(user.displayAvatarURL({size: 512, dynamic: true}));
       msg.channel.send({embed});
     } catch(error) { u.errorHandler(error, msg); }
   },
