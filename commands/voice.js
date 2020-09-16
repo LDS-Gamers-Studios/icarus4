@@ -392,22 +392,18 @@ const Module = new Augur.Module()
     }
   });
 })
-.addEvent("voiceStateUpdate", async (oldMember, newMember) => {
-  let guild = oldMember.guild;
-  let oldChannel = (oldMember.voice ? oldMember.voice.channel : null);
-  let newChannel = (newMember.voice ? oldMember.voice.channel : null);
-  let oldChannelID = (oldMember.voice ? oldMember.voice.channelID : null);
-  let newChannelID = (newMember.voice ? oldMember.voice.channelID : null);
-  if ((guild.id == Module.config.ldsg) && (oldChannelID != newChannelID)) {
-    if (oldChannel && (oldChannel.members.size == 0) && isCommunityVoice(oldChannel)) {
+.addEvent("voiceStateUpdate", async (oldState, newState) => {
+  let guild = oldstate.guild;
+  if ((guild.id == Module.config.ldsg) && (oldState.channelID != newState.channelID)) {
+    if (oldState.channel && (oldState.channel.members.size == 0) && isCommunityVoice(oldState.channel)) {
       // REMOVE OLD VOICE CHANNEL
-      let name = roomList.find(room => oldChannel.name.startsWith(room));
-      await oldChannel.delete().catch(e => u.errorHandler(e, `Could not delete empty voice channel. (${oldChannel.name})`));
+      let name = roomList.find(room => oldState.channel.name.startsWith(room));
+      await oldState.channel.delete().catch(e => u.errorHandler(e, `Could not delete empty voice channel. (${oldState.channel.name})`));
       if (name && !guild.channels.cache.find(c => c.name.startsWith(name))) availableNames.add(name);
     }
-    if (newChannel && (newChannel.members.size == 1) && isCommunityVoice(newChannel)) {
+    if (newState.channel && (newState.channel.members.size == 1) && isCommunityVoice(newState.channel)) {
       // CREATE NEW VOICE CHANNEL
-      const bitrate = newChannel.bitrate;
+      const bitrate = newState.channel.bitrate;
 
       let name = (availableNames.size > 0 ? availableNames.random() : u.rand(roomList));
       availableNames.delete(name);
