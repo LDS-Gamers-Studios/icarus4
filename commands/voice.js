@@ -393,7 +393,7 @@ const Module = new Augur.Module()
   });
 })
 .addEvent("voiceStateUpdate", async (oldState, newState) => {
-  let guild = oldstate.guild;
+  let guild = oldState.guild;
   if ((guild.id == Module.config.ldsg) && (oldState.channelID != newState.channelID)) {
     if (oldState.channel && (oldState.channel.members.size == 0) && isCommunityVoice(oldState.channel)) {
       // REMOVE OLD VOICE CHANNEL
