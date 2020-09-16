@@ -178,7 +178,7 @@ const Module = new Augur.Module()
       let member = await msg.client.guilds.cache.get(Module.config.ldsg).members.fetch(msg.author.id);
       let roles = member.roles.cache.filter(r => inventory.has(r.id));
       if (roles.size == 0) {
-        u.botSpam(msg).send(msg.author + ", you don't have any colors in your inventory!");
+        u.botSpam(msg).send(`${msg.author}, you don't have any colors in your inventory!`);
       } else {
         u.botSpam(msg).send(`${msg.author}, you have the following role colors that you can equip through \`!equip name\`:\n${roles.map(r => r.name).join("\n")}`);
       }
