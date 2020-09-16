@@ -394,19 +394,18 @@ const Module = new Augur.Module()
 })
 .addEvent("voiceStateUpdate", async (oldMember, newMember) => {
   let guild = oldMember.guild;
-  let oldVoiceId = (oldMember.voice && oldMember.voice.channelID ? oldMember.voice.channelID : null);
-  let newVoiceId = (newMember.voice && newMember.voice.channelID ? newMember.voice.channelID : null);
-  if ((guild.id == Module.config.ldsg) && (oldVoiceId != newVoiceId)) {
-    if (oldMember.voice && oldMember.voice.channel && (oldMember.voice.channel.members.size == 0) && isCommunityVoice(oldMember.voice.channel)) {
+  let oldChannel = oldMember.voice.channel;
+  let newChannel = newMember.voice.channel;
+  if ((guild.id == Module.config.ldsg) && (oldMember.voice.channelID != newMember.voice.channelID)) {
+    if (oldChannel && (oldChannel.members.size == 0) && isCommunityVoice(oldChannel)) {
       // REMOVE OLD VOICE CHANNEL
-      let oldChannelName = oldMember.voice.channel.name;
-      await oldMember.voice.channel.delete().catch(e => u.errorHandler(e, "Could not delete empty voice channel."));
-      let name = roomList.find(room => oldChannelName.startsWith(room));
-      if (name && !guild.channels.find(c => c.name.startsWith(name))) availableNames.add(name);
+      let name = roomList.find(room => oldChannel.name.startsWith(room));
+      await oldChannel.delete().catch(e => u.errorHandler(e, `Could not delete empty voice channel. (${oldChannel.name})`));
+      if (name && !guild.channels.cache.find(c => c.name.startsWith(name))) availableNames.add(name);
     }
-    if (newMember.voice && newMember.voice.channel && (newMember.voice.channel.members.size == 1) && isCommunityVoice(newMember.voice.channel)) {
+    if (newChannel && (newChannel.members.size == 1) && isCommunityVoice(newChannel)) {
       // CREATE NEW VOICE CHANNEL
-      const bitrate = newMember.voice.channel.bitrate;
+      const bitrate = newChannel.bitrate;
 
       let name = (availableNames.size > 0 ? availableNames.random() : u.rand(roomList));
       availableNames.delete(name);
