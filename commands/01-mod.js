@@ -328,7 +328,7 @@ async function processCardReaction(reaction, mod, infraction) {
       embed.fields = embed.fields.filter(f => !f.name || !f.name.startsWith("Jump"));
       embed.fields.find(f => f.name && f.name.startsWith("Infraction")).value = `Infractions: ${infractionSummary.count}\nPoints: ${infractionSummary.points}`;
 
-      await message.clearReactions();
+      await message.reactions.removeAll();
       message.edit({embed});
     }
   } catch(e) { u.errorHandler(e, "Mod Card Reaction"); }
