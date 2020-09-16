@@ -70,7 +70,7 @@ const Module = new Augur.Module()
 .addCommand({name: "inventory",
   description: "Check your color inventory.",
   category: "Members",
-  permissions: (msg) => msg.guild && msg.guild.id == Mdoule.config.ldsg,
+  permissions: (msg) => msg.guild && msg.guild.id == Module.config.ldsg,
   process: async (msg) => {
     try {
       let member = msg.member;
