@@ -397,7 +397,7 @@ Module
               msg.channel.send(`No users have lost any ankles in ${channel}!`);
             }
           } catch (e) { u.errorHandler(e, `Handling lost ankles for channel: ${channel.name}`); }
-        });
+        }
       }
       if (!userMentions && channelMentions.size == 0) { // No user or channel mentions, give high summary
         let data = await Module.db.ankle.getSummary(time);
