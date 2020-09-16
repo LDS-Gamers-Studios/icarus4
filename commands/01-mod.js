@@ -654,8 +654,10 @@ Module
         try {
           if (member && !member.roles.cache.has(Module.config.roles.muted)) {
             await member.roles.add(Module.config.roles.muted);
-            await member.voice.setMute(true);
-            await member.voice.setDeaf(true);
+            if (member.voice.channel) {
+              await member.voice.setMute(true);
+              await member.voice.setDeaf(true);
+            }
 
             msg.client.channels.cache.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** muted **${u.escapeText(member.displayName)}**${(duration ? " for " + duration + " minutes." : "")}`);
             msg.client.channels.cache.get("356657507197779968").send(`${member}, you have been muted in ${msg.guild.name}. Please review our Code of Conduct. A member of the management team will be available to discuss more details.\n\nhttp://ldsgamers.com/code-of-conduct`);
@@ -1014,7 +1016,7 @@ Module
   if (msg.guild && msg.member && msg.guild.id == Module.config.ldsg) return processMessageLanguage(msg, true);
 })
 .addEvent("userUpdate", (oldUser, newUser) => {
-  let ldsg = newUser.client.guilds.get(Module.config.ldsg);
+  let ldsg = newUser.client.guilds.cache.get(Module.config.ldsg);
   if (ldsg.members.cache.has(newUser.id)) {
     let newMember = ldsg.members.cache.get(newUser.id);
     if (!newMember.roles.cache.has(Module.config.roles.trusted) || newMember.roles.cache.has(Module.config.roles.untrusted)) {
