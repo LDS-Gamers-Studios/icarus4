@@ -685,7 +685,7 @@ Module
   description: "Record a mod note",
   category: "Mod",
   permissions: (msg) => (msg.guild && (msg.member.roles.cache.has(Module.config.roles.mod) || msg.member.roles.cache.has(Module.config.roles.management))),
-  process: (msg, suffix) => {
+  process: async (msg, suffix) => {
     u.clean(msg, 0);
     let comment = suffix.replace(/<@!?\d+>/ig, '').replace(/\s\s+/g, ' ').trim();
     if (comment) {
