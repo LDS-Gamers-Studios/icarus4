@@ -5,7 +5,7 @@ const tags = new Map();
 
 function runTag(msg) {
   let cmd = u.parse(msg);
-  cmd.command = cmd.command.toLowerCase();
+  if (cmd) cmd.command = cmd.command.toLowerCase();
   if (cmd && tags.get(msg.guild.id).has(cmd.command)) {
     let tag = tags.get(msg.guild.id).get(cmd.command);
     let response = tag.response
