@@ -1,5 +1,5 @@
 const Augur = require("augurbot"),
-  inventory = require("../utils/roleColors),
+  inventory = require("../utils/roleColors"),
   u = require("../utils/utils");
 
 const roles = new Map();
