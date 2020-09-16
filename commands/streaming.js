@@ -336,7 +336,7 @@ const Module = new Augur.Module()
       let ttv = bot.emojis.cache.get("621224837611782164"); // ldsgamErsTTV
 
       msg.member.roles.add(raider);
-      msg.reply("thanks for being a Twitch Raider! " + ttv);
+      msg.reply("thanks for being a Twitch Raider! " + ttv.toString());
 
       bot.channels.cache.get("506575671242260490").send(`ℹ️ ${msg.member.displayName} has become a Twitch Raider!`);
     }
