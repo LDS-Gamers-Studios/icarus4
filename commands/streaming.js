@@ -333,7 +333,7 @@ const Module = new Augur.Module()
       msg.member.roles.remove(raider);
       bot.channels.cache.get("506575671242260490").send(`ℹ️ ${msg.member.displayName} is no longer a Twitch Raider. :cry:`);
     } else {
-      let ttv = bot.emojis.cache.get("621224837611782164"); // ldsgamErsTTV
+      let ttv = bot.emojis.cache.get("491332611340369920"); // ldsg
 
       msg.member.roles.add(raider);
       msg.reply("thanks for being a Twitch Raider! " + ttv.toString());
