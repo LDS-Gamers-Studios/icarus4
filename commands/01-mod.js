@@ -931,7 +931,7 @@ Module
   category: "Mod",
   aliases: ["infraction", "warning"],
   permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && (msg.member.roles.cache.has(Module.config.roles.mod) || msg.member.roles.cache.has(Module.config.roles.management))),
-  process: (msg, suffix) => {
+  process: async (msg, suffix) => {
     u.clean(msg, 0);
     let members = u.userMentions(msg, true);
     if (members.size > 0) {
