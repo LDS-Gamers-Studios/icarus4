@@ -20,8 +20,9 @@ function quickText(msg, text) {
   msg.channel.send(text).catch(u.errorHandler);
 }
 
-async function testBirthdays(bot) {
+async function testBirthdays() {
   try {
+    let bot = Module.client;
     let curDate = new Date();
     let ldsg = Module.config.ldsg;
     if (curDate.getHours() == 20) {
@@ -69,11 +70,11 @@ async function testBirthdays(bot) {
             for (let i = 1; i <= years; i++) {
               if (i == years && !member.roles.cache.has(roles[i])) {
                 setTimeout((member, role) => {
-                  member.addRole(role);
+                  member.roles.add(role);
                 }, 1200 * apicall++, member, roles[i]);
               } else if (member.roles.cache.has(roles[i])) {
                 setTimeout((member, role) => {
-                  member.removeRole(role);
+                  member.roles.remove(role);
                 }, 1200 * apicall++, member, roles[i]);
               }
             }
@@ -539,6 +540,7 @@ const Module = new Augur.Module()
     reaction.message.react("⭐").catch(u.noop);
   }
 })
+.addEvent("ready", testBirthdays)
 .setClockwork(() => {
   try {
     let bot = Module.client;
