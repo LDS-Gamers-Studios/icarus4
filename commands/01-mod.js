@@ -85,7 +85,7 @@ function processMessageLanguage(msg, edited = false) {
 
 function processDiscordInvites(msg) {
   let bot = msg.client;
-  let invites = msg.cleanContent.match(/(http(s)?:\/\/)?discord(\.gg(\/invite)?|app\.com\/invite|\.com\/invite)\/\w+/ig)/;
+  let invites = msg.cleanContent.match(/(http(s)?:\/\/)?discord(\.gg(\/invite)?|app\.com\/invite|\.com\/invite)\/\w+/ig);
 
   if (invites) {
     let modLog = [];
