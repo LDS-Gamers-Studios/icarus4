@@ -7,7 +7,9 @@ const Module = new Augur.Module()
 .addEvent("message", msg => {
   if (msg.webhookID && alerts.has(msg.webhookID)) {
     let alert = alerts.get(msg.webhookID);
-    msg.channel.send(msg.guild.roles.cache.get(alert.role) + `: New update from ${alert.name}!`).catch(u.noop);
+    let role = msg.guild.roles.cache.get(alert.role);
+    if (role)
+      msg.channel.send(`${role}: New update from ${alert.name}!`).catch(u.noop);
   }
 })
 .addEvent("loadConfig", () => {
