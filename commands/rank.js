@@ -98,7 +98,7 @@ const Module = new Augur.Module()
 
       let announce = `__**CHAT RANK RESET!!**__\n\nAnother chat season has come to a close! In the most recent season, we've had ${users.length} active members chatting! The three most active members were:\n${top3}`;
       if (dist > 0) announce += `\n\n${gb}${dist} have been distributed among *all* LDSG members who participated in chat this season, proportional to their participation.`;
-      msg.guild.channels.get("121752198731268099").send(announce);
+      msg.guild.channels.channels.get("121752198731268099").send(announce);
 
       Module.db.user.resetXP();
     } catch(e) { u.errorHandler(e, msg); }
@@ -141,7 +141,7 @@ const Module = new Augur.Module()
 
             if ((user.posts % 25 == 0) && !member.roles.cache.has(Module.config.roles.trusted) && !member.roles.cache.has(Module.config.roles.untrusted)) {
               let {Collection} = require("discord.js");
-              let modLogs = ldsg.channels.get("506575671242260490");
+              let modLogs = ldsg.channels.cache.get("506575671242260490");
               let gai = ldsg.members.cache.get(Module.config.ownerId);
               await modLogs.send(`${member} has posted ${user.posts} times in chat without being trusted!`);
               Module.client.commands.execute("fullinfo", {
