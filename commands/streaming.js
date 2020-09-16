@@ -490,18 +490,20 @@ const Module = new Augur.Module()
   syntax: "@user(s)",
   hidden: true,
   category: "Streaming",
-  process: (msg) => {
-    u.clean(msg);
-    if (u.userMentions(msg, true).size > 0) {
-      for (let [memberId, member] of u.userMentions(msg, true)) {
-        let streamer = await member.roles.remove(["267038468474011650", "698291753308127265"]);
-        streamer.send("You've been removed from the Approved and/or Community Streamers list in LDSG.");
-        bot.channels.cache.get("506575671242260490").send(`ℹ️ ${msg.member.displayName} has removed ${streamer.displayName} from Approved/Community Streamers.`);
+  process: async (msg) => {
+    try {
+      u.clean(msg);
+      if (u.userMentions(msg, true).size > 0) {
+        for (let [memberId, member] of u.userMentions(msg, true)) {
+          let streamer = await member.roles.remove(["267038468474011650", "698291753308127265"]);
+          streamer.send("You've been removed from the Approved and/or Community Streamers list in LDSG.");
+          bot.channels.cache.get("506575671242260490").send(`ℹ️ ${msg.member.displayName} has removed ${streamer.displayName} from Approved/Community Streamers.`);
+        }
+        msg.react("👌");
+      } else {
+        msg.reply("you need to tell me who to unapprove!").then(u.clean);
       }
-      msg.react("👌");
-    } else {
-      msg.reply("you need to tell me who to unapprove!").then(u.clean);
-    }
+    } catch(error) { u.errorHandler(error, msg); }
   },
   permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && msg.member.roles.cache.has(Module.config.roles.team))
 })
