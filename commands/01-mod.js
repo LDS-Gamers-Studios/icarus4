@@ -116,7 +116,7 @@ async function warnCard(msg, filtered = null, call = false) {
     let infractionSummary = await Module.db.infraction.getSummary(msg.author.id);
 
     let embed = u.embed()
-    .setTimetamp()
+    .setTimestamp()
     .setColor("#FF0000")
     .setAuthor(msg.member.displayName, msg.author.displayAvatarURL()({dynamic: true}))
     .setDescription(msg.cleanContent + (msg.editedAt ? "\n[Edited]" : ""));
