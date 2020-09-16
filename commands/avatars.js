@@ -85,7 +85,7 @@ const Module = new Augur.Module()
         target = (msg.mentions.users.first() || msg.author).displayAvatarURL({size: 512, format: "png"});
       }
 
-      let av = await Jimp.read(target.displayAvatarURL({size: 512, format: "png"}));
+      let av = await Jimp.read(target);
       av.color([
         { apply: "desaturate", params: [100] },
         { apply: "saturate", params: [47.7] },
