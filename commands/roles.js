@@ -76,7 +76,7 @@ const Module = new Augur.Module()
       let member = msg.member;
       let roles = inventory.filter((color, base) => member.roles.cache.has(base)).map((color) => msg.guild.roles.cache.get(color).toString());
       let embed = u.embed().setAuthor(member.displayName, member.user.displayAvatarURL({size: 32}))
-        .setTitle("Equippable Roles")
+        .setTitle("Equippable Color Inventory")
         .setDescription(`Equip a color role with \`${Module.config.prefix}equip Role Name\` without the "Colors"\ne.g. \`${Module.config.prefix}equip novice\`\n\n${roles.join("\n")}`);
 
       if (roles.length == 0) {
