@@ -833,7 +833,7 @@ Module
         try {
           await member.roles.add(Module.config.roles.trusted);
           if (member.roles.cache.has(Module.config.roles.untrusted))
-            member.roles.remove(Module.config.roles.untrusted);
+            await member.roles.remove(Module.config.roles.untrusted);
           member.send("You have been marked as \"Trusted\" in " + msg.guild.name + ". This means you are now permitted to post images and links in chat. Please remember to follow the Code of Conduct when doing so.\n<http://ldsgamers.com/code-of-conduct>").catch(() => blocked(member));
           msg.client.channels.cache.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** trusted **${u.escapeText(member.displayName)}**`);
         } catch(error) { u.errorHandler(error, msg); }
@@ -914,16 +914,18 @@ Module
   description: "Untrust a user.", hidden: true,
   category: "Mod",
   permissions: (msg) => (msg.guild && (msg.member.roles.cache.has(Module.config.roles.mod) || msg.member.roles.cache.has(Module.config.roles.management))),
-  process: (msg) => {
+  process: async (msg) => {
     u.clean(msg, 0);
-    let members = u.userMentiosn(msg, true);
+    let members = u.userMentions(msg, true);
     if (members.size > 0) {
       for (const [memberId, member] of members) {
-        member.roles.remove(Module.config.roles.trusted);
-        member.roles.add(Module.config.roles.untrusted);
-        member.send("You have been removed from \"Trusted\" in " + msg.guild.name + ". This means you no longer have the ability to post images. Please remember to follow the Code of Conduct when posting images or links.\n<http://ldsgamers.com/code-of-conduct>").catch(() => blocked(member));
+        try {
+          await member.roles.remove(Module.config.roles.trusted);
+          await member.roles.add(Module.config.roles.untrusted);
+          member.send("You have been removed from \"Trusted\" in " + msg.guild.name + ". This means you no longer have the ability to post images. Please remember to follow the Code of Conduct when posting images or links.\n<http://ldsgamers.com/code-of-conduct>").catch(() => blocked(member));
 
-        msg.client.channels.cache.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** untrusted **${u.escapeText(member.displayName)}**`);
+          msg.client.channels.cache.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** untrusted **${u.escapeText(member.displayName)}**`);
+        } catch(error) { u.errorHandler(error, msg); }
       }
     } else {
       msg.reply("you need to tell me which users to untrust!")
