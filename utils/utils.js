@@ -13,7 +13,7 @@ const Utils = {
     if (msg.guild && (msg.guild.id == config.ldsg) && (msg.channel.id != "209046676781006849") && (msg.channel.id != config.channels.botspam)) {
       msg.reply(`I've placed your results in <#${config.channels.botspam}> to keep things nice and tidy in here. Hurry before they get cold!`)
         .then(Utils.clean);
-      return msg.guild.channels.get(config.channels.botspam);
+      return msg.guild.channels.cache.get(config.channels.botspam);
     } else return msg.channel;
   },
   clean: function(msg, t = 20000) {
