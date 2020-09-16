@@ -497,7 +497,7 @@ const Module = new Augur.Module()
         for (let [memberId, member] of u.userMentions(msg, true)) {
           let streamer = await member.roles.remove(["267038468474011650", "698291753308127265"]);
           streamer.send("You've been removed from the Approved and/or Community Streamers list in LDSG.");
-          bot.channels.cache.get("506575671242260490").send(`ℹ️ ${msg.member.displayName} has removed ${streamer.displayName} from Approved/Community Streamers.`);
+          msg.guild.channels.cache.get("506575671242260490").send(`ℹ️ ${msg.member.displayName} has removed ${streamer.displayName} from Approved/Community Streamers.`);
         }
         msg.react("👌");
       } else {
