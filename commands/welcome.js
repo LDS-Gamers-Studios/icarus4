@@ -23,7 +23,7 @@ const Module = new Augur.Module()
       let welcomeString;
 
       if (user) { // Member is returning
-        if (user.roles.length > 0) member = await member.addRoles(user.roles.filter(role => guild.roles.has(role)));
+        if (user.roles.length > 0) member = await member.addRoles(user.roles.filter(role => guild.roles.cache.has(role)));
 
         let roleString = member.roles.cache.map(role => role.name).join(", ");
         if (roleString.length > 1024) roleString = roleString.substr(0, roleString.indexOf(", ", 1000)) + " ...";
@@ -61,7 +61,7 @@ const Module = new Augur.Module()
       }
       modLogs.send({embed});
       if (pizza && (guild.members.size < milestone)) welcomeString += `\n*${milestone - guild.members.size} more members until we have a pizza party!*`;
-      if (!member.roles.has(Module.config.roles.muted) && !member.user.bot)
+      if (!member.roles.cache.has(Module.config.roles.muted) && !member.user.bot)
         general.send(welcomeString);
       if (guild.members.size == milestone) {
         general.send(`:tada: :confetti_ball: We're now at ${milestone} members! :confetti_ball: :tada:`);
