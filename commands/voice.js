@@ -394,9 +394,11 @@ const Module = new Augur.Module()
 })
 .addEvent("voiceStateUpdate", async (oldMember, newMember) => {
   let guild = oldMember.guild;
-  let oldChannel = oldMember.voice.channel;
-  let newChannel = newMember.voice.channel;
-  if ((guild.id == Module.config.ldsg) && (oldMember.voice.channelID != newMember.voice.channelID)) {
+  let oldChannel = (oldMember.voice ? oldMember.voice.channel : null);
+  let newChannel = (newMember.voice ? oldMember.voice.channel : null);
+  let oldChannelID = (oldMember.voice ? oldMember.voice.channelID : null);
+  let newChannelID = (newMember.voice ? oldMember.voice.channelID : null);
+  if ((guild.id == Module.config.ldsg) && (oldChannelID != newChannelID)) {
     if (oldChannel && (oldChannel.members.size == 0) && isCommunityVoice(oldChannel)) {
       // REMOVE OLD VOICE CHANNEL
       let name = roomList.find(room => oldChannel.name.startsWith(room));
