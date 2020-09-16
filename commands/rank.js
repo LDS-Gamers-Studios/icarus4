@@ -38,7 +38,7 @@ const Module = new Augur.Module()
           response = `**${u.escapeText(member.displayName)}** ${u.rand(snark)}`;
         }
       } else {
-        let userDoc = await Module.db.user.findXPRank(user);
+        let userDoc = await Module.db.user.findXPRank(member);
         userDoc.level = Rank.level(userDoc.totalXP);
         userDoc.nextLevel = parseInt(Rank.minXp(userDoc.level + 1), 10).toLocaleString();
         response = u.embed()
