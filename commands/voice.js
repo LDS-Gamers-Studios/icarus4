@@ -217,8 +217,8 @@ const Module = new Augur.Module()
           id: Module.config.roles.muted,
           deny: ["CONNECT", "SPEAK"]
         }
-      ].concat(users.map(u => ({
-        id: u.id,
+      ].concat(users.map(id => ({
+        id,
         allow: "CONNECT"
       })));
 
