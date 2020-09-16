@@ -74,7 +74,17 @@ const Module = new Augur.Module()
   category: "Silly",
   process: async (msg) => {
     try {
-      let target = msg.mentions.users.first() || msg.author;
+      let target;
+      let urlexp = /\<?(https?:\/\/\S+)\>?(?:\s+)?(\d*)/;
+
+      if (msg.attachments.size > 0) {
+        target = msg.attachments.first().url;
+      } else if (match = urlexp.exec(suffix)) {
+        target = match[1];
+      } else {
+        target = (msg.mentions.users.first() || msg.author).displayAvatarURL({size: 512, format: "png"});
+      }
+
       let av = await Jimp.read(target.displayAvatarURL({size: 512, format: "png"}));
       av.color([
         { apply: "desaturate", params: [100] },
