@@ -567,8 +567,8 @@ Module
 
           if ((data.count > 0) && (data.detail.length > 0)) {
             for (let record of data.detail) {
-              let mod = guild.members.cache.get(record.mod);
-              response.push(`${record.timestamp.toLocaleDateString()} (${record.value} pts, modded by ${(mod ? mod.displayName || "Unknown Mod")}): ${record.description}`);
+              let mod = guild.members.cache.get(record.mod) || ({displayName: "Unknown Mod"});
+              response.push(`${record.timestamp.toLocaleDateString()} (${record.value} pts, modded by ${mod.displayName}): ${record.description}`);
             }
           }
           msg.channel.send(response.join("\n"), {split: true});
