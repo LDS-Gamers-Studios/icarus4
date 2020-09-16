@@ -199,7 +199,7 @@ const Module = new Augur.Module()
                   mod: msg.member.id
                 }
                 let receipt = await Module.db.bank.addCurrency(withdrawl);
-                msg.member.send(`You just sent ${member.displayName} ${gb}${bucks} for ${reason}`).catch(u.noop);
+                msg.member.send(`You just sent ${member.displayName} ${gb}${value} for ${reason}`).catch(u.noop);
               }
             } else {
               msg.reply(`You don't have enough ${gb} to give! You can give up to ${gb}${account.balance}`).then(u.clean);
