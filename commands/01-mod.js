@@ -667,8 +667,10 @@ Module
                   setTimeout(async (member, duration) => {
                     try {
                       await member.roles.remove(Module.config.roles.muted);
-                      await member.voice.setMute(false);
-                      await member.voice.setDeaf(false);
+                      if (member.voice.channel) {
+                        await member.voice.setMute(false);
+                        await member.voice.setDeaf(false);
+                      }
                       msg.client.channels.cache.get(modLogs).send(`ℹ️ **${u.escapeText(member.displayName)}** has automatically been unmuted after ${timeout} minutes.`);
                     } catch(error) { u.errorHandler(error, "Unmute Timeout"); }
                   }, (duration * 60000), member, duration)
@@ -892,8 +894,10 @@ Module
             mutes.delete(memberId);
           }
           member.roles.remove(Module.config.roles.muted);
-          member.voice.setMute(false);
-          member.voice.setDeaf(false);
+          if (member.voice.channel) {
+            member.voice.setMute(false);
+            member.voice.setDeaf(false);
+          }
           msg.client.channels.cache.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** unmuted **${u.escapeText(member.displayName)}**`);
         } catch(error) { u.errorHandler(error, msg); }
       }
