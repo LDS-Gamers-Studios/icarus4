@@ -671,7 +671,7 @@ Module
                       await member.voice.setDeaf(false);
                       msg.client.channels.cache.get(modLogs).send(`ℹ️ **${u.escapeText(member.displayName)}** has automatically been unmuted after ${timeout} minutes.`);
                     } catch(error) { u.errorHandler(error, "Unmute Timeout"); }
-                  }, (duration * 60000), member, duration);
+                  }, (duration * 60000), member, duration)
                 );
               }
             }
