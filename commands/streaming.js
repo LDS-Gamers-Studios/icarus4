@@ -294,7 +294,7 @@ const Module = new Augur.Module()
       }
     } else msg.reply("you need to tell me who to approve!").then(u.clean);
   },
-  permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && msg.member.roles.has(Module.config.roles.team))
+  permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && msg.member.roles.cache.has(Module.config.roles.team))
 })
 .addCommand({name: "multitwitch",
   desription: "Links to multi-stream pages on Multistre.am",
