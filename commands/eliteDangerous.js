@@ -19,7 +19,6 @@ async function updateFactionStatus(bot) {
 
     let channelID = "549808289811267602";
     let channel = bot.channels.cache.get(channelID);
-
     channel.setTopic(topic);
 
     // Galnet articles
@@ -210,6 +209,9 @@ const Module = new Augur.Module()
   } catch (error) {
     u.errorHandler(error, "Error reading `" + galnetDataFile + "`");
   }
+})
+.setUnload(() => {
+  delete require.cache[require.resolve(process.cwd(), "./utils/eliteDangerousAPI.js")];
 });
 
 module.exports = Module;

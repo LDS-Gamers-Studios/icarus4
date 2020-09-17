@@ -55,7 +55,7 @@ function getObjectFromAPI(params) {
   return new Promise(async (fulfill, reject) => {
     try {
       let url = apiUrl + params;
-      var text = await request(url).replace("<br \\/><br \\/>", "\n");
+      var text = (await request(url)).replace("<br \\/>", "\n");
       fulfill(JSON.parse(text));
     } catch (error) { reject(error); }
   });
