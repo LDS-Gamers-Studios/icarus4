@@ -17,7 +17,7 @@ const Module = new Augur.Module()
     try {
       await msg.react("🛏");
 
-      let files = fs.readdirSync(path.resolve(process.cwd(), "./commands"));
+      let files = fs.readdirSync(path.resolve(process.cwd(), "./commands")).filter(f => f.endsWith(".js"));
 
       for (let file of files) {
         Module.client.moduleHandler.unload(path.resolve(process.cwd(), "./commands/", file));
