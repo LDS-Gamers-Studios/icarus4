@@ -30,6 +30,7 @@ async function updateFactionStatus(bot) {
     let latestArticle = (await elite.getGalnetFeed())[0];
     if (latestArticle.title !== lastGalnetArticleTitle) {
       var contentParts = splitString(latestArticle.content, 1900); // Limit is technically 2000, but some buffer room for unicode characters and such is good.
+      channel.send("```\nNew GalNet article: \"" + latestArticle.title + "\" - " + latestArticle.date + "\n```");
       contentParts.forEach(text => channel.send("```\n" + text + "\n```"))
 
       lastGalnetArticleTitle = latestArticle.title;
