@@ -66,7 +66,7 @@ const Module = new Augur.Module()
   description: "Mario Kart frame animation.",
   aliases: ["mk"],
   process: (msg) => {
-    let blueshell = msg.guild.emojis.find("name", "blueshell").toString();
+    let blueshell = msg.client.guilds.cache.get(Module.config.ldsg).emojis.cache.find(e => e.name == "blueshell").toString();
     let frames = [
       ":red_car:                      :blue_car:     :taxi:",
       ":red_car:          " + blueshell + "  :blue_car:     :taxi:",
@@ -75,8 +75,7 @@ const Module = new Augur.Module()
       ":blue_car: :taxi:     :red_car:"
     ];
     animate(msg, frames);
-  },
-  permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg))
+  }
 })
 .addCommand({name: "volcano",
   description: "Volcano Animation",
