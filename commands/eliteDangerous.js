@@ -2,7 +2,11 @@
 
 const Augur = require("augurbot"),
   u = require("../utils/utils"),
-  elite = require("../utils/eliteDangerousAPI");
+  elite = require("../utils/eliteDangerousAPI"),
+  fs = require("fs");
+
+const galnetDataFile = "data/eliteNews.txt";
+let lastGalnetArticleTitle = "";
 
 async function updateFactionStatus(bot) {
   try {
@@ -15,8 +19,27 @@ async function updateFactionStatus(bot) {
 
     let channelID = "549808289811267602";
     let channel = bot.channels.cache.get(channelID);
-
     channel.setTopic(topic);
+
+    // Galnet articles
+    let latestArticle = (await elite.getGalnetFeed())[0];
+    if (latestArticle.title !== lastGalnetArticleTitle) {
+      let embed = u.embed()
+        .setThumbnail("https://i.imgur.com/Ud8MOzY.png")
+        .setAuthor("GALNET", "https://vignette.wikia.nocookie.net/elite-dangerous/images/c/cd/Official-Galnet-Logo.png")
+        .setTitle(latestArticle.title)
+        .setURL("https://community.elitedangerous.com/")
+        .setDescription((latestArticle.content.length > 2040 ? latestArticle.content.substr(0, 2040) + "..." : latestArticle.content));
+      channel.send({ embed });
+
+      lastGalnetArticleTitle = latestArticle.title;
+      fs.writeFile(galnetDataFile, lastGalnetArticleTitle, function (err) {
+        if (err) {
+          u.errorHandler(err, "Failed to update `" + galnetDataFile + "` with latest article title, `" + lastGalnetArticleTitle + "`");
+        }
+      });
+    }
+
   } catch (e) { u.errorHandler(e, "Faction Status Update Error"); }
 }
 
@@ -179,6 +202,16 @@ const Module = new Augur.Module()
       // Every 6 hours seems alright for channel description updates. The rate limit is actually once every 5 minutes, so we're more than clear.
       return setInterval(updateFactionStatus, 6 * 60 * 60 * 1000, bot);
     } catch (e) { u.errorHandler(e, "Elite Dangerous Clockwork Error"); }
+})
+.setInit(() => {
+  try {
+    lastGalnetArticleTitle = fs.readFileSync(galnetDataFile, 'utf8');
+  } catch (error) {
+    u.errorHandler(error, "Error reading `" + galnetDataFile + "`");
+  }
+})
+.setUnload(() => {
+  delete require.cache[require.resolve(process.cwd(), "./utils/eliteDangerousAPI.js")];
 });
 
 module.exports = Module;
