@@ -28,8 +28,7 @@ async function testBirthdays() {
     if (curDate.getHours() == 20) {
       // Birthday Blast
       let birthdays = (await Module.db.ign.getList("birthday")).filter(ign => bot.guilds.cache.get(ldsg).members.cache.has(ign.discordId));
-      for (let b = 0; b < birthdays.length; b++) {
-        let birthday = birthdays[b];
+      for (let birthday of birthdays) {
         let date = new Date(birthday.ign);
         if (date.getMonth() == curDate.getMonth() && date.getDate() == curDate.getDate()) {
           let flair = [
@@ -70,7 +69,7 @@ async function testBirthdays() {
               try {
                 await m.roles.remove(roles);
                 await m.roles.add(roles[y - 1]);
-              } catch(error) { u.errorHandler(error, `Apply cake day roles: ${m.displayName}`); continue; }
+              } catch(error) { u.errorHandler(error, `Apply cake day roles: ${m.displayName}`); }
             }, 2400 * apicall++, member, years);
             // Announce if active
             try {
