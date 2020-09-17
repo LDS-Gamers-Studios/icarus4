@@ -2,7 +2,15 @@
 
 const Augur = require("augurbot"),
   u = require("../utils/utils"),
-  elite = require("../utils/eliteDangerousAPI");
+  elite = require("../utils/eliteDangerousAPI"),
+  fs = require("fs");
+
+let lastGalnetArticleTitle = "";
+
+function splitString(string, size) {
+  var re = new RegExp('.{1,' + size + '}', 'g');
+  return string.match(re);
+}
 
 async function updateFactionStatus(bot) {
   try {
@@ -17,6 +25,21 @@ async function updateFactionStatus(bot) {
     let channel = bot.channels.cache.get(channelID);
 
     channel.setTopic(topic);
+
+    // Galnet articles
+    let latestArticle = (await elite.getGalnetFeed())[0];
+    if (latestArticle.title !== lastGalnetArticleTitle) {
+      var contentParts = splitString(latestArticle.content, 1900); // Limit is technically 2000, but some buffer room for unicode characters and such is good.
+      contentParts.forEach(text => channel.send("```\n" + text + "\n```"))
+
+      lastGalnetArticleTitle = latestArticle.title;
+      fs.writeFile('data/eliteNews.json', lastGalnetArticleTitle, function (err) {
+        if (err) {
+          u.errorHandler(err, "Failed to update `data/eliteNews.json` with latest article title, `" + lastGalnetArticleTitle + "`");
+        }
+      });
+    }
+
   } catch (e) { u.errorHandler(e, "Faction Status Update Error"); }
 }
 
@@ -179,6 +202,16 @@ const Module = new Augur.Module()
       // Every 6 hours seems alright for channel description updates. The rate limit is actually once every 5 minutes, so we're more than clear.
       return setInterval(updateFactionStatus, 6 * 60 * 60 * 1000, bot);
     } catch (e) { u.errorHandler(e, "Elite Dangerous Clockwork Error"); }
+});
+
+Module.setInit(() => {
+  fs.readFile('data/eliteNews.json', 'utf8', (err, data) => {
+    if (err) {
+      e.errorHandler(err, "Error reading `data/eliteNews.json`");
+      return;
+    }
+    lastGalnetArticleTitle = data;
+  });
 });
 
 module.exports = Module;
