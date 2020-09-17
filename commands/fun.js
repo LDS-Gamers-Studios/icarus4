@@ -197,6 +197,24 @@ const Module = new Augur.Module()
     quickFile(msg, "https://cdn.discordapp.com/attachments/96335850576556032/452153983931383808/FireGifLDSG.gif", "fire.gif");
   }
 })
+.addCommand({name: "color",
+  description: "Show what a color looks like.",
+  syntax: "color (e.g. `#003B6F` or `blue`)",
+  category: "Silly",
+  process: async (msg, suffix) => {
+    if (suffix) {
+      try {
+        const Jimp = require("jimp");
+        let img = new Jimp(256, 256, suffix);
+        msg.channel.send({files: [await img.getBufferAsync(Jimp.MIME_JPEG)]});
+      } catch(error) {
+        msg.reply(`sorry, I couldn't understand the color "${suffix}"`).then(u.clean);
+      }
+    } else {
+      msg.reply("you need to tell me a color!").then(u.clean);
+    }
+  }
+})
 .addCommand({name: "disagree",
   description: "I'm not sure I agree...",
   category: "Silly",
