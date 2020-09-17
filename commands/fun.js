@@ -211,7 +211,7 @@ const Module = new Augur.Module()
           // In the case that we have a string in 0xABCDEF format
           color = "#" + suffix.substr(2);
         } else color = suffix;
-        if (!["#000000", "black", "#000000FF"])
+        if (!["#000000", "black", "#000000FF"].includes(color))
           color = Jimp.cssColorToHex(color);
         if (color != 255) {
           let img = new Jimp(256, 256, color);
