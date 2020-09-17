@@ -14,7 +14,7 @@ async function reload(msg) {
         let reaction = reactions.first();
         let frames = await Module.db.animation.fetch(msg.id);
         if (frames) {
-          let m = await reaction.message.reactions.removeAll();
+          let m = (reaction.message.guild ? await reaction.message.reactions.removeAll() : reaction.message);
           nextFrame(m, frames.frames);
         }
       }
