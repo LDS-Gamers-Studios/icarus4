@@ -53,7 +53,6 @@ async function testBirthdays() {
 
       // LDSG Cake Day
       let roles = [
-        null,
         "375047444599275543",
         "375047691253579787",
         "375047792487432192",
@@ -61,23 +60,18 @@ async function testBirthdays() {
         "731895666577506345"
       ];
       let members = bot.guilds.cache.get(ldsg).members.cache;
-      let apicall = 0;
+      let apicall = 1;
       for (let [key, member] of members) {
         try {
           let join = member.joinedAt;
           if (join && (join.getMonth() == curDate.getMonth()) && (join.getDate() == curDate.getDate()) && (join.getFullYear() < curDate.getFullYear())) {
             let years = curDate.getFullYear() - join.getFullYear();
-            for (let i = 1; i <= years; i++) {
-              if (i == years && !member.roles.cache.has(roles[i])) {
-                setTimeout((member, role) => {
-                  member.roles.add(role);
-                }, 1200 * apicall++, member, roles[i]);
-              } else if (member.roles.cache.has(roles[i])) {
-                setTimeout((member, role) => {
-                  member.roles.remove(role);
-                }, 1200 * apicall++, member, roles[i]);
-              }
-            }
+            setTimeout(async (m, y) => {
+              try {
+                await m.roles.remove(roles);
+                await m.roles.add(roles[y - 1]);
+              } catch(error) { u.errorHandler(error, `Apply cake day roles: ${m.displayName}`); continue; }
+            }, 2400 * apicall++, member, years);
             // Announce if active
             try {
               let user = await Module.db.user.fetchUser(member.id);
