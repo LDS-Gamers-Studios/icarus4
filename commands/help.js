@@ -11,7 +11,7 @@ const Module = new Augur.Module()
     u.clean(msg);
 
     let prefix = Module.config.prefix;
-    let commands = Module.client.commands.filter(c => c.permissions(msg));
+    let commands = Module.client.commands.filter(c => c.permissions(msg) && c.enabled);
 
     let embed = u.embed()
     .setURL("https://my.ldsgamers.com/commands")
@@ -35,7 +35,7 @@ const Module = new Augur.Module()
         for (let [name, command] of commands.filter(c => c.category == category && !c.hidden).sort((a, b) => a.name.localeCompare(b.name))) {
           embed.addField(prefix + command.name + " " + command.syntax, (command.description ? command.description : "Description"));
           if (i == 20) {
-            msg.author.send(embed).catch(e => u.errorHandler(u, msg));
+            msg.author.send({embed}).catch(e => u.errorHandler(u, msg));
             embed = u.embed().setTitle(msg.client.user.username + " Commands" + (msg.guild ? ` in ${msg.guild.name}.` : ".") + " (Cont.)")
             .setURL("https://my.ldsgamers.com/commands")
             .setDescription(`You have access to the following commands. For more info, type \`${prefix}help <command>\`.`);
@@ -44,7 +44,7 @@ const Module = new Augur.Module()
           i++;
         }
       }
-      msg.author.send(embed).catch(e => u.errorHandler(e, msg));
+      msg.author.send({embed}).catch(e => u.errorHandler(e, msg));
     } else { // SINGLE COMMAND HELP
       let command = null;
       if (commands.has(suffix)) command = commands.get(suffix);
