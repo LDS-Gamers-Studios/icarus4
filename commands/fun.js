@@ -206,17 +206,14 @@ const Module = new Augur.Module()
       try {
         const Jimp = require("jimp");
 
-        let color = suffix;
-        if (suffix.startsWith('#')) {
+        let color;
+        if (suffix.startsWith('0x')) {
           // In the case that we have a string in #ABCDEF format
-          color = (parseInt(suffix.substr(1), 16));
-        } else if (suffix.startsWith('0x')) {
-          // In the case that we have a string in 0xABCDEF format
-          color = (parseInt(suffix.substr(2), 16));
-        }
+          color = "#" + suffix.substr(2);
+        } else color = suffix;
 
         let img = new Jimp(256, 256, color);
-        msg.channel.send({files: [await img.getBufferAsync(Jimp.MIME_JPEG)]});
+        msg.channel.send({files: [await img.getBufferAsync(Jimp.MIME_PNG)]});
       } catch(error) {
         msg.reply(`sorry, I couldn't understand the color "${suffix}"`).then(u.clean);
       }
