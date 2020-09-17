@@ -46,7 +46,7 @@ function getGalnetFeed() {
   return new Promise(async (fulfill, reject) => {
     try {
       let url = "https://www.alpha-orbital.com/galnet-feed";
-      fulfill(JSON.parse(await request(url)));
+      fulfill(JSON.parse((await request(url)).replace("<br \\/>", "\n")));
     } catch (error) { reject(error); }
   });
 }
@@ -55,7 +55,7 @@ function getObjectFromAPI(params) {
   return new Promise(async (fulfill, reject) => {
     try {
       let url = apiUrl + params;
-      var text = (await request(url)).replace("<br \\/>", "\n");
+      var text = await request(url);
       fulfill(JSON.parse(text));
     } catch (error) { reject(error); }
   });

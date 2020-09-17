@@ -72,7 +72,7 @@ const Module = new Augur.Module()
 .addCommand({name: "blurple",
   description: "Blurple an Avatar",
   category: "Silly",
-  process: async (msg) => {
+  process: async (msg, suffix) => {
     try {
       let target;
       let urlexp = /\<?(https?:\/\/\S+)\>?(?:\s+)?(\d*)/;

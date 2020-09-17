@@ -549,6 +549,7 @@ const Module = new Augur.Module()
   aliases: ["yt"],
   info: "Displays user videos and stream info.",
   category: "Streaming",
+  enabled: false,
   process: async function(msg, suffix) {
     try {
       let user = false,
