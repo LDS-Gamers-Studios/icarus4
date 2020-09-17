@@ -141,10 +141,12 @@ const Utils = {
       } else {
         command = parts.shift().substr(prefix.length);
       }
-      return {
-        command: command.toLowerCase(),
-        suffix: parts.join(" ")
-      };
+      if (command) {
+        return {
+          command: command.toLowerCase(),
+          suffix: parts.join(" ")
+        };
+      }
     }
   },
   path: (...segments) => {
