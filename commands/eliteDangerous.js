@@ -5,12 +5,8 @@ const Augur = require("augurbot"),
   elite = require("../utils/eliteDangerousAPI"),
   fs = require("fs");
 
+const galnetDataFile = "data/eliteNews.txt";
 let lastGalnetArticleTitle = "";
-
-function splitString(string, size) {
-  var re = new RegExp('.{1,' + size + '}', 'g');
-  return string.match(re);
-}
 
 async function updateFactionStatus(bot) {
   try {
@@ -29,14 +25,18 @@ async function updateFactionStatus(bot) {
     // Galnet articles
     let latestArticle = (await elite.getGalnetFeed())[0];
     if (latestArticle.title !== lastGalnetArticleTitle) {
-      var contentParts = splitString(latestArticle.content, 1900); // Limit is technically 2000, but some buffer room for unicode characters and such is good.
-      channel.send("```\nNew GalNet article: \"" + latestArticle.title + "\" - " + latestArticle.date + "\n```");
-      contentParts.forEach(text => channel.send("```\n" + text + "\n```"))
+      let embed = u.embed()
+        .setThumbnail("https://i.imgur.com/Ud8MOzY.png")
+        .setAuthor("GALNET", "https://vignette.wikia.nocookie.net/elite-dangerous/images/c/cd/Official-Galnet-Logo.png")
+        .setTitle(latestArticle.title)
+        .setURL("https://community.elitedangerous.com/")
+        .setDescription((latestArticle.content.length > 2040 ? latestArticle.content.substr(0, 2040) + "..." : latestArticle.content));
+      channel.send({ embed });
 
       lastGalnetArticleTitle = latestArticle.title;
-      fs.writeFile('data/eliteNews.json', lastGalnetArticleTitle, function (err) {
+      fs.writeFile(galnetDataFile, lastGalnetArticleTitle, function (err) {
         if (err) {
-          u.errorHandler(err, "Failed to update `data/eliteNews.json` with latest article title, `" + lastGalnetArticleTitle + "`");
+          u.errorHandler(err, "Failed to update `" + galnetDataFile + "` with latest article title, `" + lastGalnetArticleTitle + "`");
         }
       });
     }
@@ -203,16 +203,13 @@ const Module = new Augur.Module()
       // Every 6 hours seems alright for channel description updates. The rate limit is actually once every 5 minutes, so we're more than clear.
       return setInterval(updateFactionStatus, 6 * 60 * 60 * 1000, bot);
     } catch (e) { u.errorHandler(e, "Elite Dangerous Clockwork Error"); }
-});
-
-Module.setInit(() => {
-  fs.readFile('data/eliteNews.json', 'utf8', (err, data) => {
-    if (err) {
-      e.errorHandler(err, "Error reading `data/eliteNews.json`");
-      return;
-    }
-    lastGalnetArticleTitle = data;
-  });
+})
+.setInit(() => {
+  try {
+    lastGalnetArticleTitle = fs.readFileSync(galnetDataFile, 'utf8');
+  } catch (error) {
+    u.errorHandler(error, "Error reading `" + galnetDataFile + "`");
+  }
 });
 
 module.exports = Module;
