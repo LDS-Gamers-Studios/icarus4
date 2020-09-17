@@ -211,12 +211,13 @@ const Module = new Augur.Module()
           // In the case that we have a string in 0xABCDEF format
           color = "#" + suffix.substr(2);
         } else color = suffix;
-        color = Jimp.cssColorToHex(color);
+        if (!["#000000", "black", "#000000FF"])
+          color = Jimp.cssColorToHex(color);
         if (color != 255) {
           let img = new Jimp(256, 256, color);
           msg.channel.send({files: [await img.getBufferAsync(Jimp.MIME_PNG)]});
         } else {
-          msg.reply(`sorry, I couldn't understand the color "${suffix}" and I refuse to recognize black as a color.`).then(u.clean);
+          msg.reply(`sorry, I couldn't understand the color "${suffix}"`).then(u.clean);
         }
       } catch(error) {
         msg.reply(`sorry, I couldn't understand the color "${suffix}"`).then(u.clean);
