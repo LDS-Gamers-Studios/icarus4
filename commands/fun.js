@@ -208,12 +208,16 @@ const Module = new Augur.Module()
 
         let color;
         if (suffix.startsWith('0x')) {
-          // In the case that we have a string in #ABCDEF format
+          // In the case that we have a string in 0xABCDEF format
           color = "#" + suffix.substr(2);
         } else color = suffix;
-
-        let img = new Jimp(256, 256, color);
-        msg.channel.send({files: [await img.getBufferAsync(Jimp.MIME_PNG)]});
+        color = Jimp.cssColorToHex(color);
+        if (color != 255) {
+          let img = new Jimp(256, 256, color);
+          msg.channel.send({files: [await img.getBufferAsync(Jimp.MIME_PNG)]});
+        } else {
+          msg.reply(`sorry, I couldn't understand the color "${suffix}" and I refuse to recognize black as a color.`).then(u.clean);
+        }
       } catch(error) {
         msg.reply(`sorry, I couldn't understand the color "${suffix}"`).then(u.clean);
       }
