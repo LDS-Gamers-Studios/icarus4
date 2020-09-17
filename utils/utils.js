@@ -141,8 +141,10 @@ const Utils = {
       } else {
         command = parts.shift().substr(prefix.length);
       }
-      suffix = parts.join(" ");
-      return {command, suffix};
+      return {
+        command: command.toLowerCase(),
+        suffix: parts.join(" ")
+      };
     }
   },
   path: (...segments) => {
