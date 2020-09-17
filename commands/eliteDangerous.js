@@ -211,7 +211,7 @@ const Module = new Augur.Module()
   }
 })
 .setUnload(() => {
-  delete require.cache[require.resolve(process.cwd(), "./utils/eliteDangerousAPI.js")];
+  delete require.cache[require.resolve(path.resolve(process.cwd(), "./utils/eliteDangerousAPI.js"))];
 });
 
 module.exports = Module;
