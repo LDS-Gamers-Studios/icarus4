@@ -65,12 +65,12 @@ async function testBirthdays() {
           let join = member.joinedAt;
           if (join && (join.getMonth() == curDate.getMonth()) && (join.getDate() == curDate.getDate()) && (join.getFullYear() < curDate.getFullYear())) {
             let years = curDate.getFullYear() - join.getFullYear();
-            setTimeout(async (m, y) => {
+            //setTimeout(async (m, y) => {
               try {
                 await m.roles.remove(roles);
                 await m.roles.add(roles[y - 1]);
               } catch(error) { u.errorHandler(error, `Apply cake day roles: ${m.displayName}`); }
-            }, 2400 * apicall++, member, years);
+            //}, 2400 * apicall++, member, years);
             // Announce if active
             try {
               let user = await Module.db.user.fetchUser(member.id);
