@@ -60,10 +60,9 @@ const Module = new Augur.Module()
   category: "Members",
   permissions: (msg) => msg.guild,
   process: (msg) => {
-    let members = msg.guild.members;
     let online = 0;
 
-    for (const [id, member] of msg.guild.members) {
+    for (const [id, member] of msg.guild.members.cache) {
       if (member.presence.status != "offline")
       online++;
     }
