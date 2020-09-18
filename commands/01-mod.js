@@ -162,8 +162,7 @@ async function warnCard(msg, filtered = null, call = false) {
         if (!msg.member.roles.cache.has(Module.config.roles.muted)) {
           await msg.member.roles.add(ldsg.roles.cache.get(Module.config.roles.muted));
           if (msg.member.voice.channel) {
-            msg.member.voice.setMute(true);
-            msg.member.voice.setDeaf(true);
+            msg.member.voice.kick("Auto-mute");
           }
           ldsg.channels.cache.get("356657507197779968").send(`${msg.member}, you have been auto-muted in ${msg.guild.name}. Please review our Code of Conduct. A member of the management team will be available to discuss more details.\n\nhttp://ldsgamers.com/code-of-conduct`);
         }
@@ -293,8 +292,7 @@ async function processCardReaction(reaction, mod, infraction) {
             await member.roles.add(Module.config.roles.muted);
             await member.roles.add(Module.config.roles.untrusted);
             if (member.voice.channel) {
-              await member.voice.setMute(true);
-              await member.voice.setDeaf(true);
+              await member.voice.kick("User mute");
             };
             message.client.channels.cache.get("356657507197779968").send(`${member}, you have been muted in ${message.guild.name}. Please review our Code of Conduct. A member of the management team will be available to discuss more details.\n\nhttp://ldsgamers.com/code-of-conduct`);
           } catch(error) { u.errorHandler(error, "Mute user via card"); }
@@ -655,8 +653,7 @@ Module
           if (member && !member.roles.cache.has(Module.config.roles.muted)) {
             await member.roles.add(Module.config.roles.muted);
             if (member.voice.channel) {
-              await member.voice.setMute(true);
-              await member.voice.setDeaf(true);
+              await member.voice.kick("User mute");
             }
 
             msg.client.channels.cache.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** muted **${u.escapeText(member.displayName)}**${(duration ? " for " + duration + " minutes." : "")}`);
@@ -669,10 +666,6 @@ Module
                   setTimeout(async (member, duration) => {
                     try {
                       await member.roles.remove(Module.config.roles.muted);
-                      if (member.voice.channel) {
-                        await member.voice.setMute(false);
-                        await member.voice.setDeaf(false);
-                      }
                       msg.client.channels.cache.get(modLogs).send(`ℹ️ **${u.escapeText(member.displayName)}** has automatically been unmuted after ${timeout} minutes.`);
                     } catch(error) { u.errorHandler(error, "Unmute Timeout"); }
                   }, (duration * 60000), member, duration)
@@ -896,10 +889,6 @@ Module
             mutes.delete(memberId);
           }
           member.roles.remove(Module.config.roles.muted);
-          if (member.voice.channel) {
-            member.voice.setMute(false);
-            member.voice.setDeaf(false);
-          }
           msg.client.channels.cache.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** unmuted **${u.escapeText(member.displayName)}**`);
         } catch(error) { u.errorHandler(error, msg); }
       }
