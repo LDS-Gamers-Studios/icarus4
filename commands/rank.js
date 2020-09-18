@@ -35,7 +35,7 @@ const Module = new Augur.Module()
             "ain't interested in no XP gettin'.",
             "don't talk to me no more, so I ignore 'em."
           ];
-          response = `**${u.escapeText(member.displayName)}** ${u.rand(snark)}`;
+          response = `**${u.escapeText(member.displayName)}** ${u.rand(snark)}\n(Try \`${Module.config.prefix}trackxp\` if you want to participate in chat ranks!)`;
         }
       } else {
         let userDoc = await Module.db.user.findXPRank(member);
