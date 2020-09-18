@@ -608,9 +608,9 @@ Module
           await member.kick(reason);
           msg.client.channels.cache.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** kicked **${u.escapeText(member.displayName)}** for ${reason}`);
 
-          let memberDoc = await Module.db.user.fetchUser(userId);
+          let memberDoc = await Module.db.user.fetchUser(memberId);
           memberDoc.roles = memberDoc.roles.filter(r => r != Module.config.roles.trusted).concat(Module.config.roles.muted, Module.config.roles.untrusted);
-          await Module.db.user.update(userId, {roles: memberDoc.roles});
+          await Module.db.user.update(memberId, {roles: memberDoc.roles});
         } catch(e) { u.errorHandler(e, msg); }
       }
     } else {
