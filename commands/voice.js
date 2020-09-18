@@ -172,7 +172,8 @@ const queues = new Map();
 const Module = new Augur.Module()
 .addCommand({name: "join",
   description: "Make the bot join voice chat.",
-  permission: msg => msg.member && msg.member.voice && msg.member.voice.channel,
+  permissions: msg => msg.member && msg.member.voice && msg.member.voice.channel,
+  enabled: false,
   process: async (msg) => {
     try {
       const connection = await msg.member.voice.channel.join();
@@ -185,6 +186,7 @@ const Module = new Augur.Module()
 .addCommand({name: "leave",
   description: "Make the bot leave voice chat.",
   permissions: msg => msg.guild,
+  enabled: false,
   process: async (msg) => {
     try {
       const queue = queues.get(msg.guild.id);
@@ -232,6 +234,7 @@ const Module = new Augur.Module()
   permissions: (msg) => msg.guild,
   aliases: ["pl"],
   syntax: "[skip/stop/pause/resume]",
+  enabled: false,
   process: async (msg, suffix) => {
     try {
       suffix = suffix.toLowerCase();
@@ -260,6 +263,7 @@ const Module = new Augur.Module()
   description: "Play a song or playlist from YouTube",
   syntax: "<link>",
   permissions: (msg) => (msg.guild && msg.member.voice.channel && ((msg.guild.id != Module.config.ldsg) || msg.member.roles.cache.has(Module.config.roles.team) || msg.member.roles.cache.has("114816596341424129"))),
+  enabled: false,
   process: async (msg, suffix) => {
     if (suffix.startsWith("<") && suffix.endsWith(">")) suffix = suffix.substr(1, suffix.length - 2);
     if (ytpl.validateURL(suffix)) {
@@ -311,6 +315,7 @@ const Module = new Augur.Module()
   info: "Plays a matched sound from Freesound.org",
   category: "Voice",
   permissions: (msg) => (msg.guild && msg.member.voice.channel && ((msg.guild.id != Module.config.ldsg) || msg.member.roles.cache.has(Module.config.roles.team) || msg.member.roles.cache.has("114816596341424129"))),
+  enabled: false,
   process: async (msg, suffix) => {
     if (suffix) {
       let pf = new profanityFilter();
