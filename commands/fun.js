@@ -158,7 +158,7 @@ const Module = new Augur.Module()
   description: "It's your birthday!?",
   syntax: "<@user>", hidden: true,
   category: "Silly",
-  process: (msg) => {
+  process: async (msg) => {
     if (msg.mentions.members && msg.mentions.members.size > 0) {
       let flair = [
         ":tada: ",
@@ -168,14 +168,13 @@ const Module = new Augur.Module()
         ":cake: "
       ];
       for (let [id, member] of msg.mentions.members) {
-        msg.client.channels.cache.get(Module.config.ldsg).send(`:birthday: :confetti_ball: :tada: Happy Birthday, ${member}! :tada: :confetti_ball: :birthday:`).then(() => {
+        try {
+          await msg.client.channels.cache.get(Module.config.ldsg).send(`:birthday: :confetti_ball: :tada: Happy Birthday, ${member}! :tada: :confetti_ball: :birthday:`);
           let birthdayLangs = require("../data/birthday.json");
-          let msgs = birthdayLangs.map(lang => birthday.send(u.rand(flair) + " " + lang));
-
-          Promise.all(msgs).then(() => {
-            birthday.send(":birthday: :confetti_ball: :tada: A very happy birthday to you, from LDS Gamers! :tada: :confetti_ball: :birthday:").catch(u.noop);
-          }).catch(u.noop);
-        });
+          let msgs = birthdayLangs.map(lang => member.send(u.rand(flair) + " " + lang));
+          await Promise.all(msgs).catch(u.noop);
+          member.send(":birthday: :confetti_ball: :tada: A very happy birthday to you, from LDS Gamers! :tada: :confetti_ball: :birthday:").catch(u.noop);
+        } catch(error) { u.errorHandler(error, msg); }
       }
     } else {
       msg.reply("you need to tell me who to celebrate!");
