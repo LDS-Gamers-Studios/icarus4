@@ -67,9 +67,9 @@ async function testBirthdays() {
             let years = curDate.getFullYear() - join.getFullYear();
             //setTimeout(async (m, y) => {
               try {
-                await m.roles.remove(roles);
-                await m.roles.add(roles[y - 1]);
-              } catch(error) { u.errorHandler(error, `Apply cake day roles: ${m.displayName}`); }
+                await member.roles.remove(roles);
+                await member.roles.add(roles[years - 1]);
+              } catch(error) { u.errorHandler(error, `Apply cake day roles: ${member.displayName}`); }
             //}, 2400 * apicall++, member, years);
             // Announce if active
             try {
