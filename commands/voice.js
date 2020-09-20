@@ -6,9 +6,7 @@ const u = require("../utils/utils"),
   ytdl = require("ytdl-core-discord"),
   {USet, Link} = require("../utils/tools");
 
-var roomList = [];
-
-var availableNames = new USet();
+const roomNames = new USet();
 
 const communityVoice = "363014069533540362";
 function isCommunityVoice(channel) {
@@ -391,8 +389,9 @@ const Module = new Augur.Module()
   Module.config.sheets.get("Voice Channel Names").getRows((e, rows) => {
     if (e) u.errorHandler(e, "Error loading voice channel names.");
     else {
-      roomList = rows.map(r => r.name);
-      availableNames = new USet(roomList.filter(r => !ldsg.channels.cache.find(c => c.name.startsWith(r))));
+      for (let i = 0; i < rows.length; i++) {
+        roomNames.add(rows[i].name);
+      }
     }
   });
 })
@@ -401,22 +400,19 @@ const Module = new Augur.Module()
   if ((guild.id == Module.config.ldsg) && (oldState.channelID != newState.channelID)) {
     if (oldState.channel && (oldState.channel.members.size == 0) && isCommunityVoice(oldState.channel)) {
       // REMOVE OLD VOICE CHANNEL
-      let name = roomList.find(room => oldState.channel.name.startsWith(room));
       await oldState.channel.delete().catch(e => u.errorHandler(e, `Could not delete empty voice channel. (${oldState.channel.name})`));
-      if (name && !guild.channels.cache.find(c => c.name.startsWith(name))) availableNames.add(name);
     }
     if (newState.channel && (newState.channel.members.size == 1) && isCommunityVoice(newState.channel)) {
       // CREATE NEW VOICE CHANNEL
       const bitrate = newState.channel.bitrate;
 
-      let name = (availableNames.size > 0 ? availableNames.random() : u.rand(roomList));
-      availableNames.delete(name);
-      name += ` (${parseInt(bitrate / 1000, 10)} kbps)`;
+      let available = roomNames.filter(name => !guild.channels.cache.find(c => c.name.startsWith(name)));
+      let name = (available.random() || roomNames.random()) + ` (${parseInt(bitrate / 1000, 10)} kbps)`;
 
       try {
         await guild.channels.create(name, {
           type: "voice",
-          bitrate: bitrate,
+          bitrate,
           parent: communityVoice,
           permissionOverwrites: [{
             id: Module.config.roles.muted,
