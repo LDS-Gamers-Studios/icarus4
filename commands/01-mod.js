@@ -138,12 +138,13 @@ async function warnCard(msg, filtered = null, call = false) {
 
     embed.addField("Channel", `#${msg.channel.name}`)
     .addField("Jump to Post", msg.url)
-    .addField(`Infraction Summary (${infractionSummary.time} Days)`, `Infractions: ${infractionSummary.count}\nPoints: ${infractionSummary.points}`)
     .setTimestamp((msg.editedAt ? msg.editedAt : msg.createdAt));
 
     // Minecraft Filter
     if (msg.channel.id == "121033996439257092")
       msg.client.channels.cache.get('114490357474918401').send({embed});
+
+    embed.addField(`Infraction Summary (${infractionSummary.time} Days)`, `Infractions: ${infractionSummary.count}\nPoints: ${infractionSummary.points}`)
 
     if (msg.author.bot)
       embed.setFooter("The user is a bot and the flag likely originated elsewhere. No reactions will be processed.");
