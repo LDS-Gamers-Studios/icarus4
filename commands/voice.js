@@ -6,9 +6,9 @@ const u = require("../utils/utils"),
   ytdl = require("ytdl-core-discord"),
   {USet, Link} = require("../utils/tools");
 
-const roomList = [];
+var roomList = [];
 
-const availableNames = new USet();
+var availableNames = new USet();
 
 const communityVoice = "363014069533540362";
 function isCommunityVoice(channel) {
@@ -391,10 +391,8 @@ const Module = new Augur.Module()
   Module.config.sheets.get("Voice Channel Names").getRows((e, rows) => {
     if (e) u.errorHandler(e, "Error loading voice channel names.");
     else {
-      for (let i = 0; i < rows.length; i++) {
-        roomList.push(rows[i].name);
-        if (!ldsg.channels.cache.find(c => c.name.startsWith(rows[i].name))) availableNames.add(rows[i].name);
-      }
+      roomList = rows.map(r => r.name);
+      availableNames = new USet(roomList.filter(r => !ldsg.channels.cache.find(c => c.name.startsWith(r))));
     }
   });
 })
