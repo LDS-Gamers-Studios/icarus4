@@ -89,7 +89,7 @@ const Module = new Augur.Module()
       const target = msg.mentions.members.first() || msg.member;
 
       const rank = await Module.db.user.findXPRank(target);
-      const badges = badgeData(target.roles);
+      const badges = badgeData(target.roles.cache);
 
       const avatar = await Jimp.read(target.user.displayAvatarURL({size: 64}));
 
