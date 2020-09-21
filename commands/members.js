@@ -25,16 +25,15 @@ const Module = new Augur.Module()
   category: "Members",
   process: async (msg, suffix) => {
     try {
-      let users = null;
+      let members = null;
 
-      if (!suffix) users = [msg.member];
-      else if (msg.mentions.members.size > 0) users = Array.from(msg.mentions.members.values());
-      else if (suffix) users = [suffix];
+      if (!suffix) members = [msg.member];
+      else if (msg.mentions.members.size > 0) members = Array.from(msg.mentions.members.values());
+      else if (suffix) members = [suffix];
 
-      for (let user of users) {
-        let member = user;
-        if (typeof member == "string") member = await msg.guild.members.fetch({query: user, limit: 1});
-        if (Array.isArray(member)) member = member[0];
+      for (let member of members) {
+        if (typeof member == "string") member = await msg.guild.members.fetch({query: member, limit: 1});
+        if (member instanceof u.Collection) member = member.first();
 
         if (member) {
           msg.channel.send({embed: userEmbed(member), disableEveryone: true});
