@@ -1,11 +1,12 @@
 const badges = new Map()
-  .set("114499378936283143", {title: "LDSG Founder", image: "team_founder.png", overrides: ["96360253850935296", "96345401078087680", "114492841367044098"]})
-  .set("96360253850935296", {title: "LDSG Management", image: "team_management.png", overrides: ["96345401078087680", "114492841367044098"]})
-  .set("96345401078087680", {title: "LDSG Team", image: "team_team.png", overrides: ["114492841367044098"]})
-  .set("114492841367044098", {title: "LDSG Gameskeeper", image: "team_gameskeeper.png"})
+  .set("114499378936283143", {title: "LDSG Founder", image: "team_founder.png", overrides: ["96360253850935296", "96345401078087680", "114492841367044098", "503066022912196608"]})
+  .set("96360253850935296", {title: "LDSG Management", image: "team_management.png", overrides: ["96345401078087680", "114492841367044098", "503066022912196608"]})
+  .set("96345401078087680", {title: "LDSG Team", image: "team_team.png", overrides: ["114492841367044098", "503066022912196608"]})
+  .set("503066022912196608", {title: "Discord Moderator", image: "team_moderator.png"})
+  //.set("114492841367044098", {title: "LDSG Gameskeeper", image: "team_gameskeeper.png"})
   .set("114490059452841985", {title: "LDSG Minecraft Mod", image: "team_minecraft.png", desc: "A moderator on the LDSG Minecraft Servers"})
 
-  .set("318427374309998592", {title: "LDSG Tournament Champion", image: "tourney_champ.png"})
+  //.set("318427374309998592", {title: "LDSG Tournament Champion", image: "tourney_champ.png"})
 
   .set("121783903630524419", {title: "Pro Sponsor", image: "sponsor_pro.png", desc: "Your generous donation lets us know you care about the community. You have our sincerest thanks, you awesome person, you.", overrides: ["121783798647095297", "114816596341424129", "338056125062578176", "114817401614368775"]})
   .set("121783798647095297", {title: "Onyx Sponsor", image: "sponsor_onyx.png", desc: "Your generous donation lets us know you care about the community. You have our sincerest thanks, you awesome person, you.", overrides: ["114816596341424129", "338056125062578176", "114817401614368775"]})
@@ -26,7 +27,9 @@ const badges = new Map()
 
   .set("375047444599275543", {title: "Member - 1 Year", image: "anniversary-1.png", desc: "A member of the LDS Gamers Discord Community for 1 Year!"})
   .set("375047691253579787", {title: "Member - 2 Years", image: "anniversary-2.png", desc: "A member of the LDS Gamers Discord Community for 2 Years!", overrides: ["375047444599275543"]})
-  .set("375047792487432192", {title: "Member - 3 Years", image: "anniversary-3.png", desc: "A member of the LDS Gamers Discord Community for 3 Years!", overrides: ["375047444599275543", "375047691253579787"]});
+  .set("375047792487432192", {title: "Member - 3 Years", image: "anniversary-3.png", desc: "A member of the LDS Gamers Discord Community for 3 Years!", overrides: ["375047444599275543", "375047691253579787"]})
+  .set("543065980096741386", {title: "Member - 4 Years", image: "anniversary-4.png", desc: "A member of the LDS Gamers Discord Community for 4 Years!", overrides: ["375047444599275543", "375047691253579787", "375047792487432192"]})
+  .set("731895666577506345", {title: "Member - 5 Years", image: "anniversary-5.png", desc: "A member of the LDS Gamers Discord Community for 5 Years!", overrides: ["375047444599275543", "375047691253579787", "375047792487432192", "543065980096741386"]});
 
 module.exports = function(roles) {
   let overrides = [];
