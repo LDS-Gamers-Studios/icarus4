@@ -13,7 +13,7 @@ function userEmbed(member) {
     .addField("Joined", member.joinedAt.toUTCString(), true)
     .addField("Account Created", member.user.createdAt.toUTCString(), true)
     .addField("Roles", roleString, true)
-    .setThumbnail(member.user.displayAvatarURL({size: 32}));
+    .setThumbnail(member.user.displayAvatarURL({size: 32, dynamic: true}));
 
   return embed;
 }
@@ -91,7 +91,7 @@ const Module = new Augur.Module()
       const rank = await Module.db.user.findXPRank(target);
       const badges = badgeData(target.roles.cache);
 
-      const avatar = await Jimp.read(target.user.displayAvatarURL({size: 64}));
+      const avatar = await Jimp.read(target.user.displayAvatarURL({size: 64, format: "png"}));
 
       card.blit(avatar, 8, 8)
       .print(font, 80, 8, target.displayName.replace(/[^\x00-\x7F]/g, ""), 212)
