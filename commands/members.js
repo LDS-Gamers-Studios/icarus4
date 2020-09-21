@@ -37,7 +37,7 @@ const Module = new Augur.Module()
 
         if (member) {
           msg.channel.send({embed: userEmbed(member), disableEveryone: true});
-        } else msg.channel.send("User \"" + user + "\" not found");
+        } else msg.channel.send("User \"" + member + "\" not found");
       }
     } catch(error) { u.errorHandler(error, msg); }
   },
