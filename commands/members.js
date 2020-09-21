@@ -32,12 +32,13 @@ const Module = new Augur.Module()
       else if (suffix) members = [suffix];
 
       for (let member of members) {
+        let memberName = member;
         if (typeof member == "string") member = await msg.guild.members.fetch({query: member, limit: 1});
         if (member instanceof u.Collection) member = member.first();
 
         if (member) {
           msg.channel.send({embed: userEmbed(member), disableEveryone: true});
-        } else msg.channel.send("User \"" + member + "\" not found");
+        } else msg.channel.send("User \"" + memberName + "\" not found");
       }
     } catch(error) { u.errorHandler(error, msg); }
   },
