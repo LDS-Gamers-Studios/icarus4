@@ -34,6 +34,7 @@ const Module = new Augur.Module()
       for (let user of users) {
         let member = user;
         if (typeof member == "string") member = await msg.guild.members.fetch({query: user, limit: 1});
+        if (Array.isArray(member)) member = array[0];
 
         if (member) {
           msg.channel.send({embed: userEmbed(member), disableEveryone: true});
