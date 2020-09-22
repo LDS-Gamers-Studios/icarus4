@@ -89,7 +89,7 @@ const Module = new Augur.Module()
                 value,
                 mod: msg.author.id
               }).then(deposit => {
-                guild.members.get(deposit.discordId).send(`${guild.name} Chat Ranks have been reset! You've been awarded ${gb}${deposit.value} for your participation this season!`).catch(u.noop);
+                guild.members.cache.get(deposit.discordId).send(`${guild.name} Chat Ranks have been reset! You've been awarded ${gb}${deposit.value} for your participation this season!`).catch(u.noop);
               });
             }, 1100 * i++, user, award);
           }

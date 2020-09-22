@@ -40,8 +40,8 @@ async function updateStarboard(message) {
 };
 
 function validate(message) {
-  const management = message.guild.roles.get(Module.config.roles.management);
-  const team = message.guild.roles.get(Module.config.roles.mod);
+  const management = message.guild.roles.cache.get(Module.config.roles.management);
+  const team = message.guild.roles.cache.get(Module.config.roles.mod);
   let count = 0;
   let valid = false;
 
@@ -74,7 +74,7 @@ const Module = new Augur.Module()
       let embed = u.embed()
         .setTimestamp()
         .setAuthor(message.member.displayName, message.member.user.displayAvatarURL)
-        .setTitle("Pin Request from " + message.guild.members.get(user.id).displayName)
+        .setTitle("Pin Request from " + message.guild.members.cache.get(user.id).displayName)
         .setDescription(message.cleanContent)
         .addField("Channel", message.channel.toString())
         .addField("Link to Post", message.url);
@@ -91,7 +91,7 @@ const Module = new Augur.Module()
     let {count, valid} = validate(message);
     if (valid || ((count >= threshold) && !Rank.excludeChannels.includes(message.channel.id) && !message.channel.name.includes("spoiler")))
       updateStarboard(message);
-  } else if ((message.channel.id == starboard) && reaction.emoji.name == "🚫" && (message.guild.roles.get(Module.config.roles.mod).members.has(user.id)) && message.embeds[0].color == null) {
+  } else if ((message.channel.id == starboard) && reaction.emoji.name == "🚫" && (message.guild.roles.cache.get(Module.config.roles.mod).members.has(user.id)) && message.embeds[0].color == null) {
       message.delete();
       Module.db.starboard.denyStar(message);
   }

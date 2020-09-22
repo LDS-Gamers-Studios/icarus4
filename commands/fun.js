@@ -334,7 +334,7 @@ const Module = new Augur.Module()
           let hug = u.rand(hugs);
           user.send(`Incoming hug from **${msg.author.username}**!`, {files: [{"attachment": hug, "name": "hug.gif"}]})
           .catch(e => {
-            msg.reply(`I couldn't send a hug to ${msg.guild.members.get(user.id).displayName}. Maybe they blocked me? :shrug:`).then(u.clean);
+            msg.reply(`I couldn't send a hug to ${msg.guild.members.cache.get(user.id).displayName}. Maybe they blocked me? :shrug:`).then(u.clean);
           });
         } catch(e) { u.errorHandler(e, msg); }
       }
