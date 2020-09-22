@@ -13,7 +13,7 @@ const Module = new Augur.Module()
   process: async (msg) => {
     u.clean(msg, 0);
     let channelId = sponsorChannels.get(msg.member.id);
-    let channel = msg.guild.channels.get(channelId);
+    let channel = msg.guild.channels.cache.get(channelId);
 
     if (msg.mentions.members.size == 0) {
       msg.reply("you need to tell me who to invite to your channel!");
