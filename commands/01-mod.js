@@ -342,7 +342,7 @@ Module
 .addCommand({name: "ankles",
   description: "View lost ankles",
   category: "Mod",
-  permissions: (msg) => (msg.guild && (msg.member.roles.cache.has(Module.config.roles.mod) || msg.member.roles.cache.has(Module.config.roles.management))),
+  permissions: (msg) => (msg.member && (msg.member.roles.cache.has(Module.config.roles.mod) || msg.member.roles.cache.has(Module.config.roles.management))),
   process: async (msg, suffix) => {
     try {
       let time = parseInt(suffix.replace(/<@!?\d+>/ig, '').replace(msg.mentions.CHANNELS_PATTERN, '').trim(), 10) || 10000;
@@ -350,55 +350,51 @@ Module
 
       let userMentions = u.userMentions(msg, true);
       let channelMentions = msg.mentions.channels;
-      if (userMentions.size > 0) {
-        for (const [memberId, member] of userMentions) {
-          try {
-            let data = await Module.db.ankle.getUserSummary(memberId, time);
-            if (data.perChannel.size > 0) {
-              data.perChannel = data.perChannel.sort((v0, v1) => v1 - v0);
+      for (const [memberId, member] of userMentions) {
+        try {
+          let data = await Module.db.ankle.getUserSummary(memberId, time);
+          if (data.perChannel.size > 0) {
+            data.perChannel = data.perChannel.sort((v0, v1) => v1 - v0);
 
-              let response = [];
-              if (since < new Date(2020, 4, 22)) {
-                response.push(`${member} has lost ${data.total} ankles since 4/22/2020 in ${data.perChannel.size} channels:\`\`\``);
-              } else {
-                response.push(`${member} has lost ${data.total} ankles over the last ${time} days in ${data.perChannel.size} channels:\`\`\``);
-              }
-
-              for (const [chanId, count] of data.perChannel) {
-                response.push(`#${msg.guild.channels.cache.get(chanId).name}: ${count} ankles lost.`);
-              }
-              await msg.channel.send(response.join("\n") + "```");
+            let response = [];
+            if (since < new Date(2020, 4, 22)) {
+              response.push(`${member} has lost ${data.total} ankles since 4/22/2020 in ${data.perChannel.size} channels:\`\`\``);
             } else {
-              msg.channel.send(member.displayName + " still has all their ankles!");
+              response.push(`${member} has lost ${data.total} ankles over the last ${time} days in ${data.perChannel.size} channels:\`\`\``);
             }
-          } catch (e) { u.errorHandler(e, `Handling lost ankles for user: ${member.displayName}`); }
-        }
+
+            for (const [chanId, count] of data.perChannel) {
+              response.push(`#${msg.guild.channels.cache.get(chanId).name}: ${count} ankles lost.`);
+            }
+            await msg.channel.send(response.join("\n") + "```");
+          } else {
+            msg.channel.send(member.displayName + " still has all their ankles!");
+          }
+        } catch (e) { u.errorHandler(e, `Handling lost ankles for user: ${member.displayName}`); }
       }
-      if (channelMentions.size > 0) {
-        for (let [channelId, channel] of channelMentions) {
-          try {
-            let data = await Module.db.ankle.getChannelSummary(channel, time);
-            if (data.perUser.size > 0) {
-              data.perUser = data.perUser.sort((v0, v1) => v1 - v0);
+      for (let [channelId, channel] of channelMentions) {
+        try {
+          let data = await Module.db.ankle.getChannelSummary(channel, time);
+          if (data.perUser.size > 0) {
+            data.perUser = data.perUser.sort((v0, v1) => v1 - v0);
 
-              let response = [];
-              if (since < new Date(2020, 4, 22)) {
-                response.push(`${data.perUser.size} users have lost ${data.total} ankles since 4/22/2020 in ${channel}:\`\`\``);
-              } else {
-                response.push(`${data.perUser.size} users have lost ${data.total} ankles over the last ${time} days in ${channel}:\`\`\``);
-              }
-
-              for (const [userId, count] of data.perUser) {
-                response.push(`${msg.guild.members.cache.get(userId).displayName}: ${count} ankles lost.`);
-              }
-              await msg.channel.send(response.join("\n") + "```");
+            let response = [];
+            if (since < new Date(2020, 4, 22)) {
+              response.push(`${data.perUser.size} users have lost ${data.total} ankles since 4/22/2020 in ${channel}:\`\`\``);
             } else {
-              msg.channel.send(`No users have lost any ankles in ${channel}!`);
+              response.push(`${data.perUser.size} users have lost ${data.total} ankles over the last ${time} days in ${channel}:\`\`\``);
             }
-          } catch (e) { u.errorHandler(e, `Handling lost ankles for channel: ${channel.name}`); }
-        }
+
+            for (const [userId, count] of data.perUser) {
+              response.push(`${msg.guild.members.cache.get(userId).displayName}: ${count} ankles lost.`);
+            }
+            await msg.channel.send(response.join("\n") + "```");
+          } else {
+            msg.channel.send(`No users have lost any ankles in ${channel}!`);
+          }
+        } catch (e) { u.errorHandler(e, `Handling lost ankles for channel: ${channel.name}`); }
       }
-      if (!userMentions && channelMentions.size == 0) { // No user or channel mentions, give high summary
+      if (userMentions.size == 0 && channelMentions.size == 0) { // No user or channel mentions, give high summary
         let data = await Module.db.ankle.getSummary(time);
         data.perUser = data.perUser.sort((v0, v1) => v1 - v0);
         data.perChannel = data.perChannel.sort((v0, v1) => v1 - v0);
