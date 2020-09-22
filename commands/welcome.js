@@ -76,7 +76,7 @@ const Module = new Augur.Module()
     Module.db.user.fetchUser(member.id).then(user => {
       let response = [
         `**${member.displayName}** has left the server.`,
-        "Joined: " + member.joinedAt.toLocaleDateString(),
+        "Joined: " + (member.joinedAt ? member.joinedAt.toLocaleDateString() : "Some time in the past"),
         "Posts: " + user.posts
       ];
       member.guild.channels.cache.get(Module.config.channels.modlogs).send(response.join("\n"));
