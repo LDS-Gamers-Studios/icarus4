@@ -90,6 +90,23 @@ const Utils = {
 
     return foundUser;
   },
+  getMention: async function(msg) {
+    try {
+      if (msg.guild) {
+        let memberMentions = msg.mentions.members;
+        memberMentions.delete(msg.client.user.id);
+        if (memberMentions.size > 0) return memberMentions.first();
+        else {
+          let {suffix} = Utils.parse(msg);
+          let member = (await msg.guild.members.fetch({query: suffix})).first();
+          return member;
+        }
+      } else return msg.mentions.users.first();
+    } catch(error) {
+      u.errorHandler(error, msg);
+      return null;
+    }
+  },
   noop: () => {},
   paginator: async function(msg, pager, elements, page = 0, perPage = 1) {
     try {
