@@ -100,7 +100,7 @@ const Utils = {
           return (getMember ? memberMentions.first() : memberMentions.first().user);
         } else if (suffix) {
           let member = (await msg.guild.members.fetch({query: suffix})).first();
-          return (getMember ? member : user);
+          return (getMember ? member : member.user);
         } else return (getMember ? msg.member : msg.author);
       } else {
         let userMentions = msg.mentions.users;
