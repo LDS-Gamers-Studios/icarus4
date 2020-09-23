@@ -90,21 +90,22 @@ const Utils = {
 
     return foundUser;
   },
-  getMention: async function(msg) {
+  getMention: async function(msg, getMember = true) {
     try {
       let {suffix} = Utils.parse(msg);
       if (msg.guild) {
         let memberMentions = msg.mentions.members;
         memberMentions.delete(msg.client.user.id);
-        if (memberMentions.size > 0) return memberMentions.first();
-        else if (suffix) {
+        if (memberMentions.size > 0) {
+          return (getMember ? memberMentions.first() : memberMentions.first().user);
+        } else if (suffix) {
           let member = (await msg.guild.members.fetch({query: suffix})).first();
-          return member;
-        } else return msg.member;
-      } else if (suffix) {
-        return msg.mentions.users.first();
+          return (getMember ? member : user);
+        } else return (getMember ? msg.member : msg.author);
       } else {
-        return msg.author;
+        let userMentions = msg.mentions.users;
+        userMentions.delete(msg.client.user.id);
+        return userMentions.first() || msg.author;
       }
     } catch(error) {
       u.errorHandler(error, msg);
