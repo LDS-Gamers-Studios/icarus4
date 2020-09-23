@@ -57,9 +57,9 @@ const Module = new Augur.Module()
   category: "Members",
   process: async (msg) => {
     try {
-      let user = msg.mentions.users.first() || msg.author;
-      let member;
+      let user, member;
       if (msg.guild) member = (await u.getMention(msg)) || msg.member;
+      user = (member ? member.user : (msg.mentions.users.first() || msg.author));
       let name = (member ? member.displayName : user.username);
       let embed = u.embed()
       .setAuthor(name)
