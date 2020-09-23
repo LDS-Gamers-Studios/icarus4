@@ -92,16 +92,20 @@ const Utils = {
   },
   getMention: async function(msg) {
     try {
+      let {suffix} = Utils.parse(msg);
       if (msg.guild) {
         let memberMentions = msg.mentions.members;
         memberMentions.delete(msg.client.user.id);
         if (memberMentions.size > 0) return memberMentions.first();
-        else {
-          let {suffix} = Utils.parse(msg);
+        else if (suffix) {
           let member = (await msg.guild.members.fetch({query: suffix})).first();
           return member;
-        }
-      } else return msg.mentions.users.first();
+        } else return msg.member;
+      } else if (suffix) {
+        return msg.mentions.users.first();
+      } else {
+        return msg.author;
+      }
     } catch(error) {
       u.errorHandler(error, msg);
       return null;
