@@ -1007,9 +1007,9 @@ Module
       else if (reaction.count == 1) {
         let embed = u.embed()
         .setTimestamp()
-        .setAuthor(message.member.displayName, message.member.user.displayAvatarURL())
+        .setAuthor(message.member.displayName + " 📌", message.member.user.displayAvatarURL())
         .setDescription(message.cleanContent)
-        .addField("Requested By", message.guild.members.cache.get(user.id).displayName)
+        .addField("Pin Requested By", message.guild.members.cache.get(user.id).displayName)
         .addField("Channel", message.channel.toString())
         .addField("Link to Post", message.url);
 
