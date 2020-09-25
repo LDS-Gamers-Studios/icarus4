@@ -1008,8 +1008,8 @@ Module
         let embed = u.embed()
         .setTimestamp()
         .setAuthor(message.member.displayName, message.member.user.displayAvatarURL())
-        .setTitle("Pin Request from " + message.guild.members.cache.get(user.id).displayName)
         .setDescription(message.cleanContent)
+        .addField("Requested By", message.guild.members.cache.get(user.id).displayName)
         .addField("Channel", message.channel.toString())
         .addField("Link to Post", message.url);
 
