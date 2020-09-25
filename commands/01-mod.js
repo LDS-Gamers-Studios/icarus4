@@ -1004,7 +1004,7 @@ Module
     // Pin Request
     if (message.guild && (message.guild.id == Module.config.ldsg) && (reaction.emoji.name == "📌")) {
       if (message.channel.permissionsFor(user).has("MANAGE_MESSAGES")) message.pin();
-      else if (reaction.count == 1)) {
+      else if (reaction.count == 1) {
         let embed = u.embed()
         .setTimestamp()
         .setAuthor(message.member.displayName, message.member.user.displayAvatarURL())
