@@ -992,13 +992,34 @@ Module
   if (msg.guild && msg.member && msg.guild.id == Module.config.ldsg) return processMessageLanguage(msg);
 })
 .addEvent("messageReactionAdd", async (reaction, user) => {
+  message = reaction.message;
   try {
-    let message = reaction.message;
     if ((message.channel.id == modLogs) && !user.bot && (message.author.id == message.client.user.id) && (cardReactions.includes(reaction.emoji.name) || reaction.emoji.name == "⏪")) {
       let flag = await Module.db.infraction.getByFlag(message.id);
       if (flag) processCardReaction(reaction, user, flag);
     }
   } catch(e) { u.errorHandler(e, "Card Reaction Processing"); }
+
+  try {
+    // Pin Request
+    if (message.guild && (message.guild.id == Module.config.ldsg) && (reaction.emoji.name == "📌") && (reaction.count == 1)) {
+      if (message.channel.permissionsFor(user).has("MANAGE_MESSAGES")) message.pin();
+      else {
+        let embed = u.embed()
+        .setTimestamp()
+        .setAuthor(message.member.displayName, message.member.user.displayAvatarURL())
+        .setTitle("Pin Request from " + message.guild.members.cache.get(user.id).displayName)
+        .setDescription(message.cleanContent)
+        .addField("Channel", message.channel.toString())
+        .addField("Link to Post", message.url);
+
+        if (message.attachments && (message.attachments.size > 0))
+          embed.setImage(message.attachments.first().url);
+
+        message.guild.channels.cache.get("506575671242260490").send({embed});
+      }
+    }
+  } catch(e) { u.errorHandler(e, "Pin Request Processing"); }
 })
 .addEvent("messageUpdate", (old, msg) => {
   if (msg.guild && msg.member && msg.guild.id == Module.config.ldsg) return processMessageLanguage(msg, true);
