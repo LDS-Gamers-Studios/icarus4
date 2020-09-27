@@ -138,7 +138,7 @@ const Module = new Augur.Module()
             .setURL(`${memberUrl}#member-spotlight`)
             .setDescription('Our community is filled with amazing people. Know someone that deserves the spotlight? Nominate them by sending CJ Stormblessed a message!');
 
-          let ldsg = msg.cliend.guilds.cache.get(Module.config.ldsg);
+          let ldsg = msg.client.guilds.cache.get(Module.config.ldsg);
           let member = msg.guild.members.cache.get(discordId);
           let displayName, avatar;
 
