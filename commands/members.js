@@ -138,19 +138,25 @@ const Module = new Augur.Module()
             .setURL(`${memberUrl}#member-spotlight`)
             .setDescription('Our community is filled with amazing people. Know someone that deserves the spotlight? Nominate them by sending CJ Stormblessed a message!');
 
-          let member = null;
+          let ldsg = msg.cliend.guilds.cache.get(Module.config.ldsg);
+          let member = msg.guild.members.cache.get(discordId);
+          let name, avatar;
 
-          if (msg.guild && (msg.guild.id == Module.config.ldsg)) {
-            member = await msg.guild.fetchMember(discordId);
+          if (ldsg.members.cache.has(discordId)) {
+            avatar = member.user.displayAvatarURL({dynamic: true});
+            name = member.displayName;
+          } else {
+            let user = await msg.client.users.fetch(discordId);
+            avatar = user.displayAvatarURL({dynamic: true});
+            name = user.username;
           }
 
-          let avatar = member.user.displayAvatarURL();
           let image = (avatar ? avatar : ("http://ldsgamers.com" + $('.member-image > img')[0].attribs.src));
 
           //let communityContent = `__**MEMBER SPOTLIGHT**__\nOur community is filled with amazing people. Know someone that deserves the spotlight? Nominate them here: <http://ldsg.io/nominate>\n\nThe spotlight currently shines on **<@${discordId}>**!\n\n${text} ...\n\nTo read more, go to <${memberUrl}#member-spotlight>.`;
           //msg.channel.send(communityContent, {"file": {"attachment": image}}).catch(console.error);
 
-          embed.addField('Current Spotlight', `The spotlight currently shines on **${member.displayName}**!\n\n${text} ...\n[READ MORE](${memberUrl}#member-spotlight)`)
+          embed.addField('Current Spotlight', `The spotlight currently shines on **${name}**!\n\n${text} ...\n[READ MORE](${memberUrl}#member-spotlight)`)
             .setThumbnail(image);
 
           msg.channel.send({embed});
