@@ -139,7 +139,7 @@ const Module = new Augur.Module()
             .setDescription('Our community is filled with amazing people. Know someone that deserves the spotlight? Nominate them by sending CJ Stormblessed a message!');
 
           let ldsg = msg.client.guilds.cache.get(Module.config.ldsg);
-          let member = msg.guild.members.cache.get(discordId);
+          let member = ldsg.members.cache.get(discordId);
           let displayName, avatar;
 
           if (ldsg.members.cache.has(discordId)) {
