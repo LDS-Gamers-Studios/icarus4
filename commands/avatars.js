@@ -113,6 +113,8 @@ const Module = new Augur.Module()
       } else if (match = urlexp.exec(suffix)) {
         original = match[1];
         color = parseInt(match[2], 10);
+      } else if (suffix.split(" ").length == 1 && color = parseInt(suffix, 10)) {
+        original = msg.author.displayAvatarURL({size: 512, format: "png"});
       } else {
         original = (await u.getMention(msg, false) || msg.author).displayAvatarURL({size: 512, format: "png"});
         color = parseInt(suffix.replace(/<@!?\d+>/g, ""), 10);
