@@ -464,7 +464,7 @@ Module
     let match;
     let banCount = 0;
     let confirm = await u.confirm(msg, `Are you sure you want to ban the following?\n${msg.mentions.members.map(m => m.displayName).join("\n")}`);
-    while (confirm && match = mentions.exec(suffix)) {
+    while ((match = mentions.exec(suffix)) && confirm) {
       userId = match[1];
       try {
         bans.add(userId);
