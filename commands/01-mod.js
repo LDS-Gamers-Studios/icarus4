@@ -475,7 +475,6 @@ Module
             msg.reply(`you cannot ban ${member.displayName}!`);
             continue;
           } else {
-            let confirm =
             const infraction = {
               discordId: member.id,
               description: reason,
