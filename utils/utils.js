@@ -22,6 +22,26 @@ const Utils = {
     }, t, msg);
     return Promise.resolve(msg);
   },
+  confirm: async function(msg, prompt = "Are you sure?", timeout = 15) {
+    try {
+      let buttons = ["✅", "⛔"];
+      let embed = Utils.embed().setColor(0xff0000)
+        .setTitle(`Confirmation Required - Confirm in ${timeout}s`)
+        .setAuthor(msg.member ? msg.member.displayName : msg.author.username, msg.author.displayAvatarURL())
+        .setDescription(prompt)
+        .setFooter(`${buttons[0]} to Confirm, ${buttons[1]} to Deny`);
+      let dialog = await msg.channel.send({embed});
+      for (let button of buttons) await dialog.react(button);
+
+      let react = await dialog.awaitReactions((reaction, user) => buttons.includes(reaction.emoji.name) && msg.author.id == user.id, {max: 1, time: timeout * 1000});
+      if (react.size == 1 && react.first().emoji.name == buttons[0]) {
+        return true;
+      } else {
+        return false;
+      }
+      dialog.delete();
+    } catch(error) { Utils.errorHandler(error, "Confirmation Prompt"); }
+  },
   embed: (data) => new Discord.MessageEmbed(data).setColor(config.color).setTimestamp(),
   errorHandler: function(error, msg = null) {
     if (!error) return;
