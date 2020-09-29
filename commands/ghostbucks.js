@@ -172,7 +172,7 @@ const Module = new Augur.Module()
       msg.delete();
       if (u.userMentions(msg, true).size > 0) {
         for (const [discordId, member] of u.userMentions(msg, true)) {
-          let team = msg.member.roles.cache.includes(Module.config.roles.team);
+          let team = msg.member.roles.cache.has(Module.config.roles.team);
           let ldsg = msg.client.guilds.cache.get(Module.config.ldsg);
           let reason = suffix.replace(/<@!?\d+>/ig, "").trim().split(" ");
           let value = parseInt(reason.shift(), 10);
