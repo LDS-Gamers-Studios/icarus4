@@ -184,7 +184,7 @@ const models = {
         let record = new Bank({
           discordId: data.discordId,
           description: data.description,
-          currency: currency,
+          currency: data.currency || currency,
           value: data.value,
           mod: data.mod
         });
