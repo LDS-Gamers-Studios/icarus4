@@ -37,6 +37,24 @@ function filterUnique(e, i, a) {
 }
 
 const Module = new Augur.Module()
+.addCommand({name: "balance",
+  aliases: ["account", ember, "ember", gb, "gb", "ghostbucks"],
+  description: "Show how many Ghost Bucks and Ember you've earned.",
+  category: "Ghost Bucks",
+  process: async (msg) => {
+    try {
+      let user = ( ((msg.mentions.users.size > 0) && (msg.guild && msg.member.roles.cache.has("96345401078087680"))) ? msg.mentions.users.first() : msg.author );
+      let gbBalance = await Module.db.bank.getBalance(user, "gb");
+      let emBalance = await Module.db.bank.getBalance(user, "em");
+      let embed = u.embed()
+      .setAuthor(
+        (msg.guild ? msg.guild.members.cache.get(user.id).displayName : user.username),
+        user.displayAvatarURL({dynamic: true})
+      ).setDescription(`${gb}${gbBalance.balance}\n${ember}${emBalance.balance}`);
+      msg.channel.send({embed});
+    } catch(error) { u.errorHandler(error, msg); }
+  }
+})
 .addCommand({name: "gamelist",
   description: "See what games are available to redeem.",
   category: "Ghost Bucks",
@@ -143,24 +161,6 @@ const Module = new Augur.Module()
     })
   }
 })
-.addCommand({name: "balance",
-  aliases: ["account", ember, "ember", gb, "gb", "ghostbucks"],
-  description: "Show how many Ghost Bucks and Ember you've earned.",
-  category: "Ghost Bucks",
-  process: async (msg) => {
-    try {
-      let user = ( ((msg.mentions.users.size > 0) && (msg.guild && msg.member.roles.cache.has("96345401078087680"))) ? msg.mentions.users.first() : msg.author );
-      let gbBalance = await Module.db.bank.getBalance(user, "gb");
-      let emBalance = await Module.db.bank.getBalance(user, "em");
-      let embed = u.embed()
-      .setAuthor(
-        (msg.guild ? msg.guild.members.cache.get(user.id).displayName : user.username),
-        user.displayAvatarURL({dynamic: true})
-      ).setDescription(`${gb}${gbBalance.balance}\n${ember}${emBalance.balance}`);
-      msg.channel.send({embed});
-    } catch(error) { u.errorHandler(error, msg); }
-  }
-})
 .addCommand({name: "giveember",
   syntax: "@user amount",
   description: "Give a user Ember",
@@ -176,7 +176,7 @@ const Module = new Augur.Module()
           let ldsg = msg.client.guilds.cache.get(Module.config.ldsg);
           let reason = suffix.replace(/<@!?\d+>/ig, "").trim().split(" ");
           let value = parseInt(reason.shift(), 10);
-          reason = ((reason.length > 0) ? reason.join(" ") : "No particular reason.");
+          reason = ((reason.length > 0) ? reason.join(" ") : "No particular reason.").trim();
 
           let deposit = {
             currency: "em",
@@ -233,7 +233,7 @@ const Module = new Augur.Module()
           let ldsg = msg.client.guilds.cache.get(Module.config.ldsg);
           let reason = suffix.replace(/<@!?\d+>/ig, "").trim().split(" ");
           let value = parseInt(reason.shift(), 10);
-          reason = ((reason.length > 0) ? reason.join(" ") : "No particular reason.");
+          reason = ((reason.length > 0) ? reason.join(" ") : "No particular reason.").trim();
 
           let deposit = {
             currency: "gb",
