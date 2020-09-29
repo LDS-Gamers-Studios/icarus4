@@ -58,12 +58,12 @@ const Module = new Augur.Module()
 })
 .addCommand({name: "rankreset",
   description: "Reset the LDSG chat ranks!",
-  syntax: "GhostBucksSpread",
-  info: "Reset chat ranks and give the indicated number of Ghost Bucks to the members, proportional to their chat XP.",
+  syntax: "EmberSpread",
+  info: "Reset chat ranks and give the indicated number of Ember to the members, proportional to their chat XP.",
   permissions: (msg) => Module.config.adminId.includes(msg.author.id) && msg.guild && msg.guild.id == Module.config.ldsg,
   process: async function(msg, suffix) {
     try {
-      let gb = "<:gb:493084576470663180>";
+      let ember = "<:ember:512508452619157504>"
       let dist = parseInt(suffix, 10) || 0;
       let members = await msg.guild.members.fetch();
       let users = (await Module.db.user.getUsers({currentXP: {$gt: 0}}))
@@ -84,20 +84,21 @@ const Module = new Augur.Module()
           if (award) {
             setTimeout(async (user, value) => {
               Module.db.bank.addCurrency({
+                currency: "em",
                 discordId: user.discordId,
                 description: "Chat Rank Reset - " + (new Date()).toDateString(),
                 value,
                 mod: msg.author.id
-              }).then(deposit => {
-                guild.members.cache.get(deposit.discordId).send(`${guild.name} Chat Ranks have been reset! You've been awarded ${gb}${deposit.value} for your participation this season!`).catch(u.noop);
+              }, "em").then(deposit => {
+                guild.members.cache.get(deposit.discordId).send(`${guild.name} Chat Ranks have been reset! You've been awarded ${ember}${deposit.value} for your participation this season!`).catch(u.noop);
               });
             }, 1100 * i++, user, award);
           }
         }
       }
 
-      let announce = `__**CHAT RANK RESET!!**__\n\nAnother chat season has come to a close! In the most recent season, we've had ${users.length} active members chatting! The three most active members were:\n${top3}`;
-      if (dist > 0) announce += `\n\n${gb}${dist} have been distributed among *all* LDSG members who participated in chat this season, proportional to their participation.`;
+      let announce = `__**CHAT RANK RESET!!**__\n\nAnother chat season has come to a close! In the most recent season, we've had ${users.length} active members who are tracking XP chatting! The three most active members were:\n${top3}`;
+      if (dist > 0) announce += `\n\n${ember}${dist} have been distributed among *all* LDSG members who are tracking XP and participated in chat this season, proportional to their participation.`;
       msg.guild.channels.channels.cache.get("121752198731268099").send(announce);
 
       Module.db.user.resetXP();
