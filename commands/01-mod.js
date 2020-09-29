@@ -463,7 +463,8 @@ Module
     const reason = suffix.replace(mentions, "").trim() || "[Member Ban]: Violating the Code of Conduct";
     let match;
     let banCount = 0;
-    while (match = mentions.exec(suffix)) {
+    let confirm = await u.confirm(msg, `Are you sure you want to ban the following?\n${msg.mentions.members.map(m => m.displayName).join("\n")}`);
+    while (confirm && match = mentions.exec(suffix)) {
       userId = match[1];
       try {
         bans.add(userId);
@@ -474,6 +475,7 @@ Module
             msg.reply(`you cannot ban ${member.displayName}!`);
             continue;
           } else {
+            let confirm =
             const infraction = {
               discordId: member.id,
               description: reason,
@@ -483,6 +485,7 @@ Module
             await (member.send(`You were banned from ${msg.guild.name} for ${reason}`).catch(() => blocked(member)));
             await member.ban({days: 2, reason});
             msg.client.channels.cache.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** banned **${u.escapeText(member.displayName)}** for ${reason}`);
+
           }
         } else {
           msg.guild.members.ban(userId, {days: 2, reason});
@@ -495,6 +498,8 @@ Module
     }
     if (banCount > 0) {
       msg.reply(`${banCount} user(s) banned.`).then(u.clean);
+    } else if (!confirm) {
+      msg.reply("`!ban` cancelled.").then(u.clean);
     } else {
       msg.reply("you need to tell me who to ban!").then(u.clean);
     }
@@ -580,7 +585,10 @@ Module
   process: async (msg, suffix) => {
     u.clean(msg, 0);
     const members = u.userMentions(msg, true);
-    if (members.size > 0) {
+
+    let confirm = await u.confirm(msg, `Are you sure you want to kick the following?\n${members.map(m => m.displayName).join("\n")}`);
+
+    if (confirm && members.size > 0) {
       let reason = suffix.replace(/<@!?\d+>/ig, "").trim() || "[Member Kick] Violating the Code of Conduct";
       let guild = msg.guild;
       // Get highest role that isn't "Live"
@@ -610,9 +618,10 @@ Module
           await Module.db.user.update(memberId, {roles: memberDoc.roles});
         } catch(e) { u.errorHandler(e, msg); }
       }
+    } else if (!confirm) {
+      msg.reply("`!kick` cancelled.").then(u.clean);
     } else {
-      msg.reply("you need to tell me who to kick!")
-        .then(u.clean);
+      msg.reply("you need to tell me who to kick!").then(u.clean);
     }
   }
 })
