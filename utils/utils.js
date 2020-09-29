@@ -34,12 +34,12 @@ const Utils = {
       for (let button of buttons) await dialog.react(button);
 
       let react = await dialog.awaitReactions((reaction, user) => buttons.includes(reaction.emoji.name) && msg.author.id == user.id, {max: 1, time: timeout * 1000});
+      dialog.delete();
       if (react.size == 1 && react.first().emoji.name == buttons[0]) {
         return true;
       } else {
         return false;
       }
-      dialog.delete();
     } catch(error) { Utils.errorHandler(error, "Confirmation Prompt"); }
   },
   embed: (data) => new Discord.MessageEmbed(data).setColor(config.color).setTimestamp(),
