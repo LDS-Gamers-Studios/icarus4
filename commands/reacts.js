@@ -11,7 +11,7 @@ const emojis = new u.Collection([
 
 const Module = new Augur.Module()
 .addEvent("message", (msg) => {
-  if (msg.guild && msg.guild.id == Module.config.ldsg) {
+  if (!msg.author.bot && msg.guild && msg.guild.id == Module.config.ldsg) {
     let bot = msg.client;
 
     // Sponsor Pings
