@@ -739,7 +739,7 @@ Module
             break;
         }
         if (num > 0) {
-          let msgsToDelete = channel.messages.fetch({limit=num, before=msg.id});
+          let msgsToDelete = await channel.messages.fetch({limit=num, before=msg.id});
           for (let (id, deleteMe) of msgsToDelete) {
             await deleteMe.delete();
           }
