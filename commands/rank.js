@@ -79,7 +79,7 @@ const Module = new Augur.Module()
       if (dist) {
         let i = 0;
         for (let user of users) {
-          let user = users[i];
+          //let user = users[i];
           let award = Math.round(rate * user.currentXP);
           if (award) {
             //setTimeout(async (user, value) => {
