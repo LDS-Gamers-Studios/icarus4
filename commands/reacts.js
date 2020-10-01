@@ -19,7 +19,7 @@ const Module = new Augur.Module()
       if (msg.mentions.members.has(sponsor)) msg.react(bot.emojis.cache.get(emoji)).catch(u.noop);
 
     // General Weirdness
-    if (roll < .3) {
+    if (Math.random() < .3) {
       if (/buttermelon/.test(msg.content.toLowerCase()))
         msg.react(bot.emojis.cache.get(emojis.get("buttermelon"))).catch(u.noop);
       if (/carp/.test(msg.content.toLowerCase()))
