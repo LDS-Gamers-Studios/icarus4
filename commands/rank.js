@@ -87,7 +87,7 @@ const Module = new Augur.Module()
                 currency: "em",
                 discordId: user.discordId,
                 description: "Chat Rank Reset - " + (new Date()).toDateString(),
-                value,
+                value: award,
                 mod: msg.author.id
               }, "em");
               //.then(deposit => {
