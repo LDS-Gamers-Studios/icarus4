@@ -733,8 +733,16 @@ Module
       if (num > 0) {
         while (num > 0) {
           let deleting = Math.min(num, 50)
-          await channel.bulkDelete(deleting);
-          num -= deleting;
+          deleted = await channel.bulkDelete(deleting, filterOld=true);
+          num -= deleted.size;
+          if (deleted.size != deleting)
+            break;
+        }
+        if (num > 0) {
+          let msgsToDelete = channel.messages.fetch({limit=num, before=msg.id});
+          for (let (id, deleteMe) of msgsToDelete) {
+            await deleteMe.delete();
+          }
         }
         msg.guild.channels.cache.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** purged ${purge} messages in ${msg.channel}`);
       } else {
