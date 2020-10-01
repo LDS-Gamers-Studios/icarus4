@@ -733,14 +733,15 @@ Module
       if (num > 0) {
         while (num > 0) {
           let deleting = Math.min(num, 50)
-          deleted = await channel.bulkDelete(deleting, filterOld=true);
+          deleted = await channel.bulkDelete(deleting, true);
           num -= deleted.size;
           if (deleted.size != deleting)
             break;
         }
         if (num > 0) {
-          let msgsToDelete = await channel.messages.fetch({limit=num, before=msg.id});
-          for (let (id, deleteMe) of msgsToDelete) {
+          let msgsToDelete = await channel.messages.fetch({limit: num, before: msg.id});
+          let delay = 0;
+          for (let [id, deleteMe] of msgsToDelete) {
             await deleteMe.delete();
           }
         }
