@@ -101,7 +101,7 @@ const Module = new Augur.Module()
       let announce = `__**CHAT RANK RESET!!**__\n\nAnother chat season has come to a close! In the most recent season, we've had ${users.length} active members who are tracking XP chatting! The three most active members were:\n${top3}`;
       if (dist > 0) announce += `\n\n${ember}${dist} have been distributed among *all* LDSG members who are tracking XP and participated in chat this season, proportional to their participation.`;
       announce += "\n\nIf you would like to participate in this season's chat ranks and *haven't* opted in, `!trackxp` will get you in the mix. Users who have previously used `!trackxp` don't need to do so again.";
-      msg.guild.channels.channels.cache.get("121752198731268099").send(announce);
+      msg.guild.channels.cache.get("121752198731268099").send(announce);
 
       Module.db.user.resetXP();
     } catch(e) { u.errorHandler(e, msg); }
