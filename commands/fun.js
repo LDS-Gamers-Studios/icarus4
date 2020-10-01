@@ -24,13 +24,13 @@ async function testBirthdays() {
   try {
     let bot = Module.client;
     let curDate = new Date();
-    let ldsg = Module.config.ldsg;
+    let ldsg = bot.guilds.cache.get(Module.config.ldsg);
     if (curDate.getHours() == 20) {
       // Birthday Blast
-      let birthdays = (await Module.db.ign.getList("birthday")).filter(ign => bot.guilds.cache.get(ldsg).members.cache.has(ign.discordId));
+      let birthdays = (await Module.db.ign.getList("birthday")).filter(ign => ldsg.members.cache.has(ign.discordId));
       for (let birthday of birthdays) {
         let date = new Date(birthday.ign);
-        if (date.getMonth() == curDate.getMonth() && date.getDate() == curDate.getDate()) {
+        if (date && date.getMonth() == curDate.getMonth() && date.getDate() == curDate.getDate()) {
           let flair = [
             ":tada: ",
             ":confetti_ball: ",
@@ -39,14 +39,14 @@ async function testBirthdays() {
             ":cake: "
           ];
           try {
-            let member = await bot.guilds.cache.get(ldsg).fetchMember(birthday.discordId);
-            await bot.channels.cache.get(ldsg).send(":birthday: :confetti_ball: :tada: Happy Birthday, " + member + "! :tada: :confetti_ball: :birthday:");
+            let member = ldsg.members.cache.get(birthday.discordId);
+            await ldsg.channels.cache.get(Module.config.ldsg).send(":birthday: :confetti_ball: :tada: Happy Birthday, " + member + "! :tada: :confetti_ball: :birthday:");
             const birthdayLangs = require("../data/birthday.json");
             let msgs = birthdayLangs.map(lang => member.send(u.rand(flair) + " " + lang));
             Promise.all(msgs).then(() => {
               member.send(":birthday: :confetti_ball: :tada: A very happy birthday to you, from LDS Gamers! :tada: :confetti_ball: :birthday:").catch(u.noop);
             }).catch(u.noop);
-          } catch (e) { continue; }
+          } catch (e) { u.errorHandler(error, "Birthay Send"); continue; }
         }
       }
 
@@ -58,7 +58,7 @@ async function testBirthdays() {
         "543065980096741386",
         "731895666577506345"
       ];
-      let members = bot.guilds.cache.get(ldsg).members.cache;
+      let members = ldsg.members.cache;
       let apicall = 1;
       for (let [key, member] of members) {
         try {
@@ -75,7 +75,7 @@ async function testBirthdays() {
             try {
               let user = await Module.db.user.fetchUser(member.id);
               if (user.posts > 0) {
-                bot.channels.cache.get(ldsg).send(`${member} has been part of the server for ${years} ${(years > 1 ? "years" : "year")}! Glad you're with us!`);
+                ldsg.channels.cache.get(Module.config.ldsg).send(`${member} has been part of the server for ${years} ${(years > 1 ? "years" : "year")}! Glad you're with us!`);
               }
             } catch (e) { u.errorHandler(e, "Announce Cake Day Error"); continue; }
           }
