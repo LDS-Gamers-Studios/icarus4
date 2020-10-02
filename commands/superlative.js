@@ -61,12 +61,20 @@ const starBoards = new u.Collection()
 
 async function checkStarBoard(reaction, user) {
   try {
+    if (reaction.message.partial) {
+      try {
+        await msg.fetch();
+      } catch(error) {
+        this.errorHandler(error, "Fetch Partial Message Update Error");
+      }
+    }
+
     if (!user.bot && reaction.message.guild && reaction.message.guild.id == Module.config.ldsg && (reaction.message.createdTimestamp > (Date.now() - 7 * 24 * 60 * 60000))) {
       // Only respond to recent messages from LDSG
       const msg = reaction.message;
       let react = reaction.emoji.name;
 
-      if (!msg.author.bot && (reaction.count == 2)) {
+      if (!msg.author.bot && (reaction.count == 5)) {
         // Process initial star
         if (await Module.db.starboard.fetchMessage(msg.id)) return; // Already starred. Don't do it again
         let posted;
@@ -105,6 +113,7 @@ async function checkStarBoard(reaction, user) {
             let embed = u.embed(msg.embeds[0]).setTimestamp(star.timestamp);
             let posted = await msg.guild.channels.cache.get(board.board).send({embed});
             await Module.db.starboard.approveStar(msg, posted);
+            await msg.reactions.removeAll();
           }
         } catch(error) { u.errorHandler(error, "Approve Star"); }
       }
