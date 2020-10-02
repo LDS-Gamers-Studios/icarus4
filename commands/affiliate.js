@@ -45,7 +45,7 @@ const Module = new Augur.Module()
     processLinks(msg);
 })
 .addEvent("messageUpdate", (oldMsg, msg) => {
-  if (hasLink.test(msg.cleanContent) && !hasLink.test(oldMsg.cleanContent))
+  if (hasLink.test(msg.cleanContent) && (oldMsg.partial || hasLink.test(oldMsg.cleanContent)))
     processLinks(msg);
 });
 

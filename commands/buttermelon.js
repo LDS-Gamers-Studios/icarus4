@@ -44,7 +44,7 @@ const Module = new Augur.Module()
 })
 .addEvent("message", buttermelonEdit)
 .addEvent("messageUpdate", (oldMsg, msg) => {
-  if (!(/banana/.test(oldMsg.cleanContent.toLowerCase())))
+  if (oldMsg.partial || !(/banana/.test(oldMsg.cleanContent.toLowerCase())))
     buttermelonEdit(msg);
 });
 
