@@ -484,7 +484,10 @@ const models = {
     },
     fetchStar: (starId) => {
       return new Promise((fulfill, reject) => {
-        Star.findOne({starId})
+        Star.findOne({starId}, (error, star) => {
+          if (error) reject(error);
+          else fulfill(star);
+        });
       });
     },
     fetchMessage: (messageId) => {
