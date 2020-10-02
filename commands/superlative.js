@@ -74,7 +74,7 @@ async function checkStarBoard(reaction, user) {
       const msg = reaction.message;
       let react = reaction.emoji.name;
 
-      if (!msg.author.bot && (reaction.count == 5)) {
+      if (!msg.author.bot && (reaction.count == 5) && (msg.channel.parentID != "730435569330421830")) {
         // Process initial star
         if (await Module.db.starboard.fetchMessage(msg.id)) return; // Already starred. Don't do it again
         let posted;
