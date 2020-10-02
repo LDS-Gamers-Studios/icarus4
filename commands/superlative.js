@@ -103,7 +103,7 @@ async function checkStarBoard(reaction, user) {
           let board = starBoards.find(b => b.confirm == react);
           if (star && board) {
             let embed = u.embed(msg.embeds[0]).setTimestamp(star.timestamp);
-            let posted = await msg.guild.channels.channels.get(board.board).send({embed});
+            let posted = await msg.guild.channels.cache.get(board.board).send({embed});
             await Module.db.starboard.approveStar(msg, posted);
           }
         } catch(error) { u.errorHandler(error, "Approve Star"); }
