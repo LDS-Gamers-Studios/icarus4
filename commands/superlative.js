@@ -84,6 +84,8 @@ async function checkStarBoard(reaction, user) {
           .setDescription(msg.cleanContent)
           .addField("Channel", msg.channel.name)
           .addField("Jump to post", msg.url);
+        if (msg.attachments && (msg.attachments.size > 0))
+          embed.setImage(msg.attachments.first().url);
         try { // Post in applicable star board
           for (const [board, defaults] of starBoards) {
             if (defaults.emoji.includes(react) || ((react == "⭐") && (defaults.channels.includes(msg.channel.id) || defaults.channels.includes(msg.channel.parentID)))) {
@@ -102,6 +104,7 @@ async function checkStarBoard(reaction, user) {
               if (defaults.confirm)
                 await posted.react(defaults.confirm);
             }
+            await posted.react("🚫");
           }
         } catch(error) { u.errorHandler(error, "Post Star to Approval Queue"); }
       } else if ((msg.channel.id == approvalQueue) && (msg.author.id == msg.client.user.id)) {
@@ -109,10 +112,17 @@ async function checkStarBoard(reaction, user) {
         try {
           let star = await Module.db.starboard.fetchStar(msg.id);
           let board = starBoards.find(b => b.confirm == react);
-          if (star && board) {
+          if (star && !star.deny && board) {
             let embed = u.embed(msg.embeds[0]).setTimestamp(star.timestamp);
             let posted = await msg.guild.channels.cache.get(board.board).send({embed});
             await Module.db.starboard.approveStar(msg, posted);
+            embed.setColor(0x00ff00);
+            await msg.edit({embed});
+            await msg.reactions.removeAll();
+          } else if (star && react == "🚫") {
+            let embed = u.embed(msg.embeds[0]).setTimestamp(star.timestamp).setColor(0xff0000);
+            await Module.db.starboard.denyStar(star);
+            await msg.edit({embed});
             await msg.reactions.removeAll();
           }
         } catch(error) { u.errorHandler(error, "Approve Star"); }
