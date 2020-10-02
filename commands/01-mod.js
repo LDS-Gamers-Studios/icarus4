@@ -742,7 +742,7 @@ Module
           let msgsToDelete = await channel.messages.fetch({limit: num, before: msg.id});
           let delay = 0;
           for (let [id, deleteMe] of msgsToDelete) {
-            await deleteMe.delete({timeout: (delay++) * 1200});
+            deleteMe.delete({timeout: (delay++) * 1200}).catch(u.noop);
           }
         }
         msg.guild.channels.cache.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** purged ${purge} messages in ${msg.channel}`);
