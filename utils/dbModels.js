@@ -482,21 +482,27 @@ const models = {
         });
       });
     },
-    fetchStar: (messageId) => {
+    fetchStar: (starId) => {
       return new Promise((fulfill, reject) => {
-        Star.findOne({messageId: messageId}, (e, star) => {
+        Star.findOne({starId})
+      });
+    },
+    fetchMessage: (messageId) => {
+      return new Promise((fulfill, reject) => {
+        Star.findOne({messageId}, (e, star) => {
           if (e) reject(e);
           else fulfill(star);
         });
       });
     },
-    saveStar: (message, starboard) => {
+    saveStar: (message, starpost) => {
       return new Promise((fulfill, reject) => {
         let newStar = new Star({
           author: message.author.id,
           messageId: message.id,
           channelId: message.channel.id,
-          starId: starboard.id,
+          boardId: starpost.channel.id,
+          starId: starpost.id,
           deny: false,
           timestamp: message.createdAt
         });
@@ -504,6 +510,18 @@ const models = {
           if (e) reject (e);
           else fulfill(star);
         });
+      });
+    },
+    approveStar: (star1, star2) => {
+      return new Promise((fulfill, reject) => {
+        Star.findOneAndUpdate(
+          {starId: star1.id},
+          {$set: {starId: star2.id}},
+          (error, doc) => {
+            if (error) reject(error);
+            else fulfill(doc);
+          }
+        );
       });
     }
   },
