@@ -83,7 +83,8 @@ async function checkStarBoard(reaction, user) {
           .setTimestamp(msg.createdAt)
           .setDescription(msg.cleanContent)
           .addField("Channel", msg.channel.name)
-          .addField("Jump to post", msg.url);
+          .addField("Jump to post", msg.url)
+          .setFooter(react);
         if (msg.attachments && (msg.attachments.size > 0))
           embed.setImage(msg.attachments.first().url);
         try { // Post in applicable star board
