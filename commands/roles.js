@@ -20,7 +20,7 @@ const Module = new Augur.Module()
         let member = await ldsg.members.fetch(msg.author.id);
         if (member) await member.roles.add(role);
         msg.react("👌");
-        modLogs.send(`ℹ️ **${member.displayName}** added the ${role.name} role.`);
+        //modLogs.send(`ℹ️ **${member.displayName}** added the ${role.name} role.`);
       } else {
         msg.reply("you didn't give me a valid role to apply.")
         .then(u.clean);
@@ -102,7 +102,7 @@ const Module = new Augur.Module()
         let member = await ldsg.members.fetch(msg.author);
         if (member) await member.roles.remove(role);
         msg.react("👌");
-        modLogs.send(`ℹ️ **${member.displayName}** removed the ${role.name} role.`);
+        //modLogs.send(`ℹ️ **${member.displayName}** removed the ${role.name} role.`);
       } else {
         msg.reply("you didn't give me a valid role to remove.")
         .then(u.clean);
