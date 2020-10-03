@@ -176,7 +176,7 @@ const Module = new Augur.Module()
       msg.reply("You need to tell me which libraries to reload!").then(u.clean);
     }
   },
-  permissions: (msg) => Module.config.adminId.includes(msg.author.id);
+  permissions: (msg) => Module.config.adminId.includes(msg.author.id)
 })
 .addCommand({name: "repo",
   description: "Get a link to the bot's source code.",
