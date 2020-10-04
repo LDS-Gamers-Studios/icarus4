@@ -8,6 +8,10 @@ const badges = new Map()
 
   //.set("318427374309998592", {title: "LDSG Tournament Champion", image: "tourney_champ.png"})
 
+  .set("282364647041007616", {title: "House Brightbeam", image: "bb-badge.png", desc: "House Brightbeam - Bastion of the Light"})
+  .set("282364721045438464", {title: "House Freshbeast", image: "fb-badge.png", desc: "House Freshbeast - Thunder from the Mountains"})
+  .set("282364218282606594", {title: "House Starcamp", image: "sc-badge.png", desc: "House Starcamp - In Pursuit of the Stars"})
+
   .set("121783903630524419", {title: "Pro Sponsor", image: "sponsor_pro.png", desc: "Your generous donation lets us know you care about the community. You have our sincerest thanks, you awesome person, you.", overrides: ["121783798647095297", "114816596341424129", "338056125062578176", "114817401614368775"]})
   .set("121783798647095297", {title: "Onyx Sponsor", image: "sponsor_onyx.png", desc: "Your generous donation lets us know you care about the community. You have our sincerest thanks, you awesome person, you.", overrides: ["114816596341424129", "338056125062578176", "114817401614368775"]})
   .set("114816596341424129", {title: "Elite Sponsor", image: "sponsor_elite.png", desc: "Your generous donation lets us know you care about the community. You have our sincerest thanks, you awesome person, you.", overrides: ["338056125062578176", "114817401614368775"]})
