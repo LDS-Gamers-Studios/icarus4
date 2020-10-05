@@ -37,7 +37,7 @@ const starBoards = new u.Collection()
   board: "762681097162457128",
   emoji: ["🎥"],
   channels: [
-    "758865178191855666"
+    "737557773000245298"
   ],
   confirm: "🎥"
 })
