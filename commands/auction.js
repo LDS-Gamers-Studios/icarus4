@@ -71,9 +71,9 @@ const Module = new Augur.Module()
       let pattern = /(\S+) (?:\S+)?(\d+) (.*)/;
       let match = pattern.exec(suffix);
       if (match) {
-        let currency = pattern[1];
-        let reserve = parseInt(pattern[2], 10);
-        let description = pattern[2];
+        let currency = match[1];
+        let reserve = parseInt(match[2], 10);
+        let description = match[3];
         let auction = new Auction({
           bids: [{user: msg.author.id, bid: reserve}],
           description,
