@@ -33,7 +33,11 @@ class Auction {
   }
 
   get highbid() {
-    return this.bids.sort((a, b) => b.bid - a.bid)[0];
+    let max = {user: null, bid: -Infinity};
+    for (let bid of this.bids) {
+      if (bid.bid > max.bid) max = bid;
+    }
+    return max;
   }
 
   setMessage(msg) {
