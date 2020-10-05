@@ -121,8 +121,9 @@ const Module = new Augur.Module()
         let bid = parseInt(params[1], 10);
         let auction = auctions.get(params[0]);
         if (auction && !auction.complete && bid) {
-          let high = auctions.highbid;
+          let high = auction.highbid;
           let success = auction.bid(msg.author, bid);
+          console.log(auction.toObject());
           if (success) {
             let post = await msg.guild.channels.cache.get(auctionboard).fetch(auction.messageId);
             await post.edit({embed: auction.embed});
