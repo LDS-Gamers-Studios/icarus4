@@ -68,12 +68,12 @@ const Module = new Augur.Module()
   permissions: (msg) => msg.guild && msg.member.roles.cache.has(Module.config.roles.management),
   process: async (msg, suffix) => {
     try {
-      let pattern = /(\w+) (?:\w+)?(\d+) (.*)/;
+      let pattern = /(\S+) (?:\S+)?(\d+) (.*)/;
       let match = pattern.exec(suffix);
       if (match) {
         let currency = pattern[1];
-        let reserve = parseInt(pattern[3], 10);
-        let description = pattern[4];
+        let reserve = parseInt(pattern[2], 10);
+        let description = pattern[2];
         let auction = new Auction({
           bids: [{user: msg.author.id, bid: reserve}],
           description,
