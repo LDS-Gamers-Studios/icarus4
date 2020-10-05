@@ -25,7 +25,7 @@ async function testBirthdays() {
     let bot = Module.client;
     let curDate = new Date();
     let ldsg = bot.guilds.cache.get(Module.config.ldsg);
-    if (curDate.getHours() == 20) {
+    if (curDate.getHours() == 15) {
       // Birthday Blast
       let birthdays = (await Module.db.ign.getList("birthday")).filter(ign => ldsg.members.cache.has(ign.discordId));
       for (let birthday of birthdays) {
@@ -40,7 +40,7 @@ async function testBirthdays() {
           ];
           try {
             let member = ldsg.members.cache.get(birthday.discordId);
-            await ldsg.channels.cache.get(Module.config.ldsg).send(":birthday: :confetti_ball: :tada: Happy Birthday, " + member + "! :tada: :confetti_ball: :birthday:");
+            await ldsg.channels.cache.get(Module.config.ldsg).send(`:birthday: :confetti_ball: :tada: Happy Birthday, ${member}! :tada: :confetti_ball: :birthday:`);
             const birthdayLangs = require("../data/birthday.json");
             let msgs = birthdayLangs.map(lang => member.send(u.rand(flair) + " " + lang));
             Promise.all(msgs).then(() => {
