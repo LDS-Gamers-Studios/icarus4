@@ -17,13 +17,11 @@ const starBoards = new u.Collection()
   channels: [],
   confirm: "⭐"
 })
-.set("730435722699472896", { // #made-me-laugh *
-  board: "730435722699472896",
-  emoji: ["😆", "🤣", "😂", "ghostlaugh"],
-  channels: [
-    "121755900313731074" // #gifs-and-memes
-  ],
-  confirm: "😆"
+.set("762681231879045171", { // #aww
+  board: "762681231879045171",
+  emoji: ["💖", "ohhh"],
+  channels: [],
+  confirm: "💖"
 })
 .set("730435938072789033", { // #the-gallery *
   board: "730435938072789033",
@@ -34,6 +32,22 @@ const starBoards = new u.Collection()
     "544360918495264798"  // #3d-printing
   ],
   confirm: "🖌️"
+})
+.set("762681097162457128", { // #hype-reel
+  board: "762681097162457128",
+  emoji: ["🎥"],
+  channels: [
+    "758865178191855666"
+  ],
+  confirm: "🎥"
+})
+.set("730435722699472896", { // #made-me-laugh *
+  board: "730435722699472896",
+  emoji: ["😆", "🤣", "😂", "ghostlaugh"],
+  channels: [
+    "121755900313731074" // #gifs-and-memes
+  ],
+  confirm: "😆"
 })
 .set("760589583942942760", { // #uplifted *
   board: "760589583942942760",
