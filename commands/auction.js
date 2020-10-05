@@ -118,10 +118,12 @@ const Module = new Augur.Module()
         let auction = auctions.get(params[0]);
         if (auction && !auction.complete && bid) {
           let high = auctions.highbid;
-          let success = auctions.get(params[0]).bid(msg.author, bid);
+          let success = auction.bid(msg.author, bid);
           if (success) {
+            let post = await msg.guild.channels.cache.get(auctionboard).fetch(auction.messageId);
+            await post.edit({embed: auction.embed});
             msg.reply("your bid has been entered!").then(u.clean);
-            msg.client.users.cache.get(high.user).send(`You've been outbid in Auction ${auction.id} by ${msg.member.displayName}!`).catch(u.noop);
+            if (high.user) msg.client.users.cache.get(high.user).send(`You've been outbid in Auction ${auction.id} by ${msg.member.displayName}!`).catch(u.noop);
             saveAuctions();
           } else msg.reply("your bid was unsuccessful.").then(u.clean);
         } else {
