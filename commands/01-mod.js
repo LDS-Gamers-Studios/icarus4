@@ -738,12 +738,16 @@ Module
           if (deleted.size != deleting)
             break;
         }
-        if (num > 0) {
-          let msgsToDelete = await channel.messages.fetch({limit: num, before: msg.id});
-          let delay = 0;
+        let delay = 0;
+        while (num > 0) {
+          let fetching = Math.min(num, 50);
+          let msgsToDelete = await channel.messages.fetch({limit: fetching, before: msg.id});
           for (let [id, deleteMe] of msgsToDelete) {
             deleteMe.delete({timeout: (delay++) * 1200}).catch(u.noop);
           }
+          num -= msgsToDelete.size;
+          if (msgsToDelete.size != fetching)
+            break;
         }
         msg.guild.channels.cache.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** purged ${purge} messages in ${msg.channel}`);
       } else {
