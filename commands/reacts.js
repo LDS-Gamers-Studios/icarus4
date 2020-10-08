@@ -26,9 +26,9 @@ const Module = new Augur.Module()
         msg.react("🐟").catch(u.noop);
       if (msg.content.toLowerCase().includes("noice"))
         msg.react(bot.emojis.cache.get(emojis.get("noice"))).catch(u.noop);
-      if (msg.content.toLowerCase().includes("taco") && msg.channel.id == "762505119710969946")
+      if (msg.channel.id == "762505119710969946" && msg.content.toLowerCase().includes("taco"))
         msg.react("🌮").catch(u.noop);
-      if (msg.content.toLowerCase().includes("sword") && msg.channel.id == "762505078531293205")
+      if (msg.channel.id == "762505078531293205" && msg.content.toLowerCase().includes("sword"))
         msg.react("⚔️").catch(u.noop);
     }
   }
