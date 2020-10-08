@@ -150,13 +150,7 @@ const Module = new Augur.Module()
         for (const [id, role] of newMember.roles.cache) {
           if (!oldMember.roles.cache.has(id) && inventory.has(id)) {
             // New equippable!
-            if (newMember.roles.cache.some((r) => inventory.find(i => i == r.id))) {
-              // They already have a role equipped
-              newMember.send(`You now have the color-equippable role **${role.name}**! You can equip the color with the \`!equip ${role.name}\` command.`).catch(u.noop);
-            } else {
-              await newMember.roles.add(inventory.get(id));
-              newMember.send(`You now have the color-equippable role **${role.name}**! This has automatically been equipped for you. You can unequip it with the \`!unequip\` command.`).catch(u.noop);
-            }
+            newMember.send(`You now have the color-equippable role **${role.name}**! You can equip the color with the \`!equip ${role.name}\` command.`).catch(u.noop);
           }
         }
         await Module.db.user.updateRoles(newMember);
