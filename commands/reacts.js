@@ -20,12 +20,16 @@ const Module = new Augur.Module()
 
     // General Weirdness
     if (Math.random() < .3) {
-      if (/buttermelon/.test(msg.content.toLowerCase()))
+      if (msg.content.toLowerCase().includes("buttermelon"))
         msg.react(bot.emojis.cache.get(emojis.get("buttermelon"))).catch(u.noop);
-      if (/carp/.test(msg.content.toLowerCase()))
+      if (msg.content.toLowerCase().includes("carp"))
         msg.react("🐟").catch(u.noop);
-      if (/noice/.test(msg.content.toLowerCase()))
+      if (msg.content.toLowerCase().includes("noice"))
         msg.react(bot.emojis.cache.get(emojis.get("noice"))).catch(u.noop);
+      if (msg.content.toLowerCase().includes("taco") && msg.channel.id == "762505119710969946")
+        msg.react("🌮").catch(u.noop);
+      if (msg.content.toLowerCase().includes("sword") && msg.channel.id == "762505078531293205")
+        msg.react("⚔️").catch(u.noop);
     }
   }
 });
