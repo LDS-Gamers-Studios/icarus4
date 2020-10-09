@@ -158,6 +158,30 @@ const Module = new Augur.Module()
     } catch(e) { u.errorHandler(e, msg); }
   }
 })
+.addCommand({name: "greyscale",
+  description: "Greyscale an Avatar",
+  aliases: ["grayscale", "bw"],
+  category: "Silly",
+  process: async (msg, suffix) => {
+    try {
+      let target;
+      let urlexp = /\<?(https?:\/\/\S+)\>?(?:\s+)?(\d*)/;
+
+      if (msg.attachments.size > 0) {
+        target = msg.attachments.first().url;
+      } else if (match = urlexp.exec(suffix)) {
+        target = match[1];
+      } else {
+        target = (await u.getMention(msg, false) || msg.author).displayAvatarURL({size: 512, format: "png"});
+      }
+
+      let av = await Jimp.read(target);
+      av.color([{ apply: "desaturate", params: [100] }]);
+
+      await msg.channel.send({files: [await av.getBufferAsync(Jimp.MIME_PNG)]});
+    } catch(e) { u.errorHandler(e, msg); }
+  }
+})
 .addCommand({name: "invert",
   description: "Invert an avatar or attached image",
   category: "Silly",
