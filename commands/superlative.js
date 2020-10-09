@@ -19,7 +19,7 @@ const starBoards = new u.Collection()
 })
 .set("762681231879045171", { // #aww
   board: "762681231879045171",
-  emoji: ["💖", "ohhh"],
+  emoji: ["💖"],
   channels: [],
   confirm: "💖"
 })
