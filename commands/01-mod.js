@@ -386,7 +386,8 @@ Module
             }
 
             for (const [userId, count] of data.perUser) {
-              response.push(`${msg.guild.members.cache.get(userId).displayName}: ${count} ankles lost.`);
+              let user = msg.guild.members.cache.get(userId) || await msg.client.users.fetch(userId);
+              response.push(`${user.displayName || user.username}: ${count} ankles lost.`);
             }
             await msg.channel.send(response.join("\n") + "```");
           } else {
