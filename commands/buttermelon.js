@@ -10,12 +10,12 @@ function buttermelonEdit(msg) {
   let roll = Math.random();
   if (roll < .3 && !msg.author.bot && !exclude.includes(msg.channel.id)) {
     //let banana = /[bß8ƥɓϐβбБВЬЪвᴮᴯḃḅḇÞ][a@∆æàáâãäåāăȁȃȧɑαдӑӓᴀᴬᵃᵅᶏᶐḁạảấầẩẫậắằẳẵặ4Λ]+([nⁿńňŋƞǹñϰпНhийӣӥѝνṅṇṉṋ]+[a@∆æàáâãäåāăȁȃȧɑαдӑӓᴀᴬᵃᵅᶏᶐḁạảấầẩẫậắằẳẵặ4Λ]+){2}/ig;
-    if (/bananas/.test(msg.content.toLowerCase())) {
+    if (msg.content.toLowerCase().includes("bananas")) {
       if (roll < .1)
         msg.channel.send({files: ["https://cdn.discordapp.com/attachments/154625360514777088/239045323522179073/buttermelons.jpg"]}).catch(u.errorHandler);
       else
         msg.channel.send("*buttermelons").catch(u.errorHandler);
-    } else if (/banana/.test(msg.content.toLowerCase().replace(/(\*|_)/ig, ""))) {
+    } else if (msg.content.toLowerCase().includes("banana")) {
       if (roll < .06)
         msg.channel.send({files: ["https://cdn.discordapp.com/attachments/136577505418018826/238764601951387648/buttermelon.jpg"]}).catch(u.errorHandler);
       else if (roll < .1)
@@ -44,7 +44,7 @@ const Module = new Augur.Module()
 })
 .addEvent("message", buttermelonEdit)
 .addEvent("messageUpdate", (oldMsg, msg) => {
-  if (oldMsg.partial || !(/banana/.test(oldMsg.cleanContent.toLowerCase())))
+  if (oldMsg.partial || !(oldMsg.cleanContent.toLowerCase().includes("banana")))
     buttermelonEdit(msg);
 });
 
