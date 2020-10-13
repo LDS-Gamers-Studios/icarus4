@@ -22,7 +22,7 @@ const Module = new Augur.Module()
         msg.guild.channels.cache.get("506575671242260490").send(`⏲️ ${msg.member.displayName} has set a ${cooldown || 15}s slow mode for ${duration} minutes in ${msg.channel}.`).catch(u.noop);
         molasses.set(msg.channel.id, {
           timeout: setTimeout((channel, rateLimitPerUser) => {
-            channel.edit({reateLimitPerUser}).catch(error => u.errorHandler(error, "Reset rate limit after slowmode"));
+            channel.edit({rateLimitPerUser}).catch(error => u.errorHandler(error, "Reset rate limit after slowmode"));
             molasses.delete(channel.id);
           }, duration * 60000, msg.channel, limit),
           limit
