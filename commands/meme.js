@@ -9,7 +9,7 @@ const Module = new Augur.Module()
         description: "Creates a meme, put an image URL for you background and then put the text you want along the bottom. Or put the image source afterwards. Who am I to judge?",
         process: (msg) => {
             //general globals from bot this was imported from
-            const args = message.content.slice(prefix.length).trim().split(/ +/);
+            const args = suffix.trim().split(/ +/);
             const commandName = args.shift();
             //Determine if a string is a url
             function isURL(str) {
