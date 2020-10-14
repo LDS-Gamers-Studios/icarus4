@@ -35,9 +35,7 @@ const Module = new Augur.Module()
                 }
             });
             bottomText = querystring.escape(bottomText.trim());
-            let meme = "";
-            meme = `https://api.memegen.link/images/custom/${topText}/${bottomText}.png?background=`;
-            meme = meme.concat(src.toString());
+            let meme = `https://api.memegen.link/images/custom/${topText}/${bottomText}.png?background=${src}`;
 
             msg.channel.send({ files: [meme] });
         },
