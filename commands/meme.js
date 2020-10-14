@@ -1,5 +1,7 @@
 const Augur = require("augurbot"),
     u = require("../utils/utils");
+//querystring is used for encoding urls
+const querystring = require('querystring');
 
 const Module = new Augur.Module()
     .addCommand({
