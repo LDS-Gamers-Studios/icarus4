@@ -17,7 +17,7 @@ const Module = new Augur.Module()
                 return str.length < 2083 && url.test(str);
             }
             
-            let src = "";
+            let src = "https://i.imgflip.com/qbm81.jpg";
             let bottomText = "_";
             let topText = "_";
             args.forEach(element => {
@@ -32,10 +32,6 @@ const Module = new Augur.Module()
                     bottomText = "_";
                 }
             });
-            if (src == "") {
-                msg.channel.send("invalid URL");
-                return;
-            }
             bottomText = querystring.escape(bottomText.trim());
             let meme = "";
             meme = `https://api.memegen.link/images/custom/${topText}/${bottomText}.png?background=`;
