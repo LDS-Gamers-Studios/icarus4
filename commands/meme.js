@@ -31,8 +31,9 @@ const Module = new Augur.Module()
                     bottomText = "_";
                 }
             });
-            bottomText = encodeURIComponent((bottomText.trim());       
-            topText = encodeURIComponent((topText.trim());    
+            bottomText = encodeURIComponent(bottomText.trim());       
+            topText = encodeURIComponent(topText.trim());
+            src = encodeURIComponent(src.trim());
             let meme = `https://api.memegen.link/images/custom/${topText}/${bottomText}.png?background=${src}`;
 
             msg.channel.send({ files: [meme] });
