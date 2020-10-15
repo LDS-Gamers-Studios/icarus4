@@ -1,7 +1,5 @@
 const Augur = require("augurbot"),
     u = require("../utils/utils");
-//querystring is used for encoding urls
-const querystring = require('querystring');
 
 const Module = new Augur.Module()
     .addCommand({
@@ -33,7 +31,8 @@ const Module = new Augur.Module()
                     bottomText = "_";
                 }
             });
-            bottomText = querystring.escape(bottomText.trim());
+            bottomText = encodeURIComponent((bottomText.trim());       
+            topText = encodeURIComponent((topText.trim());    
             let meme = `https://api.memegen.link/images/custom/${topText}/${bottomText}.png?background=${src}`;
 
             msg.channel.send({ files: [meme] });
