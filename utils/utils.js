@@ -173,10 +173,11 @@ const Utils = {
       } else await msg.channel.send({embed: pager(elements, page, msg)});
     } catch(e) { Utils.alertError(e, msg); }
   },
-  parse: (msg) => {
+  parse: (msg, clean = false) => {
     for (let prefix of [config.prefix, `<@${msg.client.user.id}>`, `<@!${msg.client.user.id}>`]) {
-      if (!msg.content.startsWith(prefix)) continue;
-      let parts = msg.content.split(" ");
+      let content = clean ? msg.cleanContent : msg.content;
+      if (!content.startsWith(prefix)) continue;
+      let parts = content.split(" ");
       let command, suffix;
       if (parts[0] == prefix) {
         parts.shift();
