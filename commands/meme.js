@@ -18,12 +18,12 @@ const Module = new Augur.Module()
               return match ? match[1] : null;
             }
 
-            let src = msg.attachments.size > 0 ? msg.attachments.first().url : "https://i.imgflip.com/qbm81.jpg";
+            let src = msg.attachments.size > 0 ? msg.attachments.first().url : null;
             let bottomText = [];
             let topText = [];
             for (const arg of args) {
               let url = isURL(arg);
-              if (url) {
+              if (!src && url) {
                 src = url;
               } else if (arg.toLowerCase() != "-t") {
                 bottomText.push(arg);
@@ -32,6 +32,8 @@ const Module = new Augur.Module()
                 bottomText = [];
               }
             }
+
+            if (!src) src = "https://i.imgflip.com/qbm81.jpg";
             bottomText = encodeURIComponent(bottomText.join(" ").replace(/\-/g, " -"));
             topText = encodeURIComponent(topText.join(" ").replace(/\-/g, " -"));
             src = encodeURIComponent(src.trim());
