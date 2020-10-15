@@ -24,12 +24,13 @@ async function updateFactionStatus(bot) {
     // Galnet articles
     let latestArticle = (await elite.getGalnetFeed())[0];
     if (latestArticle.title !== lastGalnetArticleTitle) {
+      let content = latestArticle.content.replace(/<br \/>/g, "\n");
       let embed = u.embed()
         .setThumbnail("https://i.imgur.com/Ud8MOzY.png")
         .setAuthor("GALNET", "https://vignette.wikia.nocookie.net/elite-dangerous/images/c/cd/Official-Galnet-Logo.png")
         .setTitle(latestArticle.title)
         .setURL("https://community.elitedangerous.com/")
-        .setDescription((latestArticle.content.length > 2040 ? latestArticle.content.substr(0, 2040) + "..." : latestArticle.content));
+        .setDescription((content.length > 2040 ? content.substr(0, 2040) + "..." : content));
       channel.send({ embed });
 
       lastGalnetArticleTitle = latestArticle.title;
@@ -211,7 +212,7 @@ const Module = new Augur.Module()
   }
 })
 .setUnload(() => {
-  delete require.cache[require.resolve(process.cwd(), "./utils/eliteDangerousAPI.js")];
+  delete require.cache[require.resolve(path.resolve(process.cwd(), "./utils/eliteDangerousAPI.js"))];
 });
 
 module.exports = Module;

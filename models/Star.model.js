@@ -5,6 +5,7 @@ var StarSchema = new Schema({
   author: String,
   messageId: String,
   channelId: String,
+  boardId: String,
   starId: String,
   deny: Boolean,
   timestamp: Date

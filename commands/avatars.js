@@ -16,7 +16,7 @@ async function popart(msg, initialTransform) {
     } else if (match = urlexp.exec(suffix)) {
       original = match[1];
     } else {
-      original = (msg.mentions.users.first() || msg.author).displayAvatarURL({size: 256, format: "png"});
+      original = (await u.getMention(msg, false) || msg.author).displayAvatarURL({size: 256, format: "png"});
     }
 
     const img = await Jimp.read(original);
@@ -55,11 +55,11 @@ const Module = new Augur.Module()
   description: "Get a user's avatar",
   syntax: "[@user]",
   category: "Members",
-  process: (msg) => {
+  process: async (msg) => {
     try {
-      let user = msg.mentions.users.first() || msg.author;
-      let member;
-      if (msg.guild) member = msg.mentions.members.first() || msg.member;
+      let user, member;
+      if (msg.guild) member = (await u.getMention(msg)) || msg.member;
+      user = (member ? member.user : (msg.mentions.users.first() || msg.author));
       let name = (member ? member.displayName : user.username);
       let embed = u.embed()
       .setAuthor(name)
@@ -82,7 +82,7 @@ const Module = new Augur.Module()
       } else if (match = urlexp.exec(suffix)) {
         target = match[1];
       } else {
-        target = (msg.mentions.users.first() || msg.author).displayAvatarURL({size: 512, format: "png"});
+        target = (await u.getMention(msg, false) || msg.author).displayAvatarURL({size: 512, format: "png"});
       }
 
       let av = await Jimp.read(target);
@@ -113,8 +113,10 @@ const Module = new Augur.Module()
       } else if (match = urlexp.exec(suffix)) {
         original = match[1];
         color = parseInt(match[2], 10);
+      } else if ((color = parseInt(suffix, 10)) && suffix.split(" ").length == 1) {
+        original = msg.author.displayAvatarURL({size: 512, format: "png"});
       } else {
-        original = (msg.mentions.users.first() || msg.author).displayAvatarURL({size: 512, format: "png"});
+        original = (await u.getMention(msg, false) || msg.author).displayAvatarURL({size: 512, format: "png"});
         color = parseInt(suffix.replace(/<@!?\d+>/g, ""), 10);
       }
       color = color || (10 * (Math.floor(Math.random() * 35) + 1));
@@ -133,7 +135,7 @@ const Module = new Augur.Module()
   process: async (msg) => {
     try {
       const arm = "https://cdn.discordapp.com/attachments/488887953939103775/545672817354735636/509442648080121857.png";
-      const target = msg.mentions.users.first() || msg.author;
+      const target = await u.getMention(msg, false) || msg.author;
       const staticURL = target.displayAvatarURL({size: 128, dynamic: false, format: "png"});
 
       const right = await Jimp.read(arm);
@@ -156,6 +158,30 @@ const Module = new Augur.Module()
     } catch(e) { u.errorHandler(e, msg); }
   }
 })
+.addCommand({name: "greyscale",
+  description: "Greyscale an Avatar",
+  aliases: ["grayscale", "bw"],
+  category: "Silly",
+  process: async (msg, suffix) => {
+    try {
+      let target;
+      let urlexp = /\<?(https?:\/\/\S+)\>?(?:\s+)?(\d*)/;
+
+      if (msg.attachments.size > 0) {
+        target = msg.attachments.first().url;
+      } else if (match = urlexp.exec(suffix)) {
+        target = match[1];
+      } else {
+        target = (await u.getMention(msg, false) || msg.author).displayAvatarURL({size: 512, format: "png"});
+      }
+
+      let av = await Jimp.read(target);
+      av.color([{ apply: "desaturate", params: [100] }]);
+
+      await msg.channel.send({files: [await av.getBufferAsync(Jimp.MIME_PNG)]});
+    } catch(e) { u.errorHandler(e, msg); }
+  }
+})
 .addCommand({name: "invert",
   description: "Invert an avatar or attached image",
   category: "Silly",
@@ -171,7 +197,7 @@ const Module = new Augur.Module()
       } else if (match = urlexp.exec(suffix)) {
         original = match[1];
       } else {
-        original = (msg.mentions.users.first() || msg.author).displayAvatarURL({size: 512, format: "png"});
+        original = (await u.getMention(msg, false) || msg.author).displayAvatarURL({size: 512, format: "png"});
       }
 
       let img = await Jimp.read(original);

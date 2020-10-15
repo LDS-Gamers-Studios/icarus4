@@ -184,7 +184,7 @@ const models = {
         let record = new Bank({
           discordId: data.discordId,
           description: data.description,
-          currency: currency,
+          currency: data.currency || currency,
           value: data.value,
           mod: data.mod
         });
@@ -476,27 +476,36 @@ const models = {
     denyStar: (starboard) => {
       if (typeof starboard == "string") starboard = {id: starboard};
       return new Promise((fulfill, reject) => {
-        Star.findOneAndUpdate({starId: starboard.id}, {deny: true}, (err, doc) => {
+        Star.findOneAndUpdate({starId: starboard.id}, {$set: {deny: true}}, (err, doc) => {
           if (err) reject(err);
           else fulfill(doc);
         });
       });
     },
-    fetchStar: (messageId) => {
+    fetchStar: (starId) => {
       return new Promise((fulfill, reject) => {
-        Star.findOne({messageId: messageId}, (e, star) => {
+        Star.findOne({starId}, (error, star) => {
+          if (error) reject(error);
+          else fulfill(star);
+        });
+      });
+    },
+    fetchMessage: (messageId) => {
+      return new Promise((fulfill, reject) => {
+        Star.findOne({messageId}, (e, star) => {
           if (e) reject(e);
           else fulfill(star);
         });
       });
     },
-    saveStar: (message, starboard) => {
+    saveStar: (message, starpost) => {
       return new Promise((fulfill, reject) => {
         let newStar = new Star({
           author: message.author.id,
           messageId: message.id,
           channelId: message.channel.id,
-          starId: starboard.id,
+          boardId: starpost.channel.id,
+          starId: starpost.id,
           deny: false,
           timestamp: message.createdAt
         });
@@ -504,6 +513,18 @@ const models = {
           if (e) reject (e);
           else fulfill(star);
         });
+      });
+    },
+    approveStar: (star1, star2) => {
+      return new Promise((fulfill, reject) => {
+        Star.findOneAndUpdate(
+          {starId: star1.id},
+          {$set: {starId: star2.id}},
+          (error, doc) => {
+            if (error) reject(error);
+            else fulfill(doc);
+          }
+        );
       });
     }
   },

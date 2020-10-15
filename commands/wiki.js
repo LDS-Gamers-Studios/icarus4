@@ -11,6 +11,7 @@ const Module = new Augur.Module()
   permissions: (msg) => (!msg.guild || (msg.channel.permissionsFor(msg.member).has(["EMBED_LINKS", "ATTACH_FILES"]) && msg.channel.permissionsFor(msg.client.user).has("ATTACH_FILES"))),
   process: async (msg, suffix) => {
     try {
+      if (!suffix) return msg.reply("you need to tell me what to search!").then(u.clean);
       const pf = new profanityFilter();
       if (pf.scan(suffix.toLowerCase()).length == 0) {
         let wiki = JSON.parse(await request(`https://en.wikipedia.org/w/api.php?action=opensearch&format=json&redirects=resolve&search=${encodeURIComponent(suffix)}`));

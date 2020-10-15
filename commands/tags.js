@@ -64,7 +64,7 @@ const Module = new Augur.Module()
             serverId: msg.guild.id,
             tag: newTag,
             response,
-            attachment: (attachment ? attachment.filename : null),
+            attachment: (attachment ? attachment.name : null),
             url: (attachment ? attachment.url : null)
           });
 

@@ -158,6 +158,26 @@ const Module = new Augur.Module()
   },
   permissions: (msg) => Module.config.adminId.includes(msg.author.id)
 })
+.addCommand({name: "reloadlib",
+  category: "Bot Admin",
+  hidden: true,
+  syntax: "[file1.js] [file2.js]",
+  description: "Reload local library files.",
+  process: (msg, suffix) => {
+    u.clean(msg);
+    msg.react("👌");
+    if (suffix) {
+      const path = require("path");
+      let files = suffix.split(" ").filter(f => f.endsWith(".js"));
+      for (let file of files) {
+        delete require.cache[require.resolve(path.dirname(require.main.filename), file)];
+      }
+    } else {
+      msg.reply("You need to tell me which libraries to reload!").then(u.clean);
+    }
+  },
+  permissions: (msg) => Module.config.adminId.includes(msg.author.id)
+})
 .addCommand({name: "repo",
   description: "Get a link to the bot's source code.",
   aliases: ["source"],

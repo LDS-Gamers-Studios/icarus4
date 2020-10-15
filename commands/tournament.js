@@ -57,7 +57,7 @@ const Module = new Augur.Module()
         if (error) u.errorHandler(error, "Champions Update");
         else msg.react("👌");
       });
-      msg.guild.channels.get("121752198731268099").send(`Congratulations to our new tournament champions, ${Array.from(msg.mentions.members.values()).join(", ")}!\n\nTheir performance landed them the champion slot in the ${reason}, and they'll hold on to the LDSG Tourney Champion role for a few weeks.`);
+      msg.guild.channels.cache.get("121752198731268099").send(`Congratulations to our new tournament champions, ${Array.from(msg.mentions.members.values()).join(", ")}!\n\nTheir performance landed them the champion slot in the ${reason}, and they'll hold on to the LDSG Tourney Champion role for a few weeks.`);
     } else
       msg.reply("you need to tell me who to give the Tourney Champion role and the tournament name!").then(u.clean);
   },

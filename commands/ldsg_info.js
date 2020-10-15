@@ -44,7 +44,7 @@ const Module = new Augur.Module()
   category: "LDSG",
   permissions: (msg) => msg.guild && msg.guild.id == Module.config.ldsg,
   process: (msg) => {
-    let vvo = ((msg.guild && (msg.guild.id == Module.config.ldsg)) ? msg.guild.members.get("114484697916112904").displayName : "vadervanodin");
+    let vvo = ((msg.guild && (msg.guild.id == Module.config.ldsg)) ? msg.guild.members.cache.get("114484697916112904").displayName : "vadervanodin");
     let response = [
       "**View the LDSG Member Map:**",
       "https://www.mapcustomizer.com/map/LDS%20Gamers"

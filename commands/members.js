@@ -13,7 +13,7 @@ function userEmbed(member) {
     .addField("Joined", member.joinedAt.toUTCString(), true)
     .addField("Account Created", member.user.createdAt.toUTCString(), true)
     .addField("Roles", roleString, true)
-    .setThumbnail(member.user.displayAvatarURL({size: 32}));
+    .setThumbnail(member.user.displayAvatarURL({size: 32, dynamic: true}));
 
   return embed;
 }
@@ -25,19 +25,20 @@ const Module = new Augur.Module()
   category: "Members",
   process: async (msg, suffix) => {
     try {
-      let users = null;
+      let members = null;
 
-      if (!suffix) users = [msg.member];
-      else if (msg.mentions.members.size > 0) users = Array.from(msg.mentions.members.values());
-      else if (suffix) users = [suffix];
+      if (!suffix) members = [msg.member];
+      else if (msg.mentions.members.size > 0) members = Array.from(msg.mentions.members.values());
+      else if (suffix) members = [suffix];
 
-      for (let user of users) {
-        let member = user;
-        if (typeof member == "string") member = await msg.guild.members.fetch({query: user, limit: 1});
+      for (let member of members) {
+        let memberName = member;
+        if (typeof member == "string") member = await msg.guild.members.fetch({query: member, limit: 1});
+        if (member instanceof u.Collection) member = member.first();
 
         if (member) {
           msg.channel.send({embed: userEmbed(member), disableEveryone: true});
-        } else msg.channel.send("User \"" + user + "\" not found");
+        } else msg.channel.send("User \"" + memberName + "\" not found");
       }
     } catch(error) { u.errorHandler(error, msg); }
   },
@@ -60,10 +61,9 @@ const Module = new Augur.Module()
   category: "Members",
   permissions: (msg) => msg.guild,
   process: (msg) => {
-    let members = msg.guild.members;
     let online = 0;
 
-    for (const [id, member] of msg.guild.members) {
+    for (const [id, member] of msg.guild.members.cache) {
       if (member.presence.status != "offline")
       online++;
     }
@@ -90,9 +90,9 @@ const Module = new Augur.Module()
       const target = msg.mentions.members.first() || msg.member;
 
       const rank = await Module.db.user.findXPRank(target);
-      const badges = badgeData(target.roles);
+      const badges = badgeData(target.roles.cache);
 
-      const avatar = await Jimp.read(target.user.displayAvatarURL({size: 64}));
+      const avatar = await Jimp.read(target.user.displayAvatarURL({size: 64, format: "png"}));
 
       card.blit(avatar, 8, 8)
       .print(font, 80, 8, target.displayName.replace(/[^\x00-\x7F]/g, ""), 212)
@@ -138,19 +138,25 @@ const Module = new Augur.Module()
             .setURL(`${memberUrl}#member-spotlight`)
             .setDescription('Our community is filled with amazing people. Know someone that deserves the spotlight? Nominate them by sending CJ Stormblessed a message!');
 
-          let member = null;
+          let ldsg = msg.client.guilds.cache.get(Module.config.ldsg);
+          let member = ldsg.members.cache.get(discordId);
+          let displayName, avatar;
 
-          if (msg.guild && (msg.guild.id == Module.config.ldsg)) {
-            member = await msg.guild.fetchMember(discordId);
+          if (ldsg.members.cache.has(discordId)) {
+            avatar = member.user.displayAvatarURL({dynamic: true});
+            displayName = member.displayName;
+          } else {
+            let user = await msg.client.users.fetch(discordId);
+            avatar = user.displayAvatarURL({dynamic: true});
+            displayName = user.username;
           }
 
-          let avatar = member.user.displayAvatarURL();
           let image = (avatar ? avatar : ("http://ldsgamers.com" + $('.member-image > img')[0].attribs.src));
 
           //let communityContent = `__**MEMBER SPOTLIGHT**__\nOur community is filled with amazing people. Know someone that deserves the spotlight? Nominate them here: <http://ldsg.io/nominate>\n\nThe spotlight currently shines on **<@${discordId}>**!\n\n${text} ...\n\nTo read more, go to <${memberUrl}#member-spotlight>.`;
           //msg.channel.send(communityContent, {"file": {"attachment": image}}).catch(console.error);
 
-          embed.addField('Current Spotlight', `The spotlight currently shines on **${member.displayName}**!\n\n${text} ...\n[READ MORE](${memberUrl}#member-spotlight)`)
+          embed.addField('Current Spotlight', `The spotlight currently shines on **${displayName}**!\n\n${text} ...\n[READ MORE](${memberUrl}#member-spotlight)`)
             .setThumbnail(image);
 
           msg.channel.send({embed});

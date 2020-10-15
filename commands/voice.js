@@ -6,9 +6,7 @@ const u = require("../utils/utils"),
   ytdl = require("ytdl-core-discord"),
   {USet, Link} = require("../utils/tools");
 
-const roomList = [];
-
-const availableNames = new USet();
+const roomNames = new USet();
 
 const communityVoice = "363014069533540362";
 function isCommunityVoice(channel) {
@@ -172,7 +170,8 @@ const queues = new Map();
 const Module = new Augur.Module()
 .addCommand({name: "join",
   description: "Make the bot join voice chat.",
-  permission: msg => msg.member && msg.member.voice && msg.member.voice.channel,
+  permissions: msg => msg.member && msg.member.voice && msg.member.voice.channel,
+  enabled: false,
   process: async (msg) => {
     try {
       const connection = await msg.member.voice.channel.join();
@@ -185,6 +184,7 @@ const Module = new Augur.Module()
 .addCommand({name: "leave",
   description: "Make the bot leave voice chat.",
   permissions: msg => msg.guild,
+  enabled: false,
   process: async (msg) => {
     try {
       const queue = queues.get(msg.guild.id);
@@ -232,6 +232,7 @@ const Module = new Augur.Module()
   permissions: (msg) => msg.guild,
   aliases: ["pl"],
   syntax: "[skip/stop/pause/resume]",
+  enabled: false,
   process: async (msg, suffix) => {
     try {
       suffix = suffix.toLowerCase();
@@ -260,6 +261,7 @@ const Module = new Augur.Module()
   description: "Play a song or playlist from YouTube",
   syntax: "<link>",
   permissions: (msg) => (msg.guild && msg.member.voice.channel && ((msg.guild.id != Module.config.ldsg) || msg.member.roles.cache.has(Module.config.roles.team) || msg.member.roles.cache.has("114816596341424129"))),
+  enabled: false,
   process: async (msg, suffix) => {
     if (suffix.startsWith("<") && suffix.endsWith(">")) suffix = suffix.substr(1, suffix.length - 2);
     if (ytpl.validateURL(suffix)) {
@@ -311,6 +313,7 @@ const Module = new Augur.Module()
   info: "Plays a matched sound from Freesound.org",
   category: "Voice",
   permissions: (msg) => (msg.guild && msg.member.voice.channel && ((msg.guild.id != Module.config.ldsg) || msg.member.roles.cache.has(Module.config.roles.team) || msg.member.roles.cache.has("114816596341424129"))),
+  enabled: false,
   process: async (msg, suffix) => {
     if (suffix) {
       let pf = new profanityFilter();
@@ -387,8 +390,7 @@ const Module = new Augur.Module()
     if (e) u.errorHandler(e, "Error loading voice channel names.");
     else {
       for (let i = 0; i < rows.length; i++) {
-        roomList.push(rows[i].name);
-        if (!ldsg.channels.cache.find(c => c.name.startsWith(rows[i].name))) availableNames.add(rows[i].name);
+        roomNames.add(rows[i].name);
       }
     }
   });
@@ -398,22 +400,19 @@ const Module = new Augur.Module()
   if ((guild.id == Module.config.ldsg) && (oldState.channelID != newState.channelID)) {
     if (oldState.channel && (oldState.channel.members.size == 0) && isCommunityVoice(oldState.channel)) {
       // REMOVE OLD VOICE CHANNEL
-      let name = roomList.find(room => oldState.channel.name.startsWith(room));
       await oldState.channel.delete().catch(e => u.errorHandler(e, `Could not delete empty voice channel. (${oldState.channel.name})`));
-      if (name && !guild.channels.cache.find(c => c.name.startsWith(name))) availableNames.add(name);
     }
     if (newState.channel && (newState.channel.members.size == 1) && isCommunityVoice(newState.channel)) {
       // CREATE NEW VOICE CHANNEL
       const bitrate = newState.channel.bitrate;
 
-      let name = (availableNames.size > 0 ? availableNames.random() : u.rand(roomList));
-      availableNames.delete(name);
-      name += ` (${parseInt(bitrate / 1000, 10)} kbps)`;
+      let available = roomNames.filter(name => !guild.channels.cache.find(c => c.name.startsWith(name)));
+      let name = (available.random() || roomNames.random()) + ` (${parseInt(bitrate / 1000, 10)} kbps)`;
 
       try {
         await guild.channels.create(name, {
           type: "voice",
-          bitrate: bitrate,
+          bitrate,
           parent: communityVoice,
           permissionOverwrites: [{
             id: Module.config.roles.muted,

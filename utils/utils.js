@@ -10,7 +10,7 @@ const errorLog = new Discord.WebhookClient(config.error.id, config.error.token),
 const Utils = {
   Collection: Discord.Collection,
   botSpam: (msg) => {
-    if (msg.guild && (msg.guild.id == config.ldsg) && (msg.channel.id != "209046676781006849") && (msg.channel.id != config.channels.botspam)) {
+    if (msg.guild && (msg.guild.id == config.ldsg) && (msg.channel.parentID != "363020585988653057") && (msg.channel.id != config.channels.botspam)) {
       msg.reply(`I've placed your results in <#${config.channels.botspam}> to keep things nice and tidy in here. Hurry before they get cold!`)
         .then(Utils.clean);
       return msg.guild.channels.cache.get(config.channels.botspam);
@@ -21,6 +21,26 @@ const Utils = {
       if (m.deletable && !m.deleted) m.delete();
     }, t, msg);
     return Promise.resolve(msg);
+  },
+  confirm: async function(msg, prompt = "Are you sure?", timeout = 15) {
+    try {
+      let buttons = ["✅", "⛔"];
+      let embed = Utils.embed().setColor(0xff0000)
+        .setTitle(`Confirmation Required - Confirm in ${timeout}s`)
+        .setAuthor(msg.member ? msg.member.displayName : msg.author.username, msg.author.displayAvatarURL())
+        .setDescription(prompt)
+        .setFooter(`${buttons[0]} to Confirm, ${buttons[1]} to Deny`);
+      let dialog = await msg.channel.send({embed});
+      for (let button of buttons) await dialog.react(button);
+
+      let react = await dialog.awaitReactions((reaction, user) => buttons.includes(reaction.emoji.name) && msg.author.id == user.id, {max: 1, time: timeout * 1000});
+      dialog.delete();
+      if (react.size == 1 && react.first().emoji.name == buttons[0]) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch(error) { Utils.errorHandler(error, "Confirmation Prompt"); }
   },
   embed: (data) => new Discord.MessageEmbed(data).setColor(config.color).setTimestamp(),
   errorHandler: function(error, msg = null) {
@@ -90,6 +110,29 @@ const Utils = {
 
     return foundUser;
   },
+  getMention: async function(msg, getMember = true) {
+    try {
+      let {suffix} = Utils.parse(msg);
+      if (msg.guild) {
+        let memberMentions = msg.mentions.members;
+        memberMentions.delete(msg.client.user.id);
+        if (memberMentions.size > 0) {
+          return (getMember ? memberMentions.first() : memberMentions.first().user);
+        } else if (suffix) {
+          let member = (await msg.guild.members.fetch({query: suffix})).first();
+          if (member) return (getMember ? member : member.user);
+          else return undefined;
+        } else return (getMember ? msg.member : msg.author);
+      } else {
+        let userMentions = msg.mentions.users;
+        userMentions.delete(msg.client.user.id);
+        return userMentions.first() || msg.author;
+      }
+    } catch(error) {
+      u.errorHandler(error, msg);
+      return null;
+    }
+  },
   noop: () => {},
   paginator: async function(msg, pager, elements, page = 0, perPage = 1) {
     try {
@@ -130,10 +173,11 @@ const Utils = {
       } else await msg.channel.send({embed: pager(elements, page, msg)});
     } catch(e) { Utils.alertError(e, msg); }
   },
-  parse: (msg) => {
+  parse: (msg, clean = false) => {
     for (let prefix of [config.prefix, `<@${msg.client.user.id}>`, `<@!${msg.client.user.id}>`]) {
-      if (!msg.content.startsWith(prefix)) continue;
-      let parts = msg.content.split(" ");
+      let content = clean ? msg.cleanContent : msg.content;
+      if (!content.startsWith(prefix)) continue;
+      let parts = content.split(" ");
       let command, suffix;
       if (parts[0] == prefix) {
         parts.shift();

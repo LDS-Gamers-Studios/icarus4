@@ -35,7 +35,7 @@ const Module = new Augur.Module()
             "ain't interested in no XP gettin'.",
             "don't talk to me no more, so I ignore 'em."
           ];
-          response = `**${u.escapeText(member.displayName)}** ${u.rand(snark)}`;
+          response = `**${u.escapeText(member.displayName)}** ${u.rand(snark)}\n(Try \`${Module.config.prefix}trackxp\` if you want to participate in chat ranks!)`;
         }
       } else {
         let userDoc = await Module.db.user.findXPRank(member);
@@ -50,7 +50,7 @@ const Module = new Augur.Module()
         .setURL("http://my.ldsgamers.com/leaderboard")
         .setFooter("http://my.ldsgamers.com/leaderboard");
       }
-      msg.channel.send(response);
+      u.botSpam(msg).send(response);
     } catch(e) {
       u.errorHandler(e, msg);
     }
@@ -58,12 +58,12 @@ const Module = new Augur.Module()
 })
 .addCommand({name: "rankreset",
   description: "Reset the LDSG chat ranks!",
-  syntax: "GhostBucksSpread",
-  info: "Reset chat ranks and give the indicated number of Ghost Bucks to the members, proportional to their chat XP.",
+  syntax: "EmberSpread",
+  info: "Reset chat ranks and give the indicated number of Ember to the members, proportional to their chat XP.",
   permissions: (msg) => Module.config.adminId.includes(msg.author.id) && msg.guild && msg.guild.id == Module.config.ldsg,
   process: async function(msg, suffix) {
     try {
-      let gb = "<:gb:493084576470663180>";
+      let ember = "<:ember:512508452619157504>"
       let dist = parseInt(suffix, 10) || 0;
       let members = await msg.guild.members.fetch();
       let users = (await Module.db.user.getUsers({currentXP: {$gt: 0}}))
@@ -79,26 +79,29 @@ const Module = new Augur.Module()
       if (dist) {
         let i = 0;
         for (let user of users) {
-          let user = users[i];
+          //let user = users[i];
           let award = Math.round(rate * user.currentXP);
           if (award) {
-            setTimeout(async (user, value) => {
+            //setTimeout(async (user, value) => {
               Module.db.bank.addCurrency({
+                currency: "em",
                 discordId: user.discordId,
                 description: "Chat Rank Reset - " + (new Date()).toDateString(),
-                value,
+                value: award,
                 mod: msg.author.id
-              }).then(deposit => {
-                guild.members.get(deposit.discordId).send(`${guild.name} Chat Ranks have been reset! You've been awarded ${gb}${deposit.value} for your participation this season!`).catch(u.noop);
-              });
-            }, 1100 * i++, user, award);
+              }, "em");
+              //.then(deposit => {
+              //  guild.members.cache.get(deposit.discordId).send(`${guild.name} Chat Ranks have been reset! You've been awarded ${ember}${deposit.value} for your participation this season!`).catch(u.noop);
+              //});
+            //}, 1100 * i++, user, award);
           }
         }
       }
 
-      let announce = `__**CHAT RANK RESET!!**__\n\nAnother chat season has come to a close! In the most recent season, we've had ${users.length} active members chatting! The three most active members were:\n${top3}`;
-      if (dist > 0) announce += `\n\n${gb}${dist} have been distributed among *all* LDSG members who participated in chat this season, proportional to their participation.`;
-      msg.guild.channels.channels.get("121752198731268099").send(announce);
+      let announce = `__**CHAT RANK RESET!!**__\n\nAnother chat season has come to a close! In the most recent season, we've had ${users.length} active members who are tracking XP chatting! The three most active members were:\n${top3}`;
+      if (dist > 0) announce += `\n\n${ember}${dist} have been distributed among *all* LDSG members who are tracking XP and participated in chat this season, proportional to their participation.`;
+      announce += "\n\nIf you would like to participate in this season's chat ranks and *haven't* opted in, `!trackxp` will get you in the mix. Users who have previously used `!trackxp` don't need to do so again.";
+      msg.guild.channels.cache.get("121752198731268099").send(announce);
 
       Module.db.user.resetXP();
     } catch(e) { u.errorHandler(e, msg); }

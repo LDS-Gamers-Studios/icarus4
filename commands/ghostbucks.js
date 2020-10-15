@@ -5,6 +5,7 @@ const Augur = require("augurbot"),
 
 const doc = new GoogleSpreadsheet(google.sheets.games),
   gb = "<:gb:493084576470663180>",
+  ember = "<:ember:512508452619157504>",
   modLogs = "506575671242260490";
 
 var steamGameList;
@@ -36,6 +37,24 @@ function filterUnique(e, i, a) {
 }
 
 const Module = new Augur.Module()
+.addCommand({name: "balance",
+  aliases: ["account", ember, "ember", gb, "gb", "ghostbucks"],
+  description: "Show how many Ghost Bucks and Ember you've earned.",
+  category: "Ghost Bucks",
+  process: async (msg) => {
+    try {
+      let user = ( ((msg.mentions.users.size > 0) && (msg.guild && msg.member.roles.cache.has("96345401078087680"))) ? msg.mentions.users.first() : msg.author );
+      let gbBalance = await Module.db.bank.getBalance(user, "gb");
+      let emBalance = await Module.db.bank.getBalance(user, "em");
+      let embed = u.embed()
+      .setAuthor(
+        (msg.guild ? msg.guild.members.cache.get(user.id).displayName : user.username),
+        user.displayAvatarURL({dynamic: true})
+      ).setDescription(`${gb}${gbBalance.balance}\n${ember}${emBalance.balance}`);
+      msg.channel.send({embed});
+    } catch(error) { u.errorHandler(error, msg); }
+  }
+})
 .addCommand({name: "gamelist",
   description: "See what games are available to redeem.",
   category: "Ghost Bucks",
@@ -101,14 +120,15 @@ const Module = new Augur.Module()
 
               game = game[0];
 
-              let balance = await Module.db.bank.getBalance(msg.author.id);
+              let balance = await Module.db.bank.getBalance(msg.author.id, "gb");
               if (balance.balance >= game.cost) {
                 await Module.db.bank.addCurrency({
+                  currency: "gb",
                   discordId: msg.author.id,
                   description: `${game.gametitle} (${game.system}) Game Key`,
                   value: -1 * game.cost,
                   mod: msg.author.id
-                });
+                }, "gb");
 
                 let embed = u.embed()
                 .setTitle("Game Code Redemption")
@@ -141,26 +161,67 @@ const Module = new Augur.Module()
     })
   }
 })
-.addCommand({name: "gb",
-  aliases: ["account", gb, "ghostbucks"],
-  description: "Show how many Ghost Bucks you've earned.",
+.addCommand({name: "giveember",
+  syntax: "@user amount",
+  description: "Give a user Ember",
+  aliases: ["embergive", "giveem", "emgive"],
+  permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg)),
   category: "Ghost Bucks",
-  process: async (msg) => {
+  process: async (msg, suffix) => {
     try {
-      let user = ( ((msg.mentions.users.size > 0) && (msg.guild && msg.member.roles.cache.has("96345401078087680"))) ? msg.mentions.users.first() : msg.author );
-      let userBalance = await Module.db.bank.getBalance(user);
-      let embed = u.embed()
-      .setAuthor(
-        (msg.guild ? msg.guild.members.cache.get(user.id).displayName : user.username),
-        user.displayAvatarURL({dynamic: true})
-      ).setDescription(`${gb}${userBalance.balance}`);
-      msg.channel.send({embed});
+      msg.delete();
+      if (u.userMentions(msg, true).size > 0) {
+        for (const [discordId, member] of u.userMentions(msg, true)) {
+          let team = msg.member.roles.cache.has(Module.config.roles.team);
+          let ldsg = msg.client.guilds.cache.get(Module.config.ldsg);
+          let reason = suffix.replace(/<@!?\d+>/ig, "").trim().split(" ");
+          let value = parseInt(reason.shift(), 10);
+          reason = ((reason.length > 0) ? reason.join(" ") : "No particular reason.").trim();
+
+          let deposit = {
+            currency: "em",
+            discordId,
+            description: `From ${msg.member.displayName}: ${reason}`,
+            value,
+            mod: msg.author.id
+          };
+
+          if (value) {
+            let account = await Module.db.bank.getBalance(msg.author.id, "em");
+            if (!team && (value < 0)) {
+              msg.reply(`You can't just *take* ${ember}, silly.`).then(u.clean);
+            } else if (team || (value <= account.balance)) {
+              let receipt = await Module.db.bank.addCurrency(deposit, "em");
+              let balance = await Module.db.bank.getBalance(discordId, "em");
+              msg.channel.send(`${ember}${receipt.value} sent to ${member} for ${reason}`).then(u.clean);
+              msg.client.channels.cache.get(modLogs).send(`**${msg.member.displayName}** gave **${member.displayName}** ${ember}${receipt.value} for ${reason}`);
+              member.send(`You were just awarded ${ember}${receipt.value} from ${msg.member.displayName} for ${reason}\nYou now have a total of ${ember}${balance.balance} in your LDSG account.`).catch(u.noop);
+              if (!team) {
+                let withdrawl = {
+                  currency: "em",
+                  discordId: msg.member.id,
+                  description: `To ${member.displayName}: ${reason}`,
+                  value: -value,
+                  mod: msg.member.id
+                }
+                let receipt = await Module.db.bank.addCurrency(withdrawl, "em");
+                msg.member.send(`You just sent ${member.displayName} ${ember}${value} for ${reason}`).catch(u.noop);
+              }
+            } else {
+              msg.reply(`You don't have enough ${ember} to give! You can give up to ${ember}${account.balance}`).then(u.clean);
+            }
+          } else {
+            msg.reply("You need to tell me how many Ember to give!").then(u.clean);
+          }
+        }
+      } else msg.reply("You need to tell me who to give Ember!").then(u.clean);
     } catch(error) { u.errorHandler(error, msg); }
   }
 })
-.addCommand({name: "give",
+.addCommand({name: "givegb",
   syntax: "@user amount",
   description: "Give a user Ghost Bucks",
+  aliases: ["gbgive"],
   permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg)),
   category: "Ghost Bucks",
   process: async (msg, suffix) => {
@@ -172,9 +233,10 @@ const Module = new Augur.Module()
           let ldsg = msg.client.guilds.cache.get(Module.config.ldsg);
           let reason = suffix.replace(/<@!?\d+>/ig, "").trim().split(" ");
           let value = parseInt(reason.shift(), 10);
-          reason = ((reason.length > 0) ? reason.join(" ") : "No particular reason.");
+          reason = ((reason.length > 0) ? reason.join(" ") : "No particular reason.").trim();
 
           let deposit = {
+            currency: "gb",
             discordId,
             description: `From ${msg.member.displayName}: ${reason}`,
             value,
@@ -182,23 +244,24 @@ const Module = new Augur.Module()
           };
 
           if (value) {
-            let account = await Module.db.bank.getBalance(msg.author.id);
+            let account = await Module.db.bank.getBalance(msg.author.id, "gb");
             if (!admin && (value < 0)) {
               msg.reply(`You can't just *take* ${gb}, silly.`).then(u.clean);
             } else if (admin || (value <= account.balance)) {
-              let receipt = await Module.db.bank.addCurrency(deposit);
-              let balance = await Module.db.bank.getBalance(discordId);
+              let receipt = await Module.db.bank.addCurrency(deposit, "gb");
+              let balance = await Module.db.bank.getBalance(discordId, "gb");
               msg.channel.send(`${gb}${receipt.value} sent to ${member} for ${reason}`).then(u.clean);
               msg.client.channels.cache.get(modLogs).send(`**${msg.member.displayName}** gave **${member.displayName}** ${gb}${receipt.value} for ${reason}`);
               member.send(`You were just awarded ${gb}${receipt.value} from ${msg.member.displayName} for ${reason}\nYou now have a total of ${gb}${balance.balance} in your LDSG account.`).catch(u.noop);
               if (!admin) {
                 let withdrawl = {
+                  currency: "gb",
                   discordId: msg.member.id,
                   description: `To ${member.displayName}: ${reason}`,
                   value: -value,
                   mod: msg.member.id
                 }
-                let receipt = await Module.db.bank.addCurrency(withdrawl);
+                let receipt = await Module.db.bank.addCurrency(withdrawl, "gb");
                 msg.member.send(`You just sent ${member.displayName} ${gb}${value} for ${reason}`).catch(u.noop);
               }
             } else {
@@ -222,7 +285,7 @@ const Module = new Augur.Module()
       let amount = parseInt(suffix, 10);
       if (amount) {
         amount = Math.min(amount, 1000);
-        let balance = await Module.db.bank.getBalance(msg.author);
+        let balance = await Module.db.bank.getBalance(msg.author, "gb");
         if ((amount <= balance.balance) && (amount > 0)) {
           let snipcart = require("../utils/snipcart")(Module.config.api.snipcart);
           let discountInfo = {
@@ -239,12 +302,13 @@ const Module = new Augur.Module()
 
           if (discount.amount && discount.code) {
             let withdrawl = {
+              currency: "gb",
               discordId: msg.author.id,
               description: "LDSG Store Discount Code",
               value: (0 - amount),
               mod: msg.author.id
             };
-            let withdraw = await Module.db.bank.addCurrency(withdrawl);
+            let withdraw = await Module.db.bank.addCurrency(withdrawl, "gb");
             msg.author.send(`You have redeemed ${gb}${amount} for a $${discount.amount} discount code in the LDS Gamers Store! <http://ldsgamers.com/shop>\n\nUse code __**${discount.code}**__ at checkout to apply the discount. This code will be good for ${discount.maxNumberOfUsages} use. (Note that means that if you redeem a code and don't use its full value, the remaining value is lost.)\n\nYou now have ${gb}${balance.balance - amount}.`).catch(u.noop);
             msg.client.channels.cache.get(modLogs).send(`**${msg.author.username}** just redeemed ${gb}${amount} for a store coupon code. They now have ${gb}${balance.balance - amount}.`);
           } else {

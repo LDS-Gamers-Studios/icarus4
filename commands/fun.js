@@ -24,14 +24,13 @@ async function testBirthdays() {
   try {
     let bot = Module.client;
     let curDate = new Date();
-    let ldsg = Module.config.ldsg;
-    if (curDate.getHours() == 20) {
+    let ldsg = bot.guilds.cache.get(Module.config.ldsg);
+    if (curDate.getHours() == 15) {
       // Birthday Blast
-      let birthdays = (await Module.db.ign.getList("birthday")).filter(ign => bot.guilds.cache.get(ldsg).members.cache.has(ign.discordId));
-      for (let b = 0; b < birthdays.length; b++) {
-        let birthday = birthdays[b];
+      let birthdays = (await Module.db.ign.getList("birthday")).filter(ign => ldsg.members.cache.has(ign.discordId));
+      for (let birthday of birthdays) {
         let date = new Date(birthday.ign);
-        if (date.getMonth() == curDate.getMonth() && date.getDate() == curDate.getDate()) {
+        if (date && date.getMonth() == curDate.getMonth() && date.getDate() == curDate.getDate()) {
           let flair = [
             ":tada: ",
             ":confetti_ball: ",
@@ -40,49 +39,43 @@ async function testBirthdays() {
             ":cake: "
           ];
           try {
-            let member = await bot.guilds.cache.get(ldsg).fetchMember(birthday.discordId);
-            await bot.channels.cache.get(ldsg).send(":birthday: :confetti_ball: :tada: Happy Birthday, " + member + "! :tada: :confetti_ball: :birthday:");
+            let member = ldsg.members.cache.get(birthday.discordId);
+            await ldsg.channels.cache.get(Module.config.ldsg).send(`:birthday: :confetti_ball: :tada: Happy Birthday, ${member}! :tada: :confetti_ball: :birthday:`);
             const birthdayLangs = require("../data/birthday.json");
             let msgs = birthdayLangs.map(lang => member.send(u.rand(flair) + " " + lang));
             Promise.all(msgs).then(() => {
               member.send(":birthday: :confetti_ball: :tada: A very happy birthday to you, from LDS Gamers! :tada: :confetti_ball: :birthday:").catch(u.noop);
             }).catch(u.noop);
-          } catch (e) { continue; }
+          } catch (e) { u.errorHandler(error, "Birthay Send"); continue; }
         }
       }
 
       // LDSG Cake Day
       let roles = [
-        null,
         "375047444599275543",
         "375047691253579787",
         "375047792487432192",
         "543065980096741386",
         "731895666577506345"
       ];
-      let members = bot.guilds.cache.get(ldsg).members.cache;
-      let apicall = 0;
+      let members = ldsg.members.cache;
+      let apicall = 1;
       for (let [key, member] of members) {
         try {
           let join = member.joinedAt;
           if (join && (join.getMonth() == curDate.getMonth()) && (join.getDate() == curDate.getDate()) && (join.getFullYear() < curDate.getFullYear())) {
             let years = curDate.getFullYear() - join.getFullYear();
-            for (let i = 1; i <= years; i++) {
-              if (i == years && !member.roles.cache.has(roles[i])) {
-                setTimeout((member, role) => {
-                  member.roles.add(role);
-                }, 1200 * apicall++, member, roles[i]);
-              } else if (member.roles.cache.has(roles[i])) {
-                setTimeout((member, role) => {
-                  member.roles.remove(role);
-                }, 1200 * apicall++, member, roles[i]);
-              }
-            }
+            //setTimeout(async (m, y) => {
+              try {
+                await member.roles.remove(roles);
+                await member.roles.add(roles[years - 1]);
+              } catch(error) { u.errorHandler(error, `Apply cake day roles: ${member.displayName}`); }
+            //}, 2400 * apicall++, member, years);
             // Announce if active
             try {
               let user = await Module.db.user.fetchUser(member.id);
               if (user.posts > 0) {
-                bot.channels.cache.get(ldsg).send(`${member} has been part of the server for ${years} ${(years > 1 ? "years" : "year")}! Glad you're with us!`);
+                ldsg.channels.cache.get(Module.config.ldsg).send(`${member} has been part of the server for ${years} ${(years > 1 ? "years" : "year")}! Glad you're with us!`);
               }
             } catch (e) { u.errorHandler(e, "Announce Cake Day Error"); continue; }
           }
@@ -165,7 +158,7 @@ const Module = new Augur.Module()
   description: "It's your birthday!?",
   syntax: "<@user>", hidden: true,
   category: "Silly",
-  process: (msg) => {
+  process: async (msg) => {
     if (msg.mentions.members && msg.mentions.members.size > 0) {
       let flair = [
         ":tada: ",
@@ -175,14 +168,13 @@ const Module = new Augur.Module()
         ":cake: "
       ];
       for (let [id, member] of msg.mentions.members) {
-        msg.client.channels.cache.get(Module.config.ldsg).send(`:birthday: :confetti_ball: :tada: Happy Birthday, ${member}! :tada: :confetti_ball: :birthday:`).then(() => {
+        try {
+          await msg.client.channels.cache.get(Module.config.ldsg).send(`:birthday: :confetti_ball: :tada: Happy Birthday, ${member}! :tada: :confetti_ball: :birthday:`);
           let birthdayLangs = require("../data/birthday.json");
-          let msgs = birthdayLangs.map(lang => birthday.send(u.rand(flair) + " " + lang));
-
-          Promise.all(msgs).then(() => {
-            birthday.send(":birthday: :confetti_ball: :tada: A very happy birthday to you, from LDS Gamers! :tada: :confetti_ball: :birthday:").catch(u.noop);
-          }).catch(u.noop);
-        });
+          let msgs = birthdayLangs.map(lang => member.send(u.rand(flair) + " " + lang));
+          await Promise.all(msgs).catch(u.noop);
+          member.send(":birthday: :confetti_ball: :tada: A very happy birthday to you, from LDS Gamers! :tada: :confetti_ball: :birthday:").catch(u.noop);
+        } catch(error) { u.errorHandler(error, msg); }
       }
     } else {
       msg.reply("you need to tell me who to celebrate!");
@@ -195,6 +187,36 @@ const Module = new Augur.Module()
   category: "Silly",
   process: (msg) => {
     quickFile(msg, "https://cdn.discordapp.com/attachments/96335850576556032/452153983931383808/FireGifLDSG.gif", "fire.gif");
+  }
+})
+.addCommand({name: "color",
+  description: "Show what a color looks like.",
+  syntax: "color (e.g. `#003B6F` or `blue`)",
+  category: "Silly",
+  process: async (msg, suffix) => {
+    if (suffix) {
+      try {
+        const Jimp = require("jimp");
+
+        let color;
+        if (suffix.startsWith('0x')) {
+          // In the case that we have a string in 0xABCDEF format
+          color = "#" + suffix.substr(2);
+        } else color = suffix;
+        if (!["#000000", "black", "#000000FF"].includes(color))
+          color = Jimp.cssColorToHex(color);
+        if (color != 255) {
+          let img = new Jimp(256, 256, color);
+          msg.channel.send({files: [await img.getBufferAsync(Jimp.MIME_PNG)]});
+        } else {
+          msg.reply(`sorry, I couldn't understand the color "${suffix}"`).then(u.clean);
+        }
+      } catch(error) {
+        msg.reply(`sorry, I couldn't understand the color "${suffix}"`).then(u.clean);
+      }
+    } else {
+      msg.reply("you need to tell me a color!").then(u.clean);
+    }
   }
 })
 .addCommand({name: "disagree",
@@ -312,7 +334,7 @@ const Module = new Augur.Module()
           let hug = u.rand(hugs);
           user.send(`Incoming hug from **${msg.author.username}**!`, {files: [{"attachment": hug, "name": "hug.gif"}]})
           .catch(e => {
-            msg.reply(`I couldn't send a hug to ${msg.guild.members.get(user.id).displayName}. Maybe they blocked me? :shrug:`).then(u.clean);
+            msg.reply(`I couldn't send a hug to ${msg.guild.members.cache.get(user.id).displayName}. Maybe they blocked me? :shrug:`).then(u.clean);
           });
         } catch(e) { u.errorHandler(e, msg); }
       }
@@ -536,7 +558,7 @@ const Module = new Augur.Module()
 })
 .addEvent("messageReactionAdd", (reaction, user) => {
   if ((reaction.message.channel.id == "121755900313731074") && (reaction.emoji.name == "♻️")) {
-    reaction.removeAll();
+    reaction.remove();
     reaction.message.react("⭐").catch(u.noop);
   }
 })

@@ -20,7 +20,7 @@ const Module = new Augur.Module()
         let member = await ldsg.members.fetch(msg.author.id);
         if (member) await member.roles.add(role);
         msg.react("👌");
-        modLogs.send(`ℹ️ **${member.displayName}** added the ${role.name} role.`);
+        //modLogs.send(`ℹ️ **${member.displayName}** added the ${role.name} role.`);
       } else {
         msg.reply("you didn't give me a valid role to apply.")
         .then(u.clean);
@@ -102,7 +102,7 @@ const Module = new Augur.Module()
         let member = await ldsg.members.fetch(msg.author);
         if (member) await member.roles.remove(role);
         msg.react("👌");
-        modLogs.send(`ℹ️ **${member.displayName}** removed the ${role.name} role.`);
+        //modLogs.send(`ℹ️ **${member.displayName}** removed the ${role.name} role.`);
       } else {
         msg.reply("you didn't give me a valid role to remove.")
         .then(u.clean);
@@ -142,32 +142,30 @@ const Module = new Augur.Module()
   },
   permissions: (msg) => msg.guild
 })
-.addEvent("guildMemberUpdate", (oldMember, newMember) => {
+.addEvent("guildMemberUpdate", async (oldMember, newMember) => {
   if (newMember.guild.id == Module.config.ldsg) {
     if (newMember.roles.cache.size > oldMember.roles.cache.size) {
       // Role added
-      for (const [id, role] of newMember.roles.cache) {
-        if (!oldMember.roles.cache.has(id) && inventory.has(id)) {
-          // New equippable!
-          if (newMember.roles.cache.some((r) => inventory.find(i => i == r.id))) {
-            // They already have a role equipped
+      try {
+        for (const [id, role] of newMember.roles.cache) {
+          if (!oldMember.roles.cache.has(id) && inventory.has(id)) {
+            // New equippable!
             newMember.send(`You now have the color-equippable role **${role.name}**! You can equip the color with the \`!equip ${role.name}\` command.`).catch(u.noop);
-          } else {
-            newMember.roles.add(inventory.get(id));
-            newMember.send(`You now have the color-equippable role **${role.name}**! This has automatically been equipped for you. You can unequip it with the \`!unequip\` command.`).catch(u.noop);
           }
         }
-      }
-      Module.db.user.updateRoles(newMember);
+        await Module.db.user.updateRoles(newMember);
+      } catch(error) { u.errorHandler(error, "Update Roles on Role Add"); }
     } else if (newMember.roles.cache.size < oldMember.roles.cache.size) {
       // Role removed
-      for (const [id, role] of oldMember.roles.cache) {
-        if (!newMember.roles.cache.has(id) && inventory.has(id)) {
-          // Lost equippable!
-          newMember.roles.remove(inventory.get(id));
+      try {
+        for (const [id, role] of oldMember.roles.cache) {
+          if (!newMember.roles.cache.has(id) && inventory.has(id)) {
+            // Lost equippable!
+            await newMember.roles.remove(inventory.get(id));
+          }
         }
-      }
-      Module.db.user.updateRoles(newMember);
+        await Module.db.user.updateRoles(newMember);
+      } catch(error) { u.errorHandler(error, "Update Roles on Role Remove"); }
     }
   }
 })
