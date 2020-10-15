@@ -6,7 +6,8 @@ const Module = new Augur.Module()
         name: "meme",
         description: "Creates a meme, put an image URL for you background and then put the text you want along the bottom. Or put the image source afterwards. Who am I to judge?",
         permissions: (msg) => msg.member && msg.channel.permissionsFor(msg.member).has(["ATTACH_FILES", "EMBED_LINKS"]),
-        process: (msg, suffix) => {
+        process: (msg) => {
+            let {suffix} = u.parse(msg, true);
             //general globals from bot this was imported from
             const args = suffix.trim().split(/ +/);
             //Determine if a string is a url
