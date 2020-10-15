@@ -19,8 +19,8 @@ const Module = new Augur.Module()
             }
 
             let src = "https://i.imgflip.com/qbm81.jpg";
-            let bottomText = ["_"];
-            let topText = ["_"];
+            let bottomText = [];
+            let topText = [];
             for (const arg of args) {
               let url = isURL(arg);
               if (url) {
@@ -29,13 +29,13 @@ const Module = new Augur.Module()
                 bottomText.push(arg);
               } else {
                 topText = bottomText;
-                bottomText = ["_"];
+                bottomText = [];
               }
             }
             bottomText = encodeURIComponent(bottomText.join(" "));
             topText = encodeURIComponent(topText.join(" "));
             src = encodeURIComponent(src.trim());
-            let meme = `https://api.memegen.link/images/custom/${topText}/${bottomText}.png?background=${src}`;
+            let meme = `https://api.memegen.link/images/custom/${topText || "_"}/${bottomText || "_"}.png?background=${src}`;
 
             msg.channel.send({ files: [meme] });
         },
