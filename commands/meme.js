@@ -19,23 +19,21 @@ const Module = new Augur.Module()
             }
 
             let src = "https://i.imgflip.com/qbm81.jpg";
-            let bottomText = "_";
-            let topText = "_";
-            args.forEach(element => {
-                let url = isURL(element);
-                if (url) {
-                    src = url;
-                }
-                else if (element.toLowerCase() != "-t") {
-                    bottomText = bottomText.concat(element + " ");
-                }
-                else {
-                    topText = bottomText;
-                    bottomText = "_";
-                }
-            });
-            bottomText = encodeURIComponent(bottomText.trim());
-            topText = encodeURIComponent(topText.trim());
+            let bottomText = ["_"];
+            let topText = ["_"];
+            for (const arg of args) {
+              let url = isURL(arg);
+              if (url) {
+                src = url;
+              } else if (arg.toLowerCase() != "-t") {
+                bottomText.push(arg);
+              } else {
+                topText = bottomText;
+                bottomText = ["_"];
+              }
+            }
+            bottomText = encodeURIComponent(bottomText.join(" "));
+            topText = encodeURIComponent(topText.join(" "));
             src = encodeURIComponent(src.trim());
             let meme = `https://api.memegen.link/images/custom/${topText}/${bottomText}.png?background=${src}`;
 
