@@ -137,7 +137,7 @@ async function checkStarBoard(reaction, user) {
         } catch(error) { u.errorHandler(error, "Approve Star"); }
       }
     }
-    if (react == "🗒️") user.send(starEmbed(reaction)).catch(u.noop);
+    if (reaction.emoji.name == "🗒️") user.send(starEmbed(reaction)).catch(u.noop);
   } catch(error) { u.errorHandler(error, "Star Board Update"); }
 }
 
