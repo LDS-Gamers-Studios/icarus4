@@ -785,7 +785,7 @@ const models = {
     updateRoles: (member) => {
       return new Promise((fulfill, reject) => {
         User.findOne({discordId: member.id}, (err, user) => {
-          if (user) {
+          if (user && member && member.roles && member.roles.cache) {
             user.set({roles: Array.from(member.roles.cache.keys())});
             user.save((err, newUser) => {
               if (err) reject(err);
