@@ -10,9 +10,8 @@ const Module = new Augur.Module()
             function randomNumber(min, max) {
                 return Math.round(Math.random() * (max - min) + min);
             }
+            //Roll a D20. on a 20 get a squirell. On a 1, elmo burns. anything else you get heinz
             function backgroundImage(override = randomNumber(1, 20)) {
-
-                //console.log(override);
                 switch (override) {
                     case 1: return `https://static1.srcdn.com/wordpress/wp-content/uploads/2020/05/Elmo-Flames-Meme.jpg?q=50&fit=crop&w=960&h=500`;
                     case 20: return `https://i.imgflip.com/18kirh.jpg`;
