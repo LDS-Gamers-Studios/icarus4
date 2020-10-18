@@ -5,7 +5,7 @@ const Module = new Augur.Module()
     .addCommand({
         name: "Behold",
         description: "creates a doofenshritz behold meme, with the arguments becoming your bottom text. Small chance of fire.",
-        permissions: (msg) => msg.member && msg.channel.permissionsFor(msg.member).has(["ATTACH_FILES", "EMBED_LINKS"]),
+        permissions: (msg) => msg.channel.id == "121755900313731074" && msg.channel.permissionsFor(msg.member).has(["ATTACH_FILES", "EMBED_LINKS"]),
         process: (msg) => {
             function randomNumber(min, max) {
                 return Math.round(Math.random() * (max - min) + min);
