@@ -18,8 +18,18 @@ const Module = new Augur.Module()
                     default: return `https://i.imgflip.com/zs91u.jpg`;
                 }
             }
-            let { suffix } = u.parse(msg, true);
-            let yourCompiledSuffix = `${backgroundImage()} Behold! ${u.parse(msg, true)}`;
-            Module.client.commands.execute("meme", msg, yourCompiledSuffix);
+            let { command, suffix } = u.parse(msg, true);
+            let content = `${Module.config.prefix}${command} ${backgroundImage()} Behold! ${suffix}`;
+            
+            let fakeMsg = {
+              channel: msg.channel,
+              guild: msg.guild,
+              member: msg.member,
+              author: msg.author,
+              attachments: msg.attachments,
+              content: content,
+              cleanContent: content
+            };
+            Module.client.commands.execute("meme", fakeMsg, "");
         }
     });
