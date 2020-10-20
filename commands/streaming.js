@@ -186,7 +186,15 @@ async function processTwitch(bot, key, channel) {
           since: Date.now()
         });
         if (member && isPartnered(member)) member.roles.add(liveRole);
-        notificationChannel.send(notificationEmbed(stream, "twitch"));
+        let embed = notificationEmbed(stream, "twitch");
+        // Only enable during testing
+        if (member.roles.cache.has("507031155627786250"))
+          ldsg.channels.cache.get("209046676781006849").send(`${ldsg.roles.cache.get("768164394248044575")}, **${member.displayName}** is live for Extra Life!`, {embed});
+        // The real notifications
+        if (extraLife && member.roles.cache.has("507031155627786250"))
+          notificationChannel.send(`${ldsg.roles.cache.get("768164394248044575")}, **${member.displayName}** is live for Extra Life!`, {embed});
+        else
+          notificationChannel.send({embed});
       }
     } else if (twitchStatus.has(key) && (twitchStatus.get(key).status == "online")) {
       if (channel.toLowerCase() == "ldsgamers") bot.user.setActivity("Tiddlywinks");
