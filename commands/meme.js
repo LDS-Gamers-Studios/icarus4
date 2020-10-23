@@ -71,7 +71,7 @@ const Module = new Augur.Module()
               content: content,
               cleanContent: content
             };
-            Module.client.commands.execute("meme", fakeMsg, "");
+            Module.client.commands.execute("meme", fakeMsg, content);
         }
     });;
 module.exports = Module;
