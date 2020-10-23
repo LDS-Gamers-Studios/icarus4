@@ -60,7 +60,7 @@ const Module = new Augur.Module()
                 }
             }
             let { command, suffix } = u.parse(msg, true);
-            let content = `${Module.config.prefix}${command} ${backgroundImage()} Behold! ${suffix}`;
+            let content = `${Module.config.prefix}${command} ${backgroundImage()} Behold! -t ${suffix}`;
 
             let fakeMsg = {
               channel: msg.channel,
