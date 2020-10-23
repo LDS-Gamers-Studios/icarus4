@@ -104,7 +104,7 @@ function isPartnered(member) {
   return false;
 };
 
-function notificationEmbed(body, srv) {
+function notificationEmbed(body, srv = "twitch") {
   let embed = u.embed()
     .setTimestamp();
   if (srv == "twitch") {
@@ -187,11 +187,9 @@ async function processTwitch(bot, key, channel) {
         });
         if (member && isPartnered(member)) member.roles.add(liveRole);
         let embed = notificationEmbed(stream, "twitch");
-        // Only enable during testing
-        if (member.roles.cache.has("507031155627786250"))
-          ldsg.channels.cache.get("209046676781006849").send(`${ldsg.roles.cache.get("768164394248044575")}, **${member.displayName}** is live for Extra Life!`, {embed});
+
         // The real notifications
-        if (extraLife && member.roles.cache.has("507031155627786250"))
+        if (extraLife && member.roles.cache.has("507031155627786250") && stream._data.title.toLowerCase().includes("extra life"))
           notificationChannel.send(`${ldsg.roles.cache.get("768164394248044575")}, **${member.displayName}** is live for Extra Life!`, {embed});
         else
           notificationChannel.send({embed});
