@@ -37,7 +37,7 @@ const Module = new Augur.Module()
 
         // The "body" part of this has other options for other skin views, that can be implemented later.
         let skinUrl = "https://crafatar.com/renders/body/" + uuid;
-        msg.channel.send({ files: [skinUrl] });
+        msg.channel.send({ files: [{attachment: skinUrl, name: `${name}.png`}] });
       } catch (e) { u.errorHandler(e, msg); }
     }
 });
