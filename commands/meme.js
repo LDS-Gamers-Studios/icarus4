@@ -42,7 +42,7 @@ const Module = new Augur.Module()
             msg.channel.send({ files: [meme] });
         },
     }).addCommand({
-        name: "Behold",
+        name: "behold",
         description: "creates a doofenshritz behold meme, with the arguments becoming your bottom text. Small chance of fire.",
         permissions: (msg) => msg.channel.id == "121755900313731074" && msg.channel.permissionsFor(msg.member).has(["ATTACH_FILES", "EMBED_LINKS"]),
         process: (msg) => {
