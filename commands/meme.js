@@ -47,7 +47,9 @@ const Module = new Augur.Module()
         permissions: (msg) => msg.channel.id == "121755900313731074" && msg.channel.permissionsFor(msg.member).has(["ATTACH_FILES", "EMBED_LINKS"]),
         process: (msg) => {
             function randomNumber(min, max) {
-                return Math.round(Math.random() * (max - min) + min);
+                let high = Math.max(max, min);
+                let low = Math.min(max, min);
+                return Math.floor(Math.random() * (high - low + 1)) + low;
             }
             //Roll a D20. on a 20 get a squirell. On a 1, elmo burns. anything else you get heinz
             function backgroundImage(override) {
