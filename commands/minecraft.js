@@ -27,16 +27,17 @@ const Module = new Augur.Module()
         }
       } else name = encodeURIComponent(suffix);
 
-      let uuid = await minecraft.getPlayerUUID(name);
-      if (!uuid) {
-        msg.channel.send("I couldn't find a Minecraft account with the username `" + name + "`.").then(u.clean);
-        return;
-      }
+      try {
+        let uuid = await minecraft.getPlayerUUID(name);
+        if (!uuid) {
+          msg.channel.send("I couldn't find a Minecraft account with the username `" + name + "`.").then(u.clean);
+          return;
+        }
 
-      // I added the skin type option for later potential, but for the moment
-      // we'll just leave it as "body".
-      let skinUrl = await minecraft.getPlayerSkin(uuid, "body");
-      msg.channel.send({ files: [skinUrl] });
+        // The "body" part of this has other options for other skin views, that can be implemented later.
+        let skinUrl = "https://crafatar.com/renders/body/" + uuid;
+        msg.channel.send({ files: [skinUrl] });
+      } catch (e) { u.errorHandler(e, "Minecraft UUID/Skin Grab Error"); }
     }
 });
 
