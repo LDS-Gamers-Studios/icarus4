@@ -111,8 +111,8 @@ function notificationEmbed(body, srv = "twitch") {
     let data = body._data;
     embed.setColor('#6441A4')
       .setThumbnail(data.thumbnail_url.replace("{width}", "480").replace("{height}", "270") + "?t=" + Date.now())
-      .setTitle(data.user_name)
       .setAuthor(data.user_name + (twitchGames.has(data.game_id) ? ` playing ${twitchGames.get(data.game_id).name}` : ""))
+      .setTitle(data.title)
       .setURL(data.stream_url);
   } else if (srv == "youtube") {
     let content = body.content[0].snippet;
@@ -189,9 +189,10 @@ async function processTwitch(bot, key, channel) {
         let embed = notificationEmbed(stream, "twitch");
 
         // The real notifications
-        if (extraLife && member.roles.cache.has("507031155627786250") && stream._data.title.toLowerCase().includes("extra life"))
+        if (extraLife && member.roles.cache.has("507031155627786250") && stream._data.title.toLowerCase().includes("extra life")) {
           notificationChannel.send(`${ldsg.roles.cache.get("768164394248044575")}, **${member.displayName}** is live for Extra Life!`, {embed});
-        else
+          ldsg.channels.cache.get("733336823400628275").send({embed});
+        } else
           notificationChannel.send({embed});
       }
     } else if (twitchStatus.has(key) && (twitchStatus.get(key).status == "online")) {
