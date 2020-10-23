@@ -1,5 +1,6 @@
 const Augur = require("augurbot"),
   request = require("request-promise-native"),
+  u = require("../utils/utils),
   minecraft = require("../utils/minecraftAPI");
 
 const Module = new Augur.Module()
