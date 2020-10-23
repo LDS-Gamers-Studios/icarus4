@@ -25,3 +25,5 @@ function getPlayerUUID(username) {
     } catch (error) { reject(error); }
   });
 }
+
+module.exports = { getObjectFromAPI, getPlayerUUID };
