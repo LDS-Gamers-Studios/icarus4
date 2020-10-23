@@ -438,7 +438,7 @@ Module
   process: async (msg, suffix) => {
     if (suffix) {
       try {
-        let message = msg.channel.messages.fetch(suffix);
+        let message = await msg.channel.messages.fetch(suffix);
         let author = message.member;
         let embed = u.embed()
           .setAuthor(author.displayName, author.user.displayAvatarURL())

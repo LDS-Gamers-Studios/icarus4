@@ -92,13 +92,7 @@ async function checkStarBoard(reaction, user) {
         // Process initial star
         if (await Module.db.starboard.fetchMessage(msg.id)) return; // Already starred. Don't do it again
         let posted;
-        let embed = u.embed()
-          .setAuthor(msg.member.displayName, msg.author.displayAvatarURL())
-          .setTimestamp(msg.createdAt)
-          .setDescription(msg.cleanContent)
-          .addField("Channel", msg.channel.name)
-          .addField("Jump to post", msg.url)
-          .setFooter(react);
+        let embed = starEmbed(reaction);
         if (msg.attachments && (msg.attachments.size > 0))
           embed.setImage(msg.attachments.first().url);
         try { // Post in applicable star board
@@ -143,7 +137,20 @@ async function checkStarBoard(reaction, user) {
         } catch(error) { u.errorHandler(error, "Approve Star"); }
       }
     }
+    if (reaction.emoji.name == "🗒️") user.send(starEmbed(reaction)).catch(u.noop);
   } catch(error) { u.errorHandler(error, "Star Board Update"); }
+}
+
+function starEmbed(reaction) {
+  const msg = reaction.message;
+  const react = reaction.emoji.name;
+  return (u.embed()
+    .setAuthor(msg.member.displayName, msg.author.displayAvatarURL())
+    .setTimestamp(msg.createdAt)
+    .setDescription(msg.cleanContent)
+    .addField("Channel", msg.channel.name)
+    .addField("Jump to post", msg.url)
+    .setFooter(react));
 }
 
 const Module = new Augur.Module()
