@@ -23,7 +23,7 @@ const Module = new Augur.Module()
         let ign = await Module.db.ign.find(user.id, 'minecraft');
         if (ign) name = encodeURIComponent(ign.ign);
         else {
-          msg.channel.send(user + " has not set a Minecraft name with `!addign minecraft`.").then(u.clean);
+          msg.channel.send(`${user} has not set a Minecraft name with \`!addign minecraft\`.`).then(u.clean);
           return;
         }
       } else name = encodeURIComponent(suffix);
