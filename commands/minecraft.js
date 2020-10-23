@@ -38,7 +38,7 @@ const Module = new Augur.Module()
         // The "body" part of this has other options for other skin views, that can be implemented later.
         let skinUrl = "https://crafatar.com/renders/body/" + uuid;
         msg.channel.send({ files: [skinUrl] });
-      } catch (e) { u.errorHandler(e, "Minecraft UUID/Skin Grab Error"); }
+      } catch (e) { u.errorHandler(e, msg); }
     }
 });
 
