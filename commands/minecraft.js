@@ -29,7 +29,10 @@ const Module = new Augur.Module()
       } else name = encodeURIComponent(suffix);
 
       try {
-        let uuid = await minecraft.getPlayerUUID(name);
+        let uuid;
+        try {
+          uuid = await minecraft.getPlayerUUID(name);
+        } catch(error) { u.noop(); }
         if (!uuid) {
           msg.channel.send("I couldn't find a Minecraft account with the username `" + name + "`.").then(u.clean);
           return;
