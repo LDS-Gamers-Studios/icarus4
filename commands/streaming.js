@@ -5,7 +5,7 @@ const Augur = require("augurbot"),
   u = require("../utils/utils"),
   yaml = require("js-yaml");
 
-const extraLife = false;
+const extraLife = () => new Date().getMonth() == 10;
 
 var applicationCount = 0;
 
@@ -31,7 +31,7 @@ async function checkStreams(bot) {
     processApplications();
 
     // Check for Extra Life
-    if (extraLife && (new Date()).getMinutes() < 5) {
+    if (extraLife() && (new Date()).getMinutes() < 5) {
       const liveEL = bot.guilds.cache.get(Module.config.ldsg).roles.cache.get("281135201407467520").members.filter(m => m.roles.cache.has("507031155627786250"));
       if (liveEL.size > 0) extraLifeEmbed(bot, liveEL);
     }
@@ -95,7 +95,7 @@ function isPartnered(member) {
     '121783903630524419', // Pro Sponsor
     '96345401078087680' // Staff
   ];
-  if (extraLife) roles.push("507031155627786250");
+  if (extraLife()) roles.push("507031155627786250");
 
   if (member.id == member.client.user.id) return true;
   for (let role of roles) {
@@ -189,7 +189,7 @@ async function processTwitch(bot, key, channel) {
         let embed = notificationEmbed(stream, "twitch");
 
         // The real notifications
-        if (extraLife && member.roles.cache.has("507031155627786250") && stream._data.title.toLowerCase().includes("extra life")) {
+        if (extraLife() && member.roles.cache.has("507031155627786250") && stream._data.title.toLowerCase().includes("extra life")) {
           notificationChannel.send(`${ldsg.roles.cache.get("768164394248044575")}, **${member.displayName}** is live for Extra Life!`, {embed});
           ldsg.channels.cache.get("733336823400628275").send({embed});
         } else
