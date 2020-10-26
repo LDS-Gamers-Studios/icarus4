@@ -55,7 +55,7 @@ async function extraLifeEmbed() {
         .setTitle("Live from the Extra Life Team!");
 
         let channels = [];
-        for (const stream of streams.data.channels) {
+        for (const stream of streams.data) {
           let channel = stream._data;
           if (channel) {
             channels.push({
