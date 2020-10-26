@@ -46,7 +46,7 @@ async function extraLifeEmbed() {
     });
     if (response) {
       let team = JSON.parse(response);
-      let userName = team.map(member => member.links.stream.replace("https://player.twitch.tv/?channel=", ""));
+      let userName = team.filter(m => m.links.stream).map(member => member.links.stream.replace("https://player.twitch.tv/?channel=", ""));
       let streams = await twitch.streams.getStreams({userName});
 
       if (streams.length > 0) {
