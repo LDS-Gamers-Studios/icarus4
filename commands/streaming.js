@@ -45,11 +45,11 @@ async function extraLifeEmbed() {
       msg.reply("there seems to be an issue with the Extra Life API. Please try again in a few minutes").then(u.clean);
     });
     if (response) {
-      let team = (JSON.parse(response)).filter(m => m.streamIsLive);
-      if (team.length > 0) {
-        let userName = team.map(member => member.links.stream.replace("https://player.twitch.tv/?channel=", ""));
-        let streams = await twitch.streams.getStreams({userName});
+      let team = JSON.parse(response);
+      let userName = team.map(member => member.links.stream.replace("https://player.twitch.tv/?channel=", ""));
+      let streams = await twitch.streams.getStreams({userName});
 
+      if (streams.length > 0) {
         let embed = u.embed()
         .setColor(0x7fd836)
         .setTitle("Live from the Extra Life Team!");
