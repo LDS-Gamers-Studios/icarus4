@@ -1,5 +1,6 @@
 const Augur = require("augurbot"),
   fs = require("fs"),
+  request = require("request-promise-native"),
   TwitchClient = require("twitch").default,
   twitchConfig = require("../config/twitch.json"),
   u = require("../utils/utils"),
@@ -32,13 +33,55 @@ async function checkStreams(bot) {
 
     // Check for Extra Life
     if (extraLife() && (new Date()).getMinutes() < 5) {
-      const liveEL = bot.guilds.cache.get(Module.config.ldsg).roles.cache.get("281135201407467520").members.filter(m => m.roles.cache.has("507031155627786250"));
-      if (liveEL.size > 0) extraLifeEmbed(bot, liveEL);
+      let embed = await extraLifeEmbed();
+      if (embed) Module.client.channels.cache.get(Module.config.ldsg).send({embed});
     }
   } catch(e) { u.errorHandler(e, "Stream Check"); }
 };
 
-async function extraLifeEmbed(bot, liveEL) {
+async function extraLifeEmbed() {
+  try {
+    let response = await request("https://extralife.donordrive.com/api/teams/51868/participants").catch(() => {
+      msg.reply("there seems to be an issue with the Extra Life API. Please try again in a few minutes").then(u.clean);
+    });
+    if (response) {
+      let team = (JSON.parse(response)).filter(m => m.streamIsLive);
+      if (team.length > 0) {
+        let userName = team.map(member => member.links.stream.replace("https://player.twitch.tv/?channel=", ""));
+        let streams = await twitch.streams.getStreams({userName});
+
+        let embed = u.embed()
+        .setColor(0x7fd836)
+        .setTitle("Live from the Extra Life Team!");
+
+        let channels = [];
+        for (const stream of streams.data.channels) {
+          let channel = stream._data;
+          if (channel) {
+            channels.push({
+              name: channel.user_name,
+              game: twitchGames.has(channel.game_id) ? twitchGames.get(channel.game_id).name : "Something?",
+              service: "Twitch",
+              title: channel.title,
+              url: `https://www.twitch.tv/${channel.user_name}`
+            });
+          }
+        }
+
+        channels.sort((a, b) => a.name.localeCompare(b.name));
+
+        for (let i = 0; i < Math.min(channels.length, 25); i++) {
+          let channel = channels[i];
+          embed.addField(`${channel.name} playing ${channel.game}`, `[${channel.title}](${channel.url})`);
+        }
+
+        return embed;
+      }
+    }
+  } catch(error) { u.errorHandler(error, "Extra Life Stream Fetch"); }
+}
+
+async function extraLifeEmbed_old(bot, liveEL) {
   try {
     let twitchIgns = await Module.db.ign.find(liveEL.map(m => m.id), "twitch");
 
@@ -302,6 +345,44 @@ const Module = new Augur.Module()
     } else msg.reply("you need to tell me who to approve!").then(u.clean);
   },
   permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && msg.member.roles.cache.has(Module.config.roles.team))
+})
+.addCommand({name: "extralife",
+  description: "Check the LDSG Extra Life Goal",
+  permissions: msg => msg.guild && msg.guild.id == Module.config.ldsg,
+  process: async (msg) => {
+    try {
+      let response = await request("https://extralife.donordrive.com/api/teams/51868/participants").catch(() => {
+        msg.reply("there seems to be an issue with the Extra Life API. Please try again in a few minutes").then(u.clean);
+      });
+      if (response) {
+        let team = JSON.parse(response);
+        team.sort((a, b) => (a.sumDonations != b.sumDonations ? b.sumDonations - a.sumDonations : a.displayName.localeCompare(b.displayName)));
+        let total = 0;
+        let embed = u.embed().setColor(0x7fd836);
+        for (let i = 0; i < Math.min(team.length, 25); i++) {
+          let member = team[i];
+          embed.addField(member.displayName, `$${member.sumDonations} / $${member.fundraisingGoal} (${Math.round(100 * member.sumDonations / member.fundraisingGoal)}%)\n[[Donate]](${member.links.donate})${(member.streamIsLive ? `\n[[STREAM NOW LIVE]](${member.links.stream.replace("https://player.twitch.tv/?channel=", "https://www.twitch.tv/")})` : "")}`, true);
+          total += member.sumDonations;
+        }
+        embed.setTitle("LDSG Extra Life Team")
+        .setThumbnail("https://assets.donordrive.com/extralife/images/fbLogo.jpg?v=202009241356")
+        .setURL("https://www.extra-life.org/index.cfm?fuseaction=donorDrive.participant&participantID=412575#donate")
+        .setDescription(`LDSG is raising money for Extra Life! We are currently at $${total} of our team's $2,500 goal for 2020. That's ${Math.round(100 * total / 2500)}% there!\n\nYou can help by donating to one of the Extra Life Team below.`);
+        msg.channel.send({embed});
+      }
+    } catch(error) { u.errorHandler(error, msg); }
+  }
+})
+.addCommand({name: "extralifestream",
+  description: "See who is live on the LDSG Extra Life Team",
+  permissions: msg => msg.guild && msg.guild.id == Module.config.ldsg,
+  process: async (msg) => {
+    try {
+      let embed = await extraLifeEmbed();
+      if (embed) msg.channel.send({embed});
+      else msg.reply("I couldn't find any live LDSG Extra Life Team streams!").then(u.clean);
+    } catch(error) { u.errorHandler(error, msg); }
+  }
 })
 .addCommand({name: "multitwitch",
   desription: "Links to multi-stream pages on Multistre.am",
