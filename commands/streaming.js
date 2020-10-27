@@ -316,7 +316,7 @@ const Module = new Augur.Module()
       let streams = await fetchExtraLifeStreams(team).catch(u.noop);
       if (streams) {
         for (const stream of streams.data) {
-          let member = team.find(m => m.twitch.toLowerCase() == stream.userDisplayName.toLowerCase())
+          let member = team.find(m => m.twitch && m.twitch.toLowerCase() == stream.userDisplayName.toLowerCase())
           member.streamIsLive = true;
           member.stream = stream;
         }
