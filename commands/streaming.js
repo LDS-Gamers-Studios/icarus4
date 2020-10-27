@@ -23,10 +23,7 @@ async function checkStreams(bot) {
     let igns = await Module.db.ign.find(streamers, "twitch");
 
     igns = igns.concat(bonusStreams.twitch.map(c => ({ign: c, discordId: c})));
-    for (const ign of igns) {
-      let channelName = encodeURIComponent(ign.ign);
-      processTwitch(bot, ign.discordId, channelName);
-    }
+    processTwitch(bot, igns);
 
     // Check for new Approved Streamers applications
     processApplications();
@@ -106,7 +103,7 @@ function isPartnered(member) {
   return false;
 };
 
-function notificationEmbed(body, srv = "twitch") {
+function notificationEmbed(stream, srv = "twitch") {
   let embed = u.embed()
     .setTimestamp();
   if (srv == "twitch") {
@@ -157,53 +154,64 @@ function processApplications() {
   } catch(e) { u.errorHandler(e, "Streaming Application Check"); }
 }
 
-async function processTwitch(bot, key, channel) {
+async function processTwitch(bot, igns) {
   try {
     let ldsg = bot.guilds.cache.get(Module.config.ldsg),
       liveRole = ldsg.roles.cache.get("281135201407467520"),
-      notificationChannel = ldsg.channels.cache.get(Module.config.ldsg), // #general
-      member = ldsg.members.cache.get(key);
+      notificationChannel = ldsg.channels.cache.get(Module.config.ldsg); // #general
 
-    const stream = await twitch.streams.getStreamByUserName(channel);
-    if (stream) {
-      let status = twitchStatus.get(key);
-      if (!status || ((status.status == "offline") && ((Date.now() - status.since) >= (30 * 60 * 1000)))) {
-        if (!twitchGames.has(stream.gameId)) {
-          let game = await twitch.games.getGameById(stream.gameId);
-          if (game) twitchGames.set(game.id, game);
-        }
-        stream.streamUrl = "https://www.twitch.tv/" + encodeURIComponent(channel).toLowerCase();
-        if (channel.toLowerCase() == "ldsgamers") {
-          bot.user.setActivity(
-            stream.title,
-            {
-              url: stream.streamUrl,
-              type: "STREAMING"
+    for (let i = 0; i < igns.length; i += 100) {
+      let streamers = igns.slice(i, i + 100);
+
+      let streams = await twitch.streams.getStreams({userName: streamers.map(s => s.ign)}).catch(u.noop);
+      if (streams) {
+        // Handle Live
+        for (let stream of streams) {
+          let status = twitchStatus.get(stream.userDisplayName.toLowerCase());
+          if (!status || ((status.status == "offline") && ((Date.now() - status.since) >= (30 * 60 * 1000)))) {
+            if (!twitchGames.has(stream.gameId)) {
+              let game = await twitch.games.getGameById(stream.gameId);
+              if (game) twitchGames.set(game.id, game);
             }
-          );
+            stream.streamUrl = "https://www.twitch.tv/" + encodeURIComponent(stream.userDisplayName);
+            if (stream.userDisplayName.toLowerCase() == "ldsgamers") {
+              bot.user.setActivity(
+                stream.title,
+                {
+                  url: stream.streamUrl,
+                  type: "STREAMING"
+                }
+              );
+            }
+            twitchStatus.set(stream.userDisplayName.toLowerCase(), {
+              status: "online",
+              since: Date.now()
+            });
+            let ign = streamers.find(streamer => streamer.ign.toLowerCase() == stream.userDisplayName.toLowerCase());
+            let member = await ldsg.members.fetch(ign.discordId).catch(u.noop);
+            if (member && isPartnered(member)) member.roles.add(liveRole);
+            let embed = notificationEmbed(stream, "twitch");
+
+            if (extraLife() && member && member.roles.cache.has("507031155627786250") && stream.title.toLowerCase().includes("extra life")) {
+              notificationChannel.send(`${ldsg.roles.cache.get("768164394248044575")}, **${member.displayName}** is live for Extra Life!`, {embed});
+              ldsg.channels.cache.get("733336823400628275").send({embed});
+            } else
+              notificationChannel.send({embed});
+          }
         }
-        twitchStatus.set(key, {
-          status: "online",
-          since: Date.now()
-        });
-        if (member && isPartnered(member)) member.roles.add(liveRole);
-        let embed = notificationEmbed(stream, "twitch");
 
-        // The real notifications
-        if (extraLife() && member.roles.cache.has("507031155627786250") && stream.title.toLowerCase().includes("extra life")) {
-          notificationChannel.send(`${ldsg.roles.cache.get("768164394248044575")}, **${member.displayName}** is live for Extra Life!`, {embed});
-          ldsg.channels.cache.get("733336823400628275").send({embed});
-        } else
-          notificationChannel.send({embed});
+        // Handle Offline
+        let offline = streamers.filter(streamer => !streams.find(stream => stream.userDisplayName.toLowerCase() == streamer.ign.toLowerCase()));
+        for (let channel of offline) {
+          if (channel.ign.toLowerCase() == "ldsgamers") bot.user.setActivity("Tiddlywinks");
+          let member = await ldsg.members.fetch(channel.discordId).catch(u.noop);
+          if (member && liveRole.members.has(member.id)) member.roles.remove(liveRole);
+          twitchStatus.set(channel.ign.toLowerCase(), {
+            status: "offline",
+            since: Date.now()
+          });
+        }
       }
-    } else if (twitchStatus.has(key) && (twitchStatus.get(key).status == "online")) {
-      if (channel.toLowerCase() == "ldsgamers") bot.user.setActivity("Tiddlywinks");
-      if (member && liveRole.members.has(member.id)) member.roles.remove(liveRole);
-
-      twitchStatus.set(key, {
-        status: "offline",
-        since: Date.now()
-      });
     }
   } catch(e) {
     u.errorHandler(e, "Process Twitch");
