@@ -445,16 +445,19 @@ const Module = new Augur.Module()
     try {
       let twitchIgns = await Module.db.ign.getList("twitch");
       let twitchChannels = twitchIgns.filter(ign => msg.guild.roles.cache.get("267038468474011650").members.has(ign.discordId)).map(ign => ign.ign);
+      const streamFetch = [];
 
       // Fetch channels from Twitch
-      let res = await Promise.all([
-        new Promise(async (fulfill, reject) => {
-          try {
-            let streams = await twitch.streams.getStreams({userName: twitchChannels.slice(0, 100)});
-            fulfill({service: "twitch", channels: streams.data});
-          } catch(e) { u.errorHandler(e, msg); reject(e); }
-        })
-      ]);
+      for (let i = 0; i < twitchChannels.length; i += 100) {
+        let userName = twitchChannels.slice(i, i + 100);
+
+        streamFetch.push((async function(userName) {
+          let streams = await twitch.streams.getStreams({userName}).catch(u.noop);
+          return {service: "twitch", channels: (streams ? streams.data : [])};
+        })(userName));
+      }
+
+      let res = await Promise.all(streamFetch);
 
       let embed = u.embed()
       .setColor('#6441A4')
