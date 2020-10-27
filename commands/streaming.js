@@ -41,96 +41,55 @@ async function checkStreams(bot) {
 
 async function extraLifeEmbed() {
   try {
-    let response = await request("https://extralife.donordrive.com/api/teams/51868/participants").catch(() => {
-      msg.reply("there seems to be an issue with the Extra Life API. Please try again in a few minutes").then(u.clean);
-    });
-    if (response) {
-      let team = JSON.parse(response);
-      let userName = team.filter(m => m.links.stream).map(member => member.links.stream.replace("https://player.twitch.tv/?channel=", ""));
-      let streams = await twitch.streams.getStreams({userName}).catch(u.noop);
+    let streams = await fetchExtraLifeStreams();
 
-      if (streams && streams.data && streams.data.length > 0) {
-        let embed = u.embed()
-        .setColor(0x7fd836)
-        .setTitle("Live from the Extra Life Team!");
+    if (streams && streams.data && streams.data.length > 0) {
+      let embed = u.embed()
+      .setColor(0x7fd836)
+      .setTitle("Live from the Extra Life Team!");
 
-        let channels = [];
-        for (const stream of streams.data) {
-          let channel = stream._data;
-          if (channel) {
-            channels.push({
-              name: channel.user_name,
-              game: twitchGames.has(channel.game_id) ? twitchGames.get(channel.game_id).name : "Something?",
-              service: "Twitch",
-              title: channel.title,
-              url: `https://www.twitch.tv/${channel.user_name}`
-            });
-          }
+      let channels = [];
+      for (const stream of streams.data) {
+        if (!twitchGames.has(stream.gameId)) {
+          let game = await twitch.games.getGameById(stream.gameId).catch(u.noop);
+          if (game) twitchGames.set(game.id, game);
         }
-
-        channels.sort((a, b) => a.name.localeCompare(b.name));
-
-        for (let i = 0; i < Math.min(channels.length, 25); i++) {
-          let channel = channels[i];
-          embed.addField(`${channel.name} playing ${channel.game}`, `[${channel.title}](${channel.url})`);
-        }
-
-        return embed;
+        channels.push({
+          name: channel.user_name,
+          game: twitchGames.has(channel.game_id) ? twitchGames.get(channel.game_id).name : "Something?",
+          service: "Twitch",
+          title: channel.title,
+          url: `https://www.twitch.tv/${channel.user_name}`
+        });
       }
+
+      channels.sort((a, b) => a.name.localeCompare(b.name));
+
+      for (let i = 0; i < Math.min(channels.length, 25); i++) {
+        let channel = channels[i];
+        embed.addField(`${channel.name} playing ${channel.game}`, `[${channel.title}](${channel.url})`);
+      }
+
+      return embed;
     }
   } catch(error) { u.errorHandler(error, "Extra Life Stream Fetch"); }
 }
 
-async function extraLifeEmbed_old(bot, liveEL) {
+async function fetchExtraLifeStreams(team) {
   try {
-    let twitchIgns = await Module.db.ign.find(liveEL.map(m => m.id), "twitch");
+    if (!team) team = await fetchExtraLifeTeam();
+    let userName = team.filter(m => m.links.stream).map(member => member.links.stream.replace("https://player.twitch.tv/?channel=", ""));
+    let streams = await twitch.streams.getStreams({userName}).catch(u.noop);
+    return streams;
+  } catch(error) { u.errorHandler(error, "Fetch Extra Life Streams"); }
+}
 
-    let twitchChannels = twitchIgns.map(ign => ign.ign);
-
-    // Fetch channels from Twitch
-    let res = await Promise.all([
-      new Promise(async (fulfill, reject) => {
-        try {
-          let streams = await twitch.streams.getStreams({userName: twitchChannels.filter((v, i) => i < 100)});
-          fulfill({service: "twitch", channels: streams.data});
-        } catch(e) { u.errorHandler(e, msg); }
-      })
-    ]);
-
-    let embed = u.embed()
-    .setColor('#7FD836')
-    .setTimestamp()
-    .setTitle("Live from the Extra Life Team!");
-
-    let channels = [];
-    for (const service of res) {
-      if (service.service == "twitch") {
-        for (const stream of service.channels) {
-          let channel = stream._data;
-          if (channel)
-            channels.push({
-              name: channel.user_name,
-              game: twitchGames.has(channel.game_id) ? twitchGames.get(channel.game_id).name : "Something?",
-              service: "Twitch",
-              title: channel.title,
-              url: `https://www.twitch.tv/${channel.user_name}`
-            });
-        }
-      }
-    }
-
-    channels.sort((a, b) => a.name.localeCompare(b.name));
-
-    for (let i = 0; i < Math.min(channels, 25); i++) {
-      let channel = channel[i];
-      embed.addField(`${channel.name} playing ${channel.game} [${channel.service}]`, `[${channel.title}](${channel.url})`, true);
-    }
-
-    bot.channels.cache.get(Module.config.ldsg).send({embed});
-  } catch (e) {
-    u.errorHandler(e, msg);
-  }
-};
+async function fetchExtraLifeTeam() {
+  try {
+    let team = await request("https://extralife.donordrive.com/api/teams/51868/participants").catch(u.noop);
+    if (team) return JSON.parse(team);
+  } catch(error) { u.errorHandler(error, "Fetch Extra Life Team"); }
+}
 
 function isPartnered(member) {
   let roles = [
@@ -151,19 +110,18 @@ function notificationEmbed(body, srv = "twitch") {
   let embed = u.embed()
     .setTimestamp();
   if (srv == "twitch") {
-    let data = body._data;
     embed.setColor('#6441A4')
-      .setThumbnail(data.thumbnail_url.replace("{width}", "480").replace("{height}", "270") + "?t=" + Date.now())
-      .setAuthor(data.user_name + (twitchGames.has(data.game_id) ? ` playing ${twitchGames.get(data.game_id).name}` : ""))
-      .setTitle(data.title)
-      .setURL(data.stream_url);
+      .setThumbnail(stream.thumbnailUrl.replace("{width}", "480").replace("{height}", "270") + "?t=" + Date.now())
+      .setAuthor(stream.userDisplayName + (twitchGames.has(stream.gameId) ? ` playing ${twitchGames.get(stream.gameId).name}` : ""))
+      .setTitle(stream.title)
+      .setURL(stream.streamUrl);
   } else if (srv == "youtube") {
-    let content = body.content[0].snippet;
+    let content = stream.content[0].snippet;
     embed.setColor("#ff0000")
       .setThumbnail(content.thumbnails.default.url)
       .setTitle(content.title)
       .setAuthor(content.channelTitle)
-      .setURL(`https://www.youtube.com/watch?v=${body.content[0].id.videoId}`);
+      .setURL(`https://www.youtube.com/watch?v=${stream.content[0].id.videoId}`);
   }
   return embed;
 };
@@ -210,16 +168,16 @@ async function processTwitch(bot, key, channel) {
     if (stream) {
       let status = twitchStatus.get(key);
       if (!status || ((status.status == "offline") && ((Date.now() - status.since) >= (30 * 60 * 1000)))) {
-        if (!twitchGames.has(stream._data.game_id)) {
-          let game = await twitch.games.getGameById(stream._data.game_id);
-          if (game) twitchGames.set(game.id, game._data);
+        if (!twitchGames.has(stream.gameId)) {
+          let game = await twitch.games.getGameById(stream.gameId);
+          if (game) twitchGames.set(game.id, game);
         }
-        stream._data.stream_url = "https://www.twitch.tv/" + encodeURIComponent(channel).toLowerCase();
+        stream.streamUrl = "https://www.twitch.tv/" + encodeURIComponent(channel).toLowerCase();
         if (channel.toLowerCase() == "ldsgamers") {
           bot.user.setActivity(
-            stream._data.title,
+            stream.title,
             {
-              url: stream._data.stream_url,
+              url: stream.streamUrl,
               type: "STREAMING"
             }
           );
@@ -232,7 +190,7 @@ async function processTwitch(bot, key, channel) {
         let embed = notificationEmbed(stream, "twitch");
 
         // The real notifications
-        if (extraLife() && member.roles.cache.has("507031155627786250") && stream._data.title.toLowerCase().includes("extra life")) {
+        if (extraLife() && member.roles.cache.has("507031155627786250") && stream.title.toLowerCase().includes("extra life")) {
           notificationChannel.send(`${ldsg.roles.cache.get("768164394248044575")}, **${member.displayName}** is live for Extra Life!`, {embed});
           ldsg.channels.cache.get("733336823400628275").send({embed});
         } else
@@ -253,25 +211,24 @@ async function processTwitch(bot, key, channel) {
 };
 
 function twitchEmbed(stream, online = true) {
-  const data = stream._data;
-  const name = data.user_name || data.display_name;
+  const name = stream.displayName || stream.userDisplayName;
   const embed = u.embed()
-    .setURL(data.stream_url)
+    .setURL(stream.streamUrl)
     .setAuthor(name)
     .setTitle("Twitch Stream: " + name)
     .setColor('#6441A4');
 
   if (online) {
-    embed.setDescription(data.title)
-    .setTitle(data.user_name)
-    .setThumbnail(data.thumbnail_url.replace("{width}", "480").replace("{height}", "270") + "?t=" + Date.now())
-    .addField("Playing", (data.game_id && twitchGames.has(data.game_id) ? twitchGames.get(data.game_id).name : "Something"), true)
-    .addField("Current Viewers", data.viewer_count, true)
-    .setTimestamp(new Date(data.started_at));
+    embed.setDescription(stream.title)
+    .setTitle(stream.userDisplayName)
+    .setThumbnail(stream.thumbnailUrl.replace("{width}", "480").replace("{height}", "270") + "?t=" + Date.now())
+    .addField("Playing", (stream.gameId && twitchGames.has(stream.gameId) ? twitchGames.get(stream.gameId).name : "Something"), true)
+    .addField("Current Viewers", stream.viewers, true)
+    .setTimestamp(stream.startDate);
   } else {
-    embed.setDescription("**Currently Offline**\n" + data.description)
-    .setTitle(data.display_name)
-    .setThumbnail(data.profile_image_url)
+    embed.setDescription("**Currently Offline**\n" + stream.description)
+    .setTitle(stream.displayName)
+    .setThumbnail(stream.profilePictureUrl)
     .setTimestamp();
   }
 
@@ -351,25 +308,36 @@ const Module = new Augur.Module()
   permissions: msg => msg.guild && msg.guild.id == Module.config.ldsg,
   process: async (msg) => {
     try {
-      let response = await request("https://extralife.donordrive.com/api/teams/51868/participants").catch(() => {
-        msg.reply("there seems to be an issue with the Extra Life API. Please try again in a few minutes").then(u.clean);
-      });
-      if (response) {
-        let team = JSON.parse(response);
-        team.sort((a, b) => (a.sumDonations != b.sumDonations ? b.sumDonations - a.sumDonations : a.displayName.localeCompare(b.displayName)));
-        let total = 0;
-        let embed = u.embed().setColor(0x7fd836);
-        for (let i = 0; i < Math.min(team.length, 25); i++) {
-          let member = team[i];
-          embed.addField(member.displayName, `$${member.sumDonations} / $${member.fundraisingGoal} (${Math.round(100 * member.sumDonations / member.fundraisingGoal)}%)\n[[Donate]](${member.links.donate})${(member.streamIsLive ? `\n[[STREAM NOW LIVE]](${member.links.stream.replace("https://player.twitch.tv/?channel=", "https://www.twitch.tv/")})` : "")}`, true);
-          total += member.sumDonations;
-        }
-        embed.setTitle("LDSG Extra Life Team")
-        .setThumbnail("https://assets.donordrive.com/extralife/images/fbLogo.jpg?v=202009241356")
-        .setURL("https://www.extra-life.org/index.cfm?fuseaction=donorDrive.participant&participantID=412575#donate")
-        .setDescription(`LDSG is raising money for Extra Life! We are currently at $${total} of our team's $2,500 goal for 2020. That's ${Math.round(100 * total / 2500)}% there!\n\nYou can help by donating to one of the Extra Life Team below.`);
-        msg.channel.send({embed});
+      let team = await fetchExtraLifeTeam();
+      for (let member of team) {
+        if (member.links.stream) member.twitch = member.links.stream.replace("https://player.twitch.tv/?channel=", "");
+        member.streamIsLive = false;
       }
+      let streams = await fetchExtraLifeStreams(team).catch(u.noop);
+      if (streams) {
+        for (const stream of streams.data) {
+          let member = team.find(m => m.twitch.toLowerCase() == stream.userDisplayName.toLowerCase())
+          member.streamIsLive = true;
+          member.stream = stream;
+        }
+      }
+      team.sort((a, b) => {
+        if (a.streamIsLive != b.streamIsLive) return (b.streamIsLive - a.streamIsLive);
+        else if (a.sumDonations != b.sumDonations) return (b.sumDonations - a.sumDonations);
+        else return a.displayName.localeCompare(b.displayName)
+      });
+      let total = 0;
+      let embed = u.embed().setColor(0x7fd836);
+      for (let i = 0; i < Math.min(team.length, 25); i++) {
+        let member = team[i];
+        embed.addField(member.displayName, `$${member.sumDonations} / $${member.fundraisingGoal} (${Math.round(100 * member.sumDonations / member.fundraisingGoal)}%)\n[[Donate]](${member.links.donate})${(member.streamIsLive ? `\n**STREAM NOW LIVE** [${member.stream.title}](https://www.twitch.tv/${member.twitch})` : "")}`, true);
+        total += member.sumDonations;
+      }
+      embed.setTitle("LDSG Extra Life Team")
+      .setThumbnail("https://assets.donordrive.com/extralife/images/fbLogo.jpg?v=202009241356")
+      .setURL("https://www.extra-life.org/index.cfm?fuseaction=donorDrive.participant&participantID=412575#donate")
+      .setDescription(`LDSG is raising money for Extra Life! We are currently at $${total} of our team's $2,500 goal for 2020. That's ${Math.round(100 * total / 2500)}% there!\n\nYou can help by donating to one of the Extra Life Team below.`);
+      msg.channel.send({embed});
     } catch(error) { u.errorHandler(error, msg); }
   }
 })
@@ -446,15 +414,15 @@ const Module = new Augur.Module()
     try {
       const stream = (await twitch.streams.getStreamByUserName(name));
       if (stream) {
-        if (!twitchGames.has(stream._data.game_id)) {
-          let game = (await twitch.games.getGameById(stream._data.game_id));
-          if (game) twitchGames.set(game._data.id, game._data);
+        if (!twitchGames.has(stream.gameId)) {
+          let game = (await twitch.games.getGameById(stream.gameId));
+          if (game) twitchGames.set(game.id, game);
         }
-        stream._data.stream_url = "https://www.twitch.tv/" + encodeURIComponent(name).toLowerCase();
+        stream.streamUrl = "https://www.twitch.tv/" + encodeURIComponent(name).toLowerCase();
         msg.channel.send(twitchEmbed(stream));
       } else { // Offline
         const streamer = (await twitch.users.getUserByName(name));
-        streamer._data.stream_url = "https://www.twitch.tv/" + encodeURIComponent(name).toLowerCase();
+        streamer.streamUrl = "https://www.twitch.tv/" + encodeURIComponent(name).toLowerCase();
         msg.channel.send(twitchEmbed(streamer, false));
       }
     } catch(e) {
@@ -489,18 +457,16 @@ const Module = new Augur.Module()
       for (let service of res) {
         if (service.service == "twitch") {
           for (let stream of service.channels) {
-            let channel = stream._data;
-            if (!channel) continue;
-            if (!twitchGames.has(stream._data.game_id)) {
-              let game = (await twitch.games.getGameById(stream._data.game_id));
-              if (game) twitchGames.set(game._data.id, game._data);
+            if (!twitchGames.has(stream.gameId)) {
+              let game = (await twitch.games.getGameById(stream.gameId));
+              if (game) twitchGames.set(game.id, game);
             }
             channels.push({
-              name: channel.user_name,
-              game: twitchGames.has(channel.game_id) ? twitchGames.get(channel.game_id).name : "Something?",
+              name: stream.userDisplayName,
+              game: twitchGames.has(stream.gameId) ? twitchGames.get(stream.gameId).name : "Something?",
               service: "Twitch",
-              title: channel.title,
-              url: `https://www.twitch.tv/${channel.user_name}`
+              title: stream.title,
+              url: `https://www.twitch.tv/${stream.userDisplayName}`
             });
           }
         }
@@ -513,9 +479,7 @@ const Module = new Augur.Module()
       }
 
       u.botSpam(msg).send({embed});
-    } catch (e) {
-      u.errorHandler(e, msg);
-    }
+    } catch (e) { u.errorHandler(e, msg); }
   },
   permissions: (msg) => msg.guild
 })
@@ -547,15 +511,15 @@ const Module = new Augur.Module()
       try {
         const stream = (await twitch.streams.getStreamByUserName(name));
         if (stream) {
-          if (!twitchGames.has(stream._data.game_id)) {
-            let game = (await twitch.games.getGameById(stream._data.game_id));
-            if (game) twitchGames.set(game._data.id, game._data);
+          if (!twitchGames.has(stream.gameId)) {
+            let game = (await twitch.games.getGameById(stream.gameId));
+            if (game) twitchGames.set(game.id, game);
           }
-          stream._data.stream_url = "https://www.twitch.tv/" + encodeURIComponent(name).toLowerCase();
+          stream.streamUrl = "https://www.twitch.tv/" + encodeURIComponent(name).toLowerCase();
           msg.channel.send(twitchEmbed(stream));
         } else { // Offline
           const streamer = (await twitch.users.getUserByName(name));
-          streamer._data.stream_url = "https://www.twitch.tv/" + encodeURIComponent(name).toLowerCase();
+          streamer.streamUrl = "https://www.twitch.tv/" + encodeURIComponent(name).toLowerCase();
           msg.channel.send(twitchEmbed(streamer, false));
         }
       } catch(e) {
