@@ -330,7 +330,7 @@ const Module = new Augur.Module()
       let embed = u.embed().setColor(0x7fd836);
       for (let i = 0; i < Math.min(team.length, 25); i++) {
         let member = team[i];
-        embed.addField(member.displayName, `$${member.sumDonations} / $${member.fundraisingGoal} (${Math.round(100 * member.sumDonations / member.fundraisingGoal)}%)\n[[Donate]](${member.links.donate})${(member.streamIsLive ? `\n**STREAM NOW LIVE** [${member.stream.title}](https://www.twitch.tv/${member.twitch})` : "")}`, true);
+        embed.addField(member.displayName, `$${member.sumDonations} / $${member.fundraisingGoal} (${Math.round(100 * member.sumDonations / member.fundraisingGoal)}%)\n[[Donate]](${member.links.donate})${(member.streamIsLive ? `\n**STREAM NOW LIVE**\n[${member.stream.title}](https://www.twitch.tv/${member.twitch})` : "")}`, true);
         total += member.sumDonations;
       }
       embed.setTitle("LDSG Extra Life Team")
