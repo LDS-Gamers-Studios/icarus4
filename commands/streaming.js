@@ -166,7 +166,7 @@ async function processTwitch(bot, igns) {
       let streams = await twitch.streams.getStreams({userName: streamers.map(s => s.ign)}).catch(u.noop);
       if (streams) {
         // Handle Live
-        for (let stream of streams) {
+        for (let stream of streams.data) {
           let status = twitchStatus.get(stream.userDisplayName.toLowerCase());
           if (!status || ((status.status == "offline") && ((Date.now() - status.since) >= (30 * 60 * 1000)))) {
             if (!twitchGames.has(stream.gameId)) {
@@ -201,7 +201,7 @@ async function processTwitch(bot, igns) {
         }
 
         // Handle Offline
-        let offline = streamers.filter(streamer => !streams.find(stream => stream.userDisplayName.toLowerCase() == streamer.ign.toLowerCase()));
+        let offline = streamers.filter(streamer => !streams.data.find(stream => stream.userDisplayName.toLowerCase() == streamer.ign.toLowerCase()));
         for (let channel of offline) {
           if (channel.ign.toLowerCase() == "ldsgamers") bot.user.setActivity("Tiddlywinks");
           let member = await ldsg.members.fetch(channel.discordId).catch(u.noop);
