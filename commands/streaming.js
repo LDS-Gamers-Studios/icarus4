@@ -55,11 +55,11 @@ async function extraLifeEmbed() {
           if (game) twitchGames.set(game.id, game);
         }
         channels.push({
-          name: channel.user_name,
-          game: twitchGames.has(channel.game_id) ? twitchGames.get(channel.game_id).name : "Something?",
+          name: stream.userDisplayName,
+          game: twitchGames.has(stream.gameId) ? twitchGames.get(stream.gameId).name : "Something?",
           service: "Twitch",
-          title: channel.title,
-          url: `https://www.twitch.tv/${channel.user_name}`
+          title: stream.title,
+          url: `https://www.twitch.tv/${stream.userDisplayName}`
         });
       }
 
