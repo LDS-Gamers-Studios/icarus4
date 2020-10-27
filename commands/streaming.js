@@ -47,9 +47,9 @@ async function extraLifeEmbed() {
     if (response) {
       let team = JSON.parse(response);
       let userName = team.filter(m => m.links.stream).map(member => member.links.stream.replace("https://player.twitch.tv/?channel=", ""));
-      let streams = await twitch.streams.getStreams({userName});
+      let streams = await twitch.streams.getStreams({userName}).catch(u.noop);
 
-      if (streams.length > 0) {
+      if (streams && streams.data && streams.data.length > 0) {
         let embed = u.embed()
         .setColor(0x7fd836)
         .setTitle("Live from the Extra Life Team!");
