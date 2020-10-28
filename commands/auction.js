@@ -74,7 +74,7 @@ const Module = new Augur.Module()
   permissions: (msg) => msg.guild && msg.member.roles.cache.has(Module.config.roles.management),
   process: async (msg, suffix) => {
     try {
-      let pattern = /(\S+) (?:\S+)?(\d+) (.*)/;
+      let pattern = /^(\S+) (?:\S+)?(\d+) (.*)$/;
       let match = pattern.exec(suffix);
       if (match) {
         let currency = match[1];
