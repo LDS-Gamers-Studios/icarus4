@@ -41,7 +41,7 @@ class Auction {
   }
 
   setMessage(msg) {
-    this.messageId = msg;
+    this.messageId = msg.id;
     this.channelId = msg.channel.id;
     return this;
   }
