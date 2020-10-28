@@ -2,7 +2,6 @@ const Augur = require("augurbot");
 const u = require("../utils/utils");
 const shortid = require("shortid").generate;
 const fs = require("fs");
-const auctionboard = "209046676781006849";
 
 class Auction {
   constructor(data) {
@@ -11,6 +10,7 @@ class Auction {
     this.description = data.description;
     this.currency = data.currency;
     this.messageId = data.messageId;
+    this.channelId = data.channelId;
     this.complete = data.complete;
   }
 
@@ -41,7 +41,8 @@ class Auction {
   }
 
   setMessage(msg) {
-    this.messageId = msg.id || msg;
+    this.messageId = msg;
+    this.channelId = msg.channel.id;
     return this;
   }
 
@@ -52,6 +53,7 @@ class Auction {
       description: this.description,
       currency: this.currency,
       messageId: this.messageId,
+      channelId: this.channelId,
       complete: this.complete
     };
   }
@@ -83,7 +85,7 @@ const Module = new Augur.Module()
           description,
           currency
         });
-        let m = await msg.guild.channels.cache.get(auctionboard).send({embed: auction.embed});
+        let m = await msg.channel.send({embed: auction.embed});
         auction.setMessage(m);
         auctions.set(auction.id, auction);
         saveAuctions();
@@ -102,7 +104,7 @@ const Module = new Augur.Module()
       if (auctions.has(suffix)) {
         let auction = auctions.get(suffix);
         auction.complete = true;
-        let post = await msg.guild.channels.cache.get(auctionboard).messages.fetch(auction.messageId);
+        let post = await msg.guild.channels.cache.get(auction.channelId).messages.fetch(auction.messageId);
         await post.edit({embed: auction.embed});
         saveAuctions();
       }
@@ -124,7 +126,7 @@ const Module = new Augur.Module()
           let high = auction.highbid;
           let success = auction.bid(msg.author, bid);
           if (success) {
-            let post = await msg.guild.channels.cache.get(auctionboard).messages.fetch(auction.messageId);
+            let post = await msg.guild.channels.cache.get(auction.channelId).messages.fetch(auction.messageId);
             await post.edit({embed: auction.embed});
             msg.reply("your bid has been entered!").then(u.clean);
             if (high && high.user) msg.client.users.cache.get(high.user).send(`You've been outbid in Auction ${auction.id} by ${msg.member.displayName}!`).catch(u.noop);
