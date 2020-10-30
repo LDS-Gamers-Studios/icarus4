@@ -721,6 +721,70 @@ Module
     }
   }
 })
+.addCommand({name: "office",
+  syntax: "<@user> [time]",
+  description: "Send a user to Ghost's office.",
+  category: "Mod",
+  permissions: (msg) => (msg.guild && (msg.member.roles.cache.has(Module.config.roles.mod) || msg.member.roles.cache.has(Module.config.roles.management))),
+  process: async (msg, suffix) => {
+    u.clean(msg, 0);
+    let duration = parseInt(suffix.replace(/<@!?\d+>/ig, '').toLowerCase().trim(), 10);
+    let members = u.userMentions(msg, true);
+    if (members.size > 0) {
+      for (const [memberId, member] of members) {
+        try {
+          if (member && !member.roles.cache.has("771516264618262607")) {
+            await member.roles.add("771516264618262607");
+            if (member.voice.channel) {
+              await member.voice.kick("User sent to office");
+            }
+
+            msg.client.channels.cache.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** sent **${u.escapeText(member.displayName)}** to the office${(duration ? " for " + duration + " minutes." : "")}`);
+            msg.client.channels.cache.get("771515647808372777").send(`${member}, you have been muted in ${msg.guild.name}. Please review our Code of Conduct. A member of the management team will be available to discuss more details.\n\nhttp://ldsgamers.com/code-of-conduct`);
+
+              if (duration) {
+                if (mutes.has(memberId)) clearTimeout(mutes.get(memberId));
+
+                mutes.set(memberId,
+                  setTimeout(async (member, duration) => {
+                    try {
+                      await member.roles.remove("771516264618262607");
+                      msg.client.channels.cache.get(modLogs).send(`ℹ️ **${u.escapeText(member.displayName)}** has automatically been let out of the office after ${timeout} minutes.`);
+                    } catch(error) { u.errorHandler(error, "Office Timeout"); }
+                  }, (duration * 60000), member, duration)
+                );
+              }
+            }
+          } catch(e) { u.errorHandler(e, msg); }
+        }
+    } else msg.reply("you need to tell me who to send to the office!").then(u.clean);
+  }
+})
+.addCommand({name: "playground",
+  syntax: "<@user>",
+  description: "Let someone out of the office.", hidden: true,
+  category: "Mod",
+  permissions: (msg) => (msg.guild && (msg.member.roles.cache.has(Module.config.roles.mod) || msg.member.roles.cache.has(Module.config.roles.management))),
+  process: async (msg) => {
+    u.clean(msg, 0);
+    let members = u.userMentions(msg, true);
+    if (members.size > 0) {
+      for (const [memberId, member] of members) {
+        try {
+          if (mutes.has(memberId)) {
+            clearTimeout(mutes.get(memberId));
+            mutes.delete(memberId);
+          }
+          member.roles.remove("771516264618262607");
+          msg.client.channels.cache.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** let **${u.escapeText(member.displayName)}** out of the office.`);
+        } catch(error) { u.errorHandler(error, msg); }
+      }
+    } else {
+      msg.reply("you need to tell me which users to let out of the office!")
+        .then(u.clean);
+    }
+  }
+})
 .addCommand({name: "purge",
   syntax: "<number of messages>",
   description: "Delete a number of messages",
@@ -998,8 +1062,13 @@ Module
 Module
 .addEvent("channelCreate", (channel) => {
   if (channel.guild && (channel.guild.id == Module.config.ldsg)) {
-    let muted = channel.guild.roles.cache.get(Module.config.roles.muted);
-    channel.createOverwrite(muted, {
+    channel.createOverwrite(Module.config.roles.muted, {
+      VIEW_CHANNEL: false,
+      CONNECT: false,
+      SEND_MESSAGES: false,
+      SPEAK: false
+    }).catch(e => u.errorHandler(e, "Update new channel permissions."));
+    channel.createOverwrite("771516264618262607", {
       VIEW_CHANNEL: false,
       CONNECT: false,
       SEND_MESSAGES: false,
