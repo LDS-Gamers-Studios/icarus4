@@ -734,7 +734,7 @@ Module
       for (const [memberId, member] of members) {
         try {
           if (member && !member.roles.cache.has("771516264618262607")) {
-            await member.roles.add("771516264618262607");
+            await member.roles.add(["771516264618262607", "771732533309603841"]);
             if (member.voice.channel) {
               await member.voice.kick("User sent to office");
             }
