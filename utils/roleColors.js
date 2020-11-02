@@ -44,7 +44,10 @@ const inventory = new Collection([
   ["507031155627786250", "737408727522476093"], // Extra Life Team
   ["692463991670177792", "697257750677159946"], // LDSG Steam Group Founder
   ["448935116262080514", "697257745971281931"], // GG
-  ["318427374309998592", "697257742502723745"]  // Tournament Champion
+  ["318427374309998592", "697257742502723745"], // Tournament Champion
+
+  /* EXTRA LIFE 2020 REWARDS */
+  ["772836045943341146", "772836221323182120"], // Origami - Kendama Merchant
 ]);
 
 module.exports = inventory;
