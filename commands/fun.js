@@ -51,13 +51,18 @@ async function testBirthdays() {
       }
 
       // LDSG Cake Day
-      let roles = [
+      let tenure = [
         "375047444599275543",
         "375047691253579787",
         "375047792487432192",
         "543065980096741386",
         "731895666577506345"
       ];
+      const inventory = require("../utils/roleColors.js");
+      for (let role of tenure) {
+        if (inventory.has(role)) tenure.push(inventory.get(role));
+      }
+
       let members = ldsg.members.cache;
       let apicall = 1;
       for (let [key, member] of members) {
@@ -65,13 +70,13 @@ async function testBirthdays() {
           let join = member.joinedAt;
           if (join && (join.getMonth() == curDate.getMonth()) && (join.getDate() == curDate.getDate()) && (join.getFullYear() < curDate.getFullYear())) {
             let years = curDate.getFullYear() - join.getFullYear();
-            //setTimeout(async (m, y) => {
-              try {
-                await member.roles.remove(roles);
-                await member.roles.add(roles[years - 1]);
-              } catch(error) { u.errorHandler(error, `Apply cake day roles: ${member.displayName}`); }
-            //}, 2400 * apicall++, member, years);
-            // Announce if active
+            try {
+              let roles = member.roles.cache.keyArray()
+                .filter(r => !tenure.includes(r));
+              roles.push(tenure[years - 1]);
+
+              await member.roles.set(roles);
+            } catch(error) { u.errorHandler(error, `Apply cake day roles: ${member.displayName}`); }
             try {
               let user = await Module.db.user.fetchUser(member.id);
               if (user.posts > 0) {
