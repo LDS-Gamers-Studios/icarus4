@@ -15,15 +15,15 @@ const twitch = TwitchClient.withClientCredentials(twitchConfig.clientId, twitchC
   twitchStatus = new Map(),
   bonusStreams = require("../data/streams.json");
 
-async function checkStreams(bot) {
+async function checkStreams() {
   try {
     // Approved Streamers
-    let streamers = bot.guilds.cache.get(Module.config.ldsg).roles.cache.get("267038468474011650").members.map(member => member.id);
+    let streamers = Module.client.guilds.cache.get(Module.config.ldsg).roles.cache.get("267038468474011650").members.map(member => member.id);
 
     let igns = await Module.db.ign.find(streamers, "twitch");
 
     igns = igns.concat(bonusStreams.twitch.map(c => ({ign: c, discordId: c})));
-    processTwitch(bot, igns);
+    processTwitch(igns);
 
     // Check for new Approved Streamers applications
     processApplications();
@@ -75,7 +75,8 @@ async function extraLifeEmbed() {
 async function fetchExtraLifeStreams(team) {
   try {
     if (!team) team = await fetchExtraLifeTeam();
-    let userName = team.filter(m => m.links.stream).map(member => member.links.stream.replace("https://player.twitch.tv/?channel=", ""));
+    let userName = team.filter(m => m.links.stream).map(member => member.links.stream.replace("https://player.twitch.tv/?channel=", ""))
+      .filter(channel => !(channel.includes(" ") || channel.includes("/")));
     let streams = await twitch.streams.getStreams({userName}).catch(u.noop);
     return streams;
   } catch(error) { u.errorHandler(error, "Fetch Extra Life Streams"); }
@@ -154,9 +155,9 @@ function processApplications() {
   } catch(e) { u.errorHandler(e, "Streaming Application Check"); }
 }
 
-async function processTwitch(bot, igns) {
+async function processTwitch(igns) {
   try {
-    let ldsg = bot.guilds.cache.get(Module.config.ldsg),
+    let ldsg = Module.client.guilds.cache.get(Module.config.ldsg),
       liveRole = ldsg.roles.cache.get("281135201407467520"),
       notificationChannel = ldsg.channels.cache.get(Module.config.ldsg); // #general
 
@@ -175,7 +176,7 @@ async function processTwitch(bot, igns) {
             }
             stream.streamUrl = "https://www.twitch.tv/" + encodeURIComponent(stream.userDisplayName);
             if (stream.userDisplayName.toLowerCase() == "ldsgamers") {
-              bot.user.setActivity(
+              Module.client.user.setActivity(
                 stream.title,
                 {
                   url: stream.streamUrl,
@@ -203,7 +204,7 @@ async function processTwitch(bot, igns) {
         // Handle Offline
         let offline = streamers.filter(streamer => !streams.data.find(stream => stream.userDisplayName.toLowerCase() == streamer.ign.toLowerCase()));
         for (let channel of offline) {
-          if (channel.ign.toLowerCase() == "ldsgamers") bot.user.setActivity("Tiddlywinks");
+          if (channel.ign.toLowerCase() == "ldsgamers") Module.client.user.setActivity("Tiddlywinks");
           let member = await ldsg.members.fetch(channel.discordId).catch(u.noop);
           if (member && liveRole.members.has(member.id)) member.roles.remove(liveRole);
           twitchStatus.set(channel.ign.toLowerCase(), {
@@ -265,7 +266,6 @@ const Module = new Augur.Module()
   category: "Streaming",
   process: async (msg) => {
     u.clean(msg);
-    let bot = msg.client;
 
     if (u.userMentions(msg, true).size > 0) {
       msg.react("👌");
@@ -275,7 +275,7 @@ const Module = new Augur.Module()
             let streamer = await member.roles.add("267038468474011650");
             streamer.send("Congratulations! You've been added to the Approved Streamers list in LDSG! This allows notifications to show up in #general and grants access to stream to voice channels. In order to show notifications in #general, please make sure your correct Twitch or Mixer name is saved in the database with `!addIGN twitch/mixer YourName`.\n\nWhile streaming, please remember the Streaming Guidelines ( https://goo.gl/Pm3mwS ) and LDSG Code of Conduct ( http://ldsgamers.com/code-of-conduct ). Also, please be aware that LDSG may make changes to the Approved Streamers list from time to time at its discretion.").catch(u.noop);
             msg.reply("I applied the role to " + streamer.displayName + "!").then(u.clean);
-            bot.channels.cache.get("506575671242260490").send(`ℹ️ ${msg.member.displayName} has made ${streamer.displayName} an Approved Streamer.`);
+            msg.guild.channels.cache.get("506575671242260490").send(`ℹ️ ${msg.member.displayName} has made ${streamer.displayName} an Approved Streamer.`);
           } else {
             msg.reply(`${member.displayName} needs to be trusted first!`);
           }
@@ -291,7 +291,6 @@ const Module = new Augur.Module()
   category: "Streaming",
   process: async (msg) => {
     u.clean(msg);
-    let bot = msg.client;
 
     if (u.userMentions(msg, true).size > 0) {
       msg.react("👌");
@@ -301,7 +300,7 @@ const Module = new Augur.Module()
             let streamer = await member.roles.add("698291753308127265");
             streamer.send("Congratulations! You've been added to the Community Streamers list in LDSG, allowing you to stream to voice channels!\n\nWhile streaming, please remember the Streaming Guidelines ( https://goo.gl/Pm3mwS ) and LDSG Code of Conduct ( http://ldsgamers.com/code-of-conduct ). Also, please be aware that LDSG may make changes to the Community Streamers list from time to time at its discretion.").catch(u.noop);
             msg.reply("I applied the role to " + streamer.displayName + "!").then(u.clean);
-            bot.channels.cache.get("506575671242260490").send(`ℹ️ ${msg.member.displayName} has made ${streamer.displayName} a Community Streamer.`);
+            msg.guild.channels.cache.get("506575671242260490").send(`ℹ️ ${msg.member.displayName} has made ${streamer.displayName} a Community Streamer.`);
           } else {
             msg.reply(`${member.displayName} needs to be trusted first!`);
           }
@@ -387,7 +386,6 @@ const Module = new Augur.Module()
   aliases: ["raiders", "twitchraider", "twitchraiders"],
   category: "Streaming",
   process: (msg, suffix) => {
-    let bot = msg.client;
     let quitter = ["done", "off", "false", "remove", "quit", "no"];
     let raider = "309889486521892865";
 
@@ -395,14 +393,14 @@ const Module = new Augur.Module()
       msg.delete();
       msg.reply("ok ... I guess. :cry:").then(u.clean);
       msg.member.roles.remove(raider);
-      bot.channels.cache.get("506575671242260490").send(`ℹ️ ${msg.member.displayName} is no longer a Twitch Raider. :cry:`);
+      msg.guild.channels.cache.get("506575671242260490").send(`ℹ️ ${msg.member.displayName} is no longer a Twitch Raider. :cry:`);
     } else {
-      let ttv = bot.emojis.cache.get("491332611340369920"); // ldsg
+      let ttv = msg.guild.emojis.cache.get("491332611340369920"); // ldsg
 
       msg.member.roles.add(raider);
       msg.reply("thanks for being a Twitch Raider! " + ttv.toString());
 
-      bot.channels.cache.get("506575671242260490").send(`ℹ️ ${msg.member.displayName} has become a Twitch Raider!`);
+      msg.guild.channels.cache.get("506575671242260490").send(`ℹ️ ${msg.member.displayName} has become a Twitch Raider!`);
     }
   },
   permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg))
@@ -664,9 +662,8 @@ const Module = new Augur.Module()
 .setUnload(() => ({ twitchStatus, applicationCount }))
 .setClockwork(() => {
   try {
-    let bot = Module.client;
     let interval = 5 * 60 * 1000;
-    return setInterval(checkStreams, interval, bot);
+    return setInterval(checkStreams, interval);
   } catch(e) { u.errorHandler(e, "Streaming Clockwork"); }
 });
 
