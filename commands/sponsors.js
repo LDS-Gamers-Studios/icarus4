@@ -52,7 +52,7 @@ const Module = new Augur.Module()
           continue;
         }
 
-        let channel = await msg.guild.createChannel(`${sponsor.displayName}-hangout`, {
+        let channel = await msg.guild.channels.create(`${sponsor.displayName}-hangout`, {
           parent: "742400003137470613",
           permissionOverwrites: [
             { id: msg.client.user.id, allow: "VIEW_CHANNEL" },
