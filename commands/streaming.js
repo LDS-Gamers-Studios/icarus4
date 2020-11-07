@@ -74,7 +74,8 @@ async function extraLifeEmbed() {
 
 async function fetchExtraLifeStreams(team) {
   try {
-    if (!team) team = await fetchExtraLifeTeam();
+    if (!team) team = await fetchExtraLifeTeam().catch(u.noop);
+    if (!team) return null;
     let userName = team.filter(m => m.links.stream).map(member => member.links.stream.replace("https://player.twitch.tv/?channel=", ""))
       .filter(channel => !(channel.includes(" ") || channel.includes("/")));
     let streams = await twitch.streams.getStreams({userName}).catch(u.noop);
