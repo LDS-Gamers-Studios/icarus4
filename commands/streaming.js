@@ -317,6 +317,7 @@ const Module = new Augur.Module()
   process: async (msg) => {
     try {
       let team = await fetchExtraLifeTeam();
+      if (!team) msg.reply("the Extra Life API seems to be down. Please try again in a bit.").then(u.clean);
       for (let member of team) {
         if (member.links.stream) member.twitch = member.links.stream.replace("https://player.twitch.tv/?channel=", "");
         member.streamIsLive = false;
