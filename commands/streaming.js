@@ -528,11 +528,11 @@ const Module = new Augur.Module()
             let game = (await twitch.games.getGameById(stream.gameId));
             if (game) twitchGames.set(game.id, game);
           }
-          stream.streamUrl = "https://www.twitch.tv/" + encodeURIComponent(name).toLowerCase();
+          stream.streamUrl = "https://www.twitch.tv/" + encodeURIComponent(name).toLowerCase().replace(/[^\w-]+/g,'');
           msg.channel.send(twitchEmbed(stream));
         } else { // Offline
           const streamer = (await twitch.users.getUserByName(name));
-          streamer.streamUrl = "https://www.twitch.tv/" + encodeURIComponent(name).toLowerCase();
+          streamer.streamUrl = "https://www.twitch.tv/" + encodeURIComponent(name).toLowerCase().replace(/[^\w-]+/g,'');
           msg.channel.send(twitchEmbed(streamer, false));
         }
       } catch(e) {
