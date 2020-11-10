@@ -86,9 +86,12 @@ async function fetchExtraLifeStreams(team) {
 async function fetchExtraLifeTeam() {
   try {
     let team = await request("https://extralife.donordrive.com/api/teams/51868").catch(u.noop);
-    if (team)
-      team.members = await request("https://extralife.donordrive.com/api/teams/51868/participants").catch(u.noop);
-    if (team) return JSON.parse(team);
+    if (team) {
+      team = JSON.parse(team);
+      let members = await request("https://extralife.donordrive.com/api/teams/51868/participants").catch(u.noop);
+      if (members) team.members = JSON.parse(members);
+    }
+    return team;
   } catch(error) { u.errorHandler(error, "Fetch Extra Life Team"); }
 }
 
