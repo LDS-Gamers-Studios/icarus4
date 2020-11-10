@@ -76,7 +76,7 @@ async function fetchExtraLifeStreams(team) {
   try {
     if (!team) team = await fetchExtraLifeTeam().catch(u.noop);
     if (!team) return null;
-    let userName = team.filter(m => m.links.stream).map(member => member.links.stream.replace("https://player.twitch.tv/?channel=", ""))
+    let userName = team.members.filter(m => m.links.stream).map(member => member.links.stream.replace("https://player.twitch.tv/?channel=", ""))
       .filter(channel => !(channel.includes(" ") || channel.includes("/")));
     let streams = await twitch.streams.getStreams({userName}).catch(u.noop);
     return streams;
@@ -85,7 +85,9 @@ async function fetchExtraLifeStreams(team) {
 
 async function fetchExtraLifeTeam() {
   try {
-    let team = await request("https://extralife.donordrive.com/api/teams/51868/participants").catch(u.noop);
+    let team = await request("https://extralife.donordrive.com/api/teams/51868").catch(u.noop);
+    if (team)
+      team.members = await request("https://extralife.donordrive.com/api/teams/51868/participants").catch(u.noop);
     if (team) return JSON.parse(team);
   } catch(error) { u.errorHandler(error, "Fetch Extra Life Team"); }
 }
@@ -318,7 +320,7 @@ const Module = new Augur.Module()
     try {
       let team = await fetchExtraLifeTeam();
       if (!team) msg.reply("the Extra Life API seems to be down. Please try again in a bit.").then(u.clean);
-      for (let member of team) {
+      for (let member of team.members) {
         if (member.links.stream) member.twitch = member.links.stream.replace("https://player.twitch.tv/?channel=", "");
         member.streamIsLive = false;
       }
@@ -347,7 +349,7 @@ const Module = new Augur.Module()
       embed.setTitle("LDSG Extra Life Team")
       .setThumbnail("https://assets.donordrive.com/extralife/images/fbLogo.jpg?v=202009241356")
       .setURL("https://www.extra-life.org/index.cfm?fuseaction=donorDrive.participant&participantID=412575#donate")
-      .setDescription(`LDSG is raising money for Extra Life! We are currently at $${total} of our team's $2,500 goal for 2020. That's ${Math.round(100 * total / 2500)}% there!\n\nYou can help by donating to one of the Extra Life Team below.`);
+      .setDescription(`LDSG is raising money for Extra Life! We are currently at $${total} of our team's $${team.fundraisingGoal} goal for 2020. That's ${Math.round(100 * total / 2500)}% there!\n\nYou can help by donating to one of the Extra Life Team below.`);
       msg.channel.send({embed});
     } catch(error) { u.errorHandler(error, msg); }
   }
