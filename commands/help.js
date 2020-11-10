@@ -6,7 +6,7 @@ const Module = new Augur.Module()
   description: "Get a list of available commands or more indepth info about a single command.",
   syntax: "[command name]",
   aliases: ["commands"],
-  process: (msg, suffix) => {
+  process: async (msg, suffix) => {
     msg.react("👌");
     u.clean(msg);
 
