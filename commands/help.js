@@ -35,7 +35,12 @@ const Module = new Augur.Module()
         for (let [name, command] of commands.filter(c => c.category == category && !c.hidden).sort((a, b) => a.name.localeCompare(b.name))) {
           embed.addField(prefix + command.name + " " + command.syntax, (command.description ? command.description : "Description"));
           if (i == 20) {
-            msg.author.send({embed}).catch(e => msg.channel.send("I couldn't send you a DM. Make sure that `Allow direct messages from server members` is enabled under the privacy settings, and that I'm not blocked.").then(u.clean())
+            try {
+              await msg.author.send({embed});
+            } catch(e) {
+              msg.channel.send("I couldn't send you a DM. Make sure that `Allow direct messages from server members` is enabled under the privacy settings, and that I'm not blocked.").then(u.clean);
+              return;
+            }
             embed = u.embed().setTitle(msg.client.user.username + " Commands" + (msg.guild ? ` in ${msg.guild.name}.` : ".") + " (Cont.)")
             .setURL("https://my.ldsgamers.com/commands")
             .setDescription(`You have access to the following commands. For more info, type \`${prefix}help <command>\`.`);
@@ -44,7 +49,12 @@ const Module = new Augur.Module()
           i++;
         }
       }
-      msg.author.send({embed}).catch(e => msg.channel.send("I couldn't send you a DM. Make sure that `Allow direct messages from server members` is enabled under the privacy settings, and that I'm not blocked.").then(u.clean())
+      try {
+        await msg.author.send({embed});
+      } catch(e) {
+        msg.channel.send("I couldn't send you a DM. Make sure that `Allow direct messages from server members` is enabled under the privacy settings, and that I'm not blocked.").then(u.clean);
+        return;
+      }
     } else { // SINGLE COMMAND HELP
       let command = null;
       if (commands.has(suffix)) command = commands.get(suffix);
@@ -57,8 +67,12 @@ const Module = new Augur.Module()
         .addField("Usage", prefix + command.name + " " + command.syntax);
 
         if (command.aliases.length > 0) embed.addField("Aliases", command.aliases.map(a => `!${a}`).join(", "));
-
-        msg.author.send(embed).catch(e => msg.channel.send("I couldn't send you a DM. Make sure that `Allow direct messages from server members` is enabled under the privacy settings, and that I'm not blocked.").then(u.clean());
+        try {
+          await msg.author.send({embed});
+        } catch(e) {
+          msg.channel.send("I couldn't send you a DM. Make sure that `Allow direct messages from server members` is enabled under the privacy settings, and that I'm not blocked.").then(u.clean);
+          return;
+        }
       } else {
         msg.reply("I don't have a command by that name.").then(u.clean);
       }
