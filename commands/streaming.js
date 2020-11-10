@@ -330,22 +330,22 @@ const Module = new Augur.Module()
       let streams = await fetchExtraLifeStreams(team).catch(u.noop);
       if (streams) {
         for (const stream of streams.data) {
-          let member = team.find(m => m.twitch && m.twitch.toLowerCase() == stream.userDisplayName.toLowerCase());
+          let member = team.members.find(m => m.twitch && m.twitch.toLowerCase() == stream.userDisplayName.toLowerCase());
           if (member) {
             member.streamIsLive = true;
             member.stream = stream;
           }
         }
       }
-      team.sort((a, b) => {
+      team.members.sort((a, b) => {
         if (a.streamIsLive != b.streamIsLive) return (b.streamIsLive - a.streamIsLive);
         else if (a.sumDonations != b.sumDonations) return (b.sumDonations - a.sumDonations);
         else return a.displayName.localeCompare(b.displayName)
       });
       let total = 0;
       let embed = u.embed().setColor(0x7fd836);
-      for (let i = 0; i < Math.min(team.length, 25); i++) {
-        let member = team[i];
+      for (let i = 0; i < Math.min(team.members.length, 25); i++) {
+        let member = team.members[i];
         embed.addField(member.displayName, `$${member.sumDonations} / $${member.fundraisingGoal} (${Math.round(100 * member.sumDonations / member.fundraisingGoal)}%)\n[[Donate]](${member.links.donate})${(member.streamIsLive ? `\n**STREAM NOW LIVE**\n[${member.stream.title}](https://www.twitch.tv/${member.twitch})` : "")}`, true);
         total += member.sumDonations;
       }
