@@ -196,7 +196,7 @@ async function processTwitch(igns) {
 
             if (extraLife() && member && member.roles.cache.has("507031155627786250") && (stream.title.toLowerCase().includes("extra life") || stream.title.toLowerCase().includes("extralife"))) {
               notificationChannel.send(`${ldsg.roles.cache.get("768164394248044575")}, **${member.displayName}** is live for Extra Life!`, {embed});
-              ldsg.channels.cache.get("733336823400628275").send({embed});
+              //ldsg.channels.cache.get("733336823400628275").send({embed});
             } else
               notificationChannel.send({embed});
           }
