@@ -99,7 +99,7 @@ async function fetchExtraLifeTeam() {
       const donors = JSON.parse(fs.readFileSync("./data/extraLifeDonors.json", "utf8"));
       const newDonors = new Set();
       for (let donation of donations) {
-        if (!donors.includes(donation.displayName)) newDonors.add(donation.displayName);
+        if (donation.displayName && !donors.includes(donation.displayName)) newDonors.add(donation.displayName);
       }
       if (newDonors.size > 0) {
         Module.client.users.cache.get(Module.config.ownerId).send(`New Extra Life Donor(s)!\n${[...newDonors].join("\n")}`);
