@@ -91,6 +91,22 @@ async function fetchExtraLifeTeam() {
       let members = await request("https://extralife.donordrive.com/api/teams/51868/participants").catch(u.noop);
       if (members) team.members = JSON.parse(members);
     }
+
+    // Check donors while we're at it.
+    let donations = await request("https://extralife.donordrive.com/api/teams/51868/donations").catch(u.noop);
+    if (donations) {
+      donations = JSON.parse(donations);
+      const donors = JSON.parse(fs.readFileSync("./data/extraLifeDonors.json", "utf8"));
+      const newDonors = new Set();
+      for (let donation of donations) {
+        if (!donors.includes(donation.displayName)) newDonors.add(donation.displayName);
+      }
+      if (newDonors.size > 0) {
+        Module.client.users.cache.get(Module.config.ownerId).send(`New Extra Life Donor(s)!\n${[...newDonors].join("\n")}`);
+        fs.writeFileSync("./data/extraLifeDonors.json", JSON.stringify(donors.concat([...newDonors])));
+      }
+    }
+
     return team;
   } catch(error) { u.errorHandler(error, "Fetch Extra Life Team"); }
 }
