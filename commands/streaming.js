@@ -213,10 +213,13 @@ async function processTwitch(igns) {
           if (channel.ign.toLowerCase() == "ldsgamers") Module.client.user.setActivity("Tiddlywinks");
           let member = await ldsg.members.fetch(channel.discordId).catch(u.noop);
           if (member && liveRole.members.has(member.id)) member.roles.remove(liveRole);
-          twitchStatus.set(channel.ign.toLowerCase(), {
-            status: "offline",
-            since: Date.now()
-          });
+          let status = twitchStatus.get(channel.ign.toLowerCase());
+          if (status && status.status == "online") {
+            twitchStatus.set(channel.ign.toLowerCase(), {
+              status: "offline",
+              since: Date.now()
+            });
+          }
         }
       }
     }
