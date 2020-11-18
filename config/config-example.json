@@ -38,8 +38,10 @@
     "guildMemberAdd",
     "guildMemberRemove",
     "guildMemberUpdate",
+    "message",
     "messageReactionAdd",
     "messageReactionRemove",
+    "messageUpdate",
     "presenceUpdate",
     "raw",
     "voiceStateUpdate"
