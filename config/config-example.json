@@ -31,6 +31,8 @@
     "token": ""
   },
   "events": [
+    "message"
+    "messageUpdate"
     "channelCreate",
     "disconnect",
     "error",
