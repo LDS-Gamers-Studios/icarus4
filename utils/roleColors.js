@@ -48,6 +48,7 @@ const inventory = new Collection([
 
   /* EXTRA LIFE 2020 REWARDS */
   ["772836045943341146", "772836221323182120"], // Origami - Kendama Merchant
+  ["778643108690526269", "778643303109361684"], // MandaLin - Nerd
 ]);
 
 module.exports = inventory;
