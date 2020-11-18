@@ -31,8 +31,6 @@
     "token": ""
   },
   "events": [
-    "message"
-    "messageUpdate"
     "channelCreate",
     "disconnect",
     "error",
@@ -40,8 +38,10 @@
     "guildMemberAdd",
     "guildMemberRemove",
     "guildMemberUpdate",
+    "message",
     "messageReactionAdd",
     "messageReactionRemove",
+    "messageUpdate",
     "presenceUpdate",
     "raw",
     "voiceStateUpdate"
