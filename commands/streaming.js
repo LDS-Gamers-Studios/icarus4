@@ -408,31 +408,6 @@ const Module = new Augur.Module()
     } else msg.reply("you need to tell me which streams to watch!").then(u.clean);
   }
 })
-.addCommand({name: "raider",
-  description: "Show your support for LDSG on Twitch!",
-  info: "Assigns you the Twitch Raiders role, showing your support for LDSG Streaming.",
-  aliases: ["raiders", "twitchraider", "twitchraiders"],
-  category: "Streaming",
-  process: (msg, suffix) => {
-    let quitter = ["done", "off", "false", "remove", "quit", "no"];
-    let raider = "309889486521892865";
-
-    if (suffix && quitter.includes(suffix.toLowerCase())) {
-      msg.delete();
-      msg.reply("ok ... I guess. :cry:").then(u.clean);
-      msg.member.roles.remove(raider);
-      msg.guild.channels.cache.get("506575671242260490").send(`ℹ️ ${msg.member.displayName} is no longer a Twitch Raider. :cry:`);
-    } else {
-      let ttv = msg.guild.emojis.cache.get("491332611340369920"); // ldsg
-
-      msg.member.roles.add(raider);
-      msg.reply("thanks for being a Twitch Raider! " + ttv.toString());
-
-      msg.guild.channels.cache.get("506575671242260490").send(`ℹ️ ${msg.member.displayName} has become a Twitch Raider!`);
-    }
-  },
-  permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg))
-})
 .addCommand({name: "schedule",
   description: "Check the LDSG streaming schedule",
   category: "Streaming",
