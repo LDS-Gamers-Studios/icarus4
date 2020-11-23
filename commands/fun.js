@@ -6,18 +6,18 @@ function quickFile(msg, file, name = null, showName = true) {
   if (Array.isArray(file))
     file = u.rand(file);
 
-  msg.delete().catch(console.error);
+  u.clean(msg, 0);
   msg.channel.send(
     (showName ? ((msg.member ? msg.member.displayName : msg.author.username) + " right now:") : ""),
     { files: [
       (name ? {attachment: file, name: name} : file)
     ]}
-  ).catch(console.error);
+  ).catch(e => u.errorHandler(e, msg));
 }
 
 function quickText(msg, text) {
-  msg.delete().catch(u.errorHandler);
-  msg.channel.send(text).catch(u.errorHandler);
+  u.clean(msg, 0);
+  msg.channel.send(text).catch(e => u.errorHandler(e, msg));
 }
 
 async function testBirthdays() {
