@@ -7,7 +7,7 @@ const Module = new Augur.Module()
   category: "Silly",
   hidden: true,
   process: (msg, suffix) => {
-    if (msg.deletable) msg.delete();
+    u.clean(msg, 0);
     msg.channel.send(suffix);
   },
   permissions: (msg) => Module.config.adminId.includes(msg.author.id)

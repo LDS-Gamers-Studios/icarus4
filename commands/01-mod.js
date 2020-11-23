@@ -152,7 +152,7 @@ async function warnCard(msg, filtered = null, call = false) {
     let card = await msg.client.channels.cache.get(modLogs).send({embed});
 
     if (call) {
-      msg.delete();
+      u.clean(msg, 0);
 
       let ldsg = msg.client.guilds.cache.get(Module.config.ldsg);
 
