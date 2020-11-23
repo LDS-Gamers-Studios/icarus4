@@ -69,6 +69,7 @@ const Module = new Augur.Module()
               author: msg.author,
               attachments: msg.attachments,
               content: content,
+              client: msg.client,
               cleanContent: content
             };
             Module.client.commands.execute("meme", fakeMsg, content);
