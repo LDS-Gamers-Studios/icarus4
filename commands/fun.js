@@ -252,7 +252,7 @@ const Module = new Augur.Module()
         quickText(msg, `${member} You are fined one credit for a violation of the Verbal Morality Statute. Reason Code: 2DANK`);
       }
     } else {
-      msg.reply("you need to let me know who to fine.").then(u.clean).catch(u.errorHandler);
+      msg.reply("you need to let me know who to fine.").then(u.clean).catch(u.noop);
     }
   },
   permissions: (msg) => (msg.guild && msg.member.roles.cache.has(Module.config.roles.mod))

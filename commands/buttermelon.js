@@ -12,16 +12,16 @@ function buttermelonEdit(msg) {
     //let banana = /[bß8ƥɓϐβбБВЬЪвᴮᴯḃḅḇÞ][a@∆æàáâãäåāăȁȃȧɑαдӑӓᴀᴬᵃᵅᶏᶐḁạảấầẩẫậắằẳẵặ4Λ]+([nⁿńňŋƞǹñϰпНhийӣӥѝνṅṇṉṋ]+[a@∆æàáâãäåāăȁȃȧɑαдӑӓᴀᴬᵃᵅᶏᶐḁạảấầẩẫậắằẳẵặ4Λ]+){2}/ig;
     if (msg.content.toLowerCase().includes("bananas")) {
       if (roll < .1)
-        msg.channel.send({files: ["https://cdn.discordapp.com/attachments/154625360514777088/239045323522179073/buttermelons.jpg"]}).catch(u.errorHandler);
+        msg.channel.send({files: ["https://cdn.discordapp.com/attachments/154625360514777088/239045323522179073/buttermelons.jpg"]}).catch(u.noop);
       else
-        msg.channel.send("*buttermelons").catch(u.errorHandler);
+        msg.channel.send("*buttermelons").catch(u.noop);
     } else if (msg.content.toLowerCase().includes("banana")) {
       if (roll < .06)
-        msg.channel.send({files: ["https://cdn.discordapp.com/attachments/136577505418018826/238764601951387648/buttermelon.jpg"]}).catch(u.errorHandler);
+        msg.channel.send({files: ["https://cdn.discordapp.com/attachments/136577505418018826/238764601951387648/buttermelon.jpg"]}).catch(u.noop);
       else if (roll < .1)
-        msg.channel.send({files: ["https://cdn.discordapp.com/attachments/96335850576556032/374995339997872128/YigaButtermelon_web.png"]}).catch(u.errorHandler);
+        msg.channel.send({files: ["https://cdn.discordapp.com/attachments/96335850576556032/374995339997872128/YigaButtermelon_web.png"]}).catch(u.noop);
       else
-        msg.channel.send("*buttermelon").catch(u.errorHandler);
+        msg.channel.send("*buttermelon").catch(u.noop);
     }
   }
 }
@@ -32,7 +32,7 @@ const Module = new Augur.Module()
   aliases: ["buttermelonfacts"],
   category: "Silly",
   process: (msg) => {
-    msg.channel.send("🍌 " + u.rand(buttermelon.facts)).catch(u.errorHandler);
+    msg.channel.send("🍌 " + u.rand(buttermelon.facts)).catch(u.noop);
   }
 })
 .addCommand({name: "buttermelonhistory",
