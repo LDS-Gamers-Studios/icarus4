@@ -8,6 +8,8 @@ const Module = new Augur.Module()
         permissions: (msg) => msg.channel.id == "121755900313731074" && msg.channel.permissionsFor(msg.member).has(["ATTACH_FILES", "EMBED_LINKS"]),
         process: (msg) => {
             let {suffix} = u.parse(msg, true);
+            //make the bot handle -t and a new line escape character the same way.
+            suffix.replace('\n', '-t');
             //general globals from bot this was imported from
             const args = suffix.trim().split(/ +/);
             //Determine if a string is a url
@@ -28,6 +30,8 @@ const Module = new Augur.Module()
               } else if (arg.toLowerCase() == "-t") {
                 topText = bottomText;
                 bottomText = [];
+              } else if (msg.mentions.users.size && arg.search('@') > -1) {//allows a mentioned user's avatar to be the meme background
+                    src = `https://cdn.discordapp.com/avatars/${msg.mentions.users.first().id}/${msg.mentions.users.first().avatar}.png`;
               } else {
                 bottomText.push(arg);
               }
