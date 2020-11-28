@@ -6,88 +6,18 @@ function quickFile(msg, file, name = null, showName = true) {
   if (Array.isArray(file))
     file = u.rand(file);
 
-  msg.delete().catch(console.error);
+  u.clean(msg, 0);
   msg.channel.send(
     (showName ? ((msg.member ? msg.member.displayName : msg.author.username) + " right now:") : ""),
     { files: [
       (name ? {attachment: file, name: name} : file)
     ]}
-  ).catch(console.error);
+  ).catch(e => u.errorHandler(e, msg));
 }
 
 function quickText(msg, text) {
-  msg.delete().catch(u.errorHandler);
-  msg.channel.send(text).catch(u.errorHandler);
-}
-
-async function testBirthdays() {
-  try {
-    let bot = Module.client;
-    let curDate = new Date();
-    let ldsg = bot.guilds.cache.get(Module.config.ldsg);
-    if (curDate.getHours() == 15) {
-      // Birthday Blast
-      let birthdays = (await Module.db.ign.getList("birthday")).filter(ign => ldsg.members.cache.has(ign.discordId));
-      for (let birthday of birthdays) {
-        let date = new Date(birthday.ign);
-        if (date && date.getMonth() == curDate.getMonth() && date.getDate() == curDate.getDate()) {
-          let flair = [
-            ":tada: ",
-            ":confetti_ball: ",
-            ":birthday: ",
-            ":gift: ",
-            ":cake: "
-          ];
-          try {
-            let member = ldsg.members.cache.get(birthday.discordId);
-            await ldsg.channels.cache.get(Module.config.ldsg).send(`:birthday: :confetti_ball: :tada: Happy Birthday, ${member}! :tada: :confetti_ball: :birthday:`);
-            const birthdayLangs = require("../data/birthday.json");
-            let msgs = birthdayLangs.map(lang => member.send(u.rand(flair) + " " + lang));
-            Promise.all(msgs).then(() => {
-              member.send(":birthday: :confetti_ball: :tada: A very happy birthday to you, from LDS Gamers! :tada: :confetti_ball: :birthday:").catch(u.noop);
-            }).catch(u.noop);
-          } catch (e) { u.errorHandler(error, "Birthay Send"); continue; }
-        }
-      }
-
-      // LDSG Cake Day
-      let tenure = [
-        "375047444599275543",
-        "375047691253579787",
-        "375047792487432192",
-        "543065980096741386",
-        "731895666577506345"
-      ];
-      const inventory = require("../utils/roleColors.js");
-      for (let role of tenure) {
-        if (inventory.has(role)) tenure.push(inventory.get(role));
-      }
-
-      let members = ldsg.members.cache;
-      let apicall = 1;
-      for (let [key, member] of members) {
-        try {
-          let join = member.joinedAt;
-          if (join && (join.getMonth() == curDate.getMonth()) && (join.getDate() == curDate.getDate()) && (join.getFullYear() < curDate.getFullYear())) {
-            let years = curDate.getFullYear() - join.getFullYear();
-            try {
-              let roles = member.roles.cache.keyArray()
-                .filter(r => !tenure.includes(r));
-              roles.push(tenure[years - 1]);
-
-              await member.roles.set(roles);
-            } catch(error) { u.errorHandler(error, `Apply cake day roles: ${member.displayName}`); }
-            try {
-              let user = await Module.db.user.fetchUser(member.id);
-              if (user.posts > 0) {
-                ldsg.channels.cache.get(Module.config.ldsg).send(`${member} has been part of the server for ${years} ${(years > 1 ? "years" : "year")}! Glad you're with us!`);
-              }
-            } catch (e) { u.errorHandler(e, "Announce Cake Day Error"); continue; }
-          }
-        } catch(e) { u.errorHandler(e, "Fetch Cake Day Error"); }
-      }
-    }
-  } catch(e) { u.errorHandler(e, "Cake Day Error"); }
+  u.clean(msg, 0);
+  msg.channel.send(text).catch(e => u.errorHandler(e, msg));
 }
 
 const Module = new Augur.Module()
@@ -159,34 +89,6 @@ const Module = new Augur.Module()
     if (suffix) msg.channel.send(`${(msg.member ? msg.member.displayName : msg.author.username)}:\nALL THE ${suffix.toUpperCase()}!`, {files: ["https://cdn.discordapp.com/emojis/250348426817044482.png"]});
   }
 })
-.addCommand({name: "birthday",
-  description: "It's your birthday!?",
-  syntax: "<@user>", hidden: true,
-  category: "Silly",
-  process: async (msg) => {
-    if (msg.mentions.members && msg.mentions.members.size > 0) {
-      let flair = [
-        ":tada: ",
-        ":confetti_ball: ",
-        ":birthday: ",
-        ":gift: ",
-        ":cake: "
-      ];
-      for (let [id, member] of msg.mentions.members) {
-        try {
-          await msg.client.channels.cache.get(Module.config.ldsg).send(`:birthday: :confetti_ball: :tada: Happy Birthday, ${member}! :tada: :confetti_ball: :birthday:`);
-          let birthdayLangs = require("../data/birthday.json");
-          let msgs = birthdayLangs.map(lang => member.send(u.rand(flair) + " " + lang));
-          await Promise.all(msgs).catch(u.noop);
-          member.send(":birthday: :confetti_ball: :tada: A very happy birthday to you, from LDS Gamers! :tada: :confetti_ball: :birthday:").catch(u.noop);
-        } catch(error) { u.errorHandler(error, msg); }
-      }
-    } else {
-      msg.reply("you need to tell me who to celebrate!");
-    }
-  },
-  permissions: (msg) => Module.config.adminId.includes(msg.author.id)
-})
 .addCommand({name: "chaos",
   description: "IT'S MADNESS!",
   category: "Silly",
@@ -252,7 +154,7 @@ const Module = new Augur.Module()
         quickText(msg, `${member} You are fined one credit for a violation of the Verbal Morality Statute. Reason Code: 2DANK`);
       }
     } else {
-      msg.reply("you need to let me know who to fine.").then(u.clean).catch(u.errorHandler);
+      msg.reply("you need to let me know who to fine.").then(u.clean).catch(u.noop);
     }
   },
   permissions: (msg) => (msg.guild && msg.member.roles.cache.has(Module.config.roles.mod))
@@ -566,13 +468,6 @@ const Module = new Augur.Module()
     reaction.remove();
     reaction.message.react("⭐").catch(u.noop);
   }
-})
-.addEvent("ready", testBirthdays)
-.setClockwork(() => {
-  try {
-    let bot = Module.client;
-    return setInterval(testBirthdays, 60 * 60 * 1000, bot);
-  } catch(e) { u.errorHandler(e, "Birthday Clockwork Error"); }
 });
 
 module.exports = Module;

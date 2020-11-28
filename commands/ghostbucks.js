@@ -169,7 +169,7 @@ const Module = new Augur.Module()
   category: "Ghost Bucks",
   process: async (msg, suffix) => {
     try {
-      msg.delete();
+      u.clean(msg, 0);
       if (u.userMentions(msg, true).size > 0) {
         for (const [discordId, member] of u.userMentions(msg, true)) {
           let team = msg.member.roles.cache.has(Module.config.roles.team);
@@ -226,7 +226,7 @@ const Module = new Augur.Module()
   category: "Ghost Bucks",
   process: async (msg, suffix) => {
     try {
-      msg.delete();
+      u.clean(msg, 0);
       if (u.userMentions(msg, true).size > 0) {
         for (const [discordId, member] of u.userMentions(msg, true)) {
           let admin = Module.config.adminId.includes(msg.member.id);
