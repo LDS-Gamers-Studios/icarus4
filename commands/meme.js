@@ -4,7 +4,7 @@ const Augur = require("augurbot"),
 const Module = new Augur.Module()
    .addCommand({
         name: "meme",
-        aliases: ["doofinshmirtz"]
+        aliases: ["doofinshmirtz"],
         description: "Creates a meme, put an image URL for you background and then put the text you want along the bottom. Or put the image source afterwards. Who am I to judge?",
         permissions: (msg) => msg.channel.id == "121755900313731074" && msg.channel.permissionsFor(msg.member).has(["ATTACH_FILES", "EMBED_LINKS"]),
         process: (msg) => {
