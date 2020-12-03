@@ -48,7 +48,7 @@ const inventory = new Collection([
   ["508030176072957952", "698293543470497944"], // Extra Life Donor
   //["768164394248044575", "768166036184367186"], // Extra Life Raiders
   ["772836045943341146", "772836221323182120"], // Origami - Kendama Merchant
-  ["778643108690526269", "778643303109361684"], // MandaLin - Nerd
+  ["782299117162070110", "782299284367736863"], // Pied - Whatever his role ends up being
 ]);
 
 module.exports = inventory;
