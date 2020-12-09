@@ -220,6 +220,33 @@ const Module = new Augur.Module()
     }
   }
 })
+.addCommand({
+    name: "holyhandgrenade", // required
+    aliases: [ "grenade"], // optional
+    syntax: "<person>", // optional
+    description: "Lobs a hand grenade at someone", // recommended
+    info: "", // recommended
+    hidden: false, // optional
+    category: "Silly", // optional
+    enabled: true, // optional
+    permissions: (msg) => true, // optional
+    process: (msg, suffix) => {
+        if (!msg.mentions.users.size && suffix.length == 0) {
+            let toSend = `**Book of Armaments, 2:9-21:** \n "And Saint Attila raised the hand grenade up on high, saying: \n> *'O Lord, bless this thy hand grenade, that with it thou mayst blow thine enemies to tiny bits, in thy mercy.'*\n And the Lord did grin. \nAnd the people did feast upon the lambs, and sloths, and carp, and anchovies, and orangutans, and breakfast cereals, and fruit bats, and large chulapas. \n\n\tAnd the Lord spake, saying, \n> *"First shalt thou take out the Holy Pin.* \n> *Then shalt thou count to **three**, no more, no less.* \n> ***Three** shall be the number thou shalt count,* \n> *and the number of the counting shall be **three**.* \n> *Four shalt thou not count,* \n> *neither count thou two, (excepting that thou then proceed to three).* \n> ***Five is right out.*** \n> \n> *Once the number **three**, (being the third number) be reached,*\n> *then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in My sight, shall snuff it.'*`;
+            msg.channel.send(toSend);
+        } else {
+            msg.channel.send('https://tenor.com/view/nuke-gif-8044239');
+            if (!msg.mentions.users.size && suffix.length > 0) {
+                msg.channel.send(`${suffix} hath snuffed it`);
+            }
+            else {
+                const avatarList = msg.mentions.users.map(user => {
+                     msg.channel.send(`${user} hath snuffed it`);
+                });
+            }
+        } // required
+    },
+})
 .addCommand({name: "hug",
   description: "Send a much needed hug.",
   syntax: "<@user(s)>",
