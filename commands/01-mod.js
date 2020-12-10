@@ -50,7 +50,7 @@ function processMessageLanguage(msg, edited = false) {
         return true;
       } else if (match = bannedWords.exec(msg.cleanContent)) {
         u.clean(msg, 0);
-        msg.reply("it looks like that link might have had some harsh language. Please be careful!");
+        msg.reply("it looks like that link might have had some harsh language. Please be careful!").then(u.clean);
         warnCard(msg, ["Link language"].concat(match));
         return true;
       } else if (!msg.member.roles.cache.has(Module.config.roles.trusted)) {
