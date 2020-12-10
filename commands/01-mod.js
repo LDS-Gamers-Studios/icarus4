@@ -48,6 +48,11 @@ function processMessageLanguage(msg, edited = false) {
         msg.reply("that link is generally believed to be to a scam/phishing site. Please be careful!");
         warnCard(msg, ["Suspected scam links"].concat(match));
         return true;
+      } else if (match = bannedWords.exec(msg.cleanContent)) {
+        u.clean(msg, 0);
+        msg.reply("it looks like that link might have had some harsh language. Please be careful!");
+        warnCard(msg, ["Link language"].concat(match));
+        return true;
       } else if (!msg.member.roles.cache.has(Module.config.roles.trusted)) {
         // General untrusted link flag
         warnCard(msg, "Links prior to being trusted");
@@ -734,7 +739,7 @@ Module
       for (const [memberId, member] of members) {
         try {
           if (member && !member.roles.cache.has("771516264618262607")) {
-            await member.roles.add(["771516264618262607", "771732533309603841"]);
+            await member.roles.add("771516264618262607");
             if (member.voice.channel) {
               await member.voice.kick("User sent to office");
             }
