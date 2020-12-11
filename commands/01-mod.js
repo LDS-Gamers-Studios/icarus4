@@ -933,7 +933,7 @@ Module
   process: async (msg, suffix) => {
     try {
       let threshold = parseInt(suffix, 10) || 15;
-      const guild = msg.guild;
+      const ldsg = msg.guild;
       let users = await Module.db.user.getUsers({posts: {$gt: threshold}});
       let response = [];
       for (const user of users) {
