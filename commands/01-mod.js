@@ -48,10 +48,10 @@ function processMessageLanguage(msg, edited = false) {
         msg.reply("that link is generally believed to be to a scam/phishing site. Please be careful!");
         warnCard(msg, ["Suspected scam links"].concat(match));
         return true;
-      } else if (match = bannedWords.exec(msg.cleanContent)) {
+      } else if ((match = bannedWords.exec(msg.cleanContent)) && (match[0].toLowerCase().includes("tenor") || match[0].toLowerCase().includes("giphy"))) {
         u.clean(msg, 0);
         msg.reply("it looks like that link might have had some harsh language. Please be careful!").then(u.clean);
-        warnCard(msg, ["Link language"].concat(match));
+        warnCard(msg, ["Link Language (Auto-Removed)"].concat(match));
         return true;
       } else if (!msg.member.roles.cache.has(Module.config.roles.trusted)) {
         // General untrusted link flag
