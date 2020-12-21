@@ -35,9 +35,9 @@ function processMessageLanguage(msg, edited = false) {
     processDiscordInvites(msg);
 
     let match = null;
-
+    let link = null;
     // LINK FILTER
-    if (hasLink.test(msg.cleanContent)) {
+    if (link = hasLink.exec(msg.cleanContent)) {
       if (match = bannedLinks.exec(msg.cleanContent)) {
         // Porn links
         warnCard(msg, match, true);
@@ -48,7 +48,7 @@ function processMessageLanguage(msg, edited = false) {
         msg.reply("that link is generally believed to be to a scam/phishing site. Please be careful!");
         warnCard(msg, ["Suspected scam links"].concat(match));
         return true;
-      } else if ((match = bannedWords.exec(msg.cleanContent)) && (match[0].toLowerCase().includes("tenor") || match[0].toLowerCase().includes("giphy"))) {
+      } else if ((match = bannedWords.exec(msg.cleanContent)) && (link[0].toLowerCase().includes("tenor") || link[0].toLowerCase().includes("giphy"))) {
         u.clean(msg, 0);
         msg.reply("it looks like that link might have had some harsh language. Please be careful!").then(u.clean);
         warnCard(msg, ["Link Language (Auto-Removed)"].concat(match));
