@@ -10,7 +10,7 @@ function type(msg) {
 }
 
 const Module = new Augur.Module()
-.addCommand({name: "note",
+.addCommand({name: "takenote",
   syntax: "@user(s)",
   description: "Troll Icarus notes.",
   hidden: true,
