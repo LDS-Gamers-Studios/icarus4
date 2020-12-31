@@ -79,7 +79,7 @@ async function checkStarBoard(reaction, user) {
       try {
         await msg.fetch();
       } catch(error) {
-        this.errorHandler(error, "Fetch Partial Message Update Error");
+        u.errorHandler(error, "Fetch Partial Message Update Error");
       }
     }
 
