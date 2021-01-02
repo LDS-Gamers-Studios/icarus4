@@ -19,11 +19,11 @@ async function popart(msg, initialTransform) {
     } else {
       original = (await u.getMention(msg, false) || msg.author).displayAvatarURL({size: 256, format: "png"});
     }
-    
+
     try {
       img = await Jimp.read(original);
     } catch (error) {
-      return msg.reply("I coulndn't use that image! Make sure its a PNG, JPG, or JPEG.")
+      return msg.reply("I couldn't use that image! Make sure its a PNG, JPG, or JPEG.")
     };
 
 
@@ -96,9 +96,9 @@ const Module = new Augur.Module()
       try {
         av = await Jimp.read(target);
       } catch (error) {
-        return msg.reply("I coulndn't use that image! Make sure its a PNG, JPG, or JPEG.")
+        return msg.reply("I couldn't use that image! Make sure its a PNG, JPG, or JPEG.")
       };
-  
+
       av.color([
         { apply: "desaturate", params: [100] },
         { apply: "saturate", params: [47.7] },
@@ -132,13 +132,13 @@ const Module = new Augur.Module()
         original = (await u.getMention(msg, false) || msg.author).displayAvatarURL({size: 512, format: "png"});
         color = parseInt(suffix.replace(/<@!?\d+>/g, ""), 10);
       }
-      
+
       color = color || (10 * (Math.floor(Math.random() * 35) + 1));
 
       try {
         image = await Jimp.read(original);
       } catch (error) {
-        return msg.reply("I coulndn't use that image! Make sure its a PNG, JPG, or JPEG.")
+        return msg.reply("I couldn't use that image! Make sure its a PNG, JPG, or JPEG.")
       };
       image.color([
         { apply: "hue", params: [color] }
@@ -197,7 +197,7 @@ const Module = new Augur.Module()
       try {
         av = await Jimp.read(target);
       } catch (error) {
-        return msg.reply("I coulndn't use that image! Make sure its a PNG, JPG, or JPEG.")
+        return msg.reply("I couldn't use that image! Make sure its a PNG, JPG, or JPEG.")
       };
 
       av.color([{ apply: "desaturate", params: [100] }]);
@@ -228,7 +228,7 @@ const Module = new Augur.Module()
       try {
         img = await Jimp.read(original);
       } catch (error) {
-        return msg.reply("I coulndn't use that image! Make sure its a PNG, JPG, or JPEG.")
+        return msg.reply("I couldn't use that image! Make sure its a PNG, JPG, or JPEG.")
       };
 
       for (let x = 0; x < img.bitmap.width; x++) {
