@@ -10,6 +10,7 @@ async function popart(msg, initialTransform) {
     let suffix = content.join(" ");
     let urlexp = /\<?(https?:\/\/\S+)\>?(?:\s+)?(\d*)/;
     let match;
+    let img;
 
     if (msg.attachments.size > 0) {
       original = msg.attachments.first().url;
@@ -18,8 +19,14 @@ async function popart(msg, initialTransform) {
     } else {
       original = (await u.getMention(msg, false) || msg.author).displayAvatarURL({size: 256, format: "png"});
     }
+    
+    try {
+      img = await Jimp.read(original);
+    } catch (error) {
+      return msg.reply("I coulndn't use that image! Make sure its a PNG, JPG, or JPEG.")
+    };
 
-    const img = await Jimp.read(original);
+
     const canvas = new Jimp(536, 536, 0xffffffff);
 
     img.resize(256, 256);
@@ -76,6 +83,7 @@ const Module = new Augur.Module()
     try {
       let target;
       let urlexp = /\<?(https?:\/\/\S+)\>?(?:\s+)?(\d*)/;
+      let av;
 
       if (msg.attachments.size > 0) {
         target = msg.attachments.first().url;
@@ -85,7 +93,12 @@ const Module = new Augur.Module()
         target = (await u.getMention(msg, false) || msg.author).displayAvatarURL({size: 512, format: "png"});
       }
 
-      let av = await Jimp.read(target);
+      try {
+        av = await Jimp.read(target);
+      } catch (error) {
+        return msg.reply("I coulndn't use that image! Make sure its a PNG, JPG, or JPEG.")
+      };
+  
       av.color([
         { apply: "desaturate", params: [100] },
         { apply: "saturate", params: [47.7] },
@@ -103,7 +116,7 @@ const Module = new Augur.Module()
     try {
       let color;
       let original;
-
+      let image;
       let urlexp = /\<?(https?:\/\/\S+)\>?(?:\s+)?(\d*)/;
       let match;
 
@@ -119,9 +132,14 @@ const Module = new Augur.Module()
         original = (await u.getMention(msg, false) || msg.author).displayAvatarURL({size: 512, format: "png"});
         color = parseInt(suffix.replace(/<@!?\d+>/g, ""), 10);
       }
+      
       color = color || (10 * (Math.floor(Math.random() * 35) + 1));
 
-      let image = await Jimp.read(original);
+      try {
+        image = await Jimp.read(original);
+      } catch (error) {
+        return msg.reply("I coulndn't use that image! Make sure its a PNG, JPG, or JPEG.")
+      };
       image.color([
         { apply: "hue", params: [color] }
       ]);
@@ -166,6 +184,7 @@ const Module = new Augur.Module()
     try {
       let target;
       let urlexp = /\<?(https?:\/\/\S+)\>?(?:\s+)?(\d*)/;
+      let av;
 
       if (msg.attachments.size > 0) {
         target = msg.attachments.first().url;
@@ -175,7 +194,12 @@ const Module = new Augur.Module()
         target = (await u.getMention(msg, false) || msg.author).displayAvatarURL({size: 512, format: "png"});
       }
 
-      let av = await Jimp.read(target);
+      try {
+        av = await Jimp.read(target);
+      } catch (error) {
+        return msg.reply("I coulndn't use that image! Make sure its a PNG, JPG, or JPEG.")
+      };
+
       av.color([{ apply: "desaturate", params: [100] }]);
 
       await msg.channel.send({files: [await av.getBufferAsync(Jimp.MIME_PNG)]});
@@ -188,6 +212,7 @@ const Module = new Augur.Module()
   process: async (msg, suffix) => {
     try {
       let original;
+      let img;
 
       let urlexp = /\<?(https?:\/\/\S+)\>?(?:\s+)?(\d*)/;
       let match;
@@ -200,7 +225,12 @@ const Module = new Augur.Module()
         original = (await u.getMention(msg, false) || msg.author).displayAvatarURL({size: 512, format: "png"});
       }
 
-      let img = await Jimp.read(original);
+      try {
+        img = await Jimp.read(original);
+      } catch (error) {
+        return msg.reply("I coulndn't use that image! Make sure its a PNG, JPG, or JPEG.")
+      };
+
       for (let x = 0; x < img.bitmap.width; x++) {
         for (let y = 0; y < img.bitmap.height; y++) {
           let {r, g, b, a} = Jimp.intToRGBA(img.getPixelColor(x, y));
