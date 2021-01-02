@@ -65,7 +65,7 @@ const Module = new Augur.Module()
         general.send(welcomeString);
       if (guild.members.size == milestone) {
         general.send(`:tada: :confetti_ball: We're now at ${milestone} members! :confetti_ball: :tada:`);
-        modLogs.send(`:tada: :confetti_ball: We're now at ${milestone} members! :confetti_ball: :tada:\n*pinging for effect: <@96335658997526528> <@111232201848295424>*`);
+        modLogs.send(`:tada: :confetti_ball: We're now at ${milestone} members! :confetti_ball: :tada:\n*pinging for effect: ${guild.members.cache.get("96335658997526528")} ${guild.members.cache.get("111232201848295424")}*`);
       }
     }
   } catch(e) { u.errorHandler(e, "New Member Add"); }
