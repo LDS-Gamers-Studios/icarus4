@@ -2,6 +2,7 @@ const Augur = require("augurbot");
 const cheerio = require("cheerio");
 const request = require("request-promise-native");
 const u = require("../utils/utils");
+const profanityFilter = require("profanity-matcher");
 
 const Module = new Augur.Module()
 .addCommand({name: "namegame",
@@ -17,10 +18,17 @@ const Module = new Augur.Module()
       let body = await request(`https://thenamegame-generator.com/lyrics/${name}.html`).catch(u.noop);
 
       if (body) {
+        const pf = new profanityFilter();
+
         let $ = cheerio.load(body);
         let results = $("blockquote").html().replace(/<br>/g, "\n");
-        let embed = u.embed().setTitle(`🎶 **The Name Game! ${name}! 🎵`).setDescription(results);
-        msg.channel.send({embed});
+
+        if ((pf.scan(suffix.toLowerCase()).length == 0) && (name.length <= 230) && (results.length + name.length <= 5750)) {
+          let embed = u.embed().setTitle(`🎶 **The Name Game! ${name}! 🎵`).setDescription(results);
+          msg.channel.send({embed});
+        } else {
+          msg.react("😬").catch(u.noop);
+        }
       } else {
         msg.react("❌").catch(u.noop);
       }
