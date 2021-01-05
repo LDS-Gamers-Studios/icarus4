@@ -13,6 +13,8 @@ const Module = new Augur.Module()
     try {
       if (msg.mentions.members && msg.mentions.members.size > 0) suffix = msg.mentions.members.first().displayName;
       else if (msg.mentions.users.size > 0) suffix = msg.mentions.users.first().displayName;
+      else if (msg.member && !suffix) suffix = msg.member.displayName;
+      else if (!suffix) suffix = msg.user.username;
 
       let name = suffix.replace("-", " ").replace("_", " ").split(" ")[0];
       let body = await request(`https://thenamegame-generator.com/lyrics/${name}.html`).catch(u.noop);
