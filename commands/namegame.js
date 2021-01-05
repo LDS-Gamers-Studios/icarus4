@@ -23,7 +23,7 @@ const Module = new Augur.Module()
         let $ = cheerio.load(body);
         let results = $("blockquote").html().replace(/<br>/g, "\n");
 
-        if ((pf.scan(suffix.toLowerCase().replace(/\-/g, " ")).length == 0) && (name.length <= 230) && (results.length + name.length <= 5750)) {
+        if ((pf.scan(suffix.toLowerCase().replace(/[\-\n]/g, " ").replace(/\s\s+/g, " ")).length == 0) && (name.length <= 230) && (results.length + name.length <= 5750)) {
           let embed = u.embed().setTitle(`🎶 **The Name Game! ${name}! 🎵`).setDescription(results);
           msg.channel.send({embed});
         } else {
