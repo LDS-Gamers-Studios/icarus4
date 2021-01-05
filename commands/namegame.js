@@ -11,7 +11,7 @@ const Module = new Augur.Module()
   description: "Play the Name Game!",
   process: async (msg, suffix) => {
     try {
-      if (msg.mentions.members.size > 0) suffix = msg.mentions.members.first().displayName;
+      if (msg.mentions.members && msg.mentions.members.size > 0) suffix = msg.mentions.members.first().displayName;
       else if (msg.mentions.users.size > 0) suffix = msg.mentions.users.first().displayName;
 
       let name = suffix.replace("-", " ").replace("_", " ").split(" ")[0];
