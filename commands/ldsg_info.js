@@ -4,6 +4,10 @@ const Augur = require("augurbot"),
   parseXML = require("xml2js").parseString,
   u = require("../utils/utils");
 
+function boostCheck(channel){
+      if(guild.premiumSubscriptionCount < 30) Module.client.channels.cache.get(channel).send(`We've dropped to ${guild.premiumSubscriptionCount} boosts (30 required for tier 3)`)
+  }
+
 const Module = new Augur.Module()
 .addCommand({name: "code",
   description: "Our Code of Conduct",
@@ -129,5 +133,10 @@ const Module = new Augur.Module()
     msg.channel.send("The LDSG YouTube Channel, featuring Let's Plays, Clips of the Week, and more:\nhttps://www.youtube.com/ldsgamers");
   }
 });
+.setClockwork(()=>{
+    try{
+        return setInterval(boostCheck(Module.config.channels.modlogs), 1000 * 60 * 60 * 24)
+    } catch(error){u.errorHandler(error, 'Boost Check Clockwork Error')}
+})
 
 module.exports = Module;
