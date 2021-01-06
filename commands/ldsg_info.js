@@ -31,13 +31,18 @@ const Module = new Augur.Module()
     msg.channel.send({embed}).catch(e => u.errorHandler(e, msg));
   }
 })
-.addCommand({name: "invite",
-  description: "Get the link to invite someone to our Discord server",
-  category: "LDSG",
-  process: (msg) => {
-    msg.channel.send("Use this link to invite a friend to our server:\n<http://ldsg.io/chat>");
-  }
-})
+
+/*
+Figured this file should also be cleaned up and stuff be put in tags. For reference, i've included the tag names and content, seperated by a -
+invite - Use this link to invite a friend to our server:\n<http://ldsg.io/chat>
+mcstore - Check out our Minecraft store for some cosmetics!\nhttp://ldsgamers.buycraft.net/
+site - Check out our site!\nhttp://LDSGamers.com
+snapchat - **Follow LDSG on Snapchat!**", file: https://cdn.discordapp.com/attachments/193042027066163200/277968968214511616/snapchat.jpg
+store/shop - Check out the new store!\n<https://ldsgamers.com/shop>
+team/staff - Get to know the LDSG Team!\nhttp://LDSGamers.com/about/staff
+videos - The LDSG YouTube Channel, featuring Let's Plays, Clips of the Week, and more:\nhttps://www.youtube.com/ldsgamers
+*/
+
 .addCommand({name: "map",
   description: "View and join the LDSG member map!",
   category: "LDSG",
@@ -50,13 +55,6 @@ const Module = new Augur.Module()
     ];
     if (vvo) response.push("\n**To be added to the LDSG Member Map:**", "Message " + vvo + " with your general whereabouts.");
     msg.channel.send(response.join("\n")).catch(e => u.errorHandler(e, msg));
-  }
-})
-.addCommand({name: "mcstore",
-  description: "Get some cosmetics for the Minecraft servers!",
-  category: "LDSG",
-  process: (msg) => {
-    msg.channel.send("Check out our Minecraft store for some cosmetics!\nhttp://ldsgamers.buycraft.net/").catch(e => u.errorHandler(e, msg));
   }
 })
 .addCommand({name: "podcast",
@@ -95,44 +93,6 @@ const Module = new Augur.Module()
     });
   }
 })
-.addCommand({name: "site",
-  description: "Check out our site!",
-  category: "LDSG",
-  process: (msg) => {
-    msg.channel.send("Check out our site!\nhttp://LDSGamers.com").catch(e => u.errorHandler(e, msg));
-  }
-})
-.addCommand({name: "snapchat",
-  description: "Link to LDGS Snapchat",
-  category: "LDSG",
-  process: (msg) => {
-    msg.channel.send("**Follow LDSG on Snapchat!**", {files: ["https://cdn.discordapp.com/attachments/193042027066163200/277968968214511616/snapchat.jpg"]})
-    .catch(e => u.errorHandler(e, msg));
-  }
-})
-.addCommand({name: "store",
-  description: "Check out some cool stuff!",
-  aliases: ["shop"],
-  category: "LDSG",
-  process: (msg) => {
-    msg.channel.send("Check out the new store!\n<https://ldsgamers.com/shop>").catch(e => u.errorHandler(e, msg));
-  }
-})
-.addCommand({name: "team",
-  description: "Get to know the LDSG Team!",
-  aliases: ["staff"],
-  category: "LDSG",
-  process: (msg) => {
-    msg.channel.send("Get to know the LDSG Team!\nhttp://LDSGamers.com/about/staff").catch(e => u.errorHandler(e, msg));
-  }
-})
-.addCommand({name: "videos",
-  description: "The LDSG YouTube Channel",
-  category: "LDSG",
-  process: (msg) => {
-    msg.channel.send("The LDSG YouTube Channel, featuring Let's Plays, Clips of the Week, and more:\nhttps://www.youtube.com/ldsgamers");
-  }
-});
 .setClockwork(()=>{
     try{
         return setInterval(boostCheck(Module.config.channels.modlogs), 1000 * 60 * 60 * 24)
