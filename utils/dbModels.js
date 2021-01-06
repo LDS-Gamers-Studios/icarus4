@@ -473,10 +473,9 @@ const models = {
     }
   },
   starboard: {
-    denyStar: (starboard) => {
-      if (typeof starboard == "string") starboard = {id: starboard};
+    denyStar: (starId) => {
       return new Promise((fulfill, reject) => {
-        Star.findOneAndUpdate({starId: starboard.id}, {$set: {deny: true}}, (err, doc) => {
+        Star.findOneAndUpdate({starId}, {$set: {deny: true}}, (err, doc) => {
           if (err) reject(err);
           else fulfill(doc);
         });
