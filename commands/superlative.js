@@ -77,15 +77,15 @@ async function checkStarBoard(reaction, user) {
   try {
     if (reaction.message.partial) {
       try {
-        await msg.fetch();
+        await reaction.message.fetch();
       } catch(error) {
         u.errorHandler(error, "Fetch Partial Message Update Error");
       }
     }
 
-    if (!user.bot && reaction.message.guild && reaction.message.guild.id == Module.config.ldsg && (reaction.message.createdTimestamp > (Date.now() - 7 * 24 * 60 * 60000))) {
+    const msg = reaction.message;
+    if (!user.bot && msg.guild && msg.guild.id == Module.config.ldsg && (msg.createdTimestamp > (Date.now() - 7 * 24 * 60 * 60000))) {
       // Only respond to recent messages from LDSG
-      const msg = reaction.message;
       let react = reaction.emoji.name;
 
       if (!msg.author.bot && (reaction.count == 5) && (msg.channel.parentID != "730435569330421830") && !msg.channel.name.toLowerCase().includes("spoiler")) {
@@ -130,7 +130,7 @@ async function checkStarBoard(reaction, user) {
             await msg.reactions.removeAll();
           } else if (star && react == "🚫") {
             let embed = u.embed(msg.embeds[0]).setTimestamp(star.timestamp).setColor(0xff0000);
-            await Module.db.starboard.denyStar(star);
+            await Module.db.starboard.denyStar(star.starId);
             await msg.edit({embed});
             await msg.reactions.removeAll();
           }
