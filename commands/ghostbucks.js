@@ -165,9 +165,10 @@ const Module = new Augur.Module()
   syntax: "@user amount",
   description: "Give a user Ember",
   aliases: ["embergive", "giveem", "emgive"],
-  permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg)),
+  permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && msg.author.id != "281658096130981889"),
   category: "Ghost Bucks",
   process: async (msg, suffix) => {
+    const MAX = 10000;
     try {
       u.clean(msg, 0);
       if (u.userMentions(msg, true).size > 0) {
@@ -176,17 +177,21 @@ const Module = new Augur.Module()
           let ldsg = msg.client.guilds.cache.get(Module.config.ldsg);
           let reason = suffix.replace(/<@!?\d+>/ig, "").trim().split(" ");
           let value = parseInt(reason.shift(), 10);
-          reason = ((reason.length > 0) ? reason.join(" ") : "No particular reason.").trim();
-
-          let deposit = {
-            currency: "em",
-            discordId,
-            description: `From ${msg.member.displayName}: ${reason}`,
-            value,
-            mod: msg.author.id
-          };
 
           if (value) {
+            if (value > MAX) value = MAX;
+            if (value < -MAX) value = -MAX;
+
+            reason = ((reason.length > 0) ? reason.join(" ") : "No particular reason.").trim();
+
+            let deposit = {
+              currency: "em",
+              discordId,
+              description: `From ${msg.member.displayName}: ${reason}`,
+              value,
+              mod: msg.author.id
+            };
+
             let account = await Module.db.bank.getBalance(msg.author.id, "em");
             if (!team && (value < 0)) {
               msg.reply(`You can't just *take* ${ember}, silly.`).then(u.clean);
@@ -225,6 +230,7 @@ const Module = new Augur.Module()
   permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg)),
   category: "Ghost Bucks",
   process: async (msg, suffix) => {
+    const MAX = 1000;
     try {
       u.clean(msg, 0);
       if (u.userMentions(msg, true).size > 0) {
@@ -233,17 +239,22 @@ const Module = new Augur.Module()
           let ldsg = msg.client.guilds.cache.get(Module.config.ldsg);
           let reason = suffix.replace(/<@!?\d+>/ig, "").trim().split(" ");
           let value = parseInt(reason.shift(), 10);
-          reason = ((reason.length > 0) ? reason.join(" ") : "No particular reason.").trim();
 
-          let deposit = {
-            currency: "gb",
-            discordId,
-            description: `From ${msg.member.displayName}: ${reason}`,
-            value,
-            mod: msg.author.id
-          };
 
           if (value) {
+            if (value > MAX) value = MAX;
+            if (value < -MAX) value = -MAX;
+            
+            reason = ((reason.length > 0) ? reason.join(" ") : "No particular reason.").trim();
+
+            let deposit = {
+              currency: "gb",
+              discordId,
+              description: `From ${msg.member.displayName}: ${reason}`,
+              value,
+              mod: msg.author.id
+            };
+
             let account = await Module.db.bank.getBalance(msg.author.id, "gb");
             if (!admin && (value < 0)) {
               msg.reply(`You can't just *take* ${gb}, silly.`).then(u.clean);
