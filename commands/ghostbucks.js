@@ -172,11 +172,15 @@ const Module = new Augur.Module()
     try {
       u.clean(msg, 0);
       if (u.userMentions(msg, true).size > 0) {
+        let team = msg.member.roles.cache.has(Module.config.roles.team);
+        let ldsg = msg.client.guilds.cache.get(Module.config.ldsg);
+        let reason = suffix.replace(/<@!?\d+>/ig, "").trim().split(" ");
+        let value = parseInt(reason.shift(), 10);
         for (const [discordId, member] of u.userMentions(msg, true)) {
-          let team = msg.member.roles.cache.has(Module.config.roles.team);
-          let ldsg = msg.client.guilds.cache.get(Module.config.ldsg);
-          let reason = suffix.replace(/<@!?\d+>/ig, "").trim().split(" ");
-          let value = parseInt(reason.shift(), 10);
+          if (discordId == msg.author.id) {
+            msg.reply("you can't give to *yourself*, silly.").then(u.clean).catch(u.noop);
+            continue;
+          }
 
           if (value) {
             if (value > MAX) value = MAX;
@@ -234,17 +238,20 @@ const Module = new Augur.Module()
     try {
       u.clean(msg, 0);
       if (u.userMentions(msg, true).size > 0) {
+        let admin = Module.config.adminId.includes(msg.member.id);
+        let ldsg = msg.client.guilds.cache.get(Module.config.ldsg);
+        let reason = suffix.replace(/<@!?\d+>/ig, "").trim().split(" ");
+        let value = parseInt(reason.shift(), 10);
         for (const [discordId, member] of u.userMentions(msg, true)) {
-          let admin = Module.config.adminId.includes(msg.member.id);
-          let ldsg = msg.client.guilds.cache.get(Module.config.ldsg);
-          let reason = suffix.replace(/<@!?\d+>/ig, "").trim().split(" ");
-          let value = parseInt(reason.shift(), 10);
-
+          if (discordId == msg.author.id) {
+            msg.reply("you can't give to *yourself*, silly.").then(u.clean).catch(u.noop);
+            continue;
+          }
 
           if (value) {
             if (value > MAX) value = MAX;
             if (value < -MAX) value = -MAX;
-            
+
             reason = ((reason.length > 0) ? reason.join(" ") : "No particular reason.").trim();
 
             let deposit = {
