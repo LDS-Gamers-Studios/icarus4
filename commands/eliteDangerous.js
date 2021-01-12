@@ -20,11 +20,18 @@ async function updateFactionStatus(bot) {
     let channelID = "549808289811267602";
     let channel = bot.channels.cache.get(channelID);
     channel.setTopic(topic);
+  } catch (e) { u.errorHandler(e, "Elite Channel Update Error"); }
 
+  let content = "";
+  try {
     // Galnet articles
     let latestArticle = (await elite.getGalnetFeed())[0];
     if (latestArticle.title !== lastGalnetArticleTitle) {
-      let content = latestArticle.content.replace(/<br \/>/g, "\n");
+      content = latestArticle.content.replace(/<br \/>/g, "\n");
+    }
+  } catch (e) { u.errorHandler(e, "Elite Galnet Capture Error"); return; }
+  
+  try {
       let embed = u.embed()
         .setThumbnail("https://i.imgur.com/Ud8MOzY.png")
         .setAuthor("GALNET", "https://vignette.wikia.nocookie.net/elite-dangerous/images/c/cd/Official-Galnet-Logo.png")
@@ -39,9 +46,7 @@ async function updateFactionStatus(bot) {
           u.errorHandler(err, "Failed to update `" + galnetDataFile + "` with latest article title, `" + lastGalnetArticleTitle + "`");
         }
       });
-    }
-
-  } catch (e) { u.errorHandler(e, "Faction Status Update Error"); }
+  } catch (e) { u.errorHandler(e, "Elite Galnet Posting Error"); }
 }
 
 const Module = new Augur.Module()
