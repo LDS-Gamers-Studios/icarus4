@@ -25,9 +25,10 @@ async function updateFactionStatus(bot) {
   let content = "";
   try {
     // Galnet articles
-    let latestArticle = (await elite.getGalnetFeed())[0];
-    if (latestArticle.title !== lastGalnetArticleTitle) {
-      content = latestArticle.content.replace(/<br \/>/g, "\n");
+    let latestArticle = await elite.getGalnetFeed().catch(u.noop);
+    if (!latestArticle) { return; }
+    if (latestArticle[0].title !== lastGalnetArticleTitle) {
+      content = latestArticle[0].content.replace(/<br \/>/g, "\n");
     }
   } catch (e) { u.errorHandler(e, "Elite Galnet Capture Error"); return; }
   
