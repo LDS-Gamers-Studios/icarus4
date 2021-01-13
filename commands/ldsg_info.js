@@ -4,6 +4,18 @@ const Augur = require("augurbot"),
   parseXML = require("xml2js").parseString,
   u = require("../utils/utils");
 
+let lowBoosts = false;
+
+function boostCheck() {
+  let ldsg = Module.client.guilds.cache.get(Module.config.ldsg);
+  if (ldsg.premiumSubscriptionCount < 30) {
+    lowBoosts = true;
+    ldsg.channels.cache.get(Moduel.config.channels.modlogs).send(`⚠️ **We've dropped to ${ldsg.premiumSubscriptionCount} boosts!** 30 boosts are required for Tier 3.`);
+  } else {
+    lowBoosts = false;
+  }
+}
+
 const Module = new Augur.Module()
 .addCommand({name: "code",
   description: "Our Code of Conduct",
@@ -128,6 +140,10 @@ const Module = new Augur.Module()
   process: (msg) => {
     msg.channel.send("The LDSG YouTube Channel, featuring Let's Plays, Clips of the Week, and more:\nhttps://www.youtube.com/ldsgamers");
   }
+})
+.setClockwork(() => {
+  boostCheck();
+  return setInterval(boostCheck, 60 * 60000);
 });
 
 module.exports = Module;
