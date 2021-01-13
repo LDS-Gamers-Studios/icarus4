@@ -80,11 +80,8 @@ function getObjectFromAPIAxios(url, params) {
         params: params
       })
       .then(function (response) {
-        if (response.statusCode.toString()[0] == "2") {
-          fulfill(JSON.parse(response.data));
-        } else {
-          reject("Non-OK Status Code From API: " + response.statusCode.toString());
-        }
+        fulfill(response.data);
+
       })
       .catch(function (error) {
         reject(error);
