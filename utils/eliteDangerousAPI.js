@@ -64,7 +64,8 @@ function getGalnetFeed() {
     try {
       axios.get("https://www.alpha-orbital.com/galnet-feed")
         .then(function (response) {
-          fulfill(JSON.parse(response.data));
+          fulfill(response.data);
+
         }).catch(function (error) {
           reject(error);
         });
