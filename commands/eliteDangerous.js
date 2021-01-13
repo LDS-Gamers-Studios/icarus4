@@ -10,43 +10,46 @@ let lastGalnetArticleTitle = "";
 
 async function updateFactionStatus(bot) {
   try {
-    let starSystem = await elite.getSystemInfo("LDS+2314");
-    let faction = starSystem.factions.find(f => f.name === "LDS Enterprises");
-    let influence = Math.round(faction.influence * 10000) / 100;
+    let starSystem = await elite.getSystemInfo("LDS+2314").catch(u.noop);
+    if (starSystem) {
+      let faction = starSystem.factions.find(f => f.name === "LDS Enterprises");
+      let influence = Math.round(faction.influence * 10000) / 100;
 
-    // Discord has a topic size limit of 250 characters, but this will never pass that.
-    let topic = `[LDS 2314 / LDS Enterprises]  Influence: ${influence}% - State: ${faction.state} - LDS 2314 Controlling Faction: ${starSystem.information.faction}`;
+      // Discord has a topic size limit of 250 characters, but this will never pass that.
+      let topic = `[LDS 2314 / LDS Enterprises]  Influence: ${influence}% - State: ${faction.state} - LDS 2314 Controlling Faction: ${starSystem.information.faction}`;
 
-    let channelID = "549808289811267602";
-    let channel = bot.channels.cache.get(channelID);
-    channel.setTopic(topic);
+      let channelID = "549808289811267602";
+      let channel = bot.channels.cache.get(channelID);
+      channel.setTopic(topic);
+    }
   } catch (e) { u.errorHandler(e, "Elite Channel Update Error"); }
 
-  let content = "";
+  let content;
+  let latestArticle;
   try {
     // Galnet articles
-    let latestArticle = await elite.getGalnetFeed().catch(u.noop);
+    latestArticle = await elite.getGalnetFeed().catch(u.noop);
     if (!latestArticle) { return; }
     if (latestArticle[0].title !== lastGalnetArticleTitle) {
       content = latestArticle[0].content.replace(/<br \/>/g, "\n");
     }
   } catch (e) { u.errorHandler(e, "Elite Galnet Capture Error"); return; }
-  
-  try {
-      let embed = u.embed()
-        .setThumbnail("https://i.imgur.com/Ud8MOzY.png")
-        .setAuthor("GALNET", "https://vignette.wikia.nocookie.net/elite-dangerous/images/c/cd/Official-Galnet-Logo.png")
-        .setTitle(latestArticle.title)
-        .setURL("https://community.elitedangerous.com/")
-        .setDescription((content.length > 2040 ? content.substr(0, 2040) + "..." : content));
-      channel.send({ embed });
 
-      lastGalnetArticleTitle = latestArticle.title;
-      fs.writeFile(galnetDataFile, lastGalnetArticleTitle, function (err) {
-        if (err) {
-          u.errorHandler(err, "Failed to update `" + galnetDataFile + "` with latest article title, `" + lastGalnetArticleTitle + "`");
-        }
-      });
+  try {
+    let embed = u.embed()
+      .setThumbnail("https://i.imgur.com/Ud8MOzY.png")
+      .setAuthor("GALNET", "https://vignette.wikia.nocookie.net/elite-dangerous/images/c/cd/Official-Galnet-Logo.png")
+      .setTitle(latestArticle.title)
+      .setURL("https://community.elitedangerous.com/")
+      .setDescription((content.length > 2040 ? content.substr(0, 2040) + "..." : content));
+    channel.send({ embed });
+
+    lastGalnetArticleTitle = latestArticle.title;
+    fs.writeFile(galnetDataFile, lastGalnetArticleTitle, function (err) {
+      if (err) {
+        u.errorHandler(err, "Failed to update `" + galnetDataFile + "` with latest article title, `" + lastGalnetArticleTitle + "`");
+      }
+    });
   } catch (e) { u.errorHandler(e, "Elite Galnet Posting Error"); }
 }
 
