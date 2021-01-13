@@ -75,11 +75,20 @@ const starBoards = new u.Collection()
 
 async function checkStarBoard(reaction, user) {
   try {
+    if (reaction.partial) {
+      try {
+        reaction = await reaction.fetch();
+      } catch(error) {
+        u.errorHandler(error, `Could not fetch reaction (ID: ${reaction.id})`);
+        return;
+      }
+    }
     if (reaction.message.partial) {
       try {
-        await reaction.message.fetch();
+        reaction.message = await reaction.message.fetch();
       } catch(error) {
         u.errorHandler(error, "Fetch Partial Message Update Error");
+        return;
       }
     }
 
