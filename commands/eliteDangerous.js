@@ -31,27 +31,27 @@ async function updateFactionStatus() {
     if (!latestArticle) { return; }
     if (latestArticle[0].title !== lastGalnetArticleTitle) {
       latestArticle = latestArticle[0];
+
+      try {
+        let content = latestArticle.content.replace(/<br \/>/g, "\n");
+
+        let embed = u.embed()
+          .setThumbnail("https://i.imgur.com/Ud8MOzY.png")
+          .setAuthor("GALNET", "https://vignette.wikia.nocookie.net/elite-dangerous/images/c/cd/Official-Galnet-Logo.png")
+          .setTitle(latestArticle.title)
+          .setURL("https://community.elitedangerous.com/")
+          .setDescription((content.length > 2040 ? content.substr(0, 2040) + "..." : content));
+        channel.send({ embed });
+
+        lastGalnetArticleTitle = latestArticle.title;
+        fs.writeFile(galnetDataFile, lastGalnetArticleTitle, function (err) {
+          if (err) {
+            u.errorHandler(err, "Failed to update `" + galnetDataFile + "` with latest article title, `" + lastGalnetArticleTitle + "`");
+          }
+        });
+      } catch (e) { u.errorHandler(e, "Elite Galnet Posting Error"); }
     }
   } catch (e) { u.errorHandler(e, "Elite Galnet Capture Error"); return; }
-
-  try {
-    let content = latestArticle.content.replace(/<br \/>/g, "\n");
-
-    let embed = u.embed()
-      .setThumbnail("https://i.imgur.com/Ud8MOzY.png")
-      .setAuthor("GALNET", "https://vignette.wikia.nocookie.net/elite-dangerous/images/c/cd/Official-Galnet-Logo.png")
-      .setTitle(latestArticle.title)
-      .setURL("https://community.elitedangerous.com/")
-      .setDescription((content.length > 2040 ? content.substr(0, 2040) + "..." : content));
-    channel.send({ embed });
-
-    lastGalnetArticleTitle = latestArticle.title;
-    fs.writeFile(galnetDataFile, lastGalnetArticleTitle, function (err) {
-      if (err) {
-        u.errorHandler(err, "Failed to update `" + galnetDataFile + "` with latest article title, `" + lastGalnetArticleTitle + "`");
-      }
-    });
-  } catch (e) { u.errorHandler(e, "Elite Galnet Posting Error"); }
 }
 
 const Module = new Augur.Module()
