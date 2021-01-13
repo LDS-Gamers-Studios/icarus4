@@ -8,7 +8,9 @@ const Augur = require("augurbot"),
 const galnetDataFile = "data/eliteNews.txt";
 let lastGalnetArticleTitle = "";
 
-async function updateFactionStatus(bot) {
+async function updateFactionStatus() {
+  let channelID = "549808289811267602";
+  let channel = Module.client.channels.cache.get(channelID);
   try {
     let starSystem = await elite.getSystemInfo("LDS+2314").catch(u.noop);
     if (starSystem) {
@@ -18,24 +20,23 @@ async function updateFactionStatus(bot) {
       // Discord has a topic size limit of 250 characters, but this will never pass that.
       let topic = `[LDS 2314 / LDS Enterprises]  Influence: ${influence}% - State: ${faction.state} - LDS 2314 Controlling Faction: ${starSystem.information.faction}`;
 
-      let channelID = "549808289811267602";
-      let channel = bot.channels.cache.get(channelID);
       channel.setTopic(topic);
     }
   } catch (e) { u.errorHandler(e, "Elite Channel Update Error"); }
 
-  let content;
   let latestArticle;
   try {
     // Galnet articles
     latestArticle = await elite.getGalnetFeed().catch(u.noop);
     if (!latestArticle) { return; }
     if (latestArticle[0].title !== lastGalnetArticleTitle) {
-      content = latestArticle[0].content.replace(/<br \/>/g, "\n");
+      latestArticle = latestArticle[0];
     }
   } catch (e) { u.errorHandler(e, "Elite Galnet Capture Error"); return; }
 
   try {
+    let content = latestArticle.content.replace(/<br \/>/g, "\n");
+
     let embed = u.embed()
       .setThumbnail("https://i.imgur.com/Ud8MOzY.png")
       .setAuthor("GALNET", "https://vignette.wikia.nocookie.net/elite-dangerous/images/c/cd/Official-Galnet-Logo.png")
@@ -207,10 +208,9 @@ const Module = new Augur.Module()
 })
 .setClockwork(() => {
     try {
-      let bot = Module.client;
-      updateFactionStatus(bot);
+      updateFactionStatus();
       // Every 6 hours seems alright for channel description updates. The rate limit is actually once every 5 minutes, so we're more than clear.
-      return setInterval(updateFactionStatus, 6 * 60 * 60 * 1000, bot);
+      return setInterval(updateFactionStatus, 6 * 60 * 60 * 1000);
     } catch (e) { u.errorHandler(e, "Elite Dangerous Clockwork Error"); }
 })
 .setInit(() => {
