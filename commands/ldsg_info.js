@@ -142,7 +142,6 @@ const Module = new Augur.Module()
   }
 })
 .setClockwork(() => {
-  boostCheck();
   return setInterval(boostCheck, 60 * 60000);
 });
 

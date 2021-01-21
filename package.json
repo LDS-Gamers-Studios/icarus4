@@ -18,6 +18,7 @@
     "@ffmpeg-installer/ffmpeg": "^1.0.19",
     "@google-cloud/translate": "^2.1.4",
     "augurbot": "^2.1.2",
+    "axios": "^0.21.1",
     "beam-client-node": "^2.0.0",
     "body-parser": "^1.19.0",
     "cheerio": "^1.0.0-rc.3",

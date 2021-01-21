@@ -6,7 +6,7 @@ const Augur = require("augurbot"),
   u = require("../utils/utils"),
   yaml = require("js-yaml");
 
-const extraLife = () => new Date().getMonth() == 10;
+const extraLife = (new Date().getMonth() == 10);
 
 var applicationCount = 0;
 
@@ -29,7 +29,7 @@ async function checkStreams() {
     processApplications();
 
     // Check for Extra Life
-    if (extraLife() && (new Date()).getMinutes() < 5) {
+    if (extraLife && (new Date()).getMinutes() < 5) {
       let embed = await extraLifeEmbed();
       if (embed) Module.client.channels.cache.get(Module.config.ldsg).send({embed});
     }
@@ -117,7 +117,7 @@ function isPartnered(member) {
     '121783903630524419', // Pro Sponsor
     '96345401078087680' // Staff
   ];
-  if (extraLife()) roles.push("507031155627786250");
+  if (extraLife) roles.push("507031155627786250");
 
   if (member.id == member.client.user.id) return true;
   for (let role of roles) {
@@ -204,7 +204,7 @@ async function processTwitch(igns) {
                   url: stream.streamUrl,
                   type: "STREAMING"
                 }
-              );
+              ).catch(error => u.errorHandler(error, "Set Icarus streaming status"));
             }
             twitchStatus.set(stream.userDisplayName.toLowerCase(), {
               status: "online",
@@ -212,23 +212,23 @@ async function processTwitch(igns) {
             });
             let ign = streamers.find(streamer => streamer.ign.toLowerCase() == stream.userDisplayName.toLowerCase());
             let member = await ldsg.members.fetch(ign.discordId).catch(u.noop);
-            if (member && isPartnered(member)) member.roles.add(liveRole);
+            if (member && isPartnered(member)) member.roles.add(liveRole).catch(error => u.errorHandler(error, `Add Live role to ${member.displayName}`));
             let embed = notificationEmbed(stream, "twitch");
 
-            if (extraLife() && member && member.roles.cache.has("507031155627786250") && (stream.title.toLowerCase().includes("extra life") || stream.title.toLowerCase().includes("extralife"))) {
-              notificationChannel.send(`${ldsg.roles.cache.get("768164394248044575")}, **${member.displayName}** is live for Extra Life!`, {embed});
+            if (extraLife && member && member.roles.cache.has("507031155627786250") && (stream.title.toLowerCase().includes("extra life") || stream.title.toLowerCase().includes("extralife"))) {
+              notificationChannel.send(`${ldsg.roles.cache.get("768164394248044575")}, **${member.displayName}** is live for Extra Life!`, {embed}).catch(error => u.errorHandler(error, `Post Twitch alert for ${member.displayName}`));
               //ldsg.channels.cache.get("733336823400628275").send({embed});
             } else
-              notificationChannel.send({embed});
+              notificationChannel.send({embed}).catch(error => u.errorHandler(error, `Post Twitch alert for ${member.displayName}`));
           }
         }
 
         // Handle Offline
         let offline = streamers.filter(streamer => !streams.data.find(stream => stream.userDisplayName.toLowerCase() == streamer.ign.toLowerCase()));
         for (let channel of offline) {
-          if (channel.ign.toLowerCase() == "ldsgamers") Module.client.user.setActivity("Tiddlywinks");
+          if (channel.ign.toLowerCase() == "ldsgamers") Module.client.user.setActivity("Tiddlywinks").catch(error => u.errorHandler(error, "Clear Icarus streaming status"));
           let member = await ldsg.members.fetch(channel.discordId).catch(u.noop);
-          if (member && liveRole.members.has(member.id)) member.roles.remove(liveRole);
+          if (member && liveRole.members.has(member.id)) member.roles.remove(liveRole).catch(error => u.errorHandler(error, `Remove Live role from ${member.displayName}`));
           let status = twitchStatus.get(channel.ign.toLowerCase());
           if (status && status.status == "online") {
             twitchStatus.set(channel.ign.toLowerCase(), {
