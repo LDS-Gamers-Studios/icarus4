@@ -800,7 +800,7 @@ Module
       let purge = parseInt(suffix, 10) || 0;
       let num = purge + 1;
       let channel = msg.channel;
-      if (num > 0) {
+      if (num > 1) {
         while (num > 0) {
           let deleting = Math.min(num, 50)
           deleted = await channel.bulkDelete(deleting, true);
@@ -811,7 +811,8 @@ Module
         let delay = 0;
         while (num > 0) {
           let fetching = Math.min(num, 50);
-          let msgsToDelete = await channel.messages.fetch({limit: fetching, before: msg.id});
+          let msgsToDelete = await channel.messages.fetch({limit: fetching, before: msg.id}).catch(u.noop);
+          if (!msgsToDelete) break;
           for (let [id, deleteMe] of msgsToDelete) {
             deleteMe.delete({timeout: (delay++) * 1200}).catch(u.noop);
           }
@@ -819,7 +820,7 @@ Module
           if (msgsToDelete.size != fetching)
             break;
         }
-        msg.guild.channels.cache.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** purged ${purge} messages in ${msg.channel}`);
+        msg.guild.channels.cache.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** purged ${purge - num} messages in ${msg.channel}`);
       } else {
         msg.reply("you need to tell me how many to delete.")
           .then(u.clean);
@@ -1067,18 +1068,22 @@ Module
 Module
 .addEvent("channelCreate", (channel) => {
   if (channel.guild && (channel.guild.id == Module.config.ldsg)) {
-    channel.createOverwrite(Module.config.roles.muted, {
-      VIEW_CHANNEL: false,
-      CONNECT: false,
-      SEND_MESSAGES: false,
-      SPEAK: false
-    }).catch(e => u.errorHandler(e, "Update new channel permissions."));
-    channel.createOverwrite("771516264618262607", {
-      VIEW_CHANNEL: false,
-      CONNECT: false,
-      SEND_MESSAGES: false,
-      SPEAK: false
-    }).catch(e => u.errorHandler(e, "Update new channel permissions."));
+    if (channel.permissionsFor(channel.client.user.id).has(["VIEW_CHANNEL", "MANAGE_CHANNELS"])) {
+      channel.createOverwrite(Module.config.roles.muted, {
+        VIEW_CHANNEL: false,
+        CONNECT: false,
+        SEND_MESSAGES: false,
+        SPEAK: false
+      }).catch(e => u.errorHandler(e, `Update New Channel Permissions: ${channel.name}`));
+      channel.createOverwrite("771516264618262607", {
+        VIEW_CHANNEL: false,
+        CONNECT: false,
+        SEND_MESSAGES: false,
+        SPEAK: false
+      }).catch(e => u.errorHandler(e, `Update New Channel Permissions: ${channel.name}`));
+    } else {
+      u.errorLogs.send(u.embed().setTitle("Update New Channel Permissions").setDescription(`Insufficient permissions to update channel ${channel.name}. Muted permissions need to be applied manually.`));
+    }
   }
 })
 .addEvent("guildBanAdd", (guild, user) => {
