@@ -8,7 +8,8 @@ const starBoards = new u.Collection()
   board: "750756030966661135",
   emoji: [],
   channels: [
-    "363020585988653057"  // LDSG Team
+    "800827468315492352", // LDSG Team
+    "363020585988653057"  // LDSG Discord Mods
   ]
 })
 .set("759065426029707305", { // #star-board *
