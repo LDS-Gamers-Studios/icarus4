@@ -7,7 +7,8 @@ const Rank = {
     "153309871297658880", // clip submissions
     "737557773000245298", // highlight reel
     "203518149809799168", // bot lobby
-    "363020585988653057", // LDSG Team
+    "800827468315492352", // LDSG Team
+    "363020585988653057", // LDSG Discord Mods
     "405405857099284490", // star board
     "420653044326203402", // youth-antics
     "356657507197779968", // outer-darkness
