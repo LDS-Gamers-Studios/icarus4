@@ -204,7 +204,7 @@ async function processTwitch(igns) {
                   url: stream.streamUrl,
                   type: "STREAMING"
                 }
-              ).catch(error => u.errorHandler(error, "Set Icarus streaming status"));
+              ).catch(u.noop);
             }
             twitchStatus.set(stream.userDisplayName.toLowerCase(), {
               status: "online",
@@ -212,14 +212,14 @@ async function processTwitch(igns) {
             });
             let ign = streamers.find(streamer => streamer.ign.toLowerCase() == stream.userDisplayName.toLowerCase());
             let member = await ldsg.members.fetch(ign.discordId).catch(u.noop);
-            if (member && isPartnered(member)) member.roles.add(liveRole).catch(error => u.errorHandler(error, `Add Live role to ${member.displayName}`));
+            if (member && isPartnered(member)) member.roles.add(liveRole).catch(u.noop);
             let embed = notificationEmbed(stream, "twitch");
 
             if (extraLife && member && member.roles.cache.has("507031155627786250") && (stream.title.toLowerCase().includes("extra life") || stream.title.toLowerCase().includes("extralife"))) {
-              notificationChannel.send(`${ldsg.roles.cache.get("768164394248044575")}, **${member.displayName}** is live for Extra Life!`, {embed}).catch(error => u.errorHandler(error, `Post Twitch alert for ${member.displayName}`));
+              notificationChannel.send(`${ldsg.roles.cache.get("768164394248044575")}, **${member.displayName}** is live for Extra Life!`, {embed}).catch(u.noop);
               //ldsg.channels.cache.get("733336823400628275").send({embed});
             } else
-              notificationChannel.send({embed}).catch(error => u.errorHandler(error, `Post Twitch alert for ${member.displayName}`));
+              notificationChannel.send({embed}).catch(u.noop);
           }
         }
 
