@@ -82,7 +82,7 @@ async function checkStarBoard(reaction, user) {
       reaction.message = await reaction.message.fetch().catch(u.noop);
 
     const msg = reaction.message;
-    if (!user.bot && msg?.guild.id == Module.config.ldsg && (msg?.createdTimestamp > (Date.now() - 7 * 24 * 60 * 60000))) {
+    if (!user.bot && msg?.guild?.id == Module.config.ldsg && (msg?.createdTimestamp > (Date.now() - 7 * 24 * 60 * 60000))) {
       // Only respond to recent messages from LDSG
       let react = reaction.emoji.name;
 
