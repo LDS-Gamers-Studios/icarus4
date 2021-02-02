@@ -206,9 +206,9 @@ const Module = new Augur.Module()
     } catch (error) { u.errorHandler(error, msg); }
   }
 })
+.addEvent("ready", updateFactionStatus)
 .setClockwork(() => {
     try {
-      updateFactionStatus();
       // Every 6 hours seems alright for channel description updates. The rate limit is actually once every 5 minutes, so we're more than clear.
       return setInterval(updateFactionStatus, 6 * 60 * 60 * 1000);
     } catch (e) { u.errorHandler(e, "Elite Dangerous Clockwork Error"); }
