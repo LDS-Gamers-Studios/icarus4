@@ -34,6 +34,7 @@ const Module = new Augur.Module()
   permissions: (msg) => Module.config.adminId.includes(msg.author.id)
 })
 .addCommand({name: "iamyourdev",
+  enabled: false,
   hidden: true,
   permissions: msg => msg.channel.type == "dm" && msg.client.guilds.cache.get(Module.config.ldsg).members.cache.has(msg.author.id),
   process: async (msg) => {
