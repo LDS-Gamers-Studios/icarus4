@@ -47,6 +47,7 @@ function embedIGN(user, igns) {
       .sort((a, b) => Ign.gameids.get(a.system).name.localeCompare(Ign.gameids.get(b.system).name))
       .forEach(ign => {
         let name = ign.ign;
+        if (name.length > 100) name = name.substr(0, 100) + " ...";
         if (Ign.aliases.has(ign.system)) ign.system = Ign.aliases.get(ign.system);
         if (Ign.gameids.get(ign.system).link && !hasLink.test(name)) name = `[${name}](${Ign.gameids.get(ign.system).link.replace(/{ign}/ig, encodeURIComponent(name))})`;
         embed.addField(Ign.gameids.get(ign.system).name, name, true);
