@@ -14,6 +14,9 @@ const bannedWords = new RegExp(banned.words.join("|"), "i"),
 const bans = new USet();
 const mutes = new u.Collection();
 
+let ohGoShield = false;
+let ohGoTimeout = null;
+
 const cardReactions = ["👤", "✅", "⚠", "⛔", "🛑", "🔇"];
 
 function blocked(member) {
@@ -902,11 +905,21 @@ Module
     }
   }
 })
+.addCommand({name: "ohgoshield",
+  description: "Shield yourself!",
+  category: "Mod",
+  hidden: true,
+  process: (msg) => {
+    clearTimeout(ohGoTimeout);
+    ohGoShield = true;
+    ohGoTimeout = setTimeout(() => { ohGoShield = false }, 60 * 60 * 1000);
+  }
+})
 .addCommand({name: "swiftkicktotheohgo",
   description: "Give OhGo not the kick he needs, but the kick he deserves.",
   category: "Mod",
   hidden: true,
-  permissions: (msg) => msg.guild?.id == Module.config.ldsg && msg.guild.members.cache.has("602887436300714013"),
+  permissions: (msg) => msg.guild?.id == Module.config.ldsg && msg.guild.members.cache.has("602887436300714013") && !ohGoShield,
   process: async (msg) => {
     let ohGo = msg.guild.members.cache.get("602887436300714013");
     msg.channel.send("https://media.tenor.com/images/3a34c491eda5278820314be42c2e7db0/tenor.gif");
