@@ -913,6 +913,7 @@ Module
     clearTimeout(ohGoTimeout);
     ohGoShield = true;
     ohGoTimeout = setTimeout(() => { ohGoShield = false }, 60 * 60 * 1000);
+    msg.react("🛡️");
   }
 })
 .addCommand({name: "swiftkicktotheohgo",
