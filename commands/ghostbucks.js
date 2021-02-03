@@ -165,7 +165,7 @@ const Module = new Augur.Module()
   syntax: "@user amount",
   description: "Give a user Ember",
   aliases: ["embergive", "giveem", "emgive"],
-  permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && msg.author.id != "281658096130981889"),
+  permissions: (msg) => (msg.guild?.id == Module.config.ldsg),
   category: "Ghost Bucks",
   process: async (msg, suffix) => {
     const MAX = 10000;
@@ -231,7 +231,7 @@ const Module = new Augur.Module()
   syntax: "@user amount",
   description: "Give a user Ghost Bucks",
   aliases: ["gbgive"],
-  permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg)),
+  permissions: (msg) => (msg.guild?.id == Module.config.ldsg),
   category: "Ghost Bucks",
   process: async (msg, suffix) => {
     const MAX = 1000;
