@@ -1106,7 +1106,7 @@ Module
     if (message.guild && (message.guild.id == Module.config.ldsg) && (reaction.emoji.name == "📌") && message.pinnable) {
       if (message.channel.permissionsFor(user).has("MANAGE_MESSAGES")){
         let messages = await message.channel.messages.fetchPinned().catch(u.noop);
-        if (messages?.size == 50) return message.channel.send(user + ", I was unable to pin the message since the channel pin limit has been reached.");
+        if (messages?.size == 50) return message.channel.send(`${user}, I was unable to pin the message since the channel pin limit has been reached.`);
         else message.pin();
       }
       else if (reaction.count == 1) {
