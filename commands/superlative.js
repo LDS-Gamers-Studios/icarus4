@@ -143,10 +143,10 @@ function starEmbed(reaction) {
   const msg = reaction.message;
   const react = reaction.emoji.name;
   return (u.embed()
-    .setAuthor(msg.member.displayName, msg.author.displayAvatarURL())
+    .setAuthor(msg.member?.displayName || msg.author?.username || "🤷", msg.author?.displayAvatarURL())
     .setTimestamp(msg.createdAt)
     .setDescription(msg.cleanContent)
-    .addField("Channel", msg.channel.name)
+    .addField("Channel", msg.channel?.name || "🤷")
     .addField("Jump to post", msg.url)
     .setFooter(react));
 }
