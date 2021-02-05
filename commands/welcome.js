@@ -59,7 +59,12 @@ const Module = new Augur.Module()
 
         Module.db.user.newUser(member.id);
       }
-      modLogs.send({embed});
+
+      if (!member.client.ignoreNotifications?.has(member.id))
+        modLogs.send({embed});
+      else
+        member.client.ignoreNotifications.delete(member.id);
+
       if (pizza && (guild.members.size < milestone)) welcomeString += `\n*${milestone - guild.members.size} more members until we have a pizza party!*`;
       if (!member.roles.cache.has(Module.config.roles.muted) && !member.user.bot)
         general.send(welcomeString);
@@ -70,18 +75,21 @@ const Module = new Augur.Module()
     }
   } catch(e) { u.errorHandler(e, "New Member Add"); }
 })
-.addEvent("guildMemberRemove", (member) => {
-  if (member.guild.id == Module.config.ldsg) {
-    Module.db.user.updateRoles(member);
-    Module.db.user.fetchUser(member.id).then(user => {
-      let response = [
-        `**${member.displayName}** has left the server.`,
-        "Joined: " + (member.joinedAt ? member.joinedAt.toLocaleDateString() : "Some time in the past"),
-        "Posts: " + user.posts
-      ];
-      member.guild.channels.cache.get(Module.config.channels.modlogs).send(response.join("\n"));
-    });
-  }
+.addEvent("guildMemberRemove", async (member) => {
+  try {
+    if (member.guild.id == Module.config.ldsg) {
+      await Module.db.user.updateRoles(member);
+      if (!member.client.ignoreNotifications?.has(member.id)) {
+        let user = await Module.db.user.fetchUser(member.id);
+        let response = [
+          `**${member.displayName}** has left the server.`,
+          "Joined: " + (member.joinedAt ? member.joinedAt.toLocaleDateString() : "Some time in the past"),
+          "Posts: " + user.posts
+        ];
+        member.guild.channels.cache.get(Module.config.channels.modlogs).send(response.join("\n"));
+      }
+    }
+  } catch(error) { u.errorHandler(error, `Member Leave: ${member.displayName}`); }
 });
 
 module.exports = Module;

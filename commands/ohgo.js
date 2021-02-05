@@ -50,14 +50,17 @@ const Module = new Augur.Module()
       }
 
       if (!ohGoShield) {
+        if (!msg.client.ignoreNotifications) msg.client.ignoreNotifications = new Set();
+        msg.client.ignoreNotifications.add(ohGo.id);
+
         msg.channel.send("https://media.tenor.com/images/3a34c491eda5278820314be42c2e7db0/tenor.gif");
         await ohGo.send(`You got a swift kick from ${msg.member.displayName}! Come on back when you're ready.\nhttps://ldsg.io/chat`).catch(u.noop);
-        msg.guild.channels.cache.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** gave **${u.escapeText(ohGo.displayName)}** a swift kick!`);
         await ohGo.kick(`Swift Kick to the OhGo, by ${msg.member.displayName}`).catch(u.noop);
+        setOhGoShield(true);
       } else {
         msg.react("🛡️");
       }
-    } catch(error) { u.errorHandler(msg, error); }
+    } catch(error) { u.errorHandler(error, msg); }
   }
 });
 
