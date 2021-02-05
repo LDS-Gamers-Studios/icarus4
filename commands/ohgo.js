@@ -35,8 +35,8 @@ const Module = new Augur.Module()
       if (ohGoShield) {
         let {balance} = await Module.db.bank.getBalance(msg.author, "em");
         if (balance >= SHIELDBREAK) {
-          let break = await u.confirm(msg, `**${ohGo.displayName} is currently shielded!**\nBreak the shield for <:ember:512508452619157504>${SHIELDBREAK}?`);
-          if (break) {
+          let breakIt = await u.confirm(msg, `**${ohGo.displayName} is currently shielded!**\nBreak the shield for <:ember:512508452619157504>${SHIELDBREAK}?`);
+          if (breakIt) {
             await Module.db.bank.addCurrency({
               discordId: msg.author.id,
               description: `${ohGo.displayName.toUpperCase()} SHIELD BREAK!`,
