@@ -1,7 +1,7 @@
 const Augur = require("augurbot"),
   u = require("../utils/utils"),
   modLogs = "506575671242260490",
-  SHIELDBREAK = 15;
+  SHIELDBREAK = 25;
 
 let ohGoShield = false,
   ohGoTimeout = null;
