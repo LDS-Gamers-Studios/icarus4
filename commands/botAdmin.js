@@ -52,6 +52,7 @@ const Module = new Augur.Module()
   process: (msg) => {
     msg.channel.send('Pinging...').then(sent => {
       sent.edit(`Pong! Took ${sent.createdTimestamp - (msg.editedTimestamp ? msg.editedTimestamp : msg.createdTimestamp)}ms`);
+      if(msg.channel.id != Module.config.channels.botspam) u.clean(sent);
     });
   }
 })
