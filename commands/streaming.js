@@ -512,30 +512,35 @@ const Module = new Augur.Module()
       }
 
       if (user) {
-        let ign = await Module.db.ign.find(user.id, 'twitch');
+        let ign = await Module.db.ign.find(user.id, 'twitch').catch(u.noop);
         if (ign) name = encodeURIComponent(ign.ign);
         else {
           msg.channel.send(user + " has not set a Twitch name with `!addign twitch`.").then(u.clean);
           return;
         }
-      } else name = encodeURIComponent(suffix);
+      } else if (suffix.includes(" ")) {
+        msg.reply(`\`${suffix}\` doesn't appear to be a valid Twitch username!`).then(u.clean);
+        return;
+      } else {
+        name = encodeURIComponent(suffix);
+      }
 
-      try {
-        const stream = (await twitch.streams.getStreamByUserName(name));
-        if (stream) {
-          if (!twitchGames.has(stream.gameId)) {
-            let game = (await twitch.games.getGameById(stream.gameId));
-            if (game) twitchGames.set(game.id, game);
-          }
-          stream.streamUrl = "https://www.twitch.tv/" + encodeURIComponent(name).toLowerCase().replace(/[^\w-]+/g,'');
-          msg.channel.send(twitchEmbed(stream));
-        } else { // Offline
-          const streamer = (await twitch.users.getUserByName(name));
+      const stream = await twitch.streams.getStreamByUserName(name).catch(u.noop);
+      if (stream) {
+        if (!twitchGames.has(stream.gameId)) {
+          let game = await twitch.games.getGameById(stream.gameId).catch(u.noop);
+          if (game) twitchGames.set(game.id, game);
+        }
+        stream.streamUrl = "https://www.twitch.tv/" + encodeURIComponent(name).toLowerCase().replace(/[^\w-]+/g,'');
+        msg.channel.send(twitchEmbed(stream));
+      } else { // Offline
+        const streamer = await twitch.users.getUserByName(name).catch(u.noop);
+        if (streamer) {
           streamer.streamUrl = "https://www.twitch.tv/" + encodeURIComponent(name).toLowerCase().replace(/[^\w-]+/g,'');
           msg.channel.send(twitchEmbed(streamer, false));
+        } else {
+          msg.reply(`I couldn't find the channel \`name\`. :shrug:`).then(u.clean);
         }
-      } catch(e) {
-        u.errorHandler(e, msg);
       }
     } catch(e) {
       u.errorHandler(e, msg);
