@@ -54,7 +54,7 @@ const Module = new Augur.Module()
           "How'd you find us?",
           "What platforms/games do you play?"
         ];
-        welcomeString = `${u.rand(welcome)}, ${member}! ${u.rand(info1)} ${welcomeChannel} ${u.rand(info2)}. ${u.rand(info3)}\n\nLooking for roles? Try \`!help addrole\` over in <#${Module.config.channels.botspam}>`;
+        welcomeString = `${u.rand(welcome)}, ${member}! ${u.rand(info1)} ${welcomeChannel} ${u.rand(info2)}. ${u.rand(info3)}\n\nTry \`!profile\` over in <#${Module.config.channels.botspam}> if you'd like to opt in to roles or share IGNs.`;
         embed.setTitle(member.displayName + " has joined the server.");
 
         Module.db.user.newUser(member.id);
