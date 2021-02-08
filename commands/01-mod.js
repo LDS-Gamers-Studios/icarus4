@@ -141,8 +141,8 @@ async function warnCard(msg, filtered = null, call = false) {
       }
     }
 
-    embed.addField("Channel", `#${msg.channel.name}`)
-    .addField("Jump to Post", `[Original Message](${msg.url})`)
+    embed.addField("Channel", `#${msg.channel.name}`, true)
+    .addField("Jump to Post", `[Original Message](${msg.url})`, true)
     .setTimestamp((msg.editedAt ? msg.editedAt : msg.createdAt));
 
     // Minecraft Filter

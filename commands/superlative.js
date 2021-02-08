@@ -146,8 +146,8 @@ function starEmbed(reaction) {
     .setAuthor(msg.member?.displayName || msg.author?.username || "🤷", msg.author?.displayAvatarURL())
     .setTimestamp(msg.createdAt)
     .setDescription(msg.cleanContent)
-    .addField("Channel", msg.channel?.name || "🤷")
-    .addField("Jump to Post", `[Original Message](${msg.url})`)
+    .addField("Channel", msg.channel?.name || "🤷", true)
+    .addField("Jump to Post", `[Original Message](${msg.url})`, true)
     .setFooter(react));
 }
 
