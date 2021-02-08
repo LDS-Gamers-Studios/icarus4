@@ -1,7 +1,9 @@
 const Augur = require("augurbot"),
   u = require("../utils/utils"),
   Jimp = require('jimp'),
-  emojiUnicode = require('emoji-unicode');
+  emojiUnicode = require('emoji-unicode'),
+  svgToImg = require('svg-to-img')
+  requrest = require('request')
 
 const Module = new Augur.Module()
 .addCommand({name: "emoji",
@@ -17,9 +19,10 @@ const Module = new Augur.Module()
     let ext = (id[1] ? ".gif" : ".png");
     if (id) msg.channel.send({files: [{name: id[2] + ext, attachment: `https://cdn.discordapp.com/emojis/${id[3]}.${(id[1] ? "gif" : "png")}`}]});
     else if (emojiUnicode(suffix)){
-      let image = await Jimp.read(`https://twemoji.maxcdn.com/v/latest/72x72/${emojiUnicode(suffix)}.png`)
-      image.resize(200,200);
-      return message.channel.send({files: [await image.getBufferAsync(Jimp.MIME_PNG)]})
+      request(`https://twemoji.maxcdn.com/v/latest/svg/${unicode(args)}.svg`, async function(err, response, body){
+        const image = await svgToImg.from(body).toPng()
+        return message.channel.send({files: [image]})
+      })
     }
         
         
