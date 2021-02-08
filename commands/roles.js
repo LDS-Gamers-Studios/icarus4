@@ -147,10 +147,13 @@ const Module = new Augur.Module()
     if (newMember.roles.cache.size > oldMember.roles.cache.size) {
       // Role added
       try {
-        for (const [id, role] of newMember.roles.cache) {
-          if (!oldMember.roles.cache.has(id) && inventory.has(id)) {
-            // New equippable!
-            newMember.send(`You now have the color-equippable role **${role.name}**! You can equip the color with the \`!equip ${role.name}\` command.`).catch(u.noop);
+        if ((Date.now() - newMember.joinedTimestamp) > 45000) {
+          // Check equippables if they're not auto-applying on rejoin
+          for (const [id, role] of newMember.roles.cache) {
+            if (!oldMember.roles.cache.has(id) && inventory.has(id)) {
+              // New equippable!
+              newMember.send(`You now have the color-equippable role **${role.name}**! You can equip the color with the \`!equip ${role.name}\` command.`).catch(u.noop);
+            }
           }
         }
         await Module.db.user.updateRoles(newMember);
