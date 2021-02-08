@@ -17,7 +17,7 @@ const Module = new Augur.Module()
   description: "Shield thyself!",
   category: "Silly",
   hidden: true,
-  permissions: msg.guild?.id == Module.config.ldsg,
+  permissions: msg => msg.guild?.id == Module.config.ldsg,
   process: async (msg) => {
     let target = msg.mentions.members.first() || msg.member;
     if (!target.roles.cache.has(kickme)) return msg.reply(`${member.displayName} hasn't opted in to get a swift kick! They don't need a shield.`).then(u.clean);
