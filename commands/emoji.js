@@ -3,7 +3,7 @@ const Augur = require("augurbot"),
   Jimp = require('jimp'),
   emojiUnicode = require('emoji-unicode'),
   svgToImg = require('svg-to-img')
-  requrest = require('request')
+  requrest = require('request');
 
 const Module = new Augur.Module()
 .addCommand({name: "emoji",
