@@ -147,7 +147,7 @@ function starEmbed(reaction) {
     .setTimestamp(msg.createdAt)
     .setDescription(msg.cleanContent)
     .addField("Channel", msg.channel?.name || "🤷")
-    .addField("Jump to post", msg.url)
+    .addField("Jump to Post", `[Original Message](${msg.url})`)
     .setFooter(react));
 }
 
