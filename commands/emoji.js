@@ -19,7 +19,7 @@ const Module = new Augur.Module()
     let ext = (id[1] ? ".gif" : ".png");
     if (id) msg.channel.send({files: [{name: id[2] + ext, attachment: `https://cdn.discordapp.com/emojis/${id[3]}.${(id[1] ? "gif" : "png")}`}]});
     else if (emojiUnicode(suffix)){
-      request(`https://twemoji.maxcdn.com/v/latest/svg/${unicode(args)}.svg`, async function(err, response, body){
+      request(`https://twemoji.maxcdn.com/v/latest/svg/${unicode(args).replace(/ fe0f/g, '').replace(/ /g, '')}.svg`, async function(err, response, body){
         const image = await svgToImg.from(body).toPng()
         msg.channel.send({files: [image]})
       })
