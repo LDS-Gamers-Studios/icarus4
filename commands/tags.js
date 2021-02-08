@@ -8,8 +8,8 @@ function runTag(msg) {
   if (cmd && tags.get(msg.guild.id).has(cmd.command)) {
     let tag = tags.get(msg.guild.id).get(cmd.command);
     let response = tag.response
-    let match, regex = /\<([^)]+)\>/
-    if(match = regex.exec(read.text)){
+    let match, regex = /\<(.*)\>/
+    if(match = regex.exec(tag.response)){
       let temp = match[1].split('|')
       if(temp[1]) response = response.replace(match[0], temp[Math.floor(Math.random() * temp.length)])
     }
