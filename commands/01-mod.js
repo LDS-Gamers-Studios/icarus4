@@ -141,7 +141,7 @@ async function warnCard(msg, filtered = null, call = false) {
       }
     }
 
-    embed.addField("Channel", `#${msg.channel.name}`, true)
+    embed.addField("Channel", msg.channel?.toString(), true)
     .addField("Jump to Post", `[Original Message](${msg.url})`, true)
     .setTimestamp((msg.editedAt ? msg.editedAt : msg.createdAt));
 
