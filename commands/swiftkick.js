@@ -26,7 +26,7 @@ const Module = new Augur.Module()
       let cost = s * SHIELDBREAK;
       let {balance} = await Module.db.bank.getBalance(msg.author, "em");
       if (balance >= cost) {
-        let shieldIt = await u.confirm(msg, `**${target.displayName} already has ${s} ${s > 1 ? "shields", "shield"}!**\nAdd another shield layer for ${ember}${cost}?`);
+        let shieldIt = await u.confirm(msg, `**${target.displayName} already has ${s} ${s > 1 ? "shields" : "shield"}!**\nAdd another shield layer for ${ember}${cost}?`);
         if (shieldIt) {
           await Module.db.bank.addCurrency({
             discordId: msg.author.id,
