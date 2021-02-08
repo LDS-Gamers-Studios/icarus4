@@ -105,7 +105,7 @@ const Module = new Augur.Module()
 })
 .setInit((shielded) => {
   if (shielded?.size > 0) {
-    for (const [memberId, shieldState]) shield.set(memberId, shieldState);
+    for (const [memberId, shieldState] of shielded) shield.set(memberId, shieldState);
   }
 })
 .setUnload(() => {
