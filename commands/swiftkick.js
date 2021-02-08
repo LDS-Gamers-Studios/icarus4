@@ -63,7 +63,9 @@ const Module = new Augur.Module()
       let target = msg.mentions.members.first();
 
       if (target?.roles.cache.has(kickme)) {
-        if (shield.get(target.id)?.shields > 0) {
+        if (target.voice?.channelID) {
+          msg.reply(`${target.displayName} is busy in Voice Chat. Let's try again later.`).then(u.clean);
+        } else if (shield.get(target.id)?.shields > 0) {
           let {balance} = await Module.db.bank.getBalance(msg.author, "em");
           let s = shield.get(target.id).shields;
           let breakCost = s * (s + 1) * SHIELDBREAK / 2;
