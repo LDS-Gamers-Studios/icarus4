@@ -247,8 +247,11 @@ const Module = new Augur.Module()
   process: async (msg, suffix) =>{
     try {
       let image = await Jimp.read('https://cdn.discordapp.com/attachments/789694239197626371/808446253737181244/personal.png');
-      let target = await Jimp.read((msg.mentions.members.first() ? msg.mentions.members.first().user : msg.author).displayAvatarURL({format: 'png', size: 512}));
+      let target = await Jimp.read((await u.getMention(msg)?.user || msg.author).displayAvatarURL({format: 'png', size: 512}));
+      let mask = await Jimp.read('./storage/mask.png');
+      mask.resize(350,350);
       target.resize(350, 350);
+      target.mask(mask);
       image.blit(target, 1050, 75);
       await msg.channel.send({files: [await image.getBufferAsync(Jimp.MIME_PNG)]});
     } catch(e) {u.errorHandler(e, msg);}
