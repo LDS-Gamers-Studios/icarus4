@@ -21,7 +21,7 @@ const Module = new Augur.Module()
     else if (emojiUnicode(suffix)){
       request(`https://twemoji.maxcdn.com/v/latest/svg/${unicode(args)}.svg`, async function(err, response, body){
         const image = await svgToImg.from(body).toPng()
-        return message.channel.send({files: [image]})
+        msg.channel.send({files: [image]})
       })
     }
         
