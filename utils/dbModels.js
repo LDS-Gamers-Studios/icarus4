@@ -162,6 +162,14 @@ const models = {
         );
       });
     },
+    getAwardsFrom: async function(givenFrom = [], since = 0, currency = "em") {
+      let awards = await Bank.find({
+        currency,
+        timestamp: { $gte: since },
+        mod: { $in: givenFrom }
+      });
+      return awards;
+    },
     getRegister: function(user, currency = "gb") {
       return new Promise((fulfill, reject) => {
         if ((typeof user) != "string") user = user.id;
