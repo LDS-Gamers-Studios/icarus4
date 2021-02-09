@@ -17,6 +17,7 @@ const Module = new Augur.Module()
   description: "Shield thyself!",
   category: "Silly",
   hidden: true,
+  enabled: false,
   permissions: msg => msg.guild?.id == Module.config.ldsg,
   process: async (msg) => {
     let target = msg.mentions.members.first() || msg.member;
@@ -57,6 +58,7 @@ const Module = new Augur.Module()
   aliases: ["swiftkicktotheohgo"],
   category: "Silly",
   hidden: true,
+  enabled: false,
   permissions: (msg) => msg.guild?.id == Module.config.ldsg,
   process: async (msg) => {
     try {
