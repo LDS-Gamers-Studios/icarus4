@@ -293,6 +293,40 @@ const Module = new Augur.Module()
     } catch(error) { u.errorHandler(error, msg); }
   }
 })
+.addCommand({name: "houseember",
+  syntax: "Date (DD MMMM YYYY)",
+  description: "Check ember given to a house since a particular date.",
+  permissions: msg => msg.member?.roles.cache.has(Module.config.roles.team),
+  category: "Ghost Bucks",
+  process: async (msg, suffix) => {
+    let since = new Date(suffix);
+    if (isNaN(since)) return msg.reply("you need to supply a valid date (try `DD MMMM YYYY` format).").then(u.clean);
+
+    let awards = await Module.db.bank.getAwardsFrom(msg.guild.roles.cache.get(Module.config.roles.team).members.keyArray().concat(msg.client.user.id), since);
+
+    let points = ["282364647041007616", "282364721045438464", "282364218282606594"].map(house => {
+      let houseRole = msg.guild.roles.cache.get(house);
+      let members = houseRole.members;
+
+      let embers = awards
+        .filter(a => members.has(a.discordId) && a.discordId != a.mod)
+        .reduce((a, c) => a + c.value, 0);
+
+      return {
+        house,
+        name: houseRole.name,
+        embers,
+        perCapita: embers / members.size
+      }
+    });
+    let medals = ["🥇", "🥈", "🥉"];
+    points.sort((a, b) => a.perCapita - b.perCapita);
+    let embed = u.embed().setTitle(`House Points Since ${since.toDateString()}`)
+      .setDescription("Current standings of the houses (Ember awards on a *per capita* basis):\n\n" + points.map((house, i) => `${medals[i]} **${house.name}:** ${house.perCapita.toFixed(2)}`).join("\n"));
+
+    msg.channel.send({embed});
+  }
+})
 .addCommand({name: "redeem",
   syntax: "amount",
   description: "Redeem Ghost Bucks for an LDSG store code ($1 off/100 GB)",
