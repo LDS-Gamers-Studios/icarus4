@@ -2,7 +2,7 @@ const Augur = require("augurbot"),
   u = require("../utils/utils"),
   Jimp = require('jimp'),
   emojiUnicode = require('emoji-unicode'),
-  svgToImg = require('svg-to-img')
+  svgToImg = require('svg-to-img'),
   axios = require('axios');
 
 const Module = new Augur.Module()
