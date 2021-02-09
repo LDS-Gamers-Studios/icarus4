@@ -3,29 +3,54 @@ const Augur = require("augurbot"),
   Jimp = require('jimp'),
   emojiUnicode = require('emoji-unicode'),
   svgToImg = require('svg-to-img')
-  request = require('request');
+  axios = require('axios');
 
 const Module = new Augur.Module()
 .addCommand({name: "emoji",
-  description: "Increases custom emoji size",
+  description: "Increases emoji size. Use multiple seperated by a space to combine them",
   syntax: ":emoji:",
-  info: "Displays full resolution emoji. Only enlarges emoji to full resolution uploaded to Discord.",
+  info: "Displays full resolution emoji. You can combine up to 25.",
   aliases: ["emote", "embiggen"],
   process: (msg, suffix) => {
     u.clean(msg, 0);
 
     let test = /<(a?):(\w+):(\d+)>/i;
-    let id = test.exec(suffix);
-    let ext = (id[1] ? ".gif" : ".png");
-    if (id) msg.channel.send({files: [{name: id[2] + ext, attachment: `https://cdn.discordapp.com/emojis/${id[3]}.${(id[1] ? "gif" : "png")}`}]});
-    else if (emojiUnicode(suffix)){
-      request(`https://twemoji.maxcdn.com/v/latest/svg/${unicode(args).replace(/ fe0f/g, '').replace(/ /g, '')}.svg`, async function(err, response, body){
-        const image = await svgToImg.from(body).toPng()
-        msg.channel.send({files: [image]})
-      })
+    let rows = [], cols = 1;
+    
+    for(x of suffix.split('\n')){
+      let j = [];
+      for(y of x.split(' ')) if(y != '' && y != ' ') j.push(y);
+      rows.push(j.join(' '));
     }
-        
-        
+    for(x of rows) if(x.split(' ').length > cols) cols = x.split(' ').length;
+    if(rows.length * cols.length > 25) return msg.channel.send("That's too many emojis! The limit is 25.");
+    let canvas = new Jimp(150 * cols, 150 * rows.length, 0x00000000);
+    let o = 1, a = 0; //o=y, a=x
+    for (y of rows) {
+      for(x of y.split(' ')){
+        let id = test.exec(x);
+        let image;
+        if(x == '[]'){
+          image = new Jimp(150, 150, 0x00000000);
+          canvas.blit(image, 150 * a, 150 * (o-1));
+        }
+        else if(id){
+          try{image = await Jimp.read(`https://cdn.discordapp.com/emojis/${id[2]}.${(id[1] ? "gif" : "png")}`)}catch{msg.channel.send(`I couldn't enlarge the emoji ${x}.`);break};
+          image.resize(150, 150);
+          canvas.blit(image, 150 * a, 150 * (o-1));
+        }
+        else{
+          let requested;
+          try{requested = await axios.get(`https://twemoji.maxcdn.com/v/latest/svg/${emojiUnicode(x).replace(/ fe0f/g, '').replace(/ /g, '-')}.svg`)}catch{msg.channel.send(`I couldn't enlarge the emoij ${x}.`);break};
+          let toPng = await svgToImg.from(requested.data).toPng();
+          image = await Jimp.read(toPng);
+          canvas.blit(image, 150 * a, 150 * (o-1));
+        }
+        a++;
+        if(a == y.split(' ').length && o == rows.length) return await msg.channel.send({files: [await canvas.getBufferAsync(Jimp.MIME_PNG)]});
+        if(a == y.split(' ').length){a=0;o++};
+      }
+    }     
   },
   permissions: (msg) => (msg.guild && (msg.channel.permissionsFor(msg.author).has("ATTACH_FILES") || msg.channel.permissionsFor(msg.author).has("USE_EXTERNAL_EMOJIS") || msg.channel.permissionsFor(msg.author).has("EMBED_LINKS")))
 });
