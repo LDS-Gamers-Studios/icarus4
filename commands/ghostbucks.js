@@ -320,7 +320,7 @@ const Module = new Augur.Module()
       }
     });
     let medals = ["🥇", "🥈", "🥉"];
-    points.sort((a, b) => a.perCapita - b.perCapita);
+    points.sort((a, b) => b.perCapita - a.perCapita);
     let embed = u.embed().setTitle(`House Points Since ${since.toDateString()}`)
       .setDescription("Current standings of the houses (Ember awards on a *per capita* basis):\n\n" + points.map((house, i) => `${medals[i]} **${house.name}:** ${house.perCapita.toFixed(2)}`).join("\n"));
 
