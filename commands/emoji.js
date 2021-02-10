@@ -49,7 +49,7 @@ const Module = new Augur.Module()
             canvas.blit(image, 72 * x, 72 * y);
           } else {
             try {
-              image = await Jimp.read(`https://twemoji.maxcdn.com/v/latest/72x72/${emojiUnicode(character).replace(/ fe0f/g, '').replace(/ /g, '-')}.png`);
+              image = await Jimp.read(`https://twemoji.maxcdn.com/v/latest/72x72/${emojiUnicode(character).replace(/ /g, '-')}.png`);
             } catch(error) {
               return msg.reply(`I couldn't enlarge the emoij ${character}.`).then(u.clean);
             }
