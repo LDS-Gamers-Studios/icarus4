@@ -2,7 +2,7 @@ const Augur = require("augurbot"),
   u = require("../utils/utils"),
   Jimp = require('jimp'),
   emojiUnicode = require('emoji-unicode'),
-  svgToImg = require('svg-to-img'),
+  //svgToImg = require('svg-to-img'),
   axios = require('axios');
 
 const Module = new Augur.Module()
@@ -25,7 +25,7 @@ const Module = new Augur.Module()
         rows.push(characters);
       }
       for (let row of rows)
-      if (row.length > cols) cols = row.length;
+        if (row.length > cols) cols = row.length;
       if (rows.length == 1 && cols == 1) {
         let id = test.exec(suffix);
         if (id) return msg.channel.send({files: [`https://cdn.discordapp.com/emojis/${id[2]}.${id[1] ?'gif':'png'}`]});
@@ -49,14 +49,14 @@ const Module = new Augur.Module()
             image.resize(150, 150);
             canvas.blit(image, 150 * x, 150 * y);
           } else {
-            let requested;
-            try {
-              requested = await axios.get(`https://twemoji.maxcdn.com/v/latest/svg/${emojiUnicode(character).replace(/ fe0f/g, '').replace(/ /g, '-')}.svg`);
-            } catch(error) {
-              return msg.reply(`I couldn't enlarge the emoij ${character}.`).then(u.clean);
-            }
-            let toPng = await svgToImg.from(requested.data).toPng();
-            image = await Jimp.read(toPng);
+            //let png;
+            //try {
+            //  png = await axios.get(`https://twemoji.maxcdn.com/v/latest/72x72/${emojiUnicode(character).replace(/ fe0f/g, '').replace(/ /g, '-')}.png`);
+            //} catch(error) {
+            //  return msg.reply(`I couldn't enlarge the emoij ${character}.`).then(u.clean);
+            //}
+            image = await Jimp.read(`https://twemoji.maxcdn.com/v/latest/72x72/${emojiUnicode(character).replace(/ fe0f/g, '').replace(/ /g, '-')}.png`);
+            image.resize(150, 150);
             canvas.blit(image, 150 * x, 150 * y);
           }
         }
