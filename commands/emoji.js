@@ -25,10 +25,10 @@ const Module = new Augur.Module()
     }
     for (let row of rows)
       if (row.length > cols) cols = row.length;
-    if(rows.length == 1 && cols == 1){
-            let id = test.exec(suffix);
-            if(id) return msg.channel.send({files: [`https://cdn.discordapp.com/emojis/${id[2]}.${id[1] ?'gif':'png'}`]});
-        }
+    if (rows.length == 1 && cols == 1) {
+      let id = test.exec(suffix);
+      if (id) return msg.channel.send({files: [`https://cdn.discordapp.com/emojis/${id[2]}.${id[1] ?'gif':'png'}`]});
+    }
     if(rows.length * cols.length > 25) return msg.channel.send("That's too many emojis! The limit is 25.");
     let canvas = new Jimp(150 * cols, 150 * rows.length, 0x00000000);
     let o = 1, a = 0; //o=y, a=x
