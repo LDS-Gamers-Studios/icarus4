@@ -17,10 +17,11 @@ const Module = new Augur.Module()
     let test = /<(a?):(\w+):(\d+)>/i;
     let rows = [], cols = 1;
     
-    for(x of suffix.split('\n')){
-      let j = [];
-      for(y of x.split(' ')) if(y != '' && y != ' ') j.push(y);
-      rows.push(j.join(' '));
+    for (let row of suffix.split('\n')) {
+      let characters = [];
+      for (let character of row.split(' '))
+        if(character != '' && character != ' ') characters.push(character);
+      rows.push(characters);
     }
     for(x of rows) if(x.split(' ').length > cols) cols = x.split(' ').length;
     if(rows.length == 1 && cols == 1){
