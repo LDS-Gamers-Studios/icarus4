@@ -15,7 +15,7 @@ const Module = new Augur.Module()
     try {
       u.clean(msg, 0);
 
-      let test = /<(a?):(\w+):(\d+)>/i;
+      let test = /<(a?):\w+:(\d+)>/i;
       let rows = [], cols = 1;
 
       for (let row of suffix.split('\n')) {
