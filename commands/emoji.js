@@ -2,7 +2,6 @@ const Augur = require("augurbot"),
   u = require("../utils/utils"),
   Jimp = require('jimp'),
   emojiUnicode = require('emoji-unicode'),
-  //svgToImg = require('svg-to-img'),
   axios = require('axios');
 
 const Module = new Augur.Module()
@@ -31,33 +30,31 @@ const Module = new Augur.Module()
         if (id) return msg.channel.send({files: [`https://cdn.discordapp.com/emojis/${id[2]}.${id[1] ?'gif':'png'}`]});
       }
       if (rows.length * cols.length > 25) return msg.channel.send("That's too many emojis! The limit is 25.").then(u.clean);
-      let canvas = new Jimp(150 * cols, 150 * rows.length, 0x00000000);
+      let canvas = new Jimp(72 * cols, 72 * rows.length, 0x00000000);
       for (let y = 0; y < rows.length; y++) {
         for (let x = 0; x < rows[y].length; x++) {
           let character = rows[y][x];
           let id = test.exec(character);
           let image;
           if (character == '[]'){
-            image = new Jimp(150, 150, 0x00000000);
-            canvas.blit(image, 150 * x, 150 * y);
+            image = new Jimp(72, 72, 0x00000000);
+            canvas.blit(image, 72 * x, 72 * y);
           } else if (id) {
             try {
               image = await Jimp.read(`https://cdn.discordapp.com/emojis/${id[2]}.${(id[1] ? "gif" : "png")}`);
             } catch(error) {
               return msg.reply(`I couldn't enlarge the emoji ${character}.`).then(u.clean);
             }
-            image.resize(150, 150);
-            canvas.blit(image, 150 * x, 150 * y);
+            image.resize(72, 72);
+            canvas.blit(image, 72 * x, 72 * y);
           } else {
-            //let png;
-            //try {
-            //  png = await axios.get(`https://twemoji.maxcdn.com/v/latest/72x72/${emojiUnicode(character).replace(/ fe0f/g, '').replace(/ /g, '-')}.png`);
-            //} catch(error) {
-            //  return msg.reply(`I couldn't enlarge the emoij ${character}.`).then(u.clean);
-            //}
-            image = await Jimp.read(`https://twemoji.maxcdn.com/v/latest/72x72/${emojiUnicode(character).replace(/ fe0f/g, '').replace(/ /g, '-')}.png`);
-            image.resize(150, 150);
-            canvas.blit(image, 150 * x, 150 * y);
+            try {
+              image = await Jimp.read(`https://twemoji.maxcdn.com/v/latest/72x72/${emojiUnicode(character).replace(/ fe0f/g, '').replace(/ /g, '-')}.png`);
+            } catch(error) {
+              return msg.reply(`I couldn't enlarge the emoij ${character}.`).then(u.clean);
+            }
+            image.resize(72, 72);
+            canvas.blit(image, 72 * x, 72 * y);
           }
         }
       }
