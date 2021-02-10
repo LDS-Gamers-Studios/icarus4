@@ -23,7 +23,8 @@ const Module = new Augur.Module()
         if(character != '' && character != ' ') characters.push(character);
       rows.push(characters);
     }
-    for(x of rows) if(x.split(' ').length > cols) cols = x.split(' ').length;
+    for (let row of rows)
+      if (row.length > cols) cols = row.length;
     if(rows.length == 1 && cols == 1){
             let id = test.exec(suffix);
             if(id) return msg.channel.send({files: [`https://cdn.discordapp.com/emojis/${id[2]}.${id[1] ?'gif':'png'}`]});
