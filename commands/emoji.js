@@ -31,32 +31,36 @@ const Module = new Augur.Module()
     }
     if (rows.length * cols.length > 25) return msg.channel.send("That's too many emojis! The limit is 25.").then(u.clean);
     let canvas = new Jimp(150 * cols, 150 * rows.length, 0x00000000);
-    let o = 1, a = 0; //o=y, a=x
-    for (y of rows) {
-      for(x of y.split(' ')){
-        let id = test.exec(x);
+    for (let y = 0; y < rows.length; y++) {
+      for (let x = 0; x < rows[y].length; x++) {
+        let character = rows[y][x];
+        let id = test.exec(character);
         let image;
-        if(x == '[]'){
+        if (character == '[]'){
           image = new Jimp(150, 150, 0x00000000);
-          canvas.blit(image, 150 * a, 150 * (o-1));
-        }
-        else if(id){
-          try{image = await Jimp.read(`https://cdn.discordapp.com/emojis/${id[2]}.${(id[1] ? "gif" : "png")}`)}catch{msg.channel.send(`I couldn't enlarge the emoji ${x}.`);break};
+          canvas.blit(image, 150 * x, 150 * y);
+        } else if (id) {
+          try{
+            image = await Jimp.read(`https://cdn.discordapp.com/emojis/${id[2]}.${(id[1] ? "gif" : "png")}`);
+          } catch(error) {
+            return msg.reply(`I couldn't enlarge the emoji ${character}.`).then(u.clean);
+          }
           image.resize(150, 150);
-          canvas.blit(image, 150 * a, 150 * (o-1));
-        }
-        else{
+          canvas.blit(image, 150 * x, 150 * y);
+        } else {
           let requested;
-          try{requested = await axios.get(`https://twemoji.maxcdn.com/v/latest/svg/${emojiUnicode(x).replace(/ fe0f/g, '').replace(/ /g, '-')}.svg`)}catch{msg.channel.send(`I couldn't enlarge the emoij ${x}.`);break};
+          try {
+            requested = await axios.get(`https://twemoji.maxcdn.com/v/latest/svg/${emojiUnicode(character).replace(/ fe0f/g, '').replace(/ /g, '-')}.svg`);
+          } catch(error) {
+            return msg.reply(`I couldn't enlarge the emoij ${character}.`).then(u.clean);
+          }
           let toPng = await svgToImg.from(requested.data).toPng();
           image = await Jimp.read(toPng);
-          canvas.blit(image, 150 * a, 150 * (o-1));
+          canvas.blit(image, 150 * x, 150 * y);
         }
-        a++;
-        if(a == y.split(' ').length && o == rows.length) return await msg.channel.send({files: [await canvas.getBufferAsync(Jimp.MIME_PNG)]});
-        if(a == y.split(' ').length){a=0;o++};
       }
-    }     
+    }
+    msg.channel.send({files: [await canvas.getBufferAsync(Jimp.MIME_PNG)]});
   },
   permissions: (msg) => (msg.guild && (msg.channel.permissionsFor(msg.author).has("ATTACH_FILES") || msg.channel.permissionsFor(msg.author).has("USE_EXTERNAL_EMOJIS") || msg.channel.permissionsFor(msg.author).has("EMBED_LINKS")))
 });
