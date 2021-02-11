@@ -70,10 +70,11 @@ const Module = new Augur.Module()
         .filter(u => members.has(u.discordId));
       let totalXP = users.reduce((a, c) => a + c.currentXP, 0);
       let rate = dist / totalXP;
+      let medals = ["🥇", "🥈", "🥉"];
       let top3 = users
         .sort((a, b) => b.currentXP - a.currentXP)
         .filter((u, i) => i < 3)
-        .map((u, i) => `${(i + 1)}) ${members.get(u.discordId)}`)
+        .map((u, i) => `${medals[i]} - ${members.get(u.discordId)}`)
         .join("\n");
 
       if (dist) {
@@ -82,18 +83,13 @@ const Module = new Augur.Module()
           //let user = users[i];
           let award = Math.round(rate * user.currentXP);
           if (award) {
-            //setTimeout(async (user, value) => {
-              Module.db.bank.addCurrency({
-                currency: "em",
-                discordId: user.discordId,
-                description: "Chat Rank Reset - " + (new Date()).toDateString(),
-                value: award,
-                mod: msg.author.id
-              }, "em");
-              //.then(deposit => {
-              //  guild.members.cache.get(deposit.discordId).send(`${guild.name} Chat Ranks have been reset! You've been awarded ${ember}${deposit.value} for your participation this season!`).catch(u.noop);
-              //});
-            //}, 1100 * i++, user, award);
+            Module.db.bank.addCurrency({
+              currency: "em",
+              discordId: user.discordId,
+              description: "Chat Rank Reset - " + (new Date()).toDateString(),
+              value: award,
+              mod: msg.client.user.id
+            }, "em");
           }
         }
       }
