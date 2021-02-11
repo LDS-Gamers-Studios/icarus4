@@ -42,6 +42,7 @@ const Module = new Augur.Module()
           msg.reply(`I couldn't apply the role to ${member}!`).then(u.clean);
         }
       }
+      msg.react("👌");
     } else {
       msg.reply("you need to tell me who's the adult here!").then(u.clean);
     }
