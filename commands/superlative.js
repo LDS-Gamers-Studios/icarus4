@@ -6,7 +6,6 @@ const approvalQueue = "759065489598054450";
 const starBoards = new u.Collection()
 .set("750756030966661135", { // #best-of-modlogs
   board: "750756030966661135",
-  emoji: [],
   channels: [
     "800827468315492352", // LDSG Team
     "363020585988653057"  // LDSG Discord Mods
@@ -14,14 +13,18 @@ const starBoards = new u.Collection()
 })
 .set("759065426029707305", { // #star-board *
   board: "759065426029707305",
-  emoji: [],
-  channels: [],
   confirm: "⭐"
+})
+.set("809436054960603196", { // #adulting
+  board: "809436054960603196",
+  channels: [
+    "809291369742991400", // #adult
+    "120618385452040195"  // #married
+  ]
 })
 .set("762681231879045171", { // #aww
   board: "762681231879045171",
   emoji: ["💖"],
-  channels: [],
   confirm: "💖"
 })
 .set("730435938072789033", { // #the-gallery *
@@ -42,6 +45,27 @@ const starBoards = new u.Collection()
   ],
   confirm: "🎥"
 })
+.set("809436205476478996", { // #just-brightbeam-stuff
+  board: "809436205476478996",
+  channels: [
+    "762505119710969946", // #brightbeam-commons
+    "801527229372825621", // #brightbeam-rp
+    "804536778597859358"  // #brightbeam-vc-text
+  ]
+})
+.set("809436300154896396", { // #just-freshbeast-stuff
+  board: "809436300154896396",
+  channels: [
+    "762505078531293205", // #freshbeast-commons,
+    "799335542893314069"  // #freshbeast-rp
+  ]
+})
+.set("809436370367021066", { // #just-starcamp-stuff
+  board: "809436370367021066",
+  channels: [
+    "762505045089452073"  // #starcamp-commons
+  ]
+})
 .set("730435722699472896", { // #made-me-laugh *
   board: "730435722699472896",
   emoji: ["😆", "🤣", "😂", "ghostlaugh"],
@@ -59,20 +83,6 @@ const starBoards = new u.Collection()
   ],
   confirm: "😇"
 });
-/*
-.set("753304264767701002", { // #job-postings
-  board: "753304264767701002",
-  emoji: ["💰"],
-  channels: [],
-  confirm: "💰"
-})
-.set("753300555023122523", { // #ldsg-merch
-  board: "753300555023122523",
-  emoji: ["gb"],
-  channels: [],
-  confirm: "gb"
-});
-*/
 
 async function checkStarBoard(reaction, user) {
   try {
@@ -94,11 +104,22 @@ async function checkStarBoard(reaction, user) {
         if (msg.attachments && (msg.attachments.size > 0))
           embed.setImage(msg.attachments.first().url);
         try { // Post in applicable star board
+          // Post to channel default, regardless of emoji
           for (const [board, defaults] of starBoards) {
-            if (defaults.emoji.includes(react) || ((react == "⭐") && (defaults.channels.includes(msg.channel.id) || defaults.channels.includes(msg.channel.parentID)))) {
+            if (defaults.channels?.includes(msg.channel.id) || defaults.channels?.includes(msg.channel.parentID)) {
               posted = await msg.guild.channels.cache.get(board).send({embed});
               await Module.db.starboard.saveStar(msg, posted);
               break;
+            }
+          }
+          // Post to emoji default
+          if (!posted) {
+            for (const [board, defaults] of starBoards) {
+              if (defaults.emoji?.includes(react)) {
+                posted = await msg.guild.channels.cache.get(board).send({embed});
+                await Module.db.starboard.saveStar(msg, posted);
+                break;
+              }
             }
           }
         } catch(error) { u.errorHandler(error, "Post Star to Default Board"); }
