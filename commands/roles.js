@@ -28,6 +28,26 @@ const Module = new Augur.Module()
     } catch(error) { u.errorHandler(error, msg); }
   }
 })
+.addCommand({name: "adult",
+  description: "Give someone the `Adulting` role.",
+  category: "Members",
+  syntax: "@user(s)",
+  permissions: (msg) => msg.member?.roles.cache.has(Module.config.roles.mod),
+  process: async (msg) => {
+    if (msg.mentions.members.size > 0) {
+      for (const [memberId, member] of msg.mentions.members) {
+        try {
+          await member.roles.add("809291931783921726");
+        } catch(error) {
+          msg.reply(`I couldn't apply the role to ${member}!`).then(u.clean);
+        }
+      }
+    } else {
+      msg.reply("you need to tell me who's the adult here!").then(u.clean);
+    }
+    u.clean(msg);
+  }
+})
 .addCommand({name: "equip",
   description: "Equip a color from your inventory.",
   category: "Members",
