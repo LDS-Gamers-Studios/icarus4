@@ -2,7 +2,11 @@ const Augur = require("augurbot"),
   u = require("../utils/utils");
 
 const approvalQueue = "759065489598054450";
-const THRESHOLD = 8;
+const threshold = new Map([
+  ["default", 8],
+  ["800827468315492352", 5], // Team
+  ["363020585988653057", 5]  // Mods
+]);
 
 const starBoards = new u.Collection()
 .set("750756030966661135", { // #best-of-modlogs
@@ -97,7 +101,7 @@ async function checkStarBoard(reaction, user) {
       // Only respond to recent messages from LDSG
       let react = reaction.emoji.name;
 
-      if (!msg.author.bot && (reaction.count == THRESHOLD) && (msg.channel.parentID != "730435569330421830") && !msg.channel.name.toLowerCase().includes("spoiler")) {
+      if (!msg.author.bot && (reaction.count == (threshold.get(msg.channel.id) || threshold.get(msg.channel.parentID) || threshold.get("default"))) && (msg.channel.parentID != "730435569330421830") && !msg.channel.name.toLowerCase().includes("spoiler")) {
         // Process initial star
         if (await Module.db.starboard.fetchMessage(msg.id)) return; // Already starred. Don't do it again
         let posted;
