@@ -1082,7 +1082,7 @@ Module
         SPEAK: false
       }).catch(e => u.errorHandler(e, `Update New Channel Permissions: ${channel.name}`));
     } else {
-      u.errorLogs.send(u.embed().setTitle("Update New Channel Permissions").setDescription(`Insufficient permissions to update channel ${channel.name}. Muted permissions need to be applied manually.`));
+      u.errorLog.send(u.embed().setTitle("Update New Channel Permissions").setDescription(`Insufficient permissions to update channel ${channel.name}. Muted permissions need to be applied manually.`));
     }
   }
 })
