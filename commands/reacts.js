@@ -4,6 +4,7 @@ const Augur = require("augurbot"),
 const emojis = new u.Collection([
   ["209007104852230145", "403553351775551488"], // Icarus - Why
   ["281658096130981889", "761342618343833670"], // Indigo - lunaping
+  ["487085787326840843", "761342618343833670"], // Behold - lunaping
   ["buttermelon",        "305039588014161921"],
   ["noice",              "633500960483704843"],
   ["why",                "403553351775551488"]
