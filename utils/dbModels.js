@@ -556,9 +556,9 @@ const models = {
         );
       });
     },
-    fetchTags: () => {
+    fetchTags: (data = {}) => {
       return new Promise((fulfill, reject) => {
-        Tag.find({}, function(err, cmds) {
+        Tag.find(data, function(err, cmds) {
           if (err) reject(err);
           else fulfill(cmds);
         });
