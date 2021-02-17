@@ -18,7 +18,7 @@ const Utils = {
   },
   clean: function(msg, t = 20000) {
     setTimeout((m) => {
-      if (m.deletable && !m.deleted) m.delete();
+      if (m.deletable && !m.deleted) m.delete().catch(Utils.noop);
     }, t, msg);
     return Promise.resolve(msg);
   },
@@ -44,7 +44,7 @@ const Utils = {
   },
   embed: (data) => new Discord.MessageEmbed(data).setColor(config.color).setTimestamp(),
   errorHandler: function(error, msg = null) {
-    if (!error) return;
+    if (!error || (error.name == "AbortError")) return;
 
     console.error(Date());
 
@@ -177,21 +177,17 @@ const Utils = {
     for (let prefix of [config.prefix, `<@${msg.client.user.id}>`, `<@!${msg.client.user.id}>`]) {
       let content = clean ? msg.cleanContent : msg.content;
       if (!content.startsWith(prefix)) continue;
-      let parts = content.split(" ");
-      let command, suffix;
-      if (parts[0] == prefix) {
-        parts.shift();
-        command = parts.shift();
-      } else {
-        command = parts.shift().substr(prefix.length);
-      }
+      let trimmed = content.substr(prefix.length).trim();
+      let [command, ...params] = content.substr(prefix.length).split(" ");
       if (command) {
         return {
           command: command.toLowerCase(),
-          suffix: parts.join(" ")
+          suffix: params.join(" "),
+          params
         };
       }
     }
+    return null;
   },
   path: (...segments) => {
     const path = require("path");
