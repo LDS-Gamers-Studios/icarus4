@@ -10,7 +10,7 @@ const roomNames = new USet();
 
 const communityVoice = "363014069533540362";
 function isCommunityVoice(channel) {
-  return ((channel.parentID == communityVoice) && (channel.id != "123477839696625664"));
+  return ((channel?.parentID == communityVoice) && (channel?.id != "123477839696625664"));
 }
 
 class Queue {
@@ -345,6 +345,37 @@ const Module = new Augur.Module()
         } catch(error) { u.errorHandler(error, msg); }
       } else msg.reply("I'm not going to make that sound.").then(u.clean);
     } else msg.reply("you need to give me a sound to search for!").then(u.clean);
+  }
+})
+.addCommand({name: "streamlock",
+  syntax: "[@additionalUser(s)]",
+  description: "Locks voice activity in your current channel",
+  category: "Voice",
+  permissions: (msg) => msg.member?.voice.channel?.permissionsFor(msg.member).has("STREAM") && isCommunityVoice(msg.member?.voice.channel),
+  process: async (msg) => {
+    try {
+      const channel = msg.member.voice.channel;
+      const users = ([msg.member.id]).concat(Array.from(msg.mentions.members.keys()));
+
+      let overwrites = [
+        { // bot
+          id: msg.client.user.id,
+          allow: "CONNECT"
+        }, { // @everyone
+          id: msg.guild.id,
+          deny: ["SPEAK", "STREAM"]
+        }, { // Muted
+          id: Module.config.roles.muted,
+          deny: ["CONNECT", "SPEAK"]
+        }
+      ].concat(users.map(id => ({
+        id,
+        allow: ["CONNECT", "STREAM", "SPEAK"]
+      })));
+
+      await channel.overwritePermissions(overwrites);
+      await msg.react("🔒");
+    } catch(error) { u.errorHandler(error, msg); }
   }
 })
 .addCommand({name: "unlock",
