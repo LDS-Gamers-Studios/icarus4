@@ -9,8 +9,6 @@ const Module = new Augur.Module()
         permissions: (msg) => msg.channel.type === 'dm' || msg.channel.permissionsFor(msg.member).has(["ATTACH_FILES", "EMBED_LINKS"]),
         process: (msg) => {
             let { suffix } = u.parse(msg, true);
-            //make the bot handle -t and a new line escape character the same way.
-            suffix.replace("\n", "-t");
             //general globals from bot this was imported from
             const args = suffix.trim().split(/\n/);
             //Determine if a string is a url
