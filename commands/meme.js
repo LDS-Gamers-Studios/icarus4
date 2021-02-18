@@ -23,23 +23,23 @@ const Module = new Augur.Module()
             }
             let src;
 
-            src = msg.attachments.size > 0 ? msg.attachments.first().url : null;
-            let bottomText = [];
-            let topText = [];
-            for (const arg of args) {
-                let url = isURL(arg);
-                if (!src && url) {
-                    src = url;
-                } else if (arg.toLowerCase() == "-t") {
-                    topText = bottomText;
-                    bottomText = [];
-                } else if (msg.mentions && msg.mentions.users.size && arg.search('@') > -1) {
-                    src = `https://cdn.discordapp.com/avatars/${msg.mentions.users.first().id}/${msg.mentions.users.first().avatar}.png`;
-                }
-                else {
-                    bottomText.push(arg);
-                }
+            if (msg.attachments.size > 0) {  // Message attachments as the default source
+              src = msg.attachments.first().url;
+            } else if (isURL(args[0])) { // Look for a URL at the beginning if one wasn't attached
+              src = isURL(shift(args));
+            } else {
+              // Look for an initial @mention to use as source
+              let mention = /^<@!?(\d+)>$/;
+              let match = mention.exec(args[0]);
+              if (match) {  
+                let mentionId = match[1];
+                src = msg.guild?.members.cache.get(mentionId)?.user.displayAvatarURL({size: 512, format: "png"});
+                shift(args);
+              }
+              // Fallback
+              if (!src) src = "https://i.imgflip.com/qbm81.jpg";
             }
+            let [topText, bottomText] = args;
 
             bottomText = encodeURIComponent(bottomText.replace(/\-/g, " -"));
             topText = encodeURIComponent(topText.replace(/\-/g, " -"));
