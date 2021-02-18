@@ -52,7 +52,6 @@ const Module = new Augur.Module()
             let meme = `https://api.memegen.link/images/custom/${topText || "_"}/${bottomText || "_"}.png?background=${src}`;
 
             msg.channel.send(`<@${msg.author.id}> says:`, { files: [meme] });
-            u.log(msg);
             u.clean(msg, 2000);
         },
     });
