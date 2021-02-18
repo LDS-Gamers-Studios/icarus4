@@ -43,11 +43,6 @@ const Module = new Augur.Module()
 
             bottomText = encodeURIComponent(bottomText.replace(/\-/g, " -"));
             topText = encodeURIComponent(topText.replace(/\-/g, " -"));
-            //If there is no background image, but someone is mentioned, use their avatar as the source
-
-            if (!src) src = "https://i.imgflip.com/qbm81.jpg";
-            bottomText = encodeURIComponent(bottomText).replace(/\-/g, " -");
-            topText = encodeURIComponent(topText);
             src = encodeURIComponent(src.trim());
             let meme = `https://api.memegen.link/images/custom/${topText || "_"}/${bottomText || "_"}.png?background=${src}`;
 
