@@ -41,8 +41,8 @@ const Module = new Augur.Module()
                 }
             }
 
-            bottomText = bottomText.join(" ").replace(/\-/g, " -");
-            topText = topText.join(" ").replace(/\-/g, " -");
+            bottomText = encodeURIComponent(bottomText.replace(/\-/g, " -"));
+            topText = encodeURIComponent(topText.replace(/\-/g, " -"));
             //If there is no background image, but someone is mentioned, use their avatar as the source
 
             if (!src) src = "https://i.imgflip.com/qbm81.jpg";
