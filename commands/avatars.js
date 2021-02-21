@@ -241,6 +241,35 @@ const Module = new Augur.Module()
     } catch(error) { u.errorHandler(error, msg); }
   }
 })
+.addCommand({name: "metal",
+  description: "Rock on.",
+  aliases: [":metal:", "🤘"],
+  category: "Silly",
+  process: async (msg) => {
+    try {
+      const hand = "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/259/sign-of-the-horns_1f918.png";
+      const target = await u.getMention(msg, false) || msg.author;
+      const staticURL = target.displayAvatarURL({size: 128, dynamic: false, format: "png"});
+
+      const right = await Jimp.read(hand);
+      const mask = await Jimp.read("./storage/mask.png");
+      const avatar = await Jimp.read(staticURL);
+      const canvas = new Jimp(344, 120, 0x00000000);
+
+      const left = right.clone().flip(true, false);
+
+      avatar.resize(120, 120);
+      avatar.mask(mask, 0, 0);
+
+      canvas.blit(right, 0, 4);
+      canvas.blit(left, 224, 4);
+
+      canvas.blit(avatar, 112, 0);
+
+      await msg.channel.send({files: [await canvas.getBufferAsync(Jimp.MIME_PNG)]});
+    } catch(e) { u.errorHandler(e, msg); }
+  }
+})
 .addCommand({name: "personal",
   description: "For when you take something personally",
   category: "Silly",
