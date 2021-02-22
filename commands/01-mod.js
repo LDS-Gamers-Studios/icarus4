@@ -1129,14 +1129,16 @@ Module
 .addEvent("messageUpdate", (old, msg) => {
   if (msg.guild && msg.member && msg.guild.id == Module.config.ldsg) return processMessageLanguage(msg, true);
 })
-.addEvent("userUpdate", (oldUser, newUser) => {
-  let ldsg = newUser.client.guilds.cache.get(Module.config.ldsg);
-  if (ldsg.members.cache.has(newUser.id)) {
+.addEvent("userUpdate", async (oldUser, newUser) => {
+  try {
+    let ldsg = newUser.client.guilds.cache.get(Module.config.ldsg);
     let newMember = ldsg.members.cache.get(newUser.id);
-    if (!newMember.roles.cache.has(Module.config.roles.trusted) || newMember.roles.cache.has(Module.config.roles.untrusted)) {
+    if (!newMember || (!newMember.roles.cache.has(Module.config.roles.trusted) || newMember.roles.cache.has(Module.config.roles.untrusted))) {
+      let user = await Module.db.user.fetchUser(newMember).catch(u.noop);
       const embed = u.embed()
         .setTimestamp()
         .setAuthor(oldUser.username, oldUser.displayAvatarURL())
+        .setFooter(`${user?.posts || "Unknown"} Posts in ${Math.round((Date.now() - (newMember?.joinedTimestamp || 0)) / (30 * 24 * 60 * 60 * 1000))} Months`)
         .setTitle("User Update");
       if (oldUser.tag != newUser.tag) {
         embed.addField("**Username Update**", `**Old:** ${oldUser.tag}\n**New:** ${newUser.tag}`);
@@ -1146,9 +1148,9 @@ Module
       } else {
         embed.setThumbnail(newUser.displayAvatarURL());
       }
-      ldsg.channels.cache.get("725797487129919488").send({embed});
+      ldsg.channels.cache.get("725797487129919488").send(newUser?.id, {embed});
     }
-  }
+  } catch(error) { u.errorHandler(error, `User Update Error: \`${newUser?.username}\``); }
 });
 
 module.exports = Module;
