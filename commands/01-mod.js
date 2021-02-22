@@ -1144,7 +1144,7 @@ Module
         embed.addField("**Username Update**", `**Old:** ${oldUser.tag}\n**New:** ${newUser.tag}`);
       }
       if (oldUser.avatar != newUser.avatar) {
-        embed.addField("**Avatar Update**", "See Below").setImage(newUser.displayAvatarURL());
+        embed.addField("**Avatar Update**", "See Below").setImage(newUser.displayAvatarURL({dynamic: true}));
       } else {
         embed.setThumbnail(newUser.displayAvatarURL());
       }
