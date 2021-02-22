@@ -1148,7 +1148,7 @@ Module
       } else {
         embed.setThumbnail(newUser.displayAvatarURL());
       }
-      ldsg.channels.cache.get("725797487129919488").send(newUser?.id, {embed});
+      ldsg.channels.cache.get("725797487129919488").send(`${newUser}: ${newUser.id}`, {embed});
     }
   } catch(error) { u.errorHandler(error, `User Update Error: \`${newUser?.username}\``); }
 });
