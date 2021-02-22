@@ -318,7 +318,7 @@ async function processCardReaction(reaction, mod, infraction) {
 
       if (member) {
         let quote = u.embed()
-        .setAuthor(u.escapeText(member.displayName), member.user.displayAvatarURL())
+        .setAuthor(member.displayName, member.user.displayAvatarURL())
         .addField("Channel", `#${message.guild.channels.cache.get(infraction.channel).name}`)
         .setDescription(message.embeds[0].description)
         .setTimestamp(message.createdAt);

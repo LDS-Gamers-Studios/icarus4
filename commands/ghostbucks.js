@@ -203,8 +203,8 @@ const Module = new Augur.Module()
               let receipt = await Module.db.bank.addCurrency(deposit, "em");
               let balance = await Module.db.bank.getBalance(discordId, "em");
               msg.channel.send(`${ember}${receipt.value} sent to ${member} for ${reason}`).then(u.clean);
-              msg.client.channels.cache.get(modLogs).send(`**${msg.member.displayName}** gave **${member.displayName}** ${ember}${receipt.value} for ${reason}`);
-              member.send(`You were just awarded ${ember}${receipt.value} from ${msg.member.displayName} for ${reason}\nYou now have a total of ${ember}${balance.balance} in your LDSG account.`).catch(u.noop);
+              msg.client.channels.cache.get(modLogs).send(`**${u.escapeText(msg.member.displayName)}** gave **${u.escapeText(member.displayName)}** ${ember}${receipt.value} for ${reason}`);
+              member.send(`You were just awarded ${ember}${receipt.value} from ${u.escapeText(msg.member.displayName)} for ${reason}\nYou now have a total of ${ember}${balance.balance} in your LDSG account.`).catch(u.noop);
               if (!team) {
                 let withdrawl = {
                   currency: "em",
@@ -214,7 +214,7 @@ const Module = new Augur.Module()
                   mod: msg.member.id
                 }
                 let receipt = await Module.db.bank.addCurrency(withdrawl, "em");
-                msg.member.send(`You just sent ${member.displayName} ${ember}${value} for ${reason}`).catch(u.noop);
+                msg.member.send(`You just sent ${u.escapeText(member.displayName)} ${ember}${value} for ${reason}`).catch(u.noop);
               }
             } else {
               msg.reply(`You don't have enough ${ember} to give! You can give up to ${ember}${account.balance}`).then(u.clean);
@@ -269,8 +269,8 @@ const Module = new Augur.Module()
               let receipt = await Module.db.bank.addCurrency(deposit, "gb");
               let balance = await Module.db.bank.getBalance(discordId, "gb");
               msg.channel.send(`${gb}${receipt.value} sent to ${member} for ${reason}`).then(u.clean);
-              msg.client.channels.cache.get(modLogs).send(`**${msg.member.displayName}** gave **${member.displayName}** ${gb}${receipt.value} for ${reason}`);
-              member.send(`You were just awarded ${gb}${receipt.value} from ${msg.member.displayName} for ${reason}\nYou now have a total of ${gb}${balance.balance} in your LDSG account.`).catch(u.noop);
+              msg.client.channels.cache.get(modLogs).send(`**${u.escapeText(msg.member.displayName)}** gave **${u.escapeText(member.displayName)}** ${gb}${receipt.value} for ${reason}`);
+              member.send(`You were just awarded ${gb}${receipt.value} from ${u.escapeText(msg.member.displayName)} for ${reason}\nYou now have a total of ${gb}${balance.balance} in your LDSG account.`).catch(u.noop);
               if (!admin) {
                 let withdrawl = {
                   currency: "gb",
@@ -280,7 +280,7 @@ const Module = new Augur.Module()
                   mod: msg.member.id
                 }
                 let receipt = await Module.db.bank.addCurrency(withdrawl, "gb");
-                msg.member.send(`You just sent ${member.displayName} ${gb}${value} for ${reason}`).catch(u.noop);
+                msg.member.send(`You just sent ${u.escapeText(member.displayName)} ${gb}${value} for ${reason}`).catch(u.noop);
               }
             } else {
               msg.reply(`You don't have enough ${gb} to give! You can give up to ${gb}${account.balance}`).then(u.clean);
