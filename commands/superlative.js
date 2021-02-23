@@ -4,8 +4,14 @@ const Augur = require("augurbot"),
 const approvalQueue = "759065489598054450";
 const threshold = new Map([
   ["default", 8],
-  ["800827468315492352", 5], // Team
-  ["363020585988653057", 5]  // Mods
+  ["800827468315492352", 5],  // Team
+  ["363020585988653057", 5],  // Mods
+  ["762505119710969946", 5],  // #brightbeam-commons
+  ["801527229372825621", 5],  // #brightbeam-rp
+  ["804536778597859358", 5],  // #brightbeam-vc-text
+  ["762505078531293205", 5],  // #freshbeast-commons,
+  ["799335542893314069", 5],  // #freshbeast-rp
+  ["762505045089452073", 5]   // #starcamp-commons
 ]);
 
 const starBoards = new u.Collection()
