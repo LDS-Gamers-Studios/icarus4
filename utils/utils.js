@@ -10,7 +10,7 @@ const errorLog = new Discord.WebhookClient(config.error.id, config.error.token),
 const Utils = {
   Collection: Discord.Collection,
   botSpam: (msg) => {
-    if (msg.guild && (msg.guild.id == config.ldsg) && (msg.channel.parentID != "363020585988653057") && (msg.channel.id != config.channels.botspam)) {
+    if ((msg.guild?.id == config.ldsg) && (msg.channel.parentID != "363020585988653057") && (msg.channel.parentID != "800827468315492352") && (msg.channel.id != config.channels.botspam)) {
       msg.reply(`I've placed your results in <#${config.channels.botspam}> to keep things nice and tidy in here. Hurry before they get cold!`)
         .then(Utils.clean);
       return msg.guild.channels.cache.get(config.channels.botspam);
