@@ -5,7 +5,7 @@ const Augur = require("augurbot"),
   Discord = require("discord.js");
 
 function userEmbed(member) {
-  let roleString = member.roles.cache.map(role => role.name).join(", ");
+  let roleString = member.roles.cache.sort((a, b) => b.comparePositionTo(a)).map(role => role.name).join(", ");
   if (roleString.length > 1024) roleString = roleString.substr(0, roleString.indexOf(", ", 1000)) + " ...";
   let embed = u.embed()
     .setTitle(u.escapeText(member.displayName))

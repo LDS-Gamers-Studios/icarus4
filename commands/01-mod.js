@@ -228,7 +228,7 @@ async function processCardReaction(reaction, mod, infraction) {
       *********************/
       let member = message.guild.members.cache.get(infraction.discordId);
 
-      let roleString = member.roles.cache.map(role => role.name).join(", ");
+      let roleString = member.roles.cache.sort((a, b) => b.comparePositionTo(a)).map(role => role.name).join(", ");
       if (roleString.length > 1024) roleString = roleString.substr(0, roleString.indexOf(", ", 1000)) + " ...";
 
       let userDoc = await Module.db.user.fetchUser(member.id);
