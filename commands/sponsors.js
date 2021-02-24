@@ -101,7 +101,7 @@ const Module = new Augur.Module()
 
     try {
       for (const [memberId, member] of msg.mentions.members) {
-        await channel?.permissionOverwrites.get(memberId)?.delete("Pro Sponser Uninvite");
+        await channel?.permissionOverwrites.get(memberId)?.delete("Pro Sponsor Uninvite");
       }
       msg.react("👌").catch(u.noop);
     } catch(error) {
