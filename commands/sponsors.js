@@ -16,17 +16,22 @@ const Module = new Augur.Module()
     let channel = msg.guild.channels.cache.get(channelId);
 
     if (msg.mentions.members.size == 0) {
-      msg.reply("you need to tell me who to invite to your channel!");
+      msg.reply("you need to tell me who to invite to your channel!").then(u.clean);
       return;
     }
 
-    for (const [memberId, member] of msg.mentions.members) {
-      try {
-        await channel.createOverwrite(member.id, {
+    try {
+      for (const [memberId, member] of msg.mentions.members) {
+        await channel?.createOverwrite(member.id, {
           VIEW_CHANNEL: true
         }, "Pro Sponsor Invite");
-        channel.send(`Welcome, ${member}!`);
-      } catch(error) { u.errorHandler(error, msg); }
+        channel?.send(`Welcome, ${member}!`);
+      }
+      msg.react("👌").catch(u.noop);
+    } catch(error) {
+      u.errorHandler(error, msg);
+      msg.reply(`I ran into an error trying to remove ${member.displayName} from ${channel}.`).then(u.clean);
+      msg.react("❌").catch(u.noop);
     }
   }
 })
@@ -78,6 +83,33 @@ const Module = new Augur.Module()
     }
   },
   permissions: (msg) => msg.guild
+})
+.addCommand({name: "uncoolkids",
+  description: "Remove user(s) to your Pro Sponsor private channel.",
+  suffix: "@user(s)",
+  permissions: (msg) => msg.guild && (msg.guild.id == Module.config.ldsg) && sponsorChannels.has(msg.member.id),
+  process: async (msg) => {
+    u.clean(msg, 0);
+    let channelId = sponsorChannels.get(msg.member.id);
+    let channel = msg.guild.channels.cache.get(channelId);
+
+    if (msg.mentions.members.size == 0) {
+      msg.reply("you need to tell me who to remove from your channel!").then(u.clean);
+      msg.react("❌").catch(u.noop);
+      return;
+    }
+
+    try {
+      for (const [memberId, member] of msg.mentions.members) {
+        await channel?.permissionOverwrites.get(memberId).delete("Pro Sponser Uninvite");
+      }
+      msg.react("👌").catch(u.noop);
+    } catch(error) {
+      u.errorHandler(error, msg);
+      msg.reply(`I ran into an error trying to remove ${member.displayName} from ${channel}.`).then(u.clean);
+      msg.react("❌").catch(u.noop);
+    }
+  }
 })
 .addEvent("loadConfig", () => {
   Module.config.sheets.get("Sponsor Channels").getRows((e, rows) => {
