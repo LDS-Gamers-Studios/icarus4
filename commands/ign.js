@@ -49,8 +49,9 @@ function embedIGN(user, igns) {
         let name = ign.ign;
         if (name.length > 100) name = name.substr(0, 100) + " ...";
         if (Ign.aliases.has(ign.system)) ign.system = Ign.aliases.get(ign.system);
-        if (Ign.gameids.get(ign.system).link && !hasLink.test(name)) name = `[${name}](${Ign.gameids.get(ign.system).link.replace(/{ign}/ig, encodeURIComponent(name))})`;
-        embed.addField(Ign.gameids.get(ign.system).name, name, true);
+        let system = Ign.gameids.get(ign.system) || {name: ign.system};
+        if (system.link && !hasLink.test(name)) name = `[${name}](${system.link.replace(/{ign}/ig, encodeURIComponent(name))})`;
+        embed.addField(system.name, name, true);
       });
     });
 
