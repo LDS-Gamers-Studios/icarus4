@@ -20,7 +20,7 @@ const Module = new Augur.Module()
 
     let name = suffix.replace(/<@!?\d+>/g, "").replace(/\s/g, "").toUpperCase();
 
-    if (msg.mentions.members.size() == 0) {
+    if (msg.mentions.members.size == 0) {
       msg.react("❌").catch(u.noop);
       msg.reply("you need to @mention the user(s) you want to add to the channel.").then(u.clean);
     } else if (!channelRef.has(name)) {
