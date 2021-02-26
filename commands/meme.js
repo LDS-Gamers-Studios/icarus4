@@ -5,9 +5,10 @@ const Module = new Augur.Module()
     .addCommand({
         name: "meme",
         category: "Meme",
-        description: "Creates a meme, put an image URL for you background and then put the text you want along the bottom. Or put the image source afterwards. Who am I to judge?",
+        description: "Creates a meme, put an image URL for you background and then put the text you want on new lines.",
         permissions: (msg) => msg.channel.type === 'dm' || msg.channel.permissionsFor(msg.member).has(["ATTACH_FILES", "EMBED_LINKS"]),
         process: (msg, uncleanSuffix) => {
+            if (!uncleanSuffix) return msg.reply("you need to tell me some meme text!").then(u.clean);
             let { suffix } = u.parse(msg, true);
             //general globals from bot this was imported from
             const args = suffix.trim().split("\n");
@@ -39,8 +40,8 @@ const Module = new Augur.Module()
             }
             let [topText, bottomText] = args;
 
-            bottomText = encodeURIComponent(bottomText.replace(/\-/g, " -"));
-            topText = encodeURIComponent(topText.replace(/\-/g, " -"));
+            bottomText = encodeURIComponent(bottomText?.replace(/\-/g, " -"));
+            topText = encodeURIComponent(topText?.replace(/\-/g, " -"));
             src = encodeURIComponent(src.trim());
             let meme = `https://api.memegen.link/images/custom/${topText || "_"}/${bottomText || "_"}.png?background=${src}`;
 
