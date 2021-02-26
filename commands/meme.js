@@ -24,7 +24,7 @@ const Module = new Augur.Module()
             if (msg.attachments.size > 0) {  // Message attachments as the default source
               src = msg.attachments.first().url;
             } else if (isURL(args[0])) { // Look for a URL at the beginning if one wasn't attached
-              src = isURL(shift(args));
+              src = isURL(args.shift());
             } else {
               // Look for an initial @mention to use as source
               let mention = /^<@!?(\d+)>$/;
