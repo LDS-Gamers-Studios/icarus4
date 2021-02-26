@@ -7,10 +7,11 @@ const Module = new Augur.Module()
         category: "Meme",
         description: "Creates a meme, put an image URL for you background and then put the text you want along the bottom. Or put the image source afterwards. Who am I to judge?",
         permissions: (msg) => msg.channel.type === 'dm' || msg.channel.permissionsFor(msg.member).has(["ATTACH_FILES", "EMBED_LINKS"]),
-        process: (msg) => {
+        process: (msg, uncleanSuffix) => {
             let { suffix } = u.parse(msg, true);
             //general globals from bot this was imported from
             const args = suffix.trim().split("\n");
+            const uncleanArgs = uncleanSuffix.trim.split("\n");
             //Determine if a string is a url
             function isURL(str) {
                 // Sloppy, but does the trick.
@@ -28,7 +29,7 @@ const Module = new Augur.Module()
             } else {
               // Look for an initial @mention to use as source
               let mention = /^<@!?(\d+)>$/;
-              let match = mention.exec(args[0].trim());
+              let match = mention.exec(uncleanArgs[0].trim());
               if (match) {
                 let mentionId = match[1];
                 src = msg.guild?.members.cache.get(mentionId)?.user.displayAvatarURL({size: 512, format: "png"});
