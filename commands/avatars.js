@@ -276,7 +276,7 @@ const Module = new Augur.Module()
   process: async (msg, suffix) =>{
     try {
       let image = await Jimp.read('https://cdn.discordapp.com/attachments/789694239197626371/808446253737181244/personal.png');
-      let target = await Jimp.read(suffix?.toLowerCase() == 'ldsg' ? 'https://cdn.discordapp.com/attachments/762899042363113482/808707034983170138/UH1D8seS_400x400.png' : (await u.getMention(msg)?.user || msg.author).displayAvatarURL({format: 'png', size: 512}));
+      let target = await Jimp.read(suffix?.toLowerCase() == 'ldsg' ? 'https://cdn.discordapp.com/attachments/762899042363113482/808707034983170138/UH1D8seS_400x400.png' : (await u.getMention(msg, false)).displayAvatarURL({format: 'png', size: 512}));
       let mask = await Jimp.read('./storage/mask.png');
       mask.resize(350,350);
       target.resize(350, 350);
