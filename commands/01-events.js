@@ -42,7 +42,7 @@ const Module = new Augur.Module()
         .setTitle(`**${member.displayName}** has left the server.`)
         .setColor(0x007f00)
         .addField("Joined", (member.joinedAt?.toLocaleDateString() || "Some time in the past"), true)
-        .addField("Posts", user?.posts || 0);
+        .addField("Posts", user?.posts || 0, true);
 
         member.guild.channels.cache.get(Module.config.channels.modlogs).send({embed});
       }
