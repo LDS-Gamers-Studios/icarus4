@@ -615,25 +615,23 @@ const Module = new Augur.Module()
   }
 })
 .addCommand({name: "trustaudit",
-  description: "List semi-active (15 posts or more) untrusted users",
+  description: "List semi-active (100 posts or more) untrusted users",
   category: "Mod",
   hidden: true,
   permissions: isMod,
   process: async (msg, suffix) => {
     try {
-      let threshold = parseInt(suffix, 10) || 15;
-      const ldsg = msg.guild;
-      let users = await Module.db.user.getUsers({posts: {$gt: threshold}});
-      let response = [];
-      for (const user of users) {
-        let member = ldsg.members.cache.get(user.discordId);
-        if (member && !member.roles.cache.has(Module.config.roles.trusted) & !member.roles.cache.has(Module.config.roles.untrusted)) {
-          response.push({member: member, posts: user.posts});
-        }
-      }
+      let threshold = parseInt(suffix, 10) || 100;
+      const members = msg.guild.members.cache;
+      const pool = members.filter(m => ((Date.now() - m.joinedTimestamp) > (7 * 24 * 60 * 60000)) && !member.roles.cache.has(Module.config.roles.trusted) && !member.roles.cache.has(Module.config.roles.untrusted));
+      let users = await Module.db.user.getUsers({posts: {$gt: threshold}, discordId: {$in: pool.map(m => m.id)}});
+      let response = users.map(user => ({
+        member: members.get(user.discordId),
+        posts: user.posts
+      }));
       if (response.length > 0)
         msg.channel.send(response.sort((a, b) => b.posts - a.posts).map(m => `${m.member}: ${m.posts} posts, joined ${m.member.joinedAt.toLocaleDateString()}`).join("\n"), {split: true});
-      else msg.channel.send(`No untrusted users with ${threshold}+ posts found.`);
+      else msg.channel.send(`No untrusted users who have been in the server longer than a week with ${threshold}+ posts found.`);
     } catch(e) { u.errorHandler(e, msg); }
   }
 })
