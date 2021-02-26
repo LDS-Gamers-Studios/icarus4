@@ -10,7 +10,7 @@ const bannedWords = new RegExp(banned.words.join("|"), "i"),
   pf = new profanityFilter(),
 	scamLinks = new RegExp(`\\b(${banned.scam.join("|").replace(".", "\.")})`, "i");
 
-const grownups = new Set();
+const grownups = new Map();
 
 function blocked(member) {
   return member.client.channels.cache.get(modLogs).send(`I think ${member} has me blocked. *sadface*`);
@@ -354,12 +354,13 @@ const Module = new Augur.Module()
   permissions: msg => (msg.channel.parentID == "363020585988653057" || msg.channel.parentID == "800827468315492352") && msg.member.roles.cache.has(Module.config.roles.mod),
   process: (msg, suffix) => {
     let time = Math.min(30, parseInt(suffix, 10) || 15);
-    grownups.add(msg.channel.id);
     msg.channel.send(`*Whistles and wanders off for ${time} minutes...*`);
-    setTimeout((channel) => {
+    if (grownups.has(msg.channel.id)) clearTimeout(grownups.get(msg.channel.id));
+
+    grownups.set(msg.channel.id, setTimeout((channel) => {
       grownups.delete(channel.id);
       channel.send("*I'm watching you again...* <:geyes:766719587533455420>");
-    }, time * 60 * 1000, msg.channel);
+    }, time * 60 * 1000, msg.channel));
   }
 })
 .addEvent("message", processMessageLanguage)
