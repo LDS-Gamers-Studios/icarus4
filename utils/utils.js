@@ -42,7 +42,13 @@ const Utils = {
       }
     } catch(error) { Utils.errorHandler(error, "Confirmation Prompt"); }
   },
-  embed: (data) => new Discord.MessageEmbed(data).setColor(config.color).setTimestamp(),
+  embed: (data) => {
+    if (!data) {
+      return new Discord.MessageEmbed().setColor(config.color).setTimestamp();
+    } else {
+      return new Discord.MessageEmbed(data);
+    }
+  },
   errorHandler: function(error, msg = null) {
     if (!error || (error.name == "AbortError")) return;
 
