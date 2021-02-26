@@ -623,7 +623,7 @@ const Module = new Augur.Module()
     try {
       let threshold = parseInt(suffix, 10) || 100;
       const members = msg.guild.members.cache;
-      const pool = members.filter(m => ((Date.now() - m.joinedTimestamp) > (7 * 24 * 60 * 60000)) && !member.roles.cache.has(Module.config.roles.trusted) && !member.roles.cache.has(Module.config.roles.untrusted));
+      const pool = members.filter(member => ((Date.now() - member.joinedTimestamp) > (7 * 24 * 60 * 60000)) && !member.roles.cache.has(Module.config.roles.trusted) && !member.roles.cache.has(Module.config.roles.untrusted));
       let users = await Module.db.user.getUsers({posts: {$gt: threshold}, discordId: {$in: pool.map(m => m.id)}});
       let response = users.map(user => ({
         member: members.get(user.discordId),
