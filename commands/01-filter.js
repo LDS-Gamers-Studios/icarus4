@@ -10,6 +10,8 @@ const bannedWords = new RegExp(banned.words.join("|"), "i"),
   pf = new profanityFilter(),
 	scamLinks = new RegExp(`\\b(${banned.scam.join("|").replace(".", "\.")})`, "i");
 
+const grownups = new Set();
+
 function blocked(member) {
   return member.client.channels.cache.get(modLogs).send(`I think ${member} has me blocked. *sadface*`);
 }
@@ -29,6 +31,7 @@ function filter(msg, text) {
 function processMessageLanguage(old, msg) {
   if (!msg) msg = old;
   if (msg.guild?.id != Module.config.ldsg) return false;
+  if (grownups.has(msg.channel.id)) return false;
 
   if (msg.author.id != msg.client.user.id) {
     processDiscordInvites(msg);
@@ -343,6 +346,19 @@ async function processCardReaction(reaction, mod, infraction) {
 **  Filter Events  **
 ********************/
 const Module = new Augur.Module()
+.addCommand({name: "grownups",
+  description: "The grownups are talking here.",
+  info: "Temporarily (default 15 minutes, max 30 minutes) disable the chat filter in a mod/Team channel to allow for conversation about modding.",
+  syntax: "minutes",
+  category: "Mod",
+  permissions: msg => (msg.channel.parentID == "363020585988653057" || msg.channel.parentID == "800827468315492352") && msg.member.roles.cache.has(Module.config.roles.mod),
+  process: (msg, suffix) => {
+    let time = Math.min(30, parseInt(suffix, 10) || 15);
+    grownups.add(msg.channel.id);
+    msg.react("👌");
+    setTimeout((channelId) => grownups.delete(channelId), time * 60 * 1000, msg.channel.id);
+  }
+})
 .addEvent("message", processMessageLanguage)
 .addEvent("messageUpdate", processMessageLanguage)
 .addEvent("messageReactionAdd", async (reaction, user) => {
