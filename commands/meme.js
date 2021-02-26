@@ -10,7 +10,7 @@ const Module = new Augur.Module()
         process: (msg) => {
             let { suffix } = u.parse(msg, true);
             //general globals from bot this was imported from
-            const args = suffix.trim().split(/\n/);
+            const args = suffix.trim().split("\n");
             //Determine if a string is a url
             function isURL(str) {
                 // Sloppy, but does the trick.
