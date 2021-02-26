@@ -28,8 +28,8 @@ const Module = new Augur.Module()
             } else {
               // Look for an initial @mention to use as source
               let mention = /^<@!?(\d+)>$/;
-              let match = mention.exec(args[0]);
-              if (match) {  
+              let match = mention.exec(args[0].trim());
+              if (match) {
                 let mentionId = match[1];
                 src = msg.guild?.members.cache.get(mentionId)?.user.displayAvatarURL({size: 512, format: "png"});
                 args.shift();
