@@ -216,7 +216,7 @@ async function processCardReaction(reaction, mod, infraction) {
 
         message.edit({embed});
       }
-    } else if (embed.color != 0xf89a22) {
+    } else if (infraction.mod != Module.client.user.id) {
       /***************************************
       **  Only process non-processed cards  **
       ***************************************/
