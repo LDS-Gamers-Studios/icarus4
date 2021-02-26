@@ -40,10 +40,10 @@ const Module = new Augur.Module()
             }
             let [topText, bottomText] = args;
 
-            bottomText = encodeURIComponent(bottomText?.replace(/\-/g, " -"));
-            topText = encodeURIComponent(topText?.replace(/\-/g, " -"));
+            bottomText = encodeURIComponent(bottomText?.replace(/\-/g, " -") || "_");
+            topText = encodeURIComponent(topText?.replace(/\-/g, " -") || "_");
             src = encodeURIComponent(src.trim());
-            let meme = `https://api.memegen.link/images/custom/${topText || "_"}/${bottomText || "_"}.png?background=${src}`;
+            let meme = `https://api.memegen.link/images/custom/${topText}/${bottomText}.png?background=${src}`;
 
             msg.channel.send(`${msg.author} says:`, { files: [meme] });
             u.clean(msg, 2000);
