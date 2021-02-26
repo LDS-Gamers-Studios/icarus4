@@ -1,6 +1,6 @@
 const Augur = require("augurbot"),
   u = require("../utils/utils"),
-  milestone = 4000,
+  milestone = 5000,
   pizza = false;
 
 const Module = new Augur.Module()
@@ -74,22 +74,6 @@ const Module = new Augur.Module()
       }
     }
   } catch(e) { u.errorHandler(e, "New Member Add"); }
-})
-.addEvent("guildMemberRemove", async (member) => {
-  try {
-    if (member.guild.id == Module.config.ldsg) {
-      await Module.db.user.updateRoles(member);
-      if (!member.client.ignoreNotifications?.has(member.id)) {
-        let user = await Module.db.user.fetchUser(member.id);
-        let response = [
-          `**${member.displayName}** has left the server.`,
-          "Joined: " + (member.joinedAt ? member.joinedAt.toLocaleDateString() : "Some time in the past"),
-          "Posts: " + user.posts
-        ];
-        member.guild.channels.cache.get(Module.config.channels.modlogs).send(response.join("\n"));
-      }
-    }
-  } catch(error) { u.errorHandler(error, `Member Leave: ${member.displayName}`); }
 });
 
 module.exports = Module;
