@@ -32,7 +32,7 @@ const Module = new Augur.Module()
               if (match) {  
                 let mentionId = match[1];
                 src = msg.guild?.members.cache.get(mentionId)?.user.displayAvatarURL({size: 512, format: "png"});
-                shift(args);
+                args.shift();
               }
               // Fallback
               if (!src) src = "https://i.imgflip.com/qbm81.jpg";
