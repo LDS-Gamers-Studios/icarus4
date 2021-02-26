@@ -358,7 +358,7 @@ const Module = new Augur.Module()
     msg.react("👌");
     setTimeout((channel) => {
       grownups.delete(channel.id);
-      channel.send("*I'm watching you again... <:geyes:766719587533455420>");
+      channel.send("*I'm watching you again...* <:geyes:766719587533455420>");
     }, time * 60 * 1000, msg.channel);
   }
 })
