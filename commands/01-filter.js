@@ -355,7 +355,7 @@ const Module = new Augur.Module()
   process: (msg, suffix) => {
     let time = Math.min(30, parseInt(suffix, 10) || 15);
     grownups.add(msg.channel.id);
-    msg.react("👌");
+    msg.channel.send(`*Whistles and wanders off for ${time} minutes...*`);
     setTimeout((channel) => {
       grownups.delete(channel.id);
       channel.send("*I'm watching you again...* <:geyes:766719587533455420>");
