@@ -11,6 +11,10 @@ function blocked(member) {
   return member.client.channels.cache.get(modLogs).send(`I think ${member} has me blocked. *sadface*`);
 }
 
+function isMod(msg) {
+  return msg.member?.roles.cache.has(Module.config.roles.mod) || msg.member?.roles.cache.has(Module.config.roles.management);
+}
+
 /*******************
 **  Mod Commands  **
 *******************/
@@ -18,7 +22,7 @@ const Module = new Augur.Module()
 .addCommand({name: "ankles",
   description: "View lost ankles",
   category: "Mod",
-  permissions: (msg) => (msg.member && (msg.member.roles.cache.has(Module.config.roles.mod) || msg.member.roles.cache.has(Module.config.roles.management))),
+  permissions: isMod,
   process: async (msg, suffix) => {
     try {
       let time = parseInt(suffix.replace(/<@!?\d+>/ig, '').replace(msg.mentions.CHANNELS_PATTERN, '').trim(), 10) || 10000;
@@ -110,7 +114,7 @@ const Module = new Augur.Module()
   description: "Announce a post!",
   syntax: "<messageId> (in channel with message)",
   category: "Mod",
-  permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && msg.member.roles.cache.has(Module.config.roles.management)),
+  permissions: (msg) => msg.member?.roles.cache.has(Module.config.roles.management),
   process: async (msg, suffix) => {
     if (suffix) {
       try {
@@ -132,7 +136,7 @@ const Module = new Augur.Module()
   syntax: "<@user>",
   category: "Mod",
   description: "Ban mentioned user",
-  permissions: (msg) => (msg.guild && (msg.member.hasPermission("BAN_MEMBERS") || msg.member.roles.cache.has(Module.config.roles.mod))),
+  permissions: (msg) => (msg.member?.hasPermission("BAN_MEMBERS") || msg.member?.roles.cache.has(Module.config.roles.mod)),
   process: async (msg, suffix) => {
     u.clean(msg, 0);
     const bannerHighRole = msg.member.roles.cache.filter(r => r.id != "281135201407467520").sort((a, b) => b.comparePositionTo(a)).first();
@@ -195,7 +199,7 @@ const Module = new Augur.Module()
 .addCommand({name: "channelactivity",
   description: "See how active a channel has been over the last two weeks",
   category: "Mod",
-  permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && (msg.member.roles.cache.has(Module.config.roles.management) || msg.member.roles.cache.has("205826273639923722"))),
+  permissions: (msg) => (msg.member.roles.cache.has(Module.config.roles.management) || msg.member.roles.cache.has("205826273639923722")),
   process: async (msg) => {
     try {
       const last = Date.now() - (14 * 24 * 60 * 60 * 1000);
@@ -225,7 +229,7 @@ const Module = new Augur.Module()
   description: "Add a word to the language filter",
   category: "Mod",
   hidden: true,
-  permissions: (msg) => (msg.guild && (msg.member.roles.cache.has(Module.config.roles.management) || msg.member.roles.cache.has("205826273639923722"))),
+  permissions: (msg) => (msg.member?.roles.cache.has(Module.config.roles.management) || msg.member?.roles.cache.has("205826273639923722")),
   process: (msg, suffix) => {
     u.clean(msg, 0);
     suffix = suffix.toLowerCase().trim();
@@ -240,7 +244,7 @@ const Module = new Augur.Module()
   category: "Mod",
   aliases: ["warnsummary", "warningsummary"],
   hidden: true,
-  permissions: (msg) => (msg.guild && (msg.member.roles.cache.has(Module.config.roles.mod) || msg.member.roles.cache.has(Module.config.roles.management))),
+  permissions: isMod,
   process: async (msg, suffix) => {
     u.clean(msg, 0);
     const guild = msg.guild;
@@ -268,7 +272,7 @@ const Module = new Augur.Module()
   syntax: "<@user(s)> [reason]",
   description: "Kick a user from the server.",
   category: "Mod",
-  permissions: (msg) => (msg.guild && (msg.member.hasPermission("KICK_MEMBERS") || msg.member.roles.cache.has(Module.config.roles.mod))),
+  permissions: (msg) => (msg.member?.hasPermission("KICK_MEMBERS") || msg.member?.roles.cache.has(Module.config.roles.mod)),
   process: async (msg, suffix) => {
     u.clean(msg, 0);
     const members = u.userMentions(msg, true);
@@ -319,7 +323,7 @@ const Module = new Augur.Module()
   description: "Note an LDSG Lady",
   category: "Mod",
   hidden: true,
-  permissions: (msg) => (msg.guild && (msg.member.roles.cache.has(Module.config.roles.mod) || msg.member.roles.cache.has(Module.config.roles.management))),
+  permissions: isMod,
   process: (msg) => {
     u.clean(msg, 0);
     let members = u.userMentions(msg, true);
@@ -337,7 +341,7 @@ const Module = new Augur.Module()
   syntax: "<@user> [time]",
   description: "Mute a user.",
   category: "Mod",
-  permissions: (msg) => (msg.guild && (msg.member.roles.cache.has(Module.config.roles.mod) || msg.member.roles.cache.has(Module.config.roles.management))),
+  permissions: isMod,
   process: async (msg, suffix) => {
     u.clean(msg, 0);
     let duration = parseInt(suffix.replace(/<@!?\d+>/ig, '').toLowerCase().trim(), 10);
@@ -376,7 +380,7 @@ const Module = new Augur.Module()
   syntax: "<@user> <message>",
   description: "Record a mod note",
   category: "Mod",
-  permissions: (msg) => (msg.guild && (msg.member.roles.cache.has(Module.config.roles.mod) || msg.member.roles.cache.has(Module.config.roles.management))),
+  permissions: isMod,
   process: async (msg, suffix) => {
     u.clean(msg, 0);
     let comment = suffix.replace(/<@!?\d+>/ig, '').replace(/\s\s+/g, ' ').trim();
@@ -414,7 +418,7 @@ const Module = new Augur.Module()
   syntax: "<@user> [time]",
   description: "Send a user to Ghost's office.",
   category: "Mod",
-  permissions: (msg) => (msg.guild && (msg.member.roles.cache.has(Module.config.roles.mod) || msg.member.roles.cache.has(Module.config.roles.management))),
+  permissions: isMod,
   process: async (msg, suffix) => {
     u.clean(msg, 0);
     let duration = parseInt(suffix.replace(/<@!?\d+>/ig, '').toLowerCase().trim(), 10);
@@ -453,7 +457,7 @@ const Module = new Augur.Module()
   syntax: "<@user>",
   description: "Let someone out of the office.", hidden: true,
   category: "Mod",
-  permissions: (msg) => (msg.guild && (msg.member.roles.cache.has(Module.config.roles.mod) || msg.member.roles.cache.has(Module.config.roles.management))),
+  permissions: isMod,
   process: async (msg) => {
     u.clean(msg, 0);
     let members = u.userMentions(msg, true);
@@ -478,7 +482,7 @@ const Module = new Augur.Module()
   syntax: "<number of messages>",
   description: "Delete a number of messages",
   category: "Mod",
-  permissions: (msg) => (msg.guild && msg.channel.permissionsFor(msg.member).has("MANAGE_MESSAGES")),
+  permissions: (msg) => msg.channel.permissionsFor(msg.member)?.has("MANAGE_MESSAGES"),
   process: async (msg, suffix) => {
     try {
       let purge = parseInt(suffix, 10) || 0;
@@ -517,7 +521,7 @@ const Module = new Augur.Module()
   syntax: "<@user> <nickname>",
   description: "Change a user's nickname",
   category: "Mod",
-  permissions: (msg) => (msg.guild && msg.channel.permissionsFor(msg.member).has("MANAGE_NICKNAMES")),
+  permissions: (msg) => msg.channel.permissionsFor(msg.member)?.has("MANAGE_NICKNAMES"),
   process: async (msg, suffix) => {
     u.clean(msg, 0);
     let setNick = suffix.replace(/<@!?\d+>/g, "").trim();
@@ -590,7 +594,7 @@ const Module = new Augur.Module()
   syntax: "<@user>",
   description: "Trust a user",
   category: "Mod",
-  permissions: (msg) => (msg.guild && (msg.member.roles.cache.has(Module.config.roles.mod) || msg.member.roles.cache.has(Module.config.roles.management))),
+  permissions: isMod,
   process: async (msg) => {
     u.clean(msg, 0);
     let members = u.userMentions(msg, true);
@@ -614,7 +618,7 @@ const Module = new Augur.Module()
   description: "List semi-active (15 posts or more) untrusted users",
   category: "Mod",
   hidden: true,
-  permissions: (msg) => (msg.guild && (msg.member.roles.cache.has(Module.config.roles.mod) || msg.member.roles.cache.has(Module.config.roles.management))),
+  permissions: isMod,
   process: async (msg, suffix) => {
     try {
       let threshold = parseInt(suffix, 10) || 15;
@@ -650,7 +654,7 @@ const Module = new Augur.Module()
   syntax: "<@user>",
   description: "Unmute a user", hidden: true,
   category: "Mod",
-  permissions: (msg) => (msg.guild && (msg.member.roles.cache.has(Module.config.roles.mod) || msg.member.roles.cache.has(Module.config.roles.management))),
+  permissions: isMod,
   process: async (msg) => {
     u.clean(msg, 0);
     let members = u.userMentions(msg, true);
@@ -675,7 +679,7 @@ const Module = new Augur.Module()
   syntax: "<@user>",
   description: "Untrust a user.", hidden: true,
   category: "Mod",
-  permissions: (msg) => (msg.guild && (msg.member.roles.cache.has(Module.config.roles.mod) || msg.member.roles.cache.has(Module.config.roles.management))),
+  permissions: isMod,
   process: async (msg) => {
     u.clean(msg, 0);
     let members = u.userMentions(msg, true);
@@ -700,7 +704,7 @@ const Module = new Augur.Module()
   description: "Record a warning",
   category: "Mod",
   aliases: ["infraction", "warning"],
-  permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && (msg.member.roles.cache.has(Module.config.roles.mod) || msg.member.roles.cache.has(Module.config.roles.management))),
+  permissions: isMod,
   process: async (msg, suffix) => {
     u.clean(msg, 0);
     let members = u.userMentions(msg, true);
