@@ -600,7 +600,7 @@ const Module = new Augur.Module()
           await member.roles.add(Module.config.roles.trusted);
           if (member.roles.cache.has(Module.config.roles.untrusted))
             await member.roles.remove(Module.config.roles.untrusted);
-          member.send("You have been marked as \"Trusted\" in " + msg.guild.name + ". This means you are now permitted to post images and links in chat. Please remember to follow the Code of Conduct when doing so.\n<http://ldsgamers.com/code-of-conduct>").catch(() => blocked(member));
+          member.send("You have been marked as \"Trusted\" in " + msg.guild.name + ". This means you are now permitted to post images and links in chat. Please remember to follow the Code of Conduct when doing so.\n<http://ldsgamers.com/code-of-conduct>\n\nIf you'd like to join one of our in-server Houses, you can visit <http://3houses.live> to get started!").catch(() => blocked(member));
           msg.client.channels.cache.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** trusted **${u.escapeText(member.displayName)}**`);
         } catch(error) { u.errorHandler(error, msg); }
       }
