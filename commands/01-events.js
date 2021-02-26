@@ -51,7 +51,7 @@ const Module = new Augur.Module()
 })
 .addEvent("messageReactionAdd", async (reaction, user) => {
   message = reaction.message;
-  if (message.guild?.id != Module.config.ldsg) return;
+  if (message.guild?.id != Module.config.ldsg || user.bot) return;
   if ((reaction.emoji.name == "📌") && message.pinnable) {
     // Pin Request
     try {
