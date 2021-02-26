@@ -11,14 +11,13 @@ const Module = new Augur.Module()
             let { suffix } = u.parse(msg, true);
             //general globals from bot this was imported from
             const args = suffix.trim().split("\n");
-            const uncleanArgs = uncleanSuffix.trim.split("\n");
+            const uncleanArgs = uncleanSuffix.trim().split("\n");
             //Determine if a string is a url
             function isURL(str) {
                 // Sloppy, but does the trick.
                 const url = /^<?(https?:\/\/\S*?)>?$/;
                 const match = url.exec(str);
                 return match ? match[1] : null;
-
             }
             let src;
 
