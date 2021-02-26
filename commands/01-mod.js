@@ -1,349 +1,20 @@
 const Augur = require("augurbot"),
-  banned = require("../data/banned.json"),
   profanityFilter = require("profanity-matcher"),
   u = require("../utils/utils"),
-  {USet} = require("../utils/tools");
+  {USet} = require("../utils/tools"),
+  modLogs = "506575671242260490";
 
-const bannedWords = new RegExp(banned.words.join("|"), "i"),
-  bannedLinks = new RegExp(`\\b(${banned.links.join("|").replace(".", "\.")})`, "i"),
-  hasLink = /http(s)?:\/\/(\w+(-\w+)*\.)+\w+/,
-  modLogs = "506575671242260490",
-  pf = new profanityFilter(),
-	scamLinks = new RegExp(`\\b(${banned.scam.join("|").replace(".", "\.")})`, "i");
-
-const bans = new USet();
+const pf = new profanityFilter();
 const mutes = new u.Collection();
-
-const cardReactions = ["👤", "✅", "⚠", "⛔", "🛑", "🔇"];
 
 function blocked(member) {
   return member.client.channels.cache.get(modLogs).send(`I think ${member} has me blocked. *sadface*`);
 }
 
-function filter(msg, text) {
-  // PROFANITY FILTER
-  let noWhiteSpace = text.toLowerCase().replace(/[\.,\/#!$%\^&\*;:\{\}=\-_`~"'\(\)\?\|]/g,"").replace(/\s\s+/g, " ");
-  let filtered = pf.scan(noWhiteSpace);
-  if ((filtered.length > 0) && (noWhiteSpace.length > 0)) {
-    warnCard(msg, filtered);
-    return true;
-  } else return false;
-}
-
-function processMessageLanguage(msg, edited = false) {
-  if (msg.author.id != msg.client.user.id) {
-    processDiscordInvites(msg);
-
-    let match = null;
-    let link = null;
-    // LINK FILTER
-    if (link = hasLink.exec(msg.cleanContent)) {
-      if (match = bannedLinks.exec(msg.cleanContent)) {
-        // Porn links
-        warnCard(msg, match, true);
-        return true;
-      } else if (match = scamLinks.test(msg.cleanContent)) {
-        // Scam links
-        u.clean(msg, 0);
-        msg.reply("that link is generally believed to be to a scam/phishing site. Please be careful!");
-        warnCard(msg, ["Suspected scam links"].concat(match));
-        return true;
-      } else if ((match = bannedWords.exec(msg.cleanContent)) && (link[0].toLowerCase().includes("tenor") || link[0].toLowerCase().includes("giphy"))) {
-        u.clean(msg, 0);
-        msg.reply("it looks like that link might have had some harsh language. Please be careful!").then(u.clean);
-        warnCard(msg, ["Link Language (Auto-Removed)"].concat(match));
-        return true;
-      } else if (!msg.member.roles.cache.has(Module.config.roles.trusted)) {
-        // General untrusted link flag
-        warnCard(msg, "Links prior to being trusted");
-      }
-    }
-
-    // HARD LANGUAGE FILTER
-    if (match = bannedWords.exec(msg.cleanContent)) {
-      warnCard(msg, match, true);
-      return true;
-    }
-
-    // SOFT LANGUAGE FILTER
-    filter(msg, msg.cleanContent);
-
-    if (msg.embeds.length > 0) {
-      for (let embed of msg.embeds) {
-        let preview = [embed.author ? embed.author.name : "", embed.title, embed.description].join("\n");
-        let match;
-        if (match = bannedWords.exec(preview)) {
-          msg.reply("it looks like that link might have some harsh language in the preview. Please be careful!").then(u.clean);
-          warnCard(msg, ["Link preview language"].concat(match));
-          u.clean(msg, 0);
-          break;
-        }
-        if (filter(msg, preview)) {
-          msg.reply("it looks like that link might have some language in the preview. Please be careful!").then(u.clean);
-          msg.suppressEmbeds().catch(u.noop);
-          break;
-        }
-      }
-    }
-  }
-};
-
-function processDiscordInvites(msg) {
-  let bot = msg.client;
-  let invites = msg.cleanContent.match(/(http(s)?:\/\/)?discord(\.gg(\/invite)?|app\.com\/invite|\.com\/invite)\/\w+/ig);
-
-  if (invites) {
-    let modLog = [];
-
-    invites = invites.map(inv => bot.fetchInvite(inv.trim()));
-
-    Promise.all(invites).then((invites) => {
-      if (invites.length > 0) {
-        let external = invites.reduce((e, i) => (i && i.guild && (i.guild.id != Module.config.ldsg) ? e.concat(`Guild: ${i.guild.name}`, `Channel: ${i.channel.name}`) : e), ["External Discord Server Invite"]);
-        if (external.length > 1) {
-          warnCard(msg, external);
-          u.clean(msg, 0);
-          msg.channel.send("It is difficult to know what will be in another Discord server at any given time. *If* you feel that this server is appropriate to share, please only do so in direct messages.");
-        }
-      }
-    }).catch(e => {
-      if (e && e.message == "Unknown Invite") {
-        warnCard(msg, "Unknown Discord Server Invite");
-        u.clean(msg, 0);
-        msg.channel.send("It is difficult to know what will be in another Discord server at any given time. *If* you feel that this server is appropriate to share, please only do so in direct messages.");
-      } else u.errorHandler(e, msg);
-    });
-  }
-};
-
-async function warnCard(msg, filtered = null, call = false) {
-  try {
-    let infractionSummary = await Module.db.infraction.getSummary(msg.author.id);
-
-    let embed = u.embed()
-    .setTimestamp()
-    .setColor("#FF0000")
-    .setAuthor(msg.member.displayName, msg.author.displayAvatarURL({dynamic: true}))
-    .setDescription(msg.cleanContent + (msg.editedAt ? "\n[Edited]" : ""));
-
-    filtered = (Array.isArray(filtered) ? filtered.join(", ") : filtered);
-    if (filtered) {
-      embed.addField("Match", filtered);
-      if (filtered.includes("lmao") && !msg.author.bot) {
-        try {
-          let ankle = {
-            discordId: msg.author.id,
-            channel: msg.channel.id,
-            message: msg.id,
-          };
-          await Module.db.ankle.save(ankle);
-        } catch(e) { u.errorHandler(e, "Saving Ankle"); }
-      }
-    }
-
-    embed.addField("Channel", msg.channel?.toString(), true)
-    .addField("Jump to Post", `[Original Message](${msg.url})`, true)
-    .setTimestamp((msg.editedAt ? msg.editedAt : msg.createdAt));
-
-    // Minecraft Filter
-    if (msg.channel.id == "121033996439257092")
-      msg.client.channels.cache.get('114490357474918401').send({embed});
-
-    embed.addField(`Infraction Summary (${infractionSummary.time} Days)`, `Infractions: ${infractionSummary.count}\nPoints: ${infractionSummary.points}`)
-
-    if (msg.author.bot)
-      embed.setFooter("The user is a bot and the flag likely originated elsewhere. No reactions will be processed.");
-
-    let card = await msg.client.channels.cache.get(modLogs).send({embed});
-
-    if (call) {
-      u.clean(msg, 0);
-
-      let ldsg = msg.client.guilds.cache.get(Module.config.ldsg);
-
-      let callToArms = [ldsg.roles.cache.get('503066022912196608')]; // Discord Mods
-      if (msg.author.bot) {
-        callToArms.push("The message has been deleted. The member was *not* muted, on account of being a bot.");
-      } else {
-        if (!msg.member.roles.cache.has(Module.config.roles.muted)) {
-          await msg.member.roles.add(ldsg.roles.cache.get(Module.config.roles.muted));
-          if (msg.member.voice.channel) {
-            msg.member.voice.kick("Auto-mute");
-          }
-          ldsg.channels.cache.get("356657507197779968").send(`${msg.member}, you have been auto-muted in ${msg.guild.name}. Please review our Code of Conduct. A member of the management team will be available to discuss more details.\n\nhttp://ldsgamers.com/code-of-conduct`);
-        }
-        callToArms.push("The mute role has been applied and message deleted.");
-      }
-
-      await msg.client.channels.cache.get(modLogs).send(callToArms.join("\n"));
-    }
-
-    if (!msg.author.bot)  {
-      let infraction = {
-        discordId: msg.author.id,
-        channel: msg.channel.id,
-        message: msg.id,
-        flag: card.id,
-        description: msg.cleanContent,
-        mod: msg.client.user.id,
-        value: 0
-      };
-      await Module.db.infraction.save(infraction);
-
-      for (let i = 0; i < cardReactions.length; i++) {
-        await card.react(cardReactions[i]);
-      }
-    }
-  } catch(e) { u.errorHandler(e, "Mod Card Creation"); }
-}
-
-async function processCardReaction(reaction, mod, infraction) {
-  try {
-    if (reaction.users.cache.filter(u => !u.bot).size > 1) return;
-    let message = reaction.message;
-    reaction = reaction.emoji.name;
-    let embed = u.embed(message.embeds[0]);
-
-    if ((reaction == "⏪") && (mod.id == infraction.mod)) {
-      /***********************
-      **  Retract a warning **
-      ***********************/
-      let retraction = await Module.db.infraction.retract(message.id, mod.id);
-      if (retraction) {
-        let infractionSummary = await Module.db.infraction.getSummary(retraction.discordId);
-        embed.setColor(0x00ff00);
-        embed.fields[2].value = `Infractions: ${infractionSummary.count}\nPoints: ${infractionSummary.points}`;
-        embed.fields[3].value = `${mod.username} retracted the warning.`;
-
-        message.edit({embed});
-      }
-    } else if (embed.color != 0xf89a22) {
-      /***************************************
-      **  Only process non-processed cards  **
-      ***************************************/
-      return;
-    } else if (reaction == cardReactions[0]) {
-      /*********************
-      **  Post Full Info  **
-      *********************/
-      let member = message.guild.members.cache.get(infraction.discordId);
-
-      let roleString = member.roles.cache.sort((a, b) => b.comparePositionTo(a)).map(role => role.name).join(", ");
-      if (roleString.length > 1024) roleString = roleString.substr(0, roleString.indexOf(", ", 1000)) + " ...";
-
-      let userDoc = await Module.db.user.fetchUser(member.id);
-
-      let infractionSummary = await Module.db.infraction.getSummary(member.id);
-
-      let infractionDescription = [`**${u.escapeText(member.displayName)}** has had **${infractionSummary.count}** infraction(s) in the last **${infractionSummary.time}** days, totalling **${infractionSummary.points}** points.`];
-      if ((infractionSummary.count > 0) && (infractionSummary.detail.length > 0)) {
-        for (let record of infractionSummary.detail) {
-          let mod = message.guild.members.cache.get(record.mod);
-          infractionDescription.push(`${record.timestamp.toLocaleDateString()} (${record.value}) pts, modded by ${mod.displayName}): ${record.description}`);
-        }
-      }
-
-      infractionDescription = infractionDescription.join("\n");
-      if (infractionDescription.length > 2048) infractionDescription = infractionDescription.substr(0, infractionDescription.indexOf("\n", 1950)) + "\n...";
-
-      let infoEmbed = u.embed()
-      .setTimestamp()
-      .setAuthor(member.displayName, member.user.displayAvatarURL())
-      .setThumbnail(member.user.displayAvatarURL({dynamic: true}))
-      .setDescription(infractionDescription)
-      .addField("ID", member.id)
-      .addField("Joined", member.joinedAt.toUTCString(), true)
-      .addField("Account Created", member.user.createdAt.toUTCString(), true)
-      .addField("Roles", roleString)
-      .addField("Activity", `Posts: ${parseInt(userDoc.posts, 10).toLocaleString()}`, true)
-      message.channel.send({embed: infoEmbed, disableEveryone: true});
-    } else if (reaction == cardReactions[1]) {
-      /********************
-      **  Ignore a flag  **
-      ********************/
-      await Module.db.infraction.retract(message.id, infraction.mod);
-
-      embed.setColor(0x00FF00);
-      embed.addField("Resolved", mod.username + " cleared the flag.");
-      embed.fields = embed.fields.filter(f => !f.name.startsWith("Jump"));
-      await message.reactions.removeAll();
-      message.edit({embed});
-    } else if (cardReactions.includes(reaction)) {
-      /**************************
-      **  Warn as appropriate  **
-      **************************/
-      try {
-        let msg = await message.guild.channels.cache.get(infraction.channel).messages.fetch(infraction.message);
-        if (msg) u.clean(msg, 0);
-      } catch(e) { u.noop(); }
-
-      embed.setColor(0x0000FF);
-      infraction.mod = mod.id;
-      let member = message.guild.members.cache.get(infraction.discordId);
-
-      if (reaction == cardReactions[2]) {         // Minor infraction
-        infraction.value = 1;
-        embed.addField("Resolved", mod.username + " issued a 1 point warning.");
-      } else if (reaction == cardReactions[3]) {  // Moderate infraction
-        infraction.value = 5;
-        embed.addField("Resolved", mod.username + " issued a 5 point warning.");
-      } else if (reaction == cardReactions[4]) {  // Major infraction
-        infraction.value = 10;
-        embed.addField("Resolved", mod.username + " issued a 10 point warning.");
-      } else if (reaction == cardReactions[5]) {  // Mute
-        infraction.value = 10;
-        if (member && !member.roles.cache.has(Module.config.roles.muted)) {
-          try {
-            // Only mute them if they weren't already muted.
-            await member.roles.add(Module.config.roles.muted);
-            await member.roles.add(Module.config.roles.untrusted);
-            if (member.voice.channel) {
-              await member.voice.kick("User mute");
-            };
-            message.client.channels.cache.get("356657507197779968").send(`${member}, you have been muted in ${message.guild.name}. Please review our Code of Conduct. A member of the management team will be available to discuss more details.\n\nhttp://ldsgamers.com/code-of-conduct`);
-          } catch(error) { u.errorHandler(error, "Mute user via card"); }
-        } else if (!member) {
-          let roles = (await Module.db.user.fetchUser(infraction.discordId)).roles.concat(Module.config.roles.muted, Module.config.roles.untrusted);
-          await Module.db.user.updateRoles({
-            id: infraction.discordId,
-            roles
-          });
-        }
-        embed.addField("Resolved", mod.username + " muted the member.");
-      }
-
-      let inf = await Module.db.infraction.update(infraction._id, infraction);
-
-      let infractionSummary = await Module.db.infraction.getSummary(infraction.discordId);
-
-      if (member) {
-        let quote = u.embed()
-        .setAuthor(member.displayName, member.user.displayAvatarURL())
-        .addField("Channel", `#${message.guild.channels.cache.get(infraction.channel).name}`)
-        .setDescription(message.embeds[0].description)
-        .setTimestamp(message.createdAt);
-
-        let response = "We have received one or more complaints regarding content you posted. We have reviewed the content in question and have determined, in our sole discretion, that it is against our code of conduct (<https://ldsgamers.com/code-of-conduct>). This content was removed on your behalf. As a reminder, if we believe that you are frequently in breach of our code of conduct or are otherwise acting inconsistently with the letter or spirit of the code, we may limit, suspend or terminate your access to the LDSG Discord server.";
-
-        member.send(`${response}\n\n**${mod.username}** has issued this warning.`, {embed: quote})
-        .catch(() => blocked(member));
-      }
-
-      embed.fields = embed.fields.filter(f => !f.name || !f.name.startsWith("Jump"));
-      embed.fields.find(f => f.name && f.name.startsWith("Infraction")).value = `Infractions: ${infractionSummary.count}\nPoints: ${infractionSummary.points}`;
-
-      await message.reactions.removeAll();
-      message.edit({embed});
-    }
-  } catch(e) { u.errorHandler(e, "Mod Card Reaction"); }
-}
-
-const Module = new Augur.Module();
-
 /*******************
 **  Mod Commands  **
 *******************/
-Module
+const Module = new Augur.Module()
 .addCommand({name: "ankles",
   description: "View lost ankles",
   category: "Mod",
@@ -473,7 +144,6 @@ Module
     while ((match = mentions.exec(suffix)) && confirm) {
       userId = match[1];
       try {
-        bans.add(userId);
         let member = await msg.guild.members.fetch(userId);
         if (member) {
           const bannedHighRole = member.roles.cache.filter(r => r.id != "281135201407467520").sort((a, b) => b.comparePositionTo(a)).first();
@@ -488,16 +158,28 @@ Module
               mod: msg.author.id
             };
             await (member.send(`You were banned from ${msg.guild.name} for ${reason}`).catch(() => blocked(member)));
-            await member.ban({days: 2, reason});
-            msg.client.channels.cache.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** banned **${u.escapeText(member.displayName)}** for ${reason}`);
 
+            if (!msg.client.ignoreNotifications) msg.client.ignoreNotifications = new Set();
+            msg.client.ignoreNotifications.add(member.id);
+
+            await member.ban({days: 2, reason});
+
+            let embed = u.embed()
+              .setAuthor(member.displayName, member.user.displayAvatarURL({dynamic: true}))
+              .setTitle(`User Ban`)
+              .setDescription(`**${msg.member.displayName}** banned **${member.displayName}** for ${reason}.`)
+              .setColor(0x0000FF);
+
+            msg.client.channels.cache.get(modLogs).send({embed});
           }
         } else {
           msg.guild.members.ban(userId, {days: 2, reason});
         }
         let memberDoc = await Module.db.user.fetchUser(userId);
-        memberDoc.roles = memberDoc.roles.filter(r => r != Module.config.roles.trusted).concat(Module.config.roles.muted, Module.config.roles.untrusted);
-        await Module.db.user.update(userId, {roles: memberDoc.roles});
+        if (memberDoc) {
+          memberDoc.roles = memberDoc.roles.filter(r => r != Module.config.roles.trusted).concat(Module.config.roles.muted, Module.config.roles.untrusted);
+          await Module.db.user.update(userId, {roles: memberDoc.roles});
+        }
         banCount++;
       } catch(error) { u.errorHandler(error, msg); }
     }
@@ -619,8 +301,10 @@ Module
           msg.client.channels.cache.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** kicked **${u.escapeText(member.displayName)}** for ${reason}`);
 
           let memberDoc = await Module.db.user.fetchUser(memberId);
-          memberDoc.roles = memberDoc.roles.filter(r => r != Module.config.roles.trusted).concat(Module.config.roles.muted, Module.config.roles.untrusted);
-          await Module.db.user.update(memberId, {roles: memberDoc.roles});
+          if (memberDoc) {
+            memberDoc.roles = memberDoc.roles.filter(r => r != Module.config.roles.trusted).concat(Module.config.roles.muted, Module.config.roles.untrusted);
+            await Module.db.user.update(memberId, {roles: memberDoc.roles});
+          }
         } catch(e) { u.errorHandler(e, msg); }
       }
     } else if (!confirm) {
@@ -1060,97 +744,6 @@ Module
       }
     } else msg.reply("you need to tell me who and what the infraction is.").then(u.clean);
   }
-});
-
-/*************
-**  Events  **
-*************/
-Module
-.addEvent("channelCreate", (channel) => {
-  if (channel.guild && (channel.guild.id == Module.config.ldsg)) {
-    if (channel.permissionsFor(channel.client.user.id).has(["VIEW_CHANNEL", "MANAGE_CHANNELS"])) {
-      channel.createOverwrite(Module.config.roles.muted, {
-        VIEW_CHANNEL: false,
-        CONNECT: false,
-        SEND_MESSAGES: false,
-        SPEAK: false
-      }).catch(e => u.errorHandler(e, `Update New Channel Permissions: ${channel.name}`));
-      channel.createOverwrite("771516264618262607", {
-        VIEW_CHANNEL: false,
-        CONNECT: false,
-        SEND_MESSAGES: false,
-        SPEAK: false
-      }).catch(e => u.errorHandler(e, `Update New Channel Permissions: ${channel.name}`));
-    } else {
-      u.errorLog.send(u.embed().setTitle("Update New Channel Permissions").setDescription(`Insufficient permissions to update channel ${channel.name}. Muted permissions need to be applied manually.`));
-    }
-  }
-})
-.addEvent("guildBanAdd", (guild, user) => {
-  if ((guild.id == Module.config.ldsg) && !bans.has(user.id)) guild.client.channels.cache.get(modLogs).send(`**${user.username}** has been banned.`);
-})
-.addEvent("message", (msg) => {
-  if (msg.guild && msg.member && msg.guild.id == Module.config.ldsg) return processMessageLanguage(msg);
-})
-.addEvent("messageReactionAdd", async (reaction, user) => {
-  message = reaction.message;
-  try {
-    if ((message.channel.id == modLogs) && !user.bot && (message.author.id == message.client.user.id) && (cardReactions.includes(reaction.emoji.name) || reaction.emoji.name == "⏪")) {
-      let flag = await Module.db.infraction.getByFlag(message.id);
-      if (flag) processCardReaction(reaction, user, flag);
-    }
-  } catch(e) { u.errorHandler(e, "Card Reaction Processing"); }
-
-  try {
-    // Pin Request
-    if (message.guild && (message.guild.id == Module.config.ldsg) && (reaction.emoji.name == "📌") && message.pinnable) {
-      if (message.channel.permissionsFor(user).has("MANAGE_MESSAGES")){
-        let messages = await message.channel.messages.fetchPinned().catch(u.noop);
-        if (messages?.size == 50) return message.channel.send(`${user}, I was unable to pin the message since the channel pin limit has been reached.`);
-        else message.pin();
-      }
-      else if (reaction.count == 1) {
-        let embed = u.embed()
-        .setTimestamp()
-        .setAuthor(message.member.displayName + " 📌", message.member.user.displayAvatarURL())
-        .setDescription(message.cleanContent)
-        .addField("Pin Requested By", message.guild.members.cache.get(user.id).displayName)
-        .addField("Channel", message.channel.toString())
-        .addField("Link to Post", message.url);
-
-        if (message.attachments && (message.attachments.size > 0))
-          embed.setImage(message.attachments.first().url);
-
-        message.guild.channels.cache.get("506575671242260490").send({embed});
-      }
-    }
-  } catch(e) { u.errorHandler(e, "Pin Request Processing"); }
-})
-.addEvent("messageUpdate", (old, msg) => {
-  if (msg.guild && msg.member && msg.guild.id == Module.config.ldsg) return processMessageLanguage(msg, true);
-})
-.addEvent("userUpdate", async (oldUser, newUser) => {
-  try {
-    let ldsg = newUser.client.guilds.cache.get(Module.config.ldsg);
-    let newMember = ldsg.members.cache.get(newUser.id);
-    if (!newMember || (!newMember.roles.cache.has(Module.config.roles.trusted) || newMember.roles.cache.has(Module.config.roles.untrusted))) {
-      let user = await Module.db.user.fetchUser(newMember).catch(u.noop);
-      const embed = u.embed()
-        .setTimestamp()
-        .setAuthor(oldUser.username, oldUser.displayAvatarURL())
-        .setFooter(`${user?.posts || "Unknown"} Posts in ${Math.round((Date.now() - (newMember?.joinedTimestamp || 0)) / (30 * 24 * 60 * 60 * 1000))} Months`)
-        .setTitle("User Update");
-      if (oldUser.tag != newUser.tag) {
-        embed.addField("**Username Update**", `**Old:** ${oldUser.tag}\n**New:** ${newUser.tag}`);
-      }
-      if (oldUser.avatar != newUser.avatar) {
-        embed.addField("**Avatar Update**", "See Below").setImage(newUser.displayAvatarURL({dynamic: true}));
-      } else {
-        embed.setThumbnail(newUser.displayAvatarURL());
-      }
-      ldsg.channels.cache.get("725797487129919488").send(`${newUser}: ${newUser.id}`, {embed});
-    }
-  } catch(error) { u.errorHandler(error, `User Update Error: \`${newUser?.username}\``); }
 });
 
 module.exports = Module;
