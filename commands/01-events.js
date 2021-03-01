@@ -25,7 +25,7 @@ const Module = new Augur.Module()
 .addEvent("guildBanAdd", (guild, user) => {
   if (guild.id == Module.config.ldsg) {
     if (guild.client.ignoreNotifications?.has(user.id)) {
-      guild.client.ignoreNotifications.delete(member.id);
+      guild.client.ignoreNotifications.delete(user.id);
     } else {
       guild.client.channels.cache.get(modLogs).send(`**${user.username}** has been banned.`);
     }
