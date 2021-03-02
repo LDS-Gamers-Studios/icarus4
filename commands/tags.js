@@ -18,6 +18,13 @@ function runTag(msg) {
           .replace(/<@targetname>/ig, target.displayName);
       } else return msg.reply("You need to `@mention` a user with that command!").then(u.clean);
     }
+    if ((/(<clean>)/i).test(response)) {
+      u.clean(msg);
+    }
+    if (response.indexOf('<|>'){
+        let responseArray = response.split('<|>');
+        response = responseArray[Math.floor(Math.random() * responseArray.length)];      
+     }
     if (tag.attachment) {
       msg.channel.send(
         response,
