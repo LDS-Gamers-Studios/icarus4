@@ -8,7 +8,8 @@ const client = new AugurClient(config, {
     partials: ["REACTION", "MESSAGE"]
   },
   commands: "./commands",
-  errorHandler: u.errorHandler
+  errorHandler: u.errorHandler,
+  parse: u.parse
 });
 
 client.login();

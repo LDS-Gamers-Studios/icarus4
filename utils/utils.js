@@ -186,9 +186,15 @@ const Utils = {
       let trimmed = content.substr(prefix.length).trim();
       let [command, ...params] = content.substr(prefix.length).split(" ");
       if (command) {
+        let suffix = params.join(" ");
+        if (suffix.toLowerCase() == "help") {  // Allow `!command help` syntax
+          let t = command.toLowerCase();
+          command = "help";
+          suffix = t;
+        }
         return {
           command: command.toLowerCase(),
-          suffix: params.join(" "),
+          suffix,
           params
         };
       }
