@@ -40,7 +40,7 @@ const Module = new Augur.Module()
         let embed = u.embed()
         .setAuthor(member.displayName, member.user.displayAvatarURL({dynamic: true}))
         .setTitle(`**${member.displayName}** has left the server.`)
-        .setColor(0x007f00)
+        .setColor(0x4e5d94)
         .addField("Joined", (member.joinedAt?.toLocaleDateString() || "Some time in the past"), true)
         .addField("Posts", user?.posts || 0, true);
 

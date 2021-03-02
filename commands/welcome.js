@@ -16,6 +16,7 @@ const Module = new Augur.Module()
       let modLogs = guild.channels.cache.get(Module.config.channels.modlogs); // #mod-logs
 
       let embed = u.embed()
+      .setColor(0x7289da)
       .setDescription("Account Created:\n" + member.user.createdAt.toLocaleDateString())
       .setTimestamp()
       .setThumbnail(member.user.displayAvatarURL({dynamic: true}));
@@ -25,7 +26,7 @@ const Module = new Augur.Module()
       if (user) { // Member is returning
         if (user.roles.length > 0) member = await member.roles.add(user.roles.filter(role => guild.roles.cache.has(role) && !guild.roles.cache.get(role).managed));
 
-        let roleString = member.roles.cache.map(role => role.name).join(", ");
+        let roleString = member.roles.cache.sort((a, b) => b.comparePositionTo(a)).map(role => role.name).join(", ");
         if (roleString.length > 1024) roleString = roleString.substr(0, roleString.indexOf(", ", 1000)) + " ...";
 
         embed.setTitle(member.displayName + " has rejoined the server.")
