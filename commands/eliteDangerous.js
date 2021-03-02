@@ -12,7 +12,7 @@ async function updateFactionStatus() {
   let channelID = "549808289811267602";
   let channel = Module.client.channels.cache.get(channelID);
   try {
-    let starSystem = await elite.getSystemInfo("LDS+2314").catch(u.noop);
+    let starSystem = await elite.getSystemInfo("LDS 2314").catch(u.noop);
     if (starSystem) {
       let faction = starSystem.factions.find(f => f.name === "LDS Enterprises");
       let influence = Math.round(faction.influence * 10000) / 100;
