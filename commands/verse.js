@@ -15,7 +15,8 @@ const scriptureTest = /([\w &]+) ((\d+)(\s?:\s?(\d+)\s?(-\s?\d+)?)?)/i,
   cheerio = require("cheerio"),
   manuals = new Map([
     [2019, "new-testament-2019"],
-    [2020, "book-of-mormon-2020"]
+    [2020, "book-of-mormon-2020"],
+    [2021, "doctrine-and-covenants-2021"]
   ]);
 
 const searchKeys = [];
