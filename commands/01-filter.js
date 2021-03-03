@@ -55,7 +55,7 @@ function processMessageLanguage(old, msg) {
         msg.reply("it looks like that link might have had some harsh language. Please be careful!").then(u.clean);
         warnCard(msg, ["Link Language (Auto-Removed)"].concat(match));
         return true;
-      } else if (!msg.member.roles.cache.has(Module.config.roles.trusted)) {
+      } else if (!msg.webhookID && !msg.author.bot && !msg.member.roles.cache.has(Module.config.roles.trusted)) {
         // General untrusted link flag
         warnCard(msg, "Links prior to being trusted");
       }
