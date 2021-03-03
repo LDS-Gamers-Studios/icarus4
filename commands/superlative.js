@@ -81,7 +81,8 @@ const starBoards = new u.Collection()
   board: "730435722699472896",
   emoji: ["😆", "🤣", "😂", "ghostlaugh"],
   channels: [
-    "121755900313731074" // #gifs-and-memes
+    "121755900313731074", // #gifs-and-memes
+    "816740597402566706"  // #destiny-memes
   ],
   confirm: "😆"
 })
@@ -97,10 +98,10 @@ const starBoards = new u.Collection()
 
 async function checkStarBoard(reaction, user) {
   try {
-    if (reaction.message?.partial !== false)
-      reaction.message = await reaction.message.fetch().catch(u.noop);
     if (reaction.partial)
       reaction = await reaction.fetch().catch(u.noop);
+    if (reaction?.message?.partial !== false)
+      reaction.message = await reaction.message.fetch().catch(u.noop);
 
     const msg = reaction?.message;
     if (!user.bot && msg?.guild?.id == Module.config.ldsg && (msg?.createdTimestamp > (Date.now() - 7 * 24 * 60 * 60000))) {
@@ -167,7 +168,7 @@ async function checkStarBoard(reaction, user) {
         } catch(error) { u.errorHandler(error, "Approve Star"); }
       }
     }
-    if (reaction.emoji.name == "🗒️") user.send(starEmbed(reaction)).catch(u.noop);
+    if (reaction?.emoji.name == "🗒️") user.send(starEmbed(reaction)).catch(u.noop);
   } catch(error) { u.errorHandler(error, "Star Board Update"); }
 }
 

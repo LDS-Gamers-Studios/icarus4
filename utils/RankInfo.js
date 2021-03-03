@@ -12,6 +12,7 @@ const Rank = {
     "405405857099284490", // star board
     "420653044326203402", // youth-antics
     "356657507197779968", // outer-darkness
+    "816740597402566706", // destiny-memes
     "121755900313731074"  // gifs-and-memes
   ],
   excludeRoles: [],
