@@ -215,9 +215,18 @@ async function processCardReaction(reaction, mod, infraction) {
         let infractionSummary = await Module.db.infraction.getSummary(retraction.discordId);
         embed.setColor(0x00ff00);
         embed.fields[2].value = `Infractions: ${infractionSummary.count}\nPoints: ${infractionSummary.points}`;
-        embed.fields[3].value = `${mod.displayName} retracted the warning.`;
+        embed.fields[3].value = `${mod?.displayName} retracted the warning.`;
 
         message.edit({embed});
+
+        reaction.remove();
+
+        let member = message.guild.members.cache.get(retraction.discordId);
+        if (member) {
+          let quote = u.embed(embed);
+          quote.fields = quote.fields.filter(f => !f.name.startsWith("Jump") && !f.name.startsWith("Infraction Summary"));
+          member.send(`**${mod?.displayName}** has retracted a warning.`).catch(u.noop);
+        }
       }
     } else if (infraction.mod != Module.client.user.id) {
       /***************************************
@@ -332,18 +341,22 @@ async function processCardReaction(reaction, mod, infraction) {
         .catch(() => blocked(member));
       }
 
-      if (infraction.value > 0) {
-        try {
-          let msg = await message.guild.channels.cache.get(infraction.channel).messages.fetch(infraction.message);
-          if (msg) u.clean(msg, 0);
-        } catch(e) { u.noop(); }
-      }
-
       embed.fields = embed.fields.filter(f => !f.name || !f.name.startsWith("Jump"));
       embed.fields.find(f => f.name && f.name.startsWith("Infraction")).value = `Infractions: ${infractionSummary.count}\nPoints: ${infractionSummary.points}`;
 
       await message.reactions.removeAll();
-      message.edit({embed});
+      await message.edit({embed});
+
+      if (infraction.value > 0) {
+        try {
+          let msg = await message.guild.channels.cache.get(infraction.channel).messages.fetch(infraction.message);
+          if (msg) u.clean(msg, 0);
+
+          message.react("⏪").then(r => {
+            setTimeout((r) => r.remove().catch(u.noop), 600000, r);
+          }).catch(u.noop);
+        } catch(e) { u.noop(); }
+      }
     }
   } catch(e) { u.errorHandler(e, "Mod Card Reaction"); }
 }
