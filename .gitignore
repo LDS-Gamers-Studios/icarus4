@@ -6,6 +6,7 @@ config/*
 !config/*-example.json
 test.js
 *-.js
+*-.json
 data/*
 !data/*-reference.json
 !data/birthday.json
