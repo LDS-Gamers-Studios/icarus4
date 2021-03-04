@@ -16,7 +16,7 @@ function blocked(member) {
   return member.client.channels.cache.get(modLogs).send(`I think ${member} has me blocked. *sadface*`);
 }
 
-const cardReactions = ["👤", "✅", "⚠", "⛔", "🛑", "🔇"];
+const cardReactions = ["👤", "✅", "🗣", "⚠", "⛔", "🔇"];
 
 function filter(msg, text) {
   // PROFANITY FILTER
@@ -215,7 +215,7 @@ async function processCardReaction(reaction, mod, infraction) {
         let infractionSummary = await Module.db.infraction.getSummary(retraction.discordId);
         embed.setColor(0x00ff00);
         embed.fields[2].value = `Infractions: ${infractionSummary.count}\nPoints: ${infractionSummary.points}`;
-        embed.fields[3].value = `${mod.username} retracted the warning.`;
+        embed.fields[3].value = `${mod.displayName} retracted the warning.`;
 
         message.edit({embed});
       }
@@ -240,8 +240,8 @@ async function processCardReaction(reaction, mod, infraction) {
       let infractionDescription = [`**${u.escapeText(member.displayName)}** has had **${infractionSummary.count}** infraction(s) in the last **${infractionSummary.time}** days, totalling **${infractionSummary.points}** points.`];
       if ((infractionSummary.count > 0) && (infractionSummary.detail.length > 0)) {
         for (let record of infractionSummary.detail) {
-          let mod = message.guild.members.cache.get(record.mod);
-          infractionDescription.push(`${record.timestamp.toLocaleDateString()} (${record.value}) pts, modded by ${mod.displayName}): ${record.description}`);
+          let recordMod = message.guild.members.cache.get(record.mod);
+          infractionDescription.push(`${record.timestamp.toLocaleDateString()} (${record.value}) pts, modded by ${recordMod?.displayName}): ${record.description}`);
         }
       }
 
@@ -266,7 +266,7 @@ async function processCardReaction(reaction, mod, infraction) {
       await Module.db.infraction.retract(message.id, infraction.mod);
 
       embed.setColor(0x00FF00);
-      embed.addField("Resolved", mod.username + " cleared the flag.");
+      embed.addField("Resolved", mod.displayName + " cleared the flag.");
       embed.fields = embed.fields.filter(f => !f.name.startsWith("Jump"));
       await message.reactions.removeAll();
       message.edit({embed});
@@ -274,24 +274,19 @@ async function processCardReaction(reaction, mod, infraction) {
       /**************************
       **  Warn as appropriate  **
       **************************/
-      try {
-        let msg = await message.guild.channels.cache.get(infraction.channel).messages.fetch(infraction.message);
-        if (msg) u.clean(msg, 0);
-      } catch(e) { u.noop(); }
-
       embed.setColor(0x0000FF);
       infraction.mod = mod.id;
       let member = message.guild.members.cache.get(infraction.discordId);
 
-      if (reaction == cardReactions[2]) {         // Minor infraction
+      if (reaction == cardReactions[2]) {         // Verbal warning
+        infraction.value = 0;
+        embed.addField("Resolved", mod.displayName + " issued a verbal warning.");
+      } else if (reaction == cardReactions[3]) {  // Minor infraction
         infraction.value = 1;
-        embed.addField("Resolved", mod.username + " issued a 1 point warning.");
-      } else if (reaction == cardReactions[3]) {  // Moderate infraction
+        embed.addField("Resolved", mod.displayName + " issued a 1 point warning.");
+      } else if (reaction == cardReactions[4]) {  // Moderate infraction
         infraction.value = 5;
-        embed.addField("Resolved", mod.username + " issued a 5 point warning.");
-      } else if (reaction == cardReactions[4]) {  // Major infraction
-        infraction.value = 10;
-        embed.addField("Resolved", mod.username + " issued a 10 point warning.");
+        embed.addField("Resolved", mod.displayName + " issued a 5 point warning.");
       } else if (reaction == cardReactions[5]) {  // Mute
         infraction.value = 10;
         if (member && !member.roles.cache.has(Module.config.roles.muted)) {
@@ -311,7 +306,7 @@ async function processCardReaction(reaction, mod, infraction) {
             roles
           });
         }
-        embed.addField("Resolved", mod.username + " muted the member.");
+        embed.addField("Resolved", mod.displayName + " muted the member.");
       } else {  // It wasn't really a thing
         return;
       }
@@ -327,10 +322,21 @@ async function processCardReaction(reaction, mod, infraction) {
         .setDescription(message.embeds[0].description)
         .setTimestamp(message.createdAt);
 
-        let response = "We have received one or more complaints regarding content you posted. We have reviewed the content in question and have determined, in our sole discretion, that it is against our code of conduct (<https://ldsgamers.com/code-of-conduct>). This content was removed on your behalf. As a reminder, if we believe that you are frequently in breach of our code of conduct or are otherwise acting inconsistently with the letter or spirit of the code, we may limit, suspend or terminate your access to the LDSG Discord server.";
+        let response = (
+          (infraction.value == 0) ?
+          `The LDSG Mods would like to speak with you about the following post. It may be that they're looking for some additional context or just want to handle things informally.\n\n**${mod.displayName}** will be reaching out to you shortly, if they haven't already.` :
+          `We have received one or more complaints regarding content you posted. We have reviewed the content in question and have determined, in our sole discretion, that it is against our code of conduct (<https://ldsgamers.com/code-of-conduct>). This content was removed on your behalf. As a reminder, if we believe that you are frequently in breach of our code of conduct or are otherwise acting inconsistently with the letter or spirit of the code, we may limit, suspend or terminate your access to the LDSG Discord server.\n\n**${mod.displayName}** has issued this warning.`
+        );
 
-        member.send(`${response}\n\n**${mod.username}** has issued this warning.`, {embed: quote})
+        member.send(response, {embed: quote})
         .catch(() => blocked(member));
+      }
+
+      if (infraction.value > 0) {
+        try {
+          let msg = await message.guild.channels.cache.get(infraction.channel).messages.fetch(infraction.message);
+          if (msg) u.clean(msg, 0);
+        } catch(e) { u.noop(); }
       }
 
       embed.fields = embed.fields.filter(f => !f.name || !f.name.startsWith("Jump"));
@@ -371,7 +377,8 @@ const Module = new Augur.Module()
     if ((message.channel.id == modLogs) && !user.bot && (message.author.id == message.client.user.id)) {
       if (cardReactions.includes(reaction.emoji.name) || reaction.emoji.name == "⏪") {
         let flag = await Module.db.infraction.getByFlag(message.id);
-        if (flag) processCardReaction(reaction, user, flag);
+        let mod = message.guild.members.cache.get(user.id);
+        if (flag) processCardReaction(reaction, mod, flag);
       }
     }
   } catch(e) { u.errorHandler(e, "Card Reaction Processing"); }
