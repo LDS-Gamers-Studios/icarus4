@@ -226,7 +226,7 @@ async function processCardReaction(reaction, mod, infraction) {
         if (member) {
           let quote = u.embed(embed);
           quote.fields = quote.fields.filter(f => !f.name.startsWith("Jump") && !f.name.startsWith("Infraction Summary"));
-          member.send(`**${mod?.displayName}** has retracted a warning.`).catch(u.noop);
+          member.send(`**${mod?.displayName}** has retracted a warning.`, {embed: quote}).catch(u.noop);
         }
       }
     } else if (infraction.mod != Module.client.user.id) {
