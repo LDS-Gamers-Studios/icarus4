@@ -202,6 +202,7 @@ async function warnCard(msg, filtered = null, call = false) {
 async function processCardReaction(reaction, mod, infraction) {
   try {
     if (reaction.users.cache.filter(u => !u.bot).size > 1) return;
+    let react = reaction;
     let message = reaction.message;
     reaction = reaction.emoji.name;
     let embed = u.embed(message.embeds[0]);
@@ -219,7 +220,7 @@ async function processCardReaction(reaction, mod, infraction) {
 
         message.edit({embed});
 
-        reaction.remove();
+        react.remove();
 
         let member = message.guild.members.cache.get(retraction.discordId);
         if (member) {
