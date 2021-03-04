@@ -720,16 +720,6 @@ const Module = new Augur.Module()
 
       for (const [memberId, member] of members) {
         try {
-          let inf = await Module.db.infraction.save({
-            discordId: member.id,
-            value: value,
-            description: comment,
-            message: msg.id,
-            channel: msg.channel.id,
-            mod: msg.author.id
-          });
-          let summary = await Module.db.infraction.getSummary(member.id);
-
           let response = "We have received one or more complaints regarding content you posted. We have reviewed the content in question and have determined, in our sole discretion, that it is against our code of conduct (<http://ldsgamers.com/code-of-conduct>). This content was removed on your behalf. As a reminder, if we believe that you are frequently in breach of our code of conduct or are otherwise acting inconsistently with the letter or spirit of the code, we may limit, suspend or terminate your access to the LDSG discord server.";
           member.send(`${response}\n\n**${msg.member.displayName}** has issued you a warning for:\n${comment}`).catch(() => blocked(member));
 
@@ -738,10 +728,23 @@ const Module = new Augur.Module()
             .setAuthor(u.escapeText(member.displayName), member.user.displayAvatarURL())
             .setDescription(comment)
             .addField("Resolved", `${msg.author.username} issued a ${value} point warning.`)
-            .addField(`Infraction Summary (${summary.time} Days) `, `Infractions: ${summary.count}\nPoints: ${summary.points}`)
             .setTimestamp();
+          let flag = await msg.client.channels.cache.get(modLogs).send({embed});
 
-          msg.client.channels.cache.get(modLogs).send({embed});
+          let inf = await Module.db.infraction.save({
+            discordId: member.id,
+            value: value,
+            description: comment,
+            message: msg.id,
+            flag: flag.id,
+            channel: msg.channel.id,
+            mod: msg.author.id
+          });
+
+          let summary = await Module.db.infraction.getSummary(member.id);
+          embed.addField(`Infraction Summary (${summary.time} Days) `, `Infractions: ${summary.count}\nPoints: ${summary.points}`);
+
+          flag.edit({embed});
         } catch(e) { u.errorHandler(e, msg); }
       }
     } else msg.reply("you need to tell me who and what the infraction is.").then(u.clean);
