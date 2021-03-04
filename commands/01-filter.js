@@ -214,8 +214,8 @@ async function processCardReaction(reaction, mod, infraction) {
       if (retraction) {
         let infractionSummary = await Module.db.infraction.getSummary(retraction.discordId);
         embed.setColor(0x00ff00);
-        embed.fields[2].value = `Infractions: ${infractionSummary.count}\nPoints: ${infractionSummary.points}`;
-        embed.fields[3].value = `${mod?.displayName} retracted the warning.`;
+        embed.fields.find(f => f.name.startsWith("Infraction Summary")).value = `Infractions: ${infractionSummary.count}\nPoints: ${infractionSummary.points}`;
+        embed.fields.find(f => f.name.startsWith("Resolved")).value = `${mod?.displayName} retracted the warning.`;
 
         message.edit({embed});
 
