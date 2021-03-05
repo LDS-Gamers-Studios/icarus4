@@ -1,4 +1,4 @@
-const Augur = require("augurbot")
+const Augur = require("augurbot"),
   u = require("../utils/utils"),
   axios = require('axios');
 
