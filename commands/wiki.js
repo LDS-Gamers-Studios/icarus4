@@ -9,8 +9,7 @@ function getPage(page) {
     axios.request({
       url,
       method: "get",
-      headers: { "Authorization": `Token ${token.tokenId}:${token.tokenSecret}` },
-      data
+      headers: { "Authorization": `Token ${token.tokenId}:${token.tokenSecret}` }
     }).then(fulfill, reject);
   })
 }
