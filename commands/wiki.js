@@ -36,7 +36,7 @@ const Module = new Augur.Module()
 
     // There are already more than 3 items, so if it's less than 3 something is broken
     if (items.length < 3) {
-      msg.channel.send("I was unable to see the wiki properly.");
+      msg.reply("I was unable to see the wiki properly.").then(u.clean);
       return;
     }
 
