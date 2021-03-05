@@ -40,19 +40,16 @@ const Module = new Augur.Module()
       return;
     }
 
-    items.sort((a, b) => {
+    items = items.sort((a, b) => {
       let aDistance = levenshteinDistance(a.name, suffix);
       let bDistance = levenshteinDistance(b.name, suffix);
       return aDistance > bDistance ? 1 : -1;
-    });
+    }).splice(0, 3).map(item => ({name: item.name, value: item.description}));
+    // Note to add a link once we have a good way to *get* one.
 
     let embed = u.embed()
       .setTitle("Search results for `" + suffix + "`")
-      .addFields(
-        { name: items[0].name, value: items[0].description },
-        { name: items[1].name, value: items[1].description },
-        { name: items[2].name, value: items[2].description }
-      );
+      .addFields(items);
     msg.channel.send({ embed });
   }
 });
