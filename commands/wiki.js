@@ -14,7 +14,7 @@ function getPage(page) {
   });
 }
 
-function levenshteinDistance(s, t) {
+function levenshteinDistance(s = "", t = "") {
   if (!s.length) return t.length;
   if (!t.length) return s.length;
 
