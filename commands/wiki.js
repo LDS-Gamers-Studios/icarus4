@@ -31,8 +31,9 @@ const Module = new Augur.Module()
   description: "Search the LDSG Wiki for a term.",
   syntax: "Term",
   process: async (msg, suffix) => {
-    let items = (await getPage("shelves").catch((err) => { return { data: [] }; })).data
-      .concat((await getPage("books").catch((err) => { return { data: [] }; })).data);
+    let shelves = (await getPage("shelves").catch(u.noop))?.data || [];
+    let books = (await getPage("books").catch(u.noop))?.data || [];
+    let items = shelves.concat(books);
 
     // There are already more than 3 items, so if it's less than 3 something is broken
     if (items.length < 3) {
