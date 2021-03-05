@@ -11,7 +11,7 @@ function getPage(page) {
       method: "get",
       headers: { "Authorization": `Token ${token.tokenId}:${token.tokenSecret}` }
     }).then(fulfill, reject);
-  })
+  });
 }
 
 function levenshteinDistance(s, t) {
