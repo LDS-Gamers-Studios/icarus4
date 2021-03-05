@@ -1,5 +1,6 @@
 const Augur = require("augurbot")
-  u = require("../utils/utils");
+  u = require("../utils/utils"),
+  axios = require('axios');
 
 async function getPage(page) {
   return new Promise((fulfill, reject) => {
