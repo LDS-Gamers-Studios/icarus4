@@ -4,7 +4,7 @@ const Augur = require("augurbot")
 
 function getPage(page) {
   return new Promise((fulfill, reject) => {
-    let url = "https://wiki.ldsgamers.com/api/" + page;
+    let url = "https://wiki.ldsgamers.com/api/" + encodeURIComponent(page);
     let token = Module.config.api.wiki;
     axios.request({
       url,
