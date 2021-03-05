@@ -2,7 +2,7 @@ const Augur = require("augurbot")
   u = require("../utils/utils"),
   axios = require('axios');
 
-async function getPage(page) {
+function getPage(page) {
   return new Promise((fulfill, reject) => {
     let url = "https://wiki.ldsgamers.com/api/" + page;
     let token = Module.config.api.wiki;
