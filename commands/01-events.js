@@ -74,7 +74,7 @@ const Module = new Augur.Module()
         message.guild.channels.cache.get("506575671242260490").send({embed});
       }
     } catch(e) { u.errorHandler(e, "Pin Request Processing"); }
-  } else if ((message.channel.id == Module.config.channels.modlogs) && (reaction.emoji.name == "🔗") && ((Date.now() - message.createdTimestamp) < (24 * 60 * 60 * 1000))) {
+  } else if ((message.channel.id == Module.config.channels.modlogs) && (reaction.emoji.name == "🔗") && (reaction.count == 1) && ((Date.now() - message.createdTimestamp) < (24 * 60 * 60 * 1000))) {
     // Move posts from #mod-logs to #mod-discussion
     try {
       let ldsg = message.guild;
