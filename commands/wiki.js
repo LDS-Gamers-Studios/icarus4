@@ -35,6 +35,10 @@ String.prototype.levenshtein = function (string) {
   return m[b.length][a.length];
 }
 
+String.prototype.removeWords = function (toRemove) {
+  return this.split(/[\s,-_\n]+/).filter(f => !toRemove.includes(f)).join(' ');
+}
+
 const Module = new Augur.Module()
 .addCommand({
   name: "wiki",
@@ -61,9 +65,11 @@ const Module = new Augur.Module()
       return "https://wiki.ldsgamers.com/books/" + item.slug;
     }
 
+    let toRemove = ["a", "of", "an", "and"];
+
     items = items.sort((a, b) => {
-      let aDistance = a.name.levenshtein(suffix);
-      let bDistance = b.name.levenshtein(suffix);
+      let aDistance = a.name.removeWords(toRemove).levenshtein(suffix);
+      let bDistance = b.name.removeWords(toRemove).levenshtein(suffix);
       return aDistance > bDistance ? 1 : -1;
     }).splice(0, 3).map(item => ({name: item.name, value: `[${item.description}](${getUrl(item)})\nUpdated at ${item.updated_at}`}));
 
