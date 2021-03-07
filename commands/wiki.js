@@ -44,9 +44,9 @@ const Module = new Augur.Module()
     function getUrl(item) {
       // Checking if it's a shelf or a book
       if (shelves.find(s => s.name === item.name)) {
-        return "https://wiki.ldsgamers.com/books/" + item.slug;
+        return "https://wiki.ldsgamers.com/shelves/" + item.slug;
       }
-      return "https://wiki.ldsgamers.com/shelves/" + item.slug;
+      return "https://wiki.ldsgamers.com/books/" + item.slug;
     }
 
     items = items.sort((a, b) => {
