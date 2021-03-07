@@ -41,12 +41,19 @@ const Module = new Augur.Module()
       return;
     }
 
+    function getUrl(item) {
+      // Checking if it's a shelf or a book
+      if (shelves.find(s => s.name === item.name)) {
+        return "https://wiki.ldsgamers.com/books/" + item.slug;
+      }
+      return "https://wiki.ldsgamers.com/shelves/" + item.slug;
+    }
+
     items = items.sort((a, b) => {
       let aDistance = levenshteinDistance(a.name, suffix);
       let bDistance = levenshteinDistance(b.name, suffix);
       return aDistance > bDistance ? 1 : -1;
-    }).splice(0, 3).map(item => ({name: item.name, value: item.description}));
-    // Note to add a link once we have a good way to *get* one.
+    }).splice(0, 3).map(item => ({name: item.name, value: `[${item.description}](${getUrl(item)})\nUpdated at ${item.updated_at}`}));
 
     let embed = u.embed()
       .setTitle("Search results for `" + suffix + "`")

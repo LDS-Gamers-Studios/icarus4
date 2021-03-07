@@ -43,6 +43,9 @@ async function updateFactionStatus() {
           .setDescription((content.length > 2040 ? content.substr(0, 2040) + "..." : content));
         channel.send({ embed });
 
+        // Don't record 503 errors. This will prevent double posting of the same article.
+        if (latestArticle.title === "Communication error...") { return; }
+
         lastGalnetArticleTitle = latestArticle.title;
         fs.writeFile(galnetDataFile, lastGalnetArticleTitle, function (err) {
           if (err) {
