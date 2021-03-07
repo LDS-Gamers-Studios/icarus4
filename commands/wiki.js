@@ -71,7 +71,10 @@ const Module = new Augur.Module()
       let aDistance = a.name.removeWords(toRemove).levenshtein(suffix);
       let bDistance = b.name.removeWords(toRemove).levenshtein(suffix);
       return aDistance > bDistance ? 1 : -1;
-    }).splice(0, 3).map(item => ({name: item.name, value: `[${item.description}](${getUrl(item)})\nUpdated at ${item.updated_at}`}));
+    }).map(item => ({ name: item.name, value: `[${item.description}](${getUrl(item)})\nUpdated at ${item.updated_at}` }));
+    if (items.length > 3) {
+      items = items.slice(3);
+    }
 
     let embed = u.embed()
       .setTitle("Search results for `" + suffix + "`")
