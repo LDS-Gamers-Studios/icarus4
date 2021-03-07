@@ -41,6 +41,7 @@ const Module = new Augur.Module()
   description: "Search the LDSG Wiki for a term.",
   syntax: "Term",
   process: async (msg, suffix) => {
+    msg.channel.startTyping();
     let shelves = (await getPage("shelves").catch(u.noop))?.data?.data || [];
     let books = (await getPage("books").catch(u.noop))?.data?.data || [];
     let items = shelves.concat(books);
@@ -48,6 +49,7 @@ const Module = new Augur.Module()
     // There are already more than 3 items, so if it's less than 3 something is broken
     if (items.length < 3) {
       msg.reply("I was unable to see the wiki properly.").then(u.clean);
+      msg.channel.stopTyping();
       return;
     }
 
@@ -69,6 +71,7 @@ const Module = new Augur.Module()
       .setTitle("Search results for `" + suffix + "`")
       .addFields(items);
     msg.channel.send({ embed });
+    msg.channel.stopTyping();
   }
 });
 
