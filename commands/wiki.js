@@ -75,6 +75,11 @@ const Module = new Augur.Module()
     if (items.length > 3) {
       items = items.slice(3);
     }
+    else if (items.length === 0) {
+      msg.reply("I couldn't find any books or shelves that matched that.").then(u.clean);
+      msg.channel.stopTyping();
+      return;
+    }
 
     let embed = u.embed()
       .setTitle("Search results for `" + suffix + "`")
