@@ -14,15 +14,25 @@ function getPage(page) {
   });
 }
 
-function levenshteinDistance(s = "", t = "") {
-  if (!s.length) return t.length;
-  if (!t.length) return s.length;
+String.prototype.levenshtein = function (string) {
+  var a = this, b = string + "", m = [], i, j, min = Math.min;
 
-  return Math.min(
-    levenshteinDistance(s.substr(1), t) + 1,
-    levenshteinDistance(t.substr(1), s) + 1,
-    levenshteinDistance(s.substr(1), t.substr(1)) + (s[0] !== t[0] ? 1 : 0)
-  ) + 1;
+  if (!(a && b)) return (b || a).length;
+
+  for (i = 0; i <= b.length; m[i] = [i++]);
+  for (j = 0; j <= a.length; m[0][j] = j++);
+
+  for (i = 1; i <= b.length; i++) {
+    for (j = 1; j <= a.length; j++) {
+      m[i][j] = b.charAt(i - 1) == a.charAt(j - 1)
+        ? m[i - 1][j - 1]
+        : m[i][j] = min(
+          m[i - 1][j - 1] + 1,
+          min(m[i][j - 1] + 1, m[i - 1][j]))
+    }
+  }
+
+  return m[b.length][a.length];
 }
 
 const Module = new Augur.Module()
@@ -50,8 +60,8 @@ const Module = new Augur.Module()
     }
 
     items = items.sort((a, b) => {
-      let aDistance = levenshteinDistance(a.name, suffix);
-      let bDistance = levenshteinDistance(b.name, suffix);
+      let aDistance = a.name.levenshtein(suffix);
+      let bDistance = b.name.levenshtein(suffix);
       return aDistance > bDistance ? 1 : -1;
     }).splice(0, 3).map(item => ({name: item.name, value: `[${item.description}](${getUrl(item)})\nUpdated at ${item.updated_at}`}));
 
