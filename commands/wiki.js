@@ -67,7 +67,7 @@ const Module = new Augur.Module()
 
     let toRemove = ["a", "of", "an", "and"];
 
-    items = items.sort((a, b) => {
+    items = items.filter(i => i.name.removeWords(toRemove).levenshtein(suffix) < 6).sort((a, b) => {
       let aDistance = a.name.removeWords(toRemove).levenshtein(suffix);
       let bDistance = b.name.removeWords(toRemove).levenshtein(suffix);
       return aDistance > bDistance ? 1 : -1;
