@@ -290,7 +290,7 @@ async function processCardReaction(reaction, mod, infraction) {
 
       if (reaction == cardReactions[2]) {         // Verbal warning
         infraction.value = 0;
-        embed.addField("Resolved", mod.displayName + " issued a verbal warning.");
+        embed.setColor(0x00FFFF).addField("Resolved", mod.displayName + " issued a verbal warning.");
       } else if (reaction == cardReactions[3]) {  // Minor infraction
         infraction.value = 1;
         embed.addField("Resolved", mod.displayName + " issued a 1 point warning.");
