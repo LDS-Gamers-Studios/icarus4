@@ -521,7 +521,7 @@ const Module = new Augur.Module()
   syntax: "<@user> <nickname>",
   description: "Change a user's nickname",
   category: "Mod",
-  permissions: (msg) => msg.channel.permissionsFor(msg.member)?.has("MANAGE_NICKNAMES"),
+  permissions: isMod,
   process: async (msg, suffix) => {
     u.clean(msg, 0);
     let setNick = suffix.replace(/<@!?\d+>/g, "").trim();
