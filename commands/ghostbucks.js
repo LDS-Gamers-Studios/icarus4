@@ -171,7 +171,7 @@ const Module = new Augur.Module()
     const MAX = 10000;
     try {
       u.clean(msg, 0);
-      let mentions = msg.mentions.members;
+      let members = msg.mentions.members;
       if (members?.size > 0) {
         let team = msg.member.roles.cache.has(Module.config.roles.team);
         let ldsg = msg.client.guilds.cache.get(Module.config.ldsg);
