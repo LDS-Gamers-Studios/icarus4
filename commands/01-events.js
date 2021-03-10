@@ -88,7 +88,7 @@ const Module = new Augur.Module()
   try {
     let ldsg = newUser.client.guilds.cache.get(Module.config.ldsg);
     let newMember = ldsg.members.cache.get(newUser.id);
-    if (!newMember || !newMember.roles.cache.has(Module.config.roles.trusted) || newMember.roles.cache.has(Module.config.roles.untrusted)) {
+    if (newMember && (!newMember.roles.cache.has(Module.config.roles.trusted) || newMember.roles.cache.has(Module.config.roles.untrusted))) {
       let user = await Module.db.user.fetchUser(newMember).catch(u.noop);
       const embed = u.embed()
         .setTimestamp()
