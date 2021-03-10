@@ -211,7 +211,7 @@ const Module = new Augur.Module()
               }
               msg.channel.send(`${ember}${receipt.value} sent to ${member} for ${reason}`).then(u.clean);
               msg.client.channels.cache.get(modLogs).send(`${(discordId == msg.client.user.id) ? "<@111232201848295424> " : ""}**${u.escapeText(msg.member.displayName)}** gave **${u.escapeText(member.displayName)}** ${ember}${receipt.value} for ${reason}`);
-              if (!team || (discordId == msg.client.user.id))) {
+              if (!team || (discordId == msg.client.user.id)) {
                 let withdrawl = {
                   currency: "em",
                   discordId: msg.member.id,
