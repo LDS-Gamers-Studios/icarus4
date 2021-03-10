@@ -209,7 +209,7 @@ const Module = new Augur.Module()
                 let balance = await Module.db.bank.getBalance(discordId, "em");
                 member.send(`You were just awarded ${ember}${receipt.value} from ${u.escapeText(msg.member.displayName)} for ${reason}\nYou now have a total of ${ember}${balance.balance} in your LDSG account.`).catch(u.noop);
               }
-              msg.channel.send(`${ember}${receipt.value} sent to ${member} for ${reason}`).then(u.clean);
+              msg.channel.send(`${ember}${value} sent to ${member} for ${reason}`).then(u.clean);
               msg.client.channels.cache.get(modLogs).send(`${(discordId == msg.client.user.id) ? "<@111232201848295424> " : ""}**${u.escapeText(msg.member.displayName)}** gave **${u.escapeText(member.displayName)}** ${ember}${receipt.value} for ${reason}`);
               if (!team || (discordId == msg.client.user.id)) {
                 let withdrawl = {
