@@ -1,5 +1,6 @@
 const Augur = require("augurbot"),
-    u = require("../utils/utils");
+    u = require("../utils/utils"),
+    axios = require("axios");
 
 const Module = new Augur.Module()
     .addCommand({
@@ -36,6 +37,14 @@ const Module = new Augur.Module()
                 args.shift();
               }
               // Fallback
+              if (!src) {
+                let i = 0;
+                while (!(src?.endsWith(".jpg") || src?.endsWith(".png")) && (i++ < 5)) {
+                  let response = await axios.get("https://random.dog/woof.json").catch(u.noop);
+                  src = response?.data?.url;
+                }
+                if (!(src?.endsWith(".jpg") || src?.endsWith(".png"))) src = null;
+              }
               if (!src) src = "https://i.imgflip.com/qbm81.jpg";
             }
             let [topText, bottomText] = args;
