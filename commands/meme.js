@@ -8,7 +8,7 @@ const Module = new Augur.Module()
         category: "Meme",
         description: "Creates a meme, put an image URL for you background and then put the text you want on new lines.",
         permissions: (msg) => msg.channel.type === 'dm' || msg.channel.permissionsFor(msg.member).has(["ATTACH_FILES", "EMBED_LINKS"]),
-        process: (msg, uncleanSuffix) => {
+        process: async (msg, uncleanSuffix) => {
             if (!uncleanSuffix) return msg.reply("you need to tell me some meme text!").then(u.clean);
             let { suffix } = u.parse(msg, true);
             //general globals from bot this was imported from
