@@ -30,6 +30,7 @@ const Module = new Augur.Module()
   name: "wiki",
   description: "Search the LDSG Wiki for a term.",
   syntax: "Term",
+  enabled: false,
   process: async (msg, suffix) => {
     let shelves = (await getPage("shelves").catch(u.noop))?.data?.data || [];
     let books = (await getPage("books").catch(u.noop))?.data?.data || [];
