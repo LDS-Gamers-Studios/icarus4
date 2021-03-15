@@ -23,7 +23,7 @@ const Module = new Augur.Module()
         embed
         .setTitle(msg.client.user.username + " Commands" + (msg.guild ? ` in ${msg.guild.name}.` : "."))
         .setDescription(`You have access to the following commands. For more info, type \`${prefix}help <command>\`.`)
-        .setFooter(`Page 1 of ${Math.ceil(commands.size)}`);
+        .setFooter(`Page 1 of ${Math.ceil(commands.size / perPage)}`);
 
         let categories = commands
         .filter(c => !c.hidden && c.category != "General")
