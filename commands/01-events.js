@@ -11,12 +11,14 @@ const Module = new Augur.Module()
         SEND_MESSAGES: false,
         SPEAK: false
       }).catch(e => u.errorHandler(e, `Update New Channel Permissions: ${channel.name}`));
+      /* Allow them to access the rest of the server while in Ghost's office.
       channel.createOverwrite("771516264618262607", {
         VIEW_CHANNEL: false,
         CONNECT: false,
         SEND_MESSAGES: false,
         SPEAK: false
       }).catch(e => u.errorHandler(e, `Update New Channel Permissions: ${channel.name}`));
+      */
     } else {
       u.errorLog.send(u.embed().setTitle("Update New Channel Permissions").setDescription(`Insufficient permissions to update channel ${channel.name}. Muted permissions need to be applied manually.`));
     }
