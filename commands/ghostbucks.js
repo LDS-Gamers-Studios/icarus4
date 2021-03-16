@@ -177,6 +177,8 @@ const Module = new Augur.Module()
         let ldsg = msg.client.guilds.cache.get(Module.config.ldsg);
         let reason = suffix.replace(/<@!?\d+>/ig, "").trim().split(" ");
         let value = parseInt(reason.shift(), 10);
+        reason = reason.join(" ").trim();
+        
         for (const [discordId, member] of members) {
           if (discordId == msg.author.id) {
             msg.reply("you can't give to *yourself*, silly.").then(u.clean).catch(u.noop);
@@ -190,12 +192,10 @@ const Module = new Augur.Module()
             if (value > MAX) value = MAX;
             if (value < -MAX) value = -MAX;
 
-            reason = ((reason.length > 0) ? reason.join(" ") : "No particular reason.").trim();
-
             let deposit = {
               currency: "em",
               discordId,
-              description: `From ${msg.member.displayName}: ${reason}`,
+              description: `From ${msg.member.displayName}: ${reason || "No particular reason"}`,
               value,
               mod: msg.author.id
             };
