@@ -199,7 +199,7 @@ const Module = new Augur.Module()
 .addCommand({name: "channelactivity",
   description: "See how active a channel has been over the last two weeks",
   category: "Mod",
-  permissions: (msg) => (msg.member.roles.cache.has(Module.config.roles.management) || msg.member.roles.cache.has("205826273639923722")),
+  permissions: (msg) => (msg.member?.roles.cache.has(Module.config.roles.management) || msg.member?.roles.cache.has("205826273639923722")),
   process: async (msg) => {
     try {
       const last = Date.now() - (14 * 24 * 60 * 60 * 1000);
@@ -639,7 +639,7 @@ const Module = new Augur.Module()
   description: "Remove a word from the language filter",
   category: "Mod",
   hidden: true,
-  permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && (msg.member.roles.cache.has(Module.config.roles.management) || msg.member.roles.cache.has("205826273639923722"))),
+  permissions: (msg) => ((msg.guild?.id == Module.config.ldsg) && (msg.member?.roles.cache.has(Module.config.roles.management) || msg.member?.roles.cache.has("205826273639923722"))),
   process: (msg, suffix) => {
     suffix = suffix.toLowerCase().trim();
     if (pf.remove_word(suffix)) {
