@@ -205,14 +205,14 @@ const Module = new Augur.Module()
       const last = Date.now() - (14 * 24 * 60 * 60 * 1000);
       const channels = msg.guild.channels.cache.filter(c => (c.type == "text" && c.permissionsFor(msg.client.user).has("VIEW_CHANNEL") && (c.parentID != "363019058158895117")));
       const fetch = channels.map(c => c.messages.fetch({limit: 100}));
-      const stats = new u.Collection();
+      const stats = new u.Collection(channels.map(c => ([c.id, {channel: c, messages: 0}])));
       const channelMsgs = await Promise.all(fetch);
 
       for (let messages of channelMsgs) {
         messages = messages.filter(m => m.createdTimestamp > last);
         if (messages.size > 0) {
           let channel = messages.first().channel;
-          stats.set(channel.id, {channel: channel, messages: messages.size});
+          stats.get(channel.id).messages = messages.size;
         }
       }
 
