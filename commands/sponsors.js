@@ -1,18 +1,17 @@
 const Augur = require("augurbot"),
-  u = require("../utils/utils"),
-  {Collection} = require("discord.js");
+  u = require("../utils/utils");
 
-const sponsorChannels = new Collection();
+const sponsorChannels = new u.Collection();
 let proSponsor = "121783903630524419";
 
 const Module = new Augur.Module()
 .addCommand({name: "coolkids",
   description: "Add user(s) to your Pro Sponsor private channel.",
   suffix: "@user(s)",
-  permissions: (msg) => msg.guild && (msg.guild.id == Module.config.ldsg) && sponsorChannels.has(msg.member.id),
+  permissions: (msg) => (msg.guild?.id == Module.config.ldsg) && sponsorChannels.has(msg.member?.id),
   process: async (msg) => {
     u.clean(msg, 0);
-    let channelId = sponsorChannels.get(msg.member.id);
+    let channelId = sponsorChannels.get(msg.member.id)?.channelId;
     let channel = msg.guild.channels.cache.get(channelId);
 
     if (msg.mentions.members.size == 0) {
@@ -30,7 +29,7 @@ const Module = new Augur.Module()
       msg.react("👌").catch(u.noop);
     } catch(error) {
       u.errorHandler(error, msg);
-      msg.reply(`I ran into an error trying to remove ${member.displayName} from ${channel}.`).then(u.clean);
+      msg.reply(`I ran into an error trying to add ${member.displayName} to ${channel}.`).then(u.clean);
       msg.react("❌").catch(u.noop);
     }
   }
@@ -87,27 +86,40 @@ const Module = new Augur.Module()
 .addCommand({name: "uncoolkids",
   description: "Remove user(s) to your Pro Sponsor private channel.",
   suffix: "@user(s)",
-  permissions: (msg) => msg.guild && (msg.guild.id == Module.config.ldsg) && sponsorChannels.has(msg.member.id),
+  permissions: (msg) => (msg.guild?.id == Module.config.ldsg) && sponsorChannels.has(msg.member.id),
   process: async (msg) => {
     u.clean(msg, 0);
-    let channelId = sponsorChannels.get(msg.member.id);
-    let channel = msg.guild.channels.cache.get(channelId);
 
-    if (msg.mentions.members.size == 0) {
-      msg.reply("you need to tell me who to remove from your channel!").then(u.clean);
-      msg.react("❌").catch(u.noop);
-      return;
-    }
-
-    try {
-      for (const [memberId, member] of msg.mentions.members) {
-        await channel?.permissionOverwrites.get(memberId)?.delete("Pro Sponsor Uninvite");
+    if (msg.mentions.channels.size > 0) {
+      try {
+      for (const [channelId, channel] of msg.mentions.channels) {
+          let myChannel = sponsorChannels.get(msg.author.id)?.channelId;
+          if (channelId == myChannel) {
+            msg.reply("you can't remove yourself from your own channel!").then(u.clean);
+            continue;
+          } else if (sponsorChannels.find(c => c.channelId == channelId)) {
+            channel.permissionOverwrites.get(msg.author.id)?.delete("I don't want to be here anymore.");
+            msg.react("👌").catch(u.noop);
+          }
+        }
+      } catch(error) {
+        u.errorHandler(error, msg);
+        msg.react("❌").catch(u.noop);
       }
-      msg.react("👌").catch(u.noop);
-    } catch(error) {
-      u.errorHandler(error, msg);
-      msg.reply(`I ran into an error trying to remove ${member.displayName} from ${channel}.`).then(u.clean);
-      msg.react("❌").catch(u.noop);
+    } else if (sponsorChannels.has(msg.author.id) && (msg.mentions.members.size > 0)) {
+      let channelId = sponsorChannels.get(msg.member.id)?.channelId;
+      let channel = msg.guild.channels.cache.get(channelId);
+      try {
+        for (const [memberId, member] of msg.mentions.members) {
+          await channel?.permissionOverwrites.get(memberId)?.delete("Pro Sponsor Uninvite");
+        }
+        msg.react("👌").catch(u.noop);
+      } catch(error) {
+        u.errorHandler(error, msg);
+        msg.react("❌").catch(u.noop);
+      }
+    } else {
+      msg.reply(`You need to tell me ${sponsorChannels.has(msg.author.id) ? "who to remove or " : ""}which Pro Sponsor Channel to leave!`).then(u.clean);
     }
   }
 })
@@ -119,7 +131,10 @@ const Module = new Augur.Module()
       sponsorChannels.clear();
       for (let row of rows) {
         if (!(ldsg.members.cache.has(row.sponsorid) && ldsg.members.cache.get(row.sponsorid).roles.cache.has(proSponsor))) continue;
-        sponsorChannels.set(row.sponsorid, row.channelid);
+        sponsorChannels.set(row.sponsorid, {
+          sponsorId: row.sponsorid,
+          channelId: row.channelid
+        });
       }
     }
   });
