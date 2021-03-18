@@ -482,7 +482,7 @@ const Module = new Augur.Module()
   syntax: "<number of messages>",
   description: "Delete a number of messages",
   category: "Mod",
-  permissions: (msg) => msg.channel.permissionsFor(msg.member)?.has("MANAGE_MESSAGES"),
+  permissions: (msg) => msg.channel.permissionsFor(msg.author)?.has("MANAGE_MESSAGES"),
   process: async (msg, suffix) => {
     try {
       let purge = parseInt(suffix, 10) || 0;
