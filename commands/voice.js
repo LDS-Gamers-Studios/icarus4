@@ -374,6 +374,7 @@ const Module = new Augur.Module()
       })));
 
       await channel.overwritePermissions(overwrites);
+      if (channel.name.includes("Room")) await channel.setName(channel.name.replace("Room", "[STREAM]"), "Stream Lock");
       await msg.react("🔒");
     } catch(error) { u.errorHandler(error, msg); }
   }
@@ -401,6 +402,7 @@ const Module = new Augur.Module()
       ];
 
       await channel.overwritePermissions(overwrites);
+      if (channel.name.includes("[STREAM]")) channel.setName(channel.name.replace("[STREAM]", "Room"), "Channel Unlock");
       await msg.react("🔓");
     } catch(error) { u.errorHandler(error, msg); }
   }
