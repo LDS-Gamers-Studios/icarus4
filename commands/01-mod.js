@@ -204,22 +204,29 @@ const Module = new Augur.Module()
     try {
       const last = Date.now() - (14 * 24 * 60 * 60 * 1000);
       const channels = msg.guild.channels.cache.filter(c => (c.type == "text" && c.permissionsFor(msg.client.user).has("VIEW_CHANNEL") && (c.parentID != "363019058158895117")));
-      const fetch = channels.map(c => c.message.fetch({limit: 100}));
-      const stats = new u.Collection(channels.map(c => ([c.id, {id: c.id, name: c.name, messages: 0}])));
-
+      const fetch = channels.map(c => c.messages.fetch({limit: 100}));
+      const stats = new u.Collection();
       const channelMsgs = await Promise.all(fetch);
 
       for (let messages of channelMsgs) {
         messages = messages.filter(m => m.createdTimestamp > last);
-        if (messages.size > 0)
-          stats.get(messages.first().channel.id).messages = messages.size;
+        if (messages.size > 0) {
+          let channel = messages.first().channel;
+          stats.set(channel.id, {channel: channel, messages: messages.size});
+        }
       }
+
+      let categories = msg.guild.channels.cache.filter(c => c.type == "category").sort((a, b) => a.position - b.position);
+      let response = "";
+      for (const [categoryId, category] of categories) {
+        let categoryStats = stats.filter(c => c.channel.parentID == categoryId && c.messages < 25).sort((a, b) => a.channel.position - b.channel.position);
+        if (categoryStats.size > 0) {
+          response += `__**${category.name}**__\n${categoryStats.map(c => `<#${c.channel.id}>: ${c.messages}`).join("\n")}\n\n`
+        }
+      }
+
       msg.channel.send(
-        stats
-        .filter(c => c.messages < 25)
-        .sort((a, b) => b.messages - a.messages)
-        .map(channel => `<#${channel.id}>: ${channel.messages}`)
-        .join("\n"),
+        response,
         {split: true}
       );
     } catch(error) { u.errorHandler(error, msg); }
