@@ -383,7 +383,7 @@ const Module = new Augur.Module()
   description: "Unlocks your current voice channel for new users",
   category: "Voice",
   hidden: true,
-  permissions: (msg) => (msg.guild && (msg.guild.id == Module.config.ldsg) && msg.member.voice.channel && isCommunityVoice(msg.member.voice.channel)),
+  permissions: (msg) => isCommunityVoice(msg.member?.voice.channel) && msg.member?.voice.channel?.permissionsFor(msg.author).has("SPEAK"),
   process: async (msg) => {
     try {
       const channel = msg.member.voice.channel;
