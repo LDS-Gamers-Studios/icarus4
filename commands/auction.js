@@ -1,11 +1,11 @@
 const Augur = require("augurbot");
 const u = require("../utils/utils");
-const shortid = require("shortid").generate;
+const {nanoid} = require("nanoid");
 const fs = require("fs");
 
 class Auction {
   constructor(data) {
-    this.id = data.id || shortid();
+    this.id = data.id || nanoid();
     this.bids = data.bids || [];
     this.description = data.description;
     this.currency = data.currency;
