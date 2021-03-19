@@ -65,8 +65,8 @@ const Module = new Augur.Module()
               response.push(`${data.perUser.size} users have lost ${data.total} ankles over the last ${time} days in ${channel}:\`\`\``);
             }
 
-            for (const [userId, count] of data.perUser) {
-              let user = msg.guild.members.cache.get(userId) || await msg.client.users.fetch(userId);
+            for (const [discordId, count] of data.perUser) {
+              let user = msg.guild.members.cache.get(discordId) || await msg.client.users.fetch(discordId);
               response.push(`${user.displayName || user.username}: ${count} ankles lost.`);
             }
             await msg.channel.send(response.join("\n") + "```");
@@ -90,8 +90,8 @@ const Module = new Augur.Module()
         if (data.perUser.size > 0) {
           response.push("Top 5 users:```");
           let displayCount = 0;
-          for (const [userId, count] of data.perUser) {
-            response.push(`${msg.guild.members.cache.get(userId).displayName}: ${count} ankles lost.`);
+          for (const [discordId, count] of data.perUser) {
+            response.push(`${msg.guild.members.cache.get(discordId).displayName}: ${count} ankles lost.`);
             if (++displayCount == 5) break;
           }
           response[response.length-1] += "```";
