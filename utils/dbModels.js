@@ -56,7 +56,7 @@ const models = {
           return acc;
         }, new Collection()),
         total: records.length
-      });
+      };
     },
     getUserSummary: async function(discordId, time = 10000) {
       if (discordId.id) discordId = discordId.id;
