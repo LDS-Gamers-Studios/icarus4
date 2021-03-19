@@ -53,8 +53,10 @@ const Module = new Augur.Module()
   category: "Silly",
   process: async (msg, suffix) => {
     try {
+      msg.channel.startTyping();
       const canvas = await popart(msg, [{ apply: "spin", params: [60] }]);
       await msg.channel.send({files: [await canvas.getBufferAsync(Jimp.MIME_JPEG)]});
+      msg.channel.stopTyping();
     } catch(e) { u.errorHandler(e, msg); }
   }
 })
@@ -81,6 +83,7 @@ const Module = new Augur.Module()
   category: "Silly",
   process: async (msg, suffix) => {
     try {
+      msg.channel.startTyping();
       let target;
       let urlexp = /\<?(https?:\/\/\S+)\>?(?:\s+)?(\d*)/;
       let av;
@@ -106,6 +109,7 @@ const Module = new Augur.Module()
       ]);
 
       await msg.channel.send({files: [await av.getBufferAsync(Jimp.MIME_PNG)]});
+      msg.channel.stopTyping();
     } catch(e) { u.errorHandler(e, msg); }
   }
 })
@@ -114,6 +118,7 @@ const Module = new Augur.Module()
   category: "Silly",
   process: async (msg, suffix) => {
     try {
+      msg.channel.startTyping();
       let color;
       let original;
       let image;
@@ -144,6 +149,7 @@ const Module = new Augur.Module()
         { apply: "hue", params: [color] }
       ]);
       await msg.channel.send({files: [await image.getBufferAsync(Jimp.MIME_PNG)]});
+      msg.channel.stopTyping();
     } catch(e) { u.errorHandler(e, msg); }
   }
 })
@@ -152,6 +158,7 @@ const Module = new Augur.Module()
   category: "Silly",
   process: async (msg) => {
     try {
+      msg.channel.startTyping();
       const arm = "https://cdn.discordapp.com/attachments/488887953939103775/545672817354735636/509442648080121857.png";
       const target = await u.getMention(msg, false) || msg.author;
       const staticURL = target.displayAvatarURL({size: 128, dynamic: false, format: "png"});
@@ -173,6 +180,7 @@ const Module = new Augur.Module()
       canvas.blit(avatar, 120, 0);
 
       await msg.channel.send({files: [await canvas.getBufferAsync(Jimp.MIME_PNG)]});
+      msg.channel.stopTyping();
     } catch(e) { u.errorHandler(e, msg); }
   }
 })
@@ -182,6 +190,7 @@ const Module = new Augur.Module()
   category: "Silly",
   process: async (msg, suffix) => {
     try {
+      msg.channel.startTyping();
       let target;
       let urlexp = /\<?(https?:\/\/\S+)\>?(?:\s+)?(\d*)/;
       let av;
@@ -203,6 +212,7 @@ const Module = new Augur.Module()
       av.color([{ apply: "desaturate", params: [100] }]);
 
       await msg.channel.send({files: [await av.getBufferAsync(Jimp.MIME_PNG)]});
+      msg.channel.stopTyping();
     } catch(e) { u.errorHandler(e, msg); }
   }
 })
@@ -211,6 +221,7 @@ const Module = new Augur.Module()
   category: "Silly",
   process: async (msg, suffix) => {
     try {
+      msg.channel.startTyping();
       let original;
       let img;
 
@@ -237,7 +248,8 @@ const Module = new Augur.Module()
           img.setPixelColor(Jimp.rgbaToInt(255 - r, 255 - g, 255 - b, a), x, y);
         }
       }
-      msg.channel.send({files: [await img.getBufferAsync(Jimp.MIME_PNG)]});
+      await msg.channel.send({files: [await img.getBufferAsync(Jimp.MIME_PNG)]});
+      msg.channel.stopTyping();
     } catch(error) { u.errorHandler(error, msg); }
   }
 })
@@ -247,6 +259,7 @@ const Module = new Augur.Module()
   category: "Silly",
   process: async (msg) => {
     try {
+      msg.channel.startTyping();
       const hand = "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/twitter/259/sign-of-the-horns_1f918.png";
       const target = await u.getMention(msg, false) || msg.author;
       const staticURL = target.displayAvatarURL({size: 128, dynamic: false, format: "png"});
@@ -267,6 +280,7 @@ const Module = new Augur.Module()
       canvas.blit(avatar, 120, 0);
 
       await msg.channel.send({files: [await canvas.getBufferAsync(Jimp.MIME_PNG)]});
+      msg.channel.stopTyping();
     } catch(e) { u.errorHandler(e, msg); }
   }
 })
@@ -275,6 +289,7 @@ const Module = new Augur.Module()
   category: "Silly",
   process: async (msg, suffix) =>{
     try {
+      msg.channel.startTyping();
       let image = await Jimp.read('https://cdn.discordapp.com/attachments/789694239197626371/808446253737181244/personal.png');
       let target = await Jimp.read(suffix?.toLowerCase() == 'ldsg' ? 'https://cdn.discordapp.com/attachments/762899042363113482/808707034983170138/UH1D8seS_400x400.png' : (await u.getMention(msg, false)).displayAvatarURL({format: 'png', size: 512}));
       let mask = await Jimp.read('./storage/mask.png');
@@ -283,6 +298,7 @@ const Module = new Augur.Module()
       target.mask(mask);
       image.blit(target, 1050, 75);
       await msg.channel.send({files: [await image.getBufferAsync(Jimp.MIME_PNG)]});
+      msg.channel.stopTyping();
     } catch(e) {u.errorHandler(e, msg);}
   }
 })
@@ -291,11 +307,13 @@ const Module = new Augur.Module()
   category: "Silly",
   process: async (msg, suffix) => {
     try {
+      msg.channel.startTyping();
       const canvas = await popart(msg, [
         { apply: "desaturate", params: [100] },
         { apply: "saturate", params: [50] }
       ]);
       await msg.channel.send({files: [await canvas.getBufferAsync(Jimp.MIME_JPEG)]});
+      msg.channel.stopTyping();
     } catch(e) { u.errorHandler(e, msg); }
   }
 });

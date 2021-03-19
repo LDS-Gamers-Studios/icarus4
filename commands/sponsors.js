@@ -1,18 +1,17 @@
 const Augur = require("augurbot"),
-  u = require("../utils/utils"),
-  {Collection} = require("discord.js");
+  u = require("../utils/utils");
 
-const sponsorChannels = new Collection();
+const sponsorChannels = new u.Collection();
 let proSponsor = "121783903630524419";
 
 const Module = new Augur.Module()
 .addCommand({name: "coolkids",
   description: "Add user(s) to your Pro Sponsor private channel.",
   suffix: "@user(s)",
-  permissions: (msg) => msg.guild && (msg.guild.id == Module.config.ldsg) && sponsorChannels.has(msg.member.id),
+  permissions: (msg) => (msg.guild?.id == Module.config.ldsg) && sponsorChannels.has(msg.member?.id),
   process: async (msg) => {
     u.clean(msg, 0);
-    let channelId = sponsorChannels.get(msg.member.id);
+    let channelId = sponsorChannels.get(msg.member.id)?.channelId;
     let channel = msg.guild.channels.cache.get(channelId);
 
     if (msg.mentions.members.size == 0) {
@@ -27,12 +26,7 @@ const Module = new Augur.Module()
         }, "Pro Sponsor Invite");
         channel?.send(`Welcome, ${member}!`);
       }
-      msg.react("👌").catch(u.noop);
-    } catch(error) {
-      u.errorHandler(error, msg);
-      msg.reply(`I ran into an error trying to remove ${member.displayName} from ${channel}.`).then(u.clean);
-      msg.react("❌").catch(u.noop);
-    }
+    } catch(error) { u.errorHandler(error, msg); }
   }
 })
 .addCommand({name: "sponsorchannel",
@@ -40,7 +34,7 @@ const Module = new Augur.Module()
   suffix: "@sponsor(s)",
   info: "Creates a private channel for a Pro Sponsor, where they can invite individuals to hang out.",
   category: "Admin",
-  permissions: (msg) => msg.guild && (msg.guild.id == Module.config.ldsg) && (msg.member.roles.cache.has(Module.config.roles.management) || msg.member.roles.cache.has("205826273639923722")),
+  permissions: (msg) => (msg.guild?.id == Module.config.ldsg) && (msg.member?.roles.cache.has(Module.config.roles.management) || msg.member?.roles.cache.has("205826273639923722")),
   process: async (msg) => {
     try {
       u.clean(msg);
@@ -53,7 +47,7 @@ const Module = new Augur.Module()
       for (const [sponsorId, sponsor] of msg.mentions.members) {
         if (!sponsor.roles.cache.has(proSponsor)) continue;
         if (sponsorChannels.has(sponsor.id)) {
-          msg.reply(`${sponsor} already has a channel at ${msg.guild.channels.cache.get(sponsorChannels.get(sponsor.id))}!`).then(u.clean);
+          msg.reply(`${sponsor} already has a channel at ${msg.guild.channels.cache.get(sponsorChannels.get(sponsor.id)?.channelId)}!`).then(u.clean);
           continue;
         }
 
@@ -66,7 +60,7 @@ const Module = new Augur.Module()
           ]
         }, "Sponsor Perk");
 
-        sponsorChannels.set(sponsor.id, channel.id);
+        sponsorChannels.set(sponsor.id, {sponsorId: sponsor.id, channelId: channel.id});
 
         try {
           Module.config.sheets.get("Sponsor Channels").addRow({
@@ -81,33 +75,37 @@ const Module = new Augur.Module()
     } catch(e) {
       u.errorHandler(e, msg);
     }
-  },
-  permissions: (msg) => msg.guild
+  }
 })
 .addCommand({name: "uncoolkids",
   description: "Remove user(s) to your Pro Sponsor private channel.",
   suffix: "@user(s)",
-  permissions: (msg) => msg.guild && (msg.guild.id == Module.config.ldsg) && sponsorChannels.has(msg.member.id),
+  permissions: (msg) => (msg.guild?.id == Module.config.ldsg) && sponsorChannels.has(msg.member.id),
   process: async (msg) => {
     u.clean(msg, 0);
-    let channelId = sponsorChannels.get(msg.member.id);
-    let channel = msg.guild.channels.cache.get(channelId);
 
-    if (msg.mentions.members.size == 0) {
-      msg.reply("you need to tell me who to remove from your channel!").then(u.clean);
-      msg.react("❌").catch(u.noop);
-      return;
-    }
-
-    try {
-      for (const [memberId, member] of msg.mentions.members) {
-        await channel?.permissionOverwrites.get(memberId)?.delete("Pro Sponsor Uninvite");
-      }
-      msg.react("👌").catch(u.noop);
-    } catch(error) {
-      u.errorHandler(error, msg);
-      msg.reply(`I ran into an error trying to remove ${member.displayName} from ${channel}.`).then(u.clean);
-      msg.react("❌").catch(u.noop);
+    if (msg.mentions.channels.size > 0) {
+      try {
+      for (const [channelId, channel] of msg.mentions.channels) {
+          let myChannel = sponsorChannels.get(msg.author.id)?.channelId;
+          if (channelId == myChannel) {
+            msg.reply("you can't remove yourself from your own channel!").then(u.clean);
+            continue;
+          } else if (sponsorChannels.find(c => c.channelId == channelId)) {
+            channel.permissionOverwrites.get(msg.author.id)?.delete("I don't want to be here anymore.");
+          }
+        }
+      } catch(error) { u.errorHandler(error, msg); }
+    } else if (sponsorChannels.has(msg.author.id) && (msg.mentions.members.size > 0)) {
+      let channelId = sponsorChannels.get(msg.member.id)?.channelId;
+      let channel = msg.guild.channels.cache.get(channelId);
+      try {
+        for (const [memberId, member] of msg.mentions.members) {
+          await channel?.permissionOverwrites.get(memberId)?.delete("Pro Sponsor Uninvite");
+        }
+      } catch(error) { u.errorHandler(error, msg); }
+    } else {
+      msg.reply(`You need to tell me ${sponsorChannels.has(msg.author.id) ? "who to remove or " : ""}which Pro Sponsor Channel to leave!`).then(u.clean);
     }
   }
 })
@@ -119,7 +117,10 @@ const Module = new Augur.Module()
       sponsorChannels.clear();
       for (let row of rows) {
         if (!(ldsg.members.cache.has(row.sponsorid) && ldsg.members.cache.get(row.sponsorid).roles.cache.has(proSponsor))) continue;
-        sponsorChannels.set(row.sponsorid, row.channelid);
+        sponsorChannels.set(row.sponsorid, {
+          sponsorId: row.sponsorid,
+          channelId: row.channelid
+        });
       }
     }
   });

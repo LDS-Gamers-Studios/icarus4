@@ -1,5 +1,6 @@
 const Augur = require("augurbot"),
-    u = require("../utils/utils");
+    u = require("../utils/utils"),
+    axios = require("axios");
 
 const Module = new Augur.Module()
     .addCommand({
@@ -7,7 +8,7 @@ const Module = new Augur.Module()
         category: "Meme",
         description: "Creates a meme, put an image URL for you background and then put the text you want on new lines.",
         permissions: (msg) => msg.channel.type === 'dm' || msg.channel.permissionsFor(msg.member).has(["ATTACH_FILES", "EMBED_LINKS"]),
-        process: (msg, uncleanSuffix) => {
+        process: async (msg, uncleanSuffix) => {
             if (!uncleanSuffix) return msg.reply("you need to tell me some meme text!").then(u.clean);
             let { suffix } = u.parse(msg, true);
             //general globals from bot this was imported from
@@ -36,6 +37,14 @@ const Module = new Augur.Module()
                 args.shift();
               }
               // Fallback
+              if (!src) {
+                let i = 0;
+                while (!(src?.endsWith(".jpg") || src?.endsWith(".png")) && (i++ < 5)) {
+                  let response = await axios.get("https://random.dog/woof.json").catch(u.noop);
+                  src = response?.data?.url;
+                }
+                if (!(src?.endsWith(".jpg") || src?.endsWith(".png"))) src = null;
+              }
               if (!src) src = "https://i.imgflip.com/qbm81.jpg";
             }
             let [topText, bottomText] = args;

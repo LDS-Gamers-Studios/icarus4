@@ -171,14 +171,20 @@ const Module = new Augur.Module()
     const MAX = 10000;
     try {
       u.clean(msg, 0);
-      if (u.userMentions(msg, true).size > 0) {
+      let members = msg.mentions.members;
+      if (members?.size > 0) {
         let team = msg.member.roles.cache.has(Module.config.roles.team);
         let ldsg = msg.client.guilds.cache.get(Module.config.ldsg);
         let reason = suffix.replace(/<@!?\d+>/ig, "").trim().split(" ");
         let value = parseInt(reason.shift(), 10);
-        for (const [discordId, member] of u.userMentions(msg, true)) {
+        reason = reason.join(" ").trim();
+        
+        for (const [discordId, member] of members) {
           if (discordId == msg.author.id) {
             msg.reply("you can't give to *yourself*, silly.").then(u.clean).catch(u.noop);
+            continue;
+          } else if ((discordId == msg.client.user.id) && !(reason.length > 0)) {
+            msg.reply("you need to have a reason to give to me!").then(u.clean).catch(u.noop);
             continue;
           }
 
@@ -186,26 +192,26 @@ const Module = new Augur.Module()
             if (value > MAX) value = MAX;
             if (value < -MAX) value = -MAX;
 
-            reason = ((reason.length > 0) ? reason.join(" ") : "No particular reason.").trim();
-
             let deposit = {
               currency: "em",
               discordId,
-              description: `From ${msg.member.displayName}: ${reason}`,
+              description: `From ${msg.member.displayName}: ${reason || "No particular reason"}`,
               value,
               mod: msg.author.id
             };
 
             let account = await Module.db.bank.getBalance(msg.author.id, "em");
-            if (!team && (value < 0)) {
+            if ((value < 0) && (!team || (discordId == msg.client.user.id))) {
               msg.reply(`You can't just *take* ${ember}, silly.`).then(u.clean);
             } else if (team || (value <= account.balance)) {
-              let receipt = await Module.db.bank.addCurrency(deposit, "em");
-              let balance = await Module.db.bank.getBalance(discordId, "em");
-              msg.channel.send(`${ember}${receipt.value} sent to ${member} for ${reason}`).then(u.clean);
-              msg.client.channels.cache.get(modLogs).send(`**${u.escapeText(msg.member.displayName)}** gave **${u.escapeText(member.displayName)}** ${ember}${receipt.value} for ${reason}`);
-              member.send(`You were just awarded ${ember}${receipt.value} from ${u.escapeText(msg.member.displayName)} for ${reason}\nYou now have a total of ${ember}${balance.balance} in your LDSG account.`).catch(u.noop);
-              if (!team) {
+              if (discordId != msg.client.user.id) {
+                let receipt = await Module.db.bank.addCurrency(deposit, "em");
+                let balance = await Module.db.bank.getBalance(discordId, "em");
+                member.send(`You were just awarded ${ember}${receipt.value} from ${u.escapeText(msg.member.displayName)} for ${reason}\nYou now have a total of ${ember}${balance.balance} in your LDSG account.`).catch(u.noop);
+              }
+              msg.channel.send(`${ember}${value} sent to ${member} for ${reason}`).then(u.clean);
+              msg.client.channels.cache.get(modLogs).send(`${(discordId == msg.client.user.id) ? "<@111232201848295424> " : ""}**${u.escapeText(msg.member.displayName)}** gave **${u.escapeText(member.displayName)}** ${ember}${value} for ${reason}`);
+              if (!team || (discordId == msg.client.user.id)) {
                 let withdrawl = {
                   currency: "em",
                   discordId: msg.member.id,

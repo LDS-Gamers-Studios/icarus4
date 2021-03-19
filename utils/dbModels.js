@@ -20,801 +20,415 @@ mongoose.connect(config.db.db, config.db.settings);
 
 const models = {
   animation: {
-    save: function(data) {
-      return new Promise((fulfill, reject) => {
-        let newAnimation = new Animation(data);
-        newAnimation.save(e => {
-          if (e) reject(e);
-          else fulfill(data);
-        });
-      });
+    save: async function(data) {
+      let newAnimation = new Animation(data);
+      return await newAnimation.save();
     },
-    fetch: function(animationId) {
-      return new Promise((fulfill, reject) => {
-        Animation.findOne({animationId: animationId}, (err, animation) => {
-          if (err) reject(err);
-          else fulfill(animation);
-        });
-      });
+    fetch: async function(animationId) {
+      return await Animation.findOne({animationId}).exec();
     },
-    fetchAll: function(time = 14) {
-      return new Promise((fulfill, reject) => {
-        let since = new Date(Date.now() - (time * 24 * 60 * 60 * 1000));
-        Animation.find({date: { $gte: since }}, (err, records) => {
-          if (err) reject(err);
-          else fulfill(records);
-        });
-      });
+    fetchAll: async function(time = 14) {
+      let since = new Date(Date.now() - (time * 24 * 60 * 60 * 1000));
+      return await Animation.find({date: { $gte: since }}).exec();
     }
   },
   ankle: {
-    save: function(data) {
-      return new Promise((fulfill, reject) => {
-        let newLostAnkle = new Ankle(data);
-        newLostAnkle.save(e => {
-          if (e) reject(e);
-          else fulfill(data);
-        });
-      });
+    save: async function(data) {
+      let newLostAnkle = new Ankle(data);
+      return newLostAnkle.save();
     },
-    getAnkles: function(time = 365) {
-      return new Promise((fulfill, reject) => {
-        let since = new Date(Date.now() - (time * 24 * 60 * 60 * 1000));
-        Ankle.find({timestamp: { $gte: since }}, (err, records) => {
-          if (err) reject(err);
-          else fulfill(records);
-        });
-      });
+    getAnkles: async function(time = 365) {
+      let since = new Date(Date.now() - (time * 24 * 60 * 60 * 1000));
+      return await Ankle.find({timestamp: { $gte: since }}).exec();
     },
-    getChannelSummary: function(channelId, time = 10000) {
+    getChannelSummary: async function(channelId, time = 10000) {
       channelId = channelId.id ? channelId.id : channelId;
-      return new Promise((fulfill, reject) => {
-        let since = new Date(Date.now() - (time * 24 * 60 * 60 * 1000));
-        Ankle.find({channel: channelId, timestamp: { $gte: since }}, (err, records) => {
-          if (err) {
-            reject(err);
-          } else {
-            fulfill({
-              channelId: channelId,
-              perUser: records.reduce((acc, r) => {
-                // Group lost ankles by user.
-                // perUser attribute is an object with User IDs as keys and counts (within the channel) as values
-                if (acc.has(r.discordId)) acc.set(r.discordId, acc.get(r.discordId) + 1);
-                else acc.set(r.discordId, 1);
-                return acc;
-                }, new Collection()
-              ),
-              total: records.length
-            });
-          }
-        });
-      });
+      let since = new Date(Date.now() - (time * 24 * 60 * 60 * 1000));
+
+      let records = await Ankle.find({channel: channelId, timestamp: { $gte: since }}).exec();
+      return {
+        channelId: channelId,
+        perUser: records.reduce((acc, r) => {
+          // Group lost ankles by user.
+          // perUser attribute is an object with User IDs as keys and counts (within the channel) as values
+          if (acc.has(r.discordId)) acc.set(r.discordId, acc.get(r.discordId) + 1);
+          else acc.set(r.discordId, 1);
+          return acc;
+        }, new Collection()),
+        total: records.length
+      };
     },
-    getUserSummary: function(userId, time = 10000) {
-      userId = userId.id ? userId.id : userId;
-      return new Promise((fulfill, reject) => {
-        let since = new Date(Date.now() - (time * 24 * 60 * 60 * 1000));
-        Ankle.find({discordId: userId, timestamp: { $gte: since }}, (err, records) => {
-          if (err) {
-            reject(err);
-          } else {
-            fulfill({
-              userId: userId,
-              perChannel: records.reduce((acc, r) => {
-                // Group lost ankles by channel.
-                // perChannel attribute is an object with Channel IDs as keys and counts as values
-                if (acc.has(r.channel)) acc.set(r.channel, acc.get(r.channel) + 1);
-                else acc.set(r.channel, 1);
-                return acc;
-                }, new Collection()
-              ),
-              total: records.length
-            });
-          }
-        });
-      });
+    getUserSummary: async function(discordId, time = 10000) {
+      if (discordId.id) discordId = discordId.id;
+      let since = new Date(Date.now() - (time * 24 * 60 * 60 * 1000));
+      let records = await Ankle.find({discordId, timestamp: { $gte: since }}).exec();
+      return {
+        discordId,
+        perChannel: records.reduce((acc, r) => {
+          // Group lost ankles by channel.
+          // perChannel attribute is an object with Channel IDs as keys and counts as values
+          if (acc.has(r.channel)) acc.set(r.channel, acc.get(r.channel) + 1);
+          else acc.set(r.channel, 1);
+          return acc;
+        }, new Collection()),
+        total: records.length
+      };
     },
-    getSummary: function(time = 10000) {
-      return new Promise((fulfill, reject) => {
+    getSummary: async function(time = 10000) {
         let since = new Date(Date.now() - (time * 24 * 60 * 60 * 1000));
-        Ankle.find({timestamp: { $gte: since }}, (err, records) => {
-          if (err) {
-            reject(err);
-          } else {
-            fulfill({
-              perChannel: records.reduce((acc, r) => {
-                // Group lost ankles by channel.
-                // perChannel attribute is an object with Channel IDs as keys and counts as values
-                if (acc.has(r.channel)) acc.set(r.channel, acc.get(r.channel) + 1);
-                else acc.set(r.channel, 1);
-                return acc;
-                }, new Collection()
-              ),
-              perUser: records.reduce((acc, r) => {
-                // Group lost ankles by user.
-                // perUser attribute is an object with User IDs as keys and counts (within the channel) as values
-                if (acc.has(r.discordId)) acc.set(r.discordId, acc.get(r.discordId) + 1);
-                else acc.set(r.discordId, 1);
-                return acc;
-                }, new Collection()
-              ),
-              total: records.length
-            });
-          }
-        });
-      });
+        let records = await Ankle.find({timestamp: { $gte: since }}).exec();
+        return {
+          perChannel: records.reduce((acc, r) => {
+            // Group lost ankles by channel.
+            // perChannel attribute is an object with Channel IDs as keys and counts as values
+            if (acc.has(r.channel)) acc.set(r.channel, acc.get(r.channel) + 1);
+            else acc.set(r.channel, 1);
+            return acc;
+          }, new Collection()),
+          perUser: records.reduce((acc, r) => {
+            // Group lost ankles by user.
+            // perUser attribute is an object with User IDs as keys and counts (within the channel) as values
+            if (acc.has(r.discordId)) acc.set(r.discordId, acc.get(r.discordId) + 1);
+            else acc.set(r.discordId, 1);
+            return acc;
+          }, new Collection()),
+          total: records.length
+        };
     }
   },
   bank: {
-    getBalance: function(user, currency = "gb") {
-      return new Promise((fulfill, reject) => {
-        if ((typeof user) != "string") user = user.id;
-        Bank.aggregate(
-          [
-            { $match: { discordId: user, currency: currency }},
-            { $group: { _id: null, balance: {$sum: "$value"}}}
-          ],
-          (err, record) => {
-            if (err) reject(err);
-            else if (record && (record.length > 0)) fulfill({discordId: user, currency: currency, balance: record[0].balance});
-            else fulfill({discordId: user, currency: currency, balance: 0});
-          }
-        );
-      });
+    getBalance: async function(discordId, currency = "gb") {
+      if (discordId) discordId = discordId.id;
+      let record = await Bank.aggregate([
+        { $match: { discordId, currency }},
+        { $group: { _id: null, balance: {$sum: "$value"}}}
+      ]).exec();
+      if (record && (record.length > 0)) return {discordId, currency, balance: record[0].balance};
+      else return {discordId, currency, balance: 0};
     },
     getAwardsFrom: async function(givenFrom = [], since = 0, currency = "em") {
       let awards = await Bank.find({
         currency,
         timestamp: { $gte: since },
         mod: { $in: givenFrom }
-      });
+      }).exec();
       return awards;
     },
-    getRegister: function(user, currency = "gb") {
-      return new Promise((fulfill, reject) => {
-        if ((typeof user) != "string") user = user.id;
-        Bank.find({discordId: user, currency: currency}, (err, register) => {
-          if (err) reject(err);
-          else {
-            fulfill({
-              discordId: user,
-              currency: currency,
-              balance: register.reduce((c, r) => c + r.value, 0),
-              register: register
-            });
-          }
-        });
-      });
+    getRegister: async function(discordId, currency = "gb") {
+      if (discordId.id) discordId = discordId.id;
+      let register = await Bank.find({discordId, currency}).exec();
+      return {
+        discordId,
+        currency,
+        balance: register.reduce((c, r) => c + r.value, 0),
+        register: register
+      };
     },
-    addCurrency: function(data, currency = "gb") {
-      if (data.currency) currency = data.currency;
-      return new Promise((fulfill, reject) => {
-        let record = new Bank({
-          discordId: data.discordId,
-          description: data.description,
-          currency: data.currency || currency,
-          value: data.value,
-          mod: data.mod
-        });
-
-        record.save((err, deposit) => {
-          if (err) reject(err);
-          else fulfill(deposit);
-        });
+    addCurrency: async function(data, currency = "gb") {
+      if (data.discordId.id) data.discordId = data.discordId.id;
+      let record = new Bank({
+        discordId: data.discordId,
+        description: data.description,
+        currency: data.currency || currency,
+        value: data.value,
+        mod: data.mod
       });
+      return await record.save();
     }
   },
   ign: {
-    delete: (userId, system) => {
-      return new Promise((fulfill, reject) => {
-        if (userId.id) userId = userId.id;
-        Ign.findOneAndRemove(
-          { discordId: userId, system: system },
-          (err, ign) => {
-            if (err) reject(err);
-            else fulfill(ign);
-          }
-        );
-      });
+    delete: async function(discordId, system) {
+      if (discordId.id) discordId = discordId.id;
+      return await Ign.findOneAndRemove({ discordId, system }).exec();
     },
-    find: (userId, system = null) => {
-      return new Promise((fulfill, reject) => {
-        let query = null;
-        if (userId.id) userId = userId.id;
-
-        if (system && Array.isArray(system)) query = Ign.find({discordId: userId, system: {$in: system} });
-        else if (system && typeof userId == "string") query = Ign.findOne({discordId: userId, system: system });
-        else if (system && Array.isArray(userId)) query = Ign.find({discordId: {$in: userId}, system: system });
-        else query = Ign.find({discordId: userId});
-
-        query.exec((err, igns) => {
-          if (err) reject(err);
-          else fulfill(igns);
-        });
-      });
+    find: async function(discordId, system) {
+      if (discordId.id) discordId = discordId.id;
+      if (Array.isArray(system)) return await Ign.find({discordId, system: {$in: system} }).exec();
+      else if (typeof system == "string") return await Ign.findOne({discordId, system}).exec();
+      else if (Array.isArray(discordId)) return await Ign.find({discordId: {$in: discordId}, system }).exec();
+      else return await Ign.find({discordId}).exec();
     },
-    getList: (system) => {
-      return new Promise((fulfill, reject) => {
-        Ign.find(
-          {system: system},
-          (err, users) => {
-            if (err) reject(err);
-            else fulfill(users);
-          }
-        );
-      });
+    getList: async function(system) {
+      return await Ign.find({system}).exec();
     },
-    save: (userId, system, name) => {
-      return new Promise((fulfill, reject) => {
-        if (userId.id) userId = userId.id;
-        Ign.findOneAndUpdate(
-          { discordId: userId, system: system },
-          { $set: { ign: name } },
-          { upsert: true, new: true },
-          (err, ign) => {
-            if (err) reject(err);
-            else fulfill(ign);
-          }
-        );
-      });
+    save: async function(discordId, system, name) {
+      if (discordId.id) discordId = discordId.id;
+      return await Ign.findOneAndUpdate(
+        { discordId, system },
+        { $set: { ign: name } },
+        { upsert: true, new: true }
+      ).exec();
     }
   },
   infraction: {
-    getSummary: (userId, time = 28) => {
-      return new Promise((fulfill, reject) => {
+    getSummary: async function(discordId, time = 28) {
         let since = new Date(Date.now() - (time * 24 * 60 * 60 * 1000));
-        Infraction.find({discordId: userId, timestamp: { $gte: since }}, (err, records) => {
-          if (err) {
-            reject(err);
-          } else {
-            fulfill({
-              userId: userId,
-              count: records.length,
-              points: records.reduce((c, r) => c + r.value, 0),
-              time: time,
-              detail: records
-            });
-          }
-        });
-      });
+        let records = await Infraction.find({discordId, timestamp: { $gte: since }}).exec();
+        return {
+          discordId,
+          count: records.length,
+          points: records.reduce((c, r) => c + r.value, 0),
+          time,
+          detail: records
+        };
     },
-    getByFlag: (flag) => {
-      return new Promise((fulfill, reject) => {
-        if (typeof flag !== "string") flag = flag.id;
-        Infraction.findOne({flag}, (err, inf) => {
-          if (err) reject(err);
-          else fulfill(inf);
-        });
-      });
+    getByFlag: async function(flag) {
+      if (flag.id) flag = flag.id;
+      return await Infraction.findOne({flag}).exec();
     },
-    save: (data) => {
-      return new Promise((fulfill, reject) => {
-        let record = new Infraction({
-          discordId: (data.discordId || data.userId),
-          channel: data.channel,
-          message: data.message,
-          flag: data.flag,
-          value: data.value,
-          description: data.description,
-          mod: data.mod
-        });
-
-        record.save((err, inf) => {
-          if (err) reject(err);
-          else fulfill(inf);
-        });
+    save: async function(data) {
+      let record = new Infraction({
+        discordId: data.discordId,
+        channel: data.channel,
+        message: data.message,
+        flag: data.flag,
+        value: data.value,
+        description: data.description,
+        mod: data.mod
       });
+      return await record.save();
     },
-    retract: (flag, mod) => {
-      return new Promise((fulfill, reject) => {
-        if (typeof mod != "string") mod = mod.id;
-        if (typeof flag != "string") flag = flag.id;
-        Infraction.findOne({flag, mod}, (err, inf) => {
-          if (err) reject(err);
-          else if (inf) {
-            Infraction.findOneAndDelete({flag, mod}, (err, doc) => {
-              if (err) reject(err);
-              else fulfill(inf);
-            });
-          } else fulfill(inf);
-        });
-      });
+    retract: async function(flag, mod) {
+      if (mod.id) mod = mod.id;
+      if (flag.id) flag = flag.id;
+      return await Infraction.findOneAndDelete({flag, mod}).exec();
     },
-    update: (id, data) => {
-      return new Promise((fulfill, reject) => {
-        Infraction.findByIdAndUpdate(id, data, {new: true}, (err, doc) => {
-          if (err) reject(err);
-          else fulfill(doc);
-        });
-      });
+    update: async function(id, data) {
+      return await Infraction.findByIdAndUpdate(id, data, {new: true}).exec();
     }
   },
   mission: {
-    save: function(data) {
-      return new Promise((fulfill, reject) => {
-        Missionary.findOneAndUpdate(
-          { discordId: data.discordId },
-          { $set: data },
-          { upsert: true, new: true },
-          function(err, mission) {
-            if (err) reject(err);
-            else fulfill(mission);
-          }
-        );
-      });
+    save: async function(data) {
+      return await Missionary.findOneAndUpdate(
+        { discordId: data.discordId },
+        { $set: data },
+        { upsert: true, new: true }
+      ).exec();
     },
-    findEmail: function(email) {
-      return new Promise((fulfill, reject) => {
-        Missionary.findOne({ email: email }, (err, missionary) => {
-          if (err) reject(err);
-          else fulfill(missionary);
-        });
-      });
+    findEmail: async function(email) {
+      return await Missionary.findOne({ email }).exec();
     },
-    delete: function(discordId) {
-      return new Promise((fulfill, reject) => {
-        Missionary.findOneAndRemove(
-          { discordId: discordId },
-          function(err, missionary) {
-            if (err) reject(err);
-            else fulfill(missionary);
-          }
-        );
-      });
+    delete: async function(discordId) {
+      return await Missionary.findOneAndRemove({ discordId });
     },
-    findAll: function() {
-      return new Promise((fulfill, reject) => {
-        Missionary.find(
-          {}, function(err, missionaries) {
-            if (err) reject(err);
-            else fulfill(missionaries);
-          }
-        );
-      });
+    findAll: async function() {
+      return await Missionary.find({}).exec();
     }
   },
   reminder: {
-    complete: (reminder) => {
-      return new Promise((fulfill, reject) => {
-        Remind.findOneAndRemove({_id: reminder._id}, (err) => {
-          if (err) reject(err);
-          else fulfill();
-        });
-      });
+    complete: async function(reminder) {
+      return await Remind.findOneAndRemove({_id: reminder._id}).exec();
     },
-    fetchReminders: () => {
-      return new Promise((fulfill, reject) => {
-        Remind.find({timestamp: {$lte: new Date()}}, (error, docs) => {
-          if (error) reject(error);
-          else fulfill(docs);
-        });
-      });
+    fetchReminders: async function() {
+      return await Remind.find({timestamp: {$lte: new Date()}}).exec();
     },
-    setReminder: (data) => {
-      return new Promise((fulfill, reject) => {
-        let reminder = new Remind(data);
-        reminder.save((err, doc) => {
-          if (err) reject(err);
-          else fulfill(doc);
-        });
-      });
+    setReminder: async function(data) {
+      let reminder = new Remind(data);
+      return await reminder.save();
     }
   },
   server: {
-    addServer: (guild) => {
-      return new Promise((fulfill, reject) => {
-        let newServer = new Server({
-          serverId: guild.id
-        });
+    addServer: async function(guild) {
+      let newServer = new Server({
+        serverId: guild.id
+      });
 
-        Server.findOneAndUpdate(
-          {serverId: guild.id},
-          {$set: {
-            serverId: newServer.serverId,
-            botspam: newServer.botspam,
-            prefix: newServer.prefix,
-            language: newServer.language
-          }},
-          {upsert: true, new: true},
-          function(err, server) {
-            if (err) reject(err);
-            else {
-              serverSettings.set(server.serverId, server);
-              fulfill(server)
-            };
-          }
-        );
-      });
+      let server = await newServer.save();
+      serverSettings.set(server.serverId, server);
+      return server;
     },
-    getSetting: (guild, setting) => {
-      if (serverSettings.has(guild.id)) return serverSettings.get(guild.id)[setting];
-      else {
-        models.server.addServer(guild);
-        return null;
-      }
+    getSetting: function(guild, setting) {
+      if (!serverSettings.has(guild.id)) models.server.addServer(guild);
+      return serverSettings.get(guild.id)?.[setting];
     },
-    saveSetting: (guild, setting, value) => {
-      return new Promise((fulfill, reject) => {
-        let updateOptions = {};
-        updateOptions[setting] = value;
-        Server.findOneAndUpdate(
-          {serverId: guild.id},
-          {$set: updateOptions},
-          {upsert: true, new: true},
-          (err, server) => {
-            if (err) reject(err);
-            else {
-              serverSettings.set(server.serverId, server);
-              fulfill(server)
-            };
-          }
-        );
-      });
+    saveSetting: async function(guild, setting, value) {
+      let updateOptions = {};
+      updateOptions[setting] = value;
+      let server = await Server.findOneAndUpdate(
+        {serverId: guild.id},
+        {$set: updateOptions},
+        {upsert: true, new: true}
+      ).exec();
+      serverSettings.set(server.serverId, server);
+      return server;
     }
   },
   spoiler: {
-    save: function(data) {
-      return new Promise((fulfill, reject) => {
-        let newSpoiler = new Spoiler(data);
-        newSpoiler.save(e => {
-          if (e) reject(e);
-          else fulfill(data);
-        });
-      });
+    save: async function(data) {
+      let newSpoiler = new Spoiler(data);
+      return await newSpoiler.save();
     },
-    fetchAll: function(time = 14) {
-      return new Promise((fulfill, reject) => {
-        let since = new Date(Date.now() - (time * 24 * 60 * 60 * 1000));
-        Spoiler.find({timestamp: { $gte: since }}, (err, records) => {
-          if (err) reject(err);
-          else fulfill(records);
-        });
-      });
+    fetchAll: async function(time = 14) {
+      let since = new Date(Date.now() - (time * 24 * 60 * 60 * 1000));
+      return await Spoiler.find({timestamp: { $gte: since }}).exec();
     },
-    fetch: function(spoilerId) {
-      return new Promise((fulfill, reject) => {
-        Spoiler.findOne({spoilerId: spoilerId}, (e, spoiler) => {
-          if (e) reject(e);
-          else fulfill(spoiler);
-        });
-      });
+    fetch: async function(spoilerId) {
+      return await Spoiler.findOne({spoilerId: spoilerId}).exec();
     }
   },
   starboard: {
-    denyStar: (starId) => {
-      return new Promise((fulfill, reject) => {
-        Star.findOneAndUpdate({starId}, {$set: {deny: true}}, (err, doc) => {
-          if (err) reject(err);
-          else fulfill(doc);
-        });
-      });
+    denyStar: async function(starId) {
+      return await Star.findOneAndUpdate({starId}, {$set: {deny: true}}).exec();
     },
-    fetchStar: (starId) => {
-      return new Promise((fulfill, reject) => {
-        Star.findOne({starId}, (error, star) => {
-          if (error) reject(error);
-          else fulfill(star);
-        });
-      });
+    fetchStar: async function(starId) {
+      return await Star.findOne({starId}).exec();
     },
-    fetchMessage: (messageId) => {
-      return new Promise((fulfill, reject) => {
-        Star.findOne({messageId}, (e, star) => {
-          if (e) reject(e);
-          else fulfill(star);
-        });
-      });
+    fetchMessage: async function(messageId) {
+      return await Star.findOne({messageId}).exec();
     },
-    saveStar: (message, starpost) => {
-      return new Promise((fulfill, reject) => {
-        let newStar = new Star({
-          author: message.author.id,
-          messageId: message.id,
-          channelId: message.channel.id,
-          boardId: starpost.channel.id,
-          starId: starpost.id,
-          deny: false,
-          timestamp: message.createdAt
-        });
-        newStar.save((e, star) => {
-          if (e) reject (e);
-          else fulfill(star);
-        });
+    saveStar: async function(message, starpost) {
+      let newStar = new Star({
+        author: message.author.id,
+        messageId: message.id,
+        channelId: message.channel.id,
+        boardId: starpost.channel.id,
+        starId: starpost.id,
+        deny: false,
+        timestamp: message.createdAt
       });
+      return await newStar.save();
     },
-    approveStar: (star1, star2) => {
-      return new Promise((fulfill, reject) => {
-        Star.findOneAndUpdate(
-          {starId: star1.id},
-          {$set: {starId: star2.id}},
-          (error, doc) => {
-            if (error) reject(error);
-            else fulfill(doc);
-          }
-        );
-      });
+    approveStar: async function(star1, star2) {
+      return await Star.findOneAndUpdate(
+        {starId: star1.id},
+        {$set: {starId: star2.id}}
+      ).exec();
     }
   },
   tags: {
-    addTag: (data) => {
-      return new Promise((fulfill, reject) => {
-        Tag.findOneAndUpdate(
-          {serverId: data.serverId, tag: data.tag},
-          {$set: {response: data.response, attachment: data.attachment}},
-          {upsert: true, new: true},
-          function (err, cmd) {
-            if (err) reject(err);
-            else {
-              if (cmd.attachment) {
-                let fs = require("fs");
-                let request = require("request");
-                request(data.url).pipe(fs.createWriteStream(process.cwd() + "/storage/" + cmd._id));
-              }
-              fulfill(cmd);
-            }
-          }
-        );
-      });
-    },
-    fetchTags: (data = {}) => {
-      return new Promise((fulfill, reject) => {
-        Tag.find(data, function(err, cmds) {
-          if (err) reject(err);
-          else fulfill(cmds);
+    addTag: async function(data) {
+      let cmd = await Tag.findOneAndUpdate(
+        {serverId: data.serverId, tag: data.tag},
+        {$set: {response: data.response, attachment: data.attachment}},
+        {upsert: true, new: true}
+      ).exec();
+      if (cmd.attachment) {
+        let fs = require("fs");
+        let axios = require("axios");
+        axios.get(data.url).then(response => {
+          response.data.pipe(fs.createWriteStream(process.cwd() + "/storage/" + cmd._id));
         });
-      });
+      }
+      return cmd;
     },
-    removeTag: (guild, tag) => {
-      return new Promise((fulfill, reject) => {
-        Tag.findOneAndRemove(
-          {serverId: guild.id, tag: tag},
-          function(err, cmd) {
-            if (err) reject(err);
-            else fulfill(cmd);
-          }
-        );
-      });
+    fetchTags: async function(data = {}) {
+      return await Tag.find(data).exec();
+    },
+    removeTag: async function(guild, tag) {
+      return await Tag.findOneAndRemove({serverId: guild.id, tag: tag}).exec();
     }
   },
   user: {
-    addStars: (stars) => {
-      return new Promise((fulfill, reject) => {
-        let updates = [];
-        for (var x in stars) {
-          updates.push(new Promise((f, r) => {
-            User.findOneAndUpdate(
-              { discordId: x },
-              { $inc: { stars: stars[x] } },
-              { new: true },
-              (err, newUser) => {
-                if (err) r(err);
-                else f(newUser);
-              }
-            );
-          }));
-        }
-
-        Promise.all(updates).then(responses => {
-          fulfill(true);
-        }).catch(reject);
-      });
-    },
-    addXp: (users) => {
+    addXp: async function(users) {
       users = Array.from(users.values());
       let response = { users: [], xp: 0 };
-      if (users.length == 0) return Promise.resolve(response);
-      else return new Promise((fulfill, reject) => {
+      if (users.length == 0) return response;
+      else {
         let xp = Math.floor(Math.random() * 11) + 15;
         response.xp = xp;
-        User.updateMany(
+        let allUsersMod = await User.updateMany(
           { discordId: {$in: users} },
           { $inc: { posts: 1 } },
-          { new: true, upsert: true },
-          (err, allUsersMod) => {
-            if (err) reject(err);
-            else {
-              User.updateMany(
-                { discordId: {$in: users}, excludeXP: false },
-                { $inc: { currentXP: xp, totalXP: xp } },
-                { new: true, upsert: false },
-                (err, rankUsersMod) => {
-                  if (err) reject(err);
-                  else {
-                    User.find(
-                      { discordId: {$in: users} },
-                      (error, userDocs) => {
-                        if (error) reject(error);
-                        else {
-                          response.users = userDocs;
-                          fulfill(response);
-                        }
-                      }
-                    );
-                  }
-                }
-              );
-            }
-          }
-        );
-      });
+          { new: true, upsert: true }
+        ).exec();
+        let rankUsersMod = await User.updateMany(
+          { discordId: {$in: users}, excludeXP: false },
+          { $inc: { currentXP: xp, totalXP: xp } },
+          { new: true, upsert: false }
+        ).exec();
+        let userDocs = await User.find({ discordId: {$in: users} }).exec();
+        response.users = userDocs;
+        return response;
+      }
     },
-    fetchCurrentRankings: (limit = 50, page = 1) => {
-      return new Promise((fulfill, reject) => {
-        User.find({excludeXP: false})
-          .sort({currentXP: -1, totalXP: -1})
-          .skip(limit * (page - 1))
-          .limit(limit)
-          .exec((err, docs) => {
-            if (err && (Object.keys(err).length > 0)) reject(err);
-            else fulfill(docs);
-          });
-      });
+    fetchCurrentRankings: async function(limit = 50, page = 1) {
+      return await User.find({excludeXP: false})
+        .sort({currentXP: -1, totalXP: -1})
+        .skip(limit * (page - 1))
+        .limit(limit)
+        .exec();
     },
-    fetchLifetimeRankings: (limit = 50, page = 1) => {
-      return new Promise((fulfill, reject) => {
-        User.find({excludeXP: false})
-          .sort({totalXP: -1, currentXP: -1})
-          .skip(limit * (page - 1))
-          .limit(limit)
-          .exec((err, docs) => {
-            if (err && (Object.keys(err).length > 0)) reject(err);
-            else fulfill(docs);
-          });
-      });
+    fetchLifetimeRankings: async function(limit = 50, page = 1) {
+      return await User.find({excludeXP: false})
+        .sort({totalXP: -1, currentXP: -1})
+        .skip(limit * (page - 1))
+        .limit(limit)
+        .exec();
     },
-    fetchStarRankings: (limit = 50, page = 1) => {
-      return new Promise((fulfill, reject) => {
-        User.find({stars: {$gt: 0}, posts: {$gt: 0}})
-          .sort({totalXP: -1, currentXP: -1})
-          .exec((err, docs) => {
-            if (err && (Object.keys(err).length > 0)) reject(err);
-            else {
-              docs = docs.map(u => { u.quality = Math.floor(1000 * u.stars / u.posts); return u; }).sort((a, b) => { return ((b.stars / b.posts) - (a.stars / a.posts)); });
-              fulfill(docs);
-            }
-          });
-      });
+    fetchStarRankings: async function(limit = 50, page = 1) {
+      let docs = await User.find({stars: {$gt: 0}, posts: {$gt: 0}})
+        .sort({totalXP: -1, currentXP: -1})
+        .exec();
+      docs = docs?.map(u => { u.quality = Math.floor(1000 * u.stars / u.posts); return u; })
+        .sort((a, b) => ((b.stars / b.posts) - (a.stars / a.posts)));
+      return docs;
     },
-    fetchUser: (user) => {
-      return new Promise((fulfill, reject) => {
-        if ((typeof user) != "string") user = user.id;
+    fetchUser: async function(discordId) {
+        if (discordId.id) discordId = discordId.id;
+        return await User.findOne({discordId}).exec();
+    },
+    findLifetimeRank: async function(discordId) {
+      if (discordId.id) discordId = discordId.id;
 
-        User.findOne({discordId: user}, (error, userDoc) => {
-          if (error) reject(error);
-          else fulfill(userDoc);
+      let userDoc = await User.findOne({discordId}).exec();
+      let userRank = await User.countDocuments({"$or": [{totalXP: {"$gt": userDoc.totalXP}}, {totalXP: userDoc.totalXP, currentXP: {"$gt": userDoc.currentXP}}]}).exec();
+      userDoc.rank = userRank + 1;
+      return userDoc;
+    },
+    findXPRank: async function(discordId) {
+      if (discordId.id) discordId = discordId.id;
+      let userDoc = await User.findOne({discordId}).exec();
+      let currentRank = await User.countDocuments({"$or": [{currentXP: {"$gt": userDoc.currentXP}}, {currentXP: userDoc.currentXP, totalXP: {"$gt": userDoc.totalXP}}]}).exec();
+      userDoc.currentRank = currentRank + 1;
+      let lifeRank = await User.countDocuments({"$or": [{totalXP: {"$gt": userDoc.totalXP}}, {totalXP: userDoc.totalXP, currentXP: {"$gt": userDoc.currentXP}}]}).exec();
+      userDoc.lifeRank = lifeRank + 1;
+      return userDoc;
+    },
+    getUsers: async function(options) {
+      return await User.find(options).exec();
+    },
+    newUser: async function(discordId) {
+      if (discordId.id) discordId = discordId.id;
+      let exists = await User.findOne({discordId}).exec();
+      if (exists) return exists;
+      else {
+        let newMember = new User({
+          discordId,
+          currentXP: 0,
+          totalXP: 0,
+          posts: 0,
+          stars: 0,
+          preferences: 0,
+          ghostBucks: 0,
+          house: null,
+          excludeXP: true,
+          roles: []
         });
-      });
+        return newMember.save();
+      }
     },
-    findLifetimeRank: (user) => {
-      return new Promise((fulfill, reject) => {
-        if ((typeof user) != "string") user = user.id;
-
-        User.findOne({discordId: user}, (error, userDoc) => {
-          if (error) reject(error);
-          else {
-            User.countDocuments({"$or": [{totalXP: {"$gt": userDoc.totalXP}}, {totalXP: userDoc.totalXP, currentXP: {"$gt": userDoc.currentXP}}]}, (e, userRank) => {
-              if (e) reject(e);
-              else {
-                userDoc.rank = userRank + 1;
-                fulfill(userDoc);
-              }
-            });
-          }
-        });
-      });
+    resetXP: async function() {
+      return await User.updateMany(
+        {},
+        { currentXP: 0 },
+        { new: true, upsert: true }
+      ).exec();
     },
-    findXPRank: (user) => {
-      return new Promise((fulfill, reject) => {
-        if ((typeof user) != "string") user = user.id;
-
-        User.findOne({discordId: user}, (error, userDoc) => {
-          if (error) reject(error);
-          else {
-            User.countDocuments({"$or": [{currentXP: {"$gt": userDoc.currentXP}}, {currentXP: userDoc.currentXP, totalXP: {"$gt": userDoc.totalXP}}]}, (e, currentRank) => {
-              if (e) reject(e);
-              else {
-                userDoc.currentRank = currentRank + 1;
-
-                User.countDocuments({"$or": [{totalXP: {"$gt": userDoc.totalXP}}, {totalXP: userDoc.totalXP, currentXP: {"$gt": userDoc.currentXP}}]}, (e, lifeRank) => {
-                  if (e) reject(e);
-                  else {
-                    userDoc.lifeRank = lifeRank + 1;
-                    fulfill(userDoc);
-                  }
-                });
-              }
-            });
-          }
-        });
-      });
+    update: async function(discordId, options) {
+      if (discordId.id) discordId = discordId.id;
+      let user = await User.findOneAndUpdate(
+        {discordId},
+        {$set: options},
+        {new: true, upsert: false}
+      ).exec();
     },
-    getUsers: (options) => {
-      return new Promise((fulfill, reject) => {
-        User.find(options, (error, userDocs) => {
-          if (error) reject(error);
-          else fulfill(userDocs);
-        });
-      });
-    },
-    newUser: (user) => {
-      if ((typeof user) != "string") user = user.id;
-      User.findOne({discordId: user}, (err, doc) => {
-        if (err) console.error(err);
-        else if (!doc) {
-          let newMember = new User({
-            discordId: user,
-            currentXP: 0,
-            totalXP: 0,
-            posts: 0,
-            stars: 0,
-            preferences: 0,
-            ghostBucks: 0,
-            house: null,
-            excludeXP: true,
-            roles: []
-          });
-          newMember.save((err, doc) => {
-            if (err) console.error(err);
-            else console.log("New Member Saved: " + doc.discordId);
-          });
-        }
-      });
-    },
-    resetXP: () => {
-      return new Promise((fulfill, reject) => {
-        User.updateMany(
-          {},
-          { currentXP: 0 },
-          { new: true, upsert: true },
-          (err, users) => {
-            if (err) reject(err);
-            else fulfill(users);
-          }
-        );
-      });
-    },
-    update: (member, options) => {
-      return new Promise((fulfill, reject) => {
-        if ((typeof user) != "string") member = member.id;
-
-        User.findOne({discordId: member}, (err, user) => {
-          if (err) reject (err);
-          else if (user) {
-            user.set(options);
-            user.save((err, newUser) => {
-              if (err) reject(err);
-              else fulfill(newUser);
-            });
-          } else fulfill(null);
-        });
-      });
-    },
-    updateRoles: (member) => {
-      return new Promise((fulfill, reject) => {
-        User.findOne({discordId: member.id}, (err, user) => {
-          if (user && member && member.roles && member.roles.cache) {
-            user.set({roles: Array.from(member.roles.cache.keys())});
-            user.save((err, newUser) => {
-              if (err) reject(err);
-              else fulfill(newUser);
-            });
-          }
-        });
-      });
+    updateRoles: async function(member) {
+      return await User.findOneAndUpdate(
+        {discordId: member.id},
+        {$set: {roles: Array.from(member.roles.cache.keys())}},
+        {new: true, upsert: false}
+      ).exec();
     }
-  },
-  init: (bot) => {
-    bot.guilds.forEach(guild => {
-      Server.findOne({serverId: guild.id}, (e, server) => {
-        if (!e && server) {
-          serverSettings.set(server.serverId, server);
-        } else {
-          models.server.addServer(guild).then(server => {
-            serverSettings.set(server.serverId, server);
-          });
-        }
-      });
-    });
   }
 };
 

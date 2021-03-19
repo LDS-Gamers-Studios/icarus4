@@ -184,7 +184,7 @@ const Utils = {
       let content = clean ? msg.cleanContent : msg.content;
       if (!content.startsWith(prefix)) continue;
       let trimmed = content.substr(prefix.length).trim();
-      let [command, ...params] = content.substr(prefix.length).split(" ");
+      let [command, ...params] = trimmed.split(" ");
       if (command) {
         let suffix = params.join(" ");
         if (suffix.toLowerCase() == "help") {  // Allow `!command help` syntax

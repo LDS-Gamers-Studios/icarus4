@@ -44,6 +44,7 @@ const Module = new Augur.Module()
   name: "wiki",
   description: "Search the LDSG Wiki for a term.",
   syntax: "Term",
+  enabled: false,
   process: async (msg, suffix) => {
     msg.channel.startTyping();
     let shelves = (await getPage("shelves").catch(u.noop))?.data?.data || [];
