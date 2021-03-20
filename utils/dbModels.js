@@ -144,8 +144,8 @@ const models = {
     find: async function(discordId, system) {
       if (discordId.id) discordId = discordId.id;
       if (Array.isArray(system)) return await Ign.find({discordId, system: {$in: system} }).exec();
-      else if (typeof system == "string") return await Ign.findOne({discordId, system}).exec();
       else if (Array.isArray(discordId)) return await Ign.find({discordId: {$in: discordId}, system }).exec();
+      else if (system) return await Ign.findOne({discordId, system}).exec();
       else return await Ign.find({discordId}).exec();
     },
     getList: async function(system) {
