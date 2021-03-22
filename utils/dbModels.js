@@ -417,7 +417,7 @@ const models = {
     },
     update: async function(discordId, options) {
       if (discordId.id) discordId = discordId.id;
-      let user = await User.findOneAndUpdate(
+      return await User.findOneAndUpdate(
         {discordId},
         {$set: options},
         {new: true, upsert: false}
