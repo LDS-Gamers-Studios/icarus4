@@ -11,19 +11,14 @@ var UserSchema = new Schema({
     type: Number,
     default: 0
   },
+  priorTenure: {
+    type: Number,
+    default: 0
+  },
   posts: {
     type: Number,
     default: 0
   },
-  stars: {
-    type: Number,
-    default: 0
-  },
-  preferences: {
-    type: Number,
-    default: 0
-  },
-  house: String,
   excludeXP: {
     type: Boolean,
     default: true
