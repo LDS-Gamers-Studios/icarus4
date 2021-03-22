@@ -124,6 +124,9 @@ const Utils = {
         memberMentions.delete(msg.client.user.id);
         if (memberMentions.size > 0) {
           return (getMember ? memberMentions.first() : memberMentions.first().user);
+        } else if (suffix && /^(.*)#(\d{4})$/.test(suffix)) {
+          let member = msg.guild.members.cache.find(m => m.user.tag.toLowerCase() == suffix.toLowerCase());
+          return member;
         } else if (suffix) {
           let member = (await msg.guild.members.fetch({query: suffix})).first();
           if (member) return (getMember ? member : member.user);
