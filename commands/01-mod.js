@@ -255,39 +255,43 @@ const Module = new Augur.Module()
   category: "Mod",
   hidden: true,
   permissions: isMod,
-  process: (msg, suffix) => {
-    let member = u.getMention(msg);
-    if (member) {
-      let roleString = member.roles.cache.sort((a, b) => b.comparePositionTo(a)).map(role => role.name).join(", ");
-      if (roleString.length > 1024) roleString = roleString.substr(0, roleString.indexOf(", ", 1000)) + " ...";
+  process: async (msg, suffix) => {
+    try {
+      let member = u.getMention(msg);
+      if (member) {
+        let roleString = member.roles.cache.sort((a, b) => b.comparePositionTo(a)).map(role => role.name).join(", ");
+        if (roleString.length > 1024) roleString = roleString.substr(0, roleString.indexOf(", ", 1000)) + " ...";
 
-      let userDoc = await Module.db.user.fetchUser(member.id);
-      let infractionSummary = await Module.db.infraction.getSummary(member.id, 90);
+        let userDoc = await Module.db.user.fetchUser(member.id);
+        let infractionSummary = await Module.db.infraction.getSummary(member.id, 90);
 
-      let infractionDescription = [`**${u.escapeText(member.displayName)}** has had **${infractionSummary.count}** infraction(s) in the last **${infractionSummary.time}** days, totalling **${infractionSummary.points}** points.`];
-      for (let record of infractionSummary.detail) {
-        let recordMod = message.guild.members.cache.get(record.mod);
-        infractionDescription.push(`${record.timestamp.toLocaleDateString()} (${record.value}) pts, modded by ${recordMod?.displayName}): ${record.description}`);
+        let infractionDescription = [`**${u.escapeText(member.displayName)}** has had **${infractionSummary.count}** infraction(s) in the last **${infractionSummary.time}** days, totalling **${infractionSummary.points}** points.`];
+        for (let record of infractionSummary.detail) {
+          let recordMod = message.guild.members.cache.get(record.mod);
+          infractionDescription.push(`${record.timestamp.toLocaleDateString()} (${record.value}) pts, modded by ${recordMod?.displayName}): ${record.description}`);
+        }
+
+        infractionDescription = infractionDescription.join("\n");
+        if (infractionDescription.length > 2048) infractionDescription = infractionDescription.substr(0, infractionDescription.indexOf("\n", 1950)) + "\n...";
+
+        let embed = u.embed()
+        .setTimestamp()
+        .setAuthor(member.displayName, member.user.displayAvatarURL())
+        .setThumbnail(member.user.displayAvatarURL({dynamic: true}))
+        .setDescription(infractionDescription)
+        .addField("ID", member.id, true)
+        .addField("Activity", `Posts: ${parseInt(userDoc.posts, 10).toLocaleString()}`, true)
+        .addField("Roles", roleString)
+        .addField("Joined", member.joinedAt.toUTCString(), true)
+        .addField("Account Created", member.user.createdAt.toUTCString(), true);
+
+        msg.channel.send({embed, disableEveryone: true});
+      } else {
+        msg.reply(`I couldn't find the member \`${suffix}\`. `).then(u.clean);
+        return;
       }
-
-      infractionDescription = infractionDescription.join("\n");
-      if (infractionDescription.length > 2048) infractionDescription = infractionDescription.substr(0, infractionDescription.indexOf("\n", 1950)) + "\n...";
-
-      let embed = u.embed()
-      .setTimestamp()
-      .setAuthor(member.displayName, member.user.displayAvatarURL())
-      .setThumbnail(member.user.displayAvatarURL({dynamic: true}))
-      .setDescription(infractionDescription)
-      .addField("ID", member.id, true)
-      .addField("Activity", `Posts: ${parseInt(userDoc.posts, 10).toLocaleString()}`, true)
-      .addField("Roles", roleString)
-      .addField("Joined", member.joinedAt.toUTCString(), true)
-      .addField("Account Created", member.user.createdAt.toUTCString(), true);
-
-      msg.channel.send({embed, disableEveryone: true});
-    } else {
-      msg.reply(`I couldn't find the member \`${suffix}\`. `).then(u.clean);
-      return;
+    } catch(error) {
+      u.errorHandler(error, msg);
     }
   }
 })
