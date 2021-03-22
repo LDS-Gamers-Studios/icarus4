@@ -36,7 +36,7 @@ const Module = new Augur.Module()
 .addEvent("guildMemberRemove", async (member) => {
   try {
     if (member.guild.id == Module.config.ldsg) {
-      // await Module.db.user.updateRoles(member);
+      await Module.db.user.updateTenure(member);
       if (!member.client.ignoreNotifications?.has(member.id)) {
         let user = await Module.db.user.fetchUser(member.id);
         let embed = u.embed()
