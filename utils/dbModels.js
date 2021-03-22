@@ -428,6 +428,13 @@ const models = {
         {$set: {roles: Array.from(member.roles.cache.keys())}},
         {new: true, upsert: false}
       ).exec();
+    },
+    updateTenure: async function(member) {
+      return await User.findOneAndUpdate(
+        {discordId: member.id},
+        {$inc: { priorTenure: Math.floor((Date.now() - member.joinedTimestamp) / (60000 * 60 * 24)) }},
+        {new: true, upsert: false}
+      ).exec();
     }
   }
 };
