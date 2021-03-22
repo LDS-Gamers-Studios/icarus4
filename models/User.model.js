@@ -3,6 +3,16 @@ var mongoose = require('mongoose'),
 
 var UserSchema = new Schema({
   discordId: String,
+  roles: [String],
+  badges: [String],
+  posts: {
+    type: Number,
+    default: 0
+  },
+  excludeXP: {
+    type: Boolean,
+    default: true
+  },
   currentXP: {
     type: Number,
     default: 0
@@ -14,16 +24,7 @@ var UserSchema = new Schema({
   priorTenure: {
     type: Number,
     default: 0
-  },
-  posts: {
-    type: Number,
-    default: 0
-  },
-  excludeXP: {
-    type: Boolean,
-    default: true
-  },
-  roles: [String]
+  }
 });
 
 module.exports = mongoose.model("User", UserSchema);

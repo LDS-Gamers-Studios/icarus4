@@ -1,5 +1,6 @@
 const Animation = require("../models/Animation.model"),
   Ankle = require("../models/Ankle.model"),
+  Badge = require("../models/Badge.model"),
   Bank = require("../models/Bank.model"),
   Ign = require("../models/Ign.model"),
   Infraction = require("../models/Infraction.model"),
@@ -95,6 +96,22 @@ const models = {
           }, new Collection()),
           total: records.length
         };
+    }
+  },
+  badge: {
+    create: async function(data) {
+      let badge = new Badge(data);
+      return await badge.save();
+    },
+    fetch: async function(id) {
+      if (id) {
+        return await Badge.findOne({_id: id}).exec();
+      } else {
+        return await Badge.find({}).exec();
+      }
+    },
+    findByName: async function(title) {
+      return await Badge.findOne({title}).exec();
     }
   },
   bank: {
@@ -342,6 +359,15 @@ const models = {
         return response;
       }
     },
+    applyBadge: async function(discordId, badge) {
+      if (discordId.id) discordId = discordId.id;
+      if (badge._id) badge = badge._id;
+      return await Badge.findOneAndUpdate(
+        {discordId},
+        {$addToSet: {badges: badge}},
+        {new: true, upsert: false}
+      ).exec();
+    },
     fetchCurrentRankings: async function(limit = 50, page = 1) {
       return await User.find({excludeXP: false})
         .sort({currentXP: -1, totalXP: -1})
@@ -407,6 +433,15 @@ const models = {
         });
         return newMember.save();
       }
+    },
+    removeBadge: async function(discordId, badge) {
+      if (discordId.id) discordId = discordId.id;
+      if (badge._id) badge = badge._id;
+      return await Badge.findOneAndUpdate(
+        {discordId},
+        {$pull: {badges: badge}},
+        {new: true, upsert: false}
+      ).exec();
     },
     resetXP: async function() {
       return await User.updateMany(
