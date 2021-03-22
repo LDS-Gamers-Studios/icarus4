@@ -11,6 +11,7 @@ const Animation = require("../models/Animation.model"),
   Tag = require("../models/Tag.model"),
   User = require("../models/User.model"),
   config = require("../config/config.json"),
+  moment = require("moment"),
   mongoose = require("mongoose");
 
 const serverSettings = new Map(),
@@ -432,7 +433,7 @@ const models = {
     updateTenure: async function(member) {
       return await User.findOneAndUpdate(
         {discordId: member.id},
-        {$inc: { priorTenure: Math.floor((Date.now() - member.joinedTimestamp) / (60000 * 60 * 24)) }},
+        {$inc: { priorTenure: moment().diff(moment(member.joinedAt), "days") }},
         {new: true, upsert: false}
       ).exec();
     }
