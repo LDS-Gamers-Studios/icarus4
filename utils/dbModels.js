@@ -15,8 +15,8 @@ const Animation = require("../models/Animation.model"),
   moment = require("moment"),
   mongoose = require("mongoose");
 
-const serverSettings = new Map(),
-  {Collection} = require("discord.js");
+const {Collection} = require("discord.js"),
+  serverSettings = new Collection();
 
 mongoose.connect(config.db.db, config.db.settings);
 
