@@ -44,18 +44,6 @@ const Module = new Augur.Module()
   },
   permissions: (msg) => msg.guild
 })
-.addCommand({name: "fullinfo",
-  description: "Check when a user joined the server and rank information",
-  syntax: "[@user]",
-  category: "Members",
-  hidden: true,
-  process: (msg, suffix) => {
-    Module.client.commands.execute("info", msg, suffix);
-    Module.client.commands.execute("rank", msg, suffix);
-    Module.client.commands.execute("infractionsummary", msg, suffix);
-  },
-  permissions: (msg) => msg.guild
-})
 .addCommand({name: "members",
   description: "How many members are in LDSG?",
   category: "Members",

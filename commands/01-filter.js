@@ -263,11 +263,11 @@ async function processCardReaction(reaction, mod, infraction) {
       .setAuthor(member.displayName, member.user.displayAvatarURL())
       .setThumbnail(member.user.displayAvatarURL({dynamic: true}))
       .setDescription(infractionDescription)
-      .addField("ID", member.id)
-      .addField("Joined", member.joinedAt.toUTCString(), true)
-      .addField("Account Created", member.user.createdAt.toUTCString(), true)
-      .addField("Roles", roleString)
+      .addField("ID", member.id, true)
       .addField("Activity", `Posts: ${parseInt(userDoc.posts, 10).toLocaleString()}`, true)
+      .addField("Roles", roleString)
+      .addField("Joined", member.joinedAt.toUTCString(), true)
+      .addField("Account Created", member.user.createdAt.toUTCString(), true);
       message.channel.send({embed: infoEmbed, disableEveryone: true});
     } else if (reaction == cardReactions[1]) {
       /********************

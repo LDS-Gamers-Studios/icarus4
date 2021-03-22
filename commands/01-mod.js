@@ -15,6 +15,10 @@ function isMod(msg) {
   return msg.member?.roles.cache.has(Module.config.roles.mod) || msg.member?.roles.cache.has(Module.config.roles.management);
 }
 
+function canManage(msg) {
+  return (msg.member?.roles.cache.has(Module.config.roles.management) || msg.member?.roles.cache.has("205826273639923722") || Module.config.adminId.includes(msg.member?.id));
+}
+
 /*******************
 **  Mod Commands  **
 *******************/
@@ -114,7 +118,7 @@ const Module = new Augur.Module()
   description: "Announce a post!",
   syntax: "<messageId> (in channel with message)",
   category: "Mod",
-  permissions: (msg) => msg.member?.roles.cache.has(Module.config.roles.management),
+  permissions: canManage,
   process: async (msg, suffix) => {
     if (suffix) {
       try {
@@ -199,7 +203,7 @@ const Module = new Augur.Module()
 .addCommand({name: "channelactivity",
   description: "See how active a channel has been over the last two weeks",
   category: "Mod",
-  permissions: (msg) => (msg.member?.roles.cache.has(Module.config.roles.management) || msg.member?.roles.cache.has("205826273639923722")),
+  permissions: canManage,
   process: async (msg) => {
     try {
       const last = Date.now() - (14 * 24 * 60 * 60 * 1000);
@@ -236,12 +240,54 @@ const Module = new Augur.Module()
   description: "Add a word to the language filter",
   category: "Mod",
   hidden: true,
-  permissions: (msg) => (msg.member?.roles.cache.has(Module.config.roles.management) || msg.member?.roles.cache.has("205826273639923722")),
+  permissions: canManage,
   process: (msg, suffix) => {
     u.clean(msg, 0);
     suffix = suffix.toLowerCase().trim();
     if (pf.add_word(suffix)) {
       msg.client.channels.cache.get(modLogs).send(`ℹ️ **${msg.member.displayName}** has added "${suffix}" to the language filter.`);
+    }
+  }
+})
+.addCommand({name: "fullinfo",
+  description: "Check when a user joined the server and rank information",
+  syntax: "[@user]",
+  category: "Mod",
+  hidden: true,
+  permissions: isMod,
+  process: (msg, suffix) => {
+    let member = u.getMention(msg);
+    if (member) {
+      let roleString = member.roles.cache.sort((a, b) => b.comparePositionTo(a)).map(role => role.name).join(", ");
+      if (roleString.length > 1024) roleString = roleString.substr(0, roleString.indexOf(", ", 1000)) + " ...";
+
+      let userDoc = await Module.db.user.fetchUser(member.id);
+      let infractionSummary = await Module.db.infraction.getSummary(member.id, 90);
+
+      let infractionDescription = [`**${u.escapeText(member.displayName)}** has had **${infractionSummary.count}** infraction(s) in the last **${infractionSummary.time}** days, totalling **${infractionSummary.points}** points.`];
+      for (let record of infractionSummary.detail) {
+        let recordMod = message.guild.members.cache.get(record.mod);
+        infractionDescription.push(`${record.timestamp.toLocaleDateString()} (${record.value}) pts, modded by ${recordMod?.displayName}): ${record.description}`);
+      }
+
+      infractionDescription = infractionDescription.join("\n");
+      if (infractionDescription.length > 2048) infractionDescription = infractionDescription.substr(0, infractionDescription.indexOf("\n", 1950)) + "\n...";
+
+      let embed = u.embed()
+      .setTimestamp()
+      .setAuthor(member.displayName, member.user.displayAvatarURL())
+      .setThumbnail(member.user.displayAvatarURL({dynamic: true}))
+      .setDescription(infractionDescription)
+      .addField("ID", member.id, true)
+      .addField("Activity", `Posts: ${parseInt(userDoc.posts, 10).toLocaleString()}`, true)
+      .addField("Roles", roleString)
+      .addField("Joined", member.joinedAt.toUTCString(), true)
+      .addField("Account Created", member.user.createdAt.toUTCString(), true);
+
+      msg.channel.send({embed, disableEveryone: true});
+    } else {
+      msg.reply(`I couldn't find the member \`${suffix}\`. `).then(u.clean);
+      return;
     }
   }
 })
@@ -489,7 +535,7 @@ const Module = new Augur.Module()
   syntax: "<number of messages>",
   description: "Delete a number of messages",
   category: "Mod",
-  permissions: (msg) => msg.channel.permissionsFor?.(msg.author)?.has("MANAGE_MESSAGES"),
+  permissions: (msg) => msg.guild && msg.channel.permissionsFor(msg.author)?.has("MANAGE_MESSAGES"),
   process: async (msg, suffix) => {
     try {
       let purge = parseInt(suffix, 10) || 0;
@@ -501,7 +547,7 @@ const Module = new Augur.Module()
           deleted = await channel.bulkDelete(deleting, true);
           num -= deleted.size;
           if (deleted.size != deleting)
-            break;
+          break;
         }
         let delay = 0;
         while (num > 0) {
@@ -513,12 +559,12 @@ const Module = new Augur.Module()
           }
           num -= msgsToDelete.size;
           if (msgsToDelete.size != fetching)
-            break;
+          break;
         }
         msg.guild.channels.cache.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** purged ${purge - num} messages in ${msg.channel}`);
       } else {
         msg.reply("you need to tell me how many to delete.")
-          .then(u.clean);
+        .then(u.clean);
       }
     } catch(e) { u.errorHandler(e, msg); }
   }
@@ -646,7 +692,7 @@ const Module = new Augur.Module()
   description: "Remove a word from the language filter",
   category: "Mod",
   hidden: true,
-  permissions: (msg) => ((msg.guild?.id == Module.config.ldsg) && (msg.member?.roles.cache.has(Module.config.roles.management) || msg.member?.roles.cache.has("205826273639923722"))),
+  permissions: canManage,
   process: (msg, suffix) => {
     suffix = suffix.toLowerCase().trim();
     if (pf.remove_word(suffix)) {
