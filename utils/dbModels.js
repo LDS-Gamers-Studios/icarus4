@@ -362,7 +362,7 @@ const models = {
     applyBadge: async function(discordId, badge) {
       if (discordId.id) discordId = discordId.id;
       if (badge._id) badge = badge._id;
-      return await Badge.findOneAndUpdate(
+      return await User.findOneAndUpdate(
         {discordId},
         {$addToSet: {badges: badge}},
         {new: true, upsert: false}
@@ -391,8 +391,8 @@ const models = {
       return docs;
     },
     fetchUser: async function(discordId) {
-        if (discordId.id) discordId = discordId.id;
-        return await User.findOne({discordId}).exec();
+      if (discordId.id) discordId = discordId.id;
+      return await User.findOne({discordId}).exec();
     },
     findLifetimeRank: async function(discordId) {
       if (discordId.id) discordId = discordId.id;
@@ -437,7 +437,7 @@ const models = {
     removeBadge: async function(discordId, badge) {
       if (discordId.id) discordId = discordId.id;
       if (badge._id) badge = badge._id;
-      return await Badge.findOneAndUpdate(
+      return await User.findOneAndUpdate(
         {discordId},
         {$pull: {badges: badge}},
         {new: true, upsert: false}
