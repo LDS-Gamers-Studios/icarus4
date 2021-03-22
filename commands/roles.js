@@ -56,7 +56,7 @@ const Module = new Augur.Module()
     try {
       let ldsg = msg.client.guilds.cache.get(Module.config.ldsg);
       let member = await ldsg.members.fetch(msg.author.id);
-      let role = ldsg.roles.cache.find(r => r.name.toLowerCase() == suffix.toLowerCase());
+      let role = ldsg.roles.cache.find(r => r.name.toLowerCase() == suffix.toLowerCase().replace(" colors", ""));
       if (!role) {
         u.clean(msg);
         msg.reply("sorry, that's not a role on the server. Check `!inventory` to see what you can equip.").then(u.clean);
@@ -98,7 +98,7 @@ const Module = new Augur.Module()
       let roles = inventory.filter((color, base) => member.roles.cache.has(base)).map((color) => msg.guild.roles.cache.get(color).toString());
       let embed = u.embed().setAuthor(member.displayName, member.user.displayAvatarURL({size: 32}))
         .setTitle("Equippable Color Inventory")
-        .setDescription(`Equip a color role with \`${Module.config.prefix}equip Role Name\` without the "Colors"\ne.g. \`${Module.config.prefix}equip novice\`\n\n${roles.join("\n")}`);
+        .setDescription(`Equip a color role with \`${Module.config.prefix}equip Role Name\`\ne.g. \`${Module.config.prefix}equip novice\`\n\n${roles.join("\n")}`);
 
       if (roles.length == 0) {
         u.botSpam(msg).send(`${msg.author}, you don't have any colors in your inventory!`);
