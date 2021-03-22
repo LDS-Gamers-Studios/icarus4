@@ -257,7 +257,7 @@ const Module = new Augur.Module()
   permissions: isMod,
   process: async (msg, suffix) => {
     try {
-      let member = u.getMention(msg);
+      let member = await u.getMention(msg);
       if (member) {
         let roleString = member.roles.cache.sort((a, b) => b.comparePositionTo(a)).map(role => role.name).join(", ");
         if (roleString.length > 1024) roleString = roleString.substr(0, roleString.indexOf(", ", 1000)) + " ...";
