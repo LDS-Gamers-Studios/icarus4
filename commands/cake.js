@@ -1,66 +1,79 @@
 const Augur = require("augurbot"),
+  moment = require("moment"),
   u = require("../utils/utils");
+
+function celebrate() {
+  if (moment().hours() == 15) {
+    testBirthdays().catch(error => u.errorHandler(error, "Test Birthdays"));
+    testCakeDays().catch(error => u.errorHandler(error, "Test Cake Days"));
+  }
+}
 
 async function testBirthdays() {
   try {
-    let bot = Module.client;
-    let curDate = new Date();
-    let ldsg = bot.guilds.cache.get(Module.config.ldsg);
-    if (curDate.getHours() == 15) {
-      // Birthday Blast
-      let birthdays = (await Module.db.ign.getList("birthday")).filter(ign => ldsg.members.cache.has(ign.discordId));
-      for (let birthday of birthdays) {
-        let date = new Date(birthday.ign);
-        if (date && date.getMonth() == curDate.getMonth() && date.getDate() == curDate.getDate()) {
-          let flair = [
-            ":tada: ",
-            ":confetti_ball: ",
-            ":birthday: ",
-            ":gift: ",
-            ":cake: "
-          ];
-          try {
-            let member = ldsg.members.cache.get(birthday.discordId);
-            await ldsg.channels.cache.get(Module.config.ldsg).send(`:birthday: :confetti_ball: :tada: Happy Birthday, ${member}! :tada: :confetti_ball: :birthday:`);
-            const birthdayLangs = require("../data/birthday.json");
-            let msgs = birthdayLangs.map(lang => member.send(u.rand(flair) + " " + lang));
-            Promise.all(msgs).then(() => {
-              member.send(":birthday: :confetti_ball: :tada: A very happy birthday to you, from LDS Gamers! :tada: :confetti_ball: :birthday:").catch(u.noop);
-            }).catch(u.noop);
-          } catch (e) { u.errorHandler(error, "Birthay Send"); continue; }
+    const ldsg = Module.client.guilds.cache.get(Module.config.ldsg);
+    const curDate = moment();
+
+    // Birthday Blast
+    const birthdayLangs = require("../data/birthday.json");
+    const flair = [
+      ":tada: ",
+      ":confetti_ball: ",
+      ":birthday: ",
+      ":gift: ",
+      ":cake: "
+    ];
+
+    let birthdays = (await Module.db.ign.getList("birthday")).filter(ign => ldsg.members.cache.has(ign.discordId));
+    for (let birthday of birthdays) {
+      try {
+        let date = moment(birthday.ign);
+        if (date && date.month() == curDate.month() && date.date() == curDate.date()) {
+          let member = ldsg.members.cache.get(birthday.discordId);
+          await ldsg.channels.cache.get(Module.config.ldsg).send(`:birthday: :confetti_ball: :tada: Happy Birthday, ${member}! :tada: :confetti_ball: :birthday:`);
+          let msgs = birthdayLangs.map(lang => member.send(u.rand(flair) + " " + lang));
+          Promise.all(msgs).then(() => {
+            member.send(":birthday: :confetti_ball: :tada: A very happy birthday to you, from LDS Gamers! :tada: :confetti_ball: :birthday:").catch(u.noop);
+          }).catch(u.noop);
         }
-      }
-
-      // LDSG Cake Day
-      let tenure = [
-        "375047444599275543",
-        "375047691253579787",
-        "375047792487432192",
-        "543065980096741386",
-        "731895666577506345"
-      ];
-
-      let members = await ldsg.members.fetch();
-      let apicall = 1;
-      for (let [key, member] of members) {
-        try {
-          let join = member.joinedAt;
-          if (join && (join.getMonth() == curDate.getMonth()) && (join.getDate() == curDate.getDate()) && (join.getFullYear() < curDate.getFullYear())) {
-            let years = curDate.getFullYear() - join.getFullYear();
-            try {
-              await member.roles.add(tenure[years - 1]).catch(u.noop);
-            } catch(error) { u.errorHandler(error, `Apply cake day roles: ${member.displayName}`); }
-            try {
-              let user = await Module.db.user.fetchUser(member.id);
-              if (user.posts > 0) {
-                ldsg.channels.cache.get(Module.config.ldsg).send(`${member} has been part of the server for ${years} ${(years > 1 ? "years" : "year")}! Glad you're with us!`);
-              }
-            } catch (e) { u.errorHandler(e, "Announce Cake Day Error"); continue; }
-          }
-        } catch(e) { u.errorHandler(e, "Fetch Cake Day Error"); }
-      }
+      } catch (e) { u.errorHandler(error, "Birthay Send"); continue; }
     }
-  } catch(e) { u.errorHandler(e, "Cake Day Error"); }
+  } catch(e) { u.errorHandler(e, "Birthday Error"); }
+}
+
+async function testCakeDays() {
+  try {
+    const ldsg = Module.client.guilds.cache.get(Module.config.ldsg);
+    const curDate = moment();
+
+    // LDSG Cake Day
+    const tenure = [
+      "375047444599275543",
+      "375047691253579787",
+      "375047792487432192",
+      "543065980096741386",
+      "731895666577506345"
+    ];
+
+    const members = await ldsg.members.fetch();
+    let offsets = await Module.db.user.getUsers({discordId: {$in: members.keyArray()}, priorTenure: { $gt: 0 }});
+
+    for (let [key, member] of members.filter(m => m.roles.cache.has(Module.config.roles.trusted))) {
+      try {
+        let offset = offsets.find(o => o.discordId == key);
+        let join = moment(member.joinedAt).subtract(offset?.priorTenure || 0, "days");
+        if (join && (join.month() == curDate.month()) && (join.date() == curDate.date()) && (join.year() < curDate.year())) {
+          let years = curDate.year() - join.year();
+          await member.roles.add(tenure[years - 1]).catch(u.noop);
+          try {
+            if (member.roles.cache.has(Module.config.roles.trusted)) {
+              ldsg.channels.cache.get(Module.config.ldsg).send(`${member} has been part of the server for ${years} ${(years > 1 ? "years" : "year")}! Glad you're with us!`);
+            }
+          } catch (e) { u.errorHandler(e, "Announce Cake Day Error"); continue; }
+        }
+      } catch(e) { u.errorHandler(e, "Fetch Cake Day Error"); }
+    }
+  } catch(error) { u.errorHandler(error, "Cake Day Error"); }
 }
 
 const Module = new Augur.Module()
@@ -92,11 +105,10 @@ const Module = new Augur.Module()
   },
   permissions: (msg) => Module.config.adminId.includes(msg.author.id)
 })
-.addEvent("ready", testBirthdays)
+.addEvent("ready", celebrate)
 .setClockwork(() => {
   try {
-    let bot = Module.client;
-    return setInterval(testBirthdays, 60 * 60 * 1000, bot);
+    return setInterval(celebrate, 60 * 60 * 1000);
   } catch(e) { u.errorHandler(e, "Birthday Clockwork Error"); }
 });
 
