@@ -116,7 +116,7 @@ const models = {
   },
   bank: {
     getBalance: async function(discordId, currency = "gb") {
-      if (discordId) discordId = discordId.id;
+      if (discordId.id) discordId = discordId.id;
       let record = await Bank.aggregate([
         { $match: { discordId, currency }},
         { $group: { _id: null, balance: {$sum: "$value"}}}
