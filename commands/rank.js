@@ -139,7 +139,6 @@ const Module = new Augur.Module()
             let member = ldsg.members.cache.get(user.discordId);
 
             if ((user.posts % 25 == 0) && !member.roles.cache.has(Module.config.roles.trusted) && !member.roles.cache.has(Module.config.roles.untrusted)) {
-              let {Collection} = require("discord.js");
               let modLogs = ldsg.channels.cache.get("506575671242260490");
               let gai = ldsg.members.cache.get(Module.config.ownerId);
               await modLogs.send(`${member} has posted ${user.posts} times in chat without being trusted!`);
@@ -150,9 +149,11 @@ const Module = new Augur.Module()
                 guild: ldsg,
                 member: gai,
                 mentions: {
-                  users: new Collection([[member.id, member.user]]),
-                  members: new Collection([[member.id, member]])
-                }
+                  users: new u.Collection([[member.id, member.user]]),
+                  members: new u.Collection([[member.id, member]])
+                },
+                content: `${Module.config.prefix}fullinfo ${member}`,
+                cleanContent: `${Module.config.prefix}fullinfo @${member.user.tag}`
               }, member.toString());
             }
 
