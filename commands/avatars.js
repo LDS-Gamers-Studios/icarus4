@@ -23,7 +23,8 @@ async function popart(msg, initialTransform) {
     try {
       img = await Jimp.read(original);
     } catch (error) {
-      return msg.reply("I couldn't use that image! Make sure its a PNG, JPG, or JPEG.")
+      msg.reply("I couldn't use that image! Make sure its a PNG, JPG, or JPEG.");
+      return null;
     };
 
 
@@ -52,12 +53,12 @@ const Module = new Augur.Module()
   description: "'Andy Warhol' an avatar or attached image",
   category: "Silly",
   process: async (msg, suffix) => {
+    msg.channel.startTyping();
     try {
-      msg.channel.startTyping();
       const canvas = await popart(msg, [{ apply: "spin", params: [60] }]);
-      await msg.channel.send({files: [await canvas.getBufferAsync(Jimp.MIME_JPEG)]});
-      msg.channel.stopTyping();
+      if (canvas) await msg.channel.send({files: [await canvas.getBufferAsync(Jimp.MIME_JPEG)]});
     } catch(e) { u.errorHandler(e, msg); }
+    msg.channel.stopTyping();
   }
 })
 .addCommand({name: "avatar",
@@ -86,7 +87,6 @@ const Module = new Augur.Module()
       msg.channel.startTyping();
       let target;
       let urlexp = /\<?(https?:\/\/\S+)\>?(?:\s+)?(\d*)/;
-      let av;
 
       if (msg.attachments.size > 0) {
         target = msg.attachments.first().url;
@@ -97,18 +97,17 @@ const Module = new Augur.Module()
       }
 
       try {
-        av = await Jimp.read(target);
+        let av = await Jimp.read(target);
+        av.color([
+          { apply: "desaturate", params: [100] },
+          { apply: "saturate", params: [47.7] },
+          { apply: "hue", params: [227] }
+        ]);
+
+        await msg.channel.send({files: [await av.getBufferAsync(Jimp.MIME_PNG)]});
       } catch (error) {
-        return msg.reply("I couldn't use that image! Make sure its a PNG, JPG, or JPEG.")
+        msg.reply("I couldn't use that image! Make sure its a PNG, JPG, or JPEG.");
       };
-
-      av.color([
-        { apply: "desaturate", params: [100] },
-        { apply: "saturate", params: [47.7] },
-        { apply: "hue", params: [227] }
-      ]);
-
-      await msg.channel.send({files: [await av.getBufferAsync(Jimp.MIME_PNG)]});
       msg.channel.stopTyping();
     } catch(e) { u.errorHandler(e, msg); }
   }
@@ -121,7 +120,6 @@ const Module = new Augur.Module()
       msg.channel.startTyping();
       let color;
       let original;
-      let image;
       let urlexp = /\<?(https?:\/\/\S+)\>?(?:\s+)?(\d*)/;
       let match;
 
@@ -141,14 +139,14 @@ const Module = new Augur.Module()
       color = color || (10 * (Math.floor(Math.random() * 35) + 1));
 
       try {
-        image = await Jimp.read(original);
+        let image = await Jimp.read(original);
+        image.color([
+          { apply: "hue", params: [color] }
+        ]);
+        await msg.channel.send({files: [await image.getBufferAsync(Jimp.MIME_PNG)]});
       } catch (error) {
-        return msg.reply("I couldn't use that image! Make sure its a PNG, JPG, or JPEG.")
+        msg.reply("I couldn't use that image! Make sure its a PNG, JPG, or JPEG.");
       };
-      image.color([
-        { apply: "hue", params: [color] }
-      ]);
-      await msg.channel.send({files: [await image.getBufferAsync(Jimp.MIME_PNG)]});
       msg.channel.stopTyping();
     } catch(e) { u.errorHandler(e, msg); }
   }
@@ -189,11 +187,10 @@ const Module = new Augur.Module()
   aliases: ["grayscale", "bw"],
   category: "Silly",
   process: async (msg, suffix) => {
+    msg.channel.startTyping();
     try {
-      msg.channel.startTyping();
       let target;
       let urlexp = /\<?(https?:\/\/\S+)\>?(?:\s+)?(\d*)/;
-      let av;
 
       if (msg.attachments.size > 0) {
         target = msg.attachments.first().url;
@@ -204,27 +201,23 @@ const Module = new Augur.Module()
       }
 
       try {
-        av = await Jimp.read(target);
+        let av = await Jimp.read(target);
+        av.color([{ apply: "desaturate", params: [100] }]);
+        await msg.channel.send({files: [await av.getBufferAsync(Jimp.MIME_PNG)]});
       } catch (error) {
-        return msg.reply("I couldn't use that image! Make sure its a PNG, JPG, or JPEG.")
+        msg.reply("I couldn't use that image! Make sure its a PNG, JPG, or JPEG.");
       };
-
-      av.color([{ apply: "desaturate", params: [100] }]);
-
-      await msg.channel.send({files: [await av.getBufferAsync(Jimp.MIME_PNG)]});
-      msg.channel.stopTyping();
     } catch(e) { u.errorHandler(e, msg); }
+    msg.channel.stopTyping();
   }
 })
 .addCommand({name: "invert",
   description: "Invert an avatar or attached image",
   category: "Silly",
   process: async (msg, suffix) => {
+    msg.channel.startTyping();
     try {
-      msg.channel.startTyping();
       let original;
-      let img;
-
       let urlexp = /\<?(https?:\/\/\S+)\>?(?:\s+)?(\d*)/;
       let match;
 
@@ -237,20 +230,19 @@ const Module = new Augur.Module()
       }
 
       try {
-        img = await Jimp.read(original);
-      } catch (error) {
-        return msg.reply("I couldn't use that image! Make sure its a PNG, JPG, or JPEG.")
-      };
-
-      for (let x = 0; x < img.bitmap.width; x++) {
-        for (let y = 0; y < img.bitmap.height; y++) {
-          let {r, g, b, a} = Jimp.intToRGBA(img.getPixelColor(x, y));
-          img.setPixelColor(Jimp.rgbaToInt(255 - r, 255 - g, 255 - b, a), x, y);
+        let img = await Jimp.read(original);
+        for (let x = 0; x < img.bitmap.width; x++) {
+          for (let y = 0; y < img.bitmap.height; y++) {
+            let {r, g, b, a} = Jimp.intToRGBA(img.getPixelColor(x, y));
+            img.setPixelColor(Jimp.rgbaToInt(255 - r, 255 - g, 255 - b, a), x, y);
+          }
         }
-      }
-      await msg.channel.send({files: [await img.getBufferAsync(Jimp.MIME_PNG)]});
-      msg.channel.stopTyping();
+        await msg.channel.send({files: [await img.getBufferAsync(Jimp.MIME_PNG)]});
+      } catch (error) {
+        msg.reply("I couldn't use that image! Make sure its a PNG, JPG, or JPEG.");
+      };
     } catch(error) { u.errorHandler(error, msg); }
+    msg.channel.stopTyping();
   }
 })
 .addCommand({name: "metal",
@@ -306,15 +298,15 @@ const Module = new Augur.Module()
   description: "'Pop art' an avatar or attached image",
   category: "Silly",
   process: async (msg, suffix) => {
+    msg.channel.startTyping();
     try {
-      msg.channel.startTyping();
       const canvas = await popart(msg, [
         { apply: "desaturate", params: [100] },
         { apply: "saturate", params: [50] }
       ]);
-      await msg.channel.send({files: [await canvas.getBufferAsync(Jimp.MIME_JPEG)]});
-      msg.channel.stopTyping();
+      if (canvas) await msg.channel.send({files: [await canvas.getBufferAsync(Jimp.MIME_JPEG)]});
     } catch(e) { u.errorHandler(e, msg); }
+    msg.channel.stopTyping();
   }
 });
 
