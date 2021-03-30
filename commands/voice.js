@@ -417,16 +417,14 @@ const Module = new Augur.Module()
   }
   return active;
 })
-.addEvent("loadConfig", () => {
-  let ldsg = Module.client.guilds.cache.get(Module.config.ldsg);
-  Module.config.sheets.get("Voice Channel Names").getRows((e, rows) => {
-    if (e) u.errorHandler(e, "Error loading voice channel names.");
-    else {
-      for (let i = 0; i < rows.length; i++) {
-        roomNames.add(rows[i].name);
-      }
+.addEvent("loadConfig", async () => {
+  try {
+    let ldsg = Module.client.guilds.cache.get(Module.config.ldsg);
+    let rows = await Module.config.sheets.get("Voice Channel Names").getRows();
+    for (let row of rows) {
+      roomNames.add(row["Name"]);
     }
-  });
+  } catch(error) { u.errorHandler(error, "Voice loadConfig"); }
 })
 .addEvent("voiceStateUpdate", async (oldState, newState) => {
   let guild = oldState.guild;
