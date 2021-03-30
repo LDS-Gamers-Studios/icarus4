@@ -1,7 +1,7 @@
 const Augur = require("augurbot"),
   google = require("../config/google_api.json"),
   u = require("../utils/utils"),
-  GoogleSpreadsheet = require("google-spreadsheet");
+  {GoogleSpreadsheet} = require("google-spreadsheet");
 
 const doc = new GoogleSpreadsheet(google.sheets.games),
   gb = "<:gb:493084576470663180>",
@@ -58,107 +58,96 @@ const Module = new Augur.Module()
 .addCommand({name: "gamelist",
   description: "See what games are available to redeem.",
   category: "Ghost Bucks",
-  process: (msg, suffix) => {
-    doc.useServiceAccountAuth(google.creds, (err) => {
-      if (err) u.errorHandler(err, msg);
-      else {
-        doc.getRows(1, (err, games) => {
-          for (const game of games.filter(g => !g.code)) {
-            game.code = code(5);
-            game.save();
-          }
-
-          games = games.filter(g => !g.recipient).filter(filterUnique).sort((a, b) => a.gametitle.localeCompare(b.gametitle));
-
-          // Filter Rated M, unless the member has the Rated M Role
-          if (!(msg.member && msg.member.roles.cache.has("281708645161631745")))
-            games = games.filter(g => g.rating.toUpperCase() != "M");
-
-          let embed = u.embed()
-            .setTitle("Games Available to Redeem")
-            .setDescription(`Redeem ${gb} for game codes with the \`!gameredeem code\` command.`);
-
-          let i = 0;
-          for (const game of games) {
-            if (((++i) % 25) == 0) {
-              msg.author.send({embed}).catch(u.noop);
-              embed = u.embed()
-              .setTitle("Games Available to Redeem")
-              .setDescription(`Redeem ${gb} for game codes with the \`!gameredeem code\` command.`);
-            }
-
-            let steamApp = null;
-            if (game.system.toLowerCase() == "steam") steamApp = steamGameList.find(g => g.name.toLowerCase() == game.gametitle.toLowerCase());
-
-            embed.addField(`${game.gametitle} (${game.system})${(game.rating ? ` [${game.rating}]` : "")}`, `${gb}${game.cost}${(steamApp ? ` [[Steam Store Page]](https://store.steampowered.com/app/${steamApp.appid})` : "")}\n\`!gameredeem ${game.code}\``);
-          }
-          msg.author.send({embed}).catch(u.noop);
-        });
+  process: async (msg, suffix) => {
+    try {
+      await doc.useServiceAccountAuth(google.creds);
+      let games = await doc.sheetsByIndex[0].getRows();
+      for (const game of games.filter(g => !g.Code)) {
+        game.Code = code(5);
+        game.save();
       }
-    });
+
+      games = games.filter(g => !g.Recipient).filter(filterUnique).sort((a, b) => a["Game Title"].localeCompare(b["Game Title"]));
+
+      // Filter Rated M, unless the member has the Rated M Role
+      if (!(msg.member && msg.member.roles.cache.has("281708645161631745")))
+      games = games.filter(g => g.Rating.toUpperCase() != "M");
+
+      let embed = u.embed()
+      .setTitle("Games Available to Redeem")
+      .setDescription(`Redeem ${gb} for game codes with the \`!gameredeem code\` command.`);
+
+      let i = 0;
+      for (const game of games) {
+        if (((++i) % 25) == 0) {
+          msg.author.send({embed}).catch(u.noop);
+          embed = u.embed()
+          .setTitle("Games Available to Redeem")
+          .setDescription(`Redeem ${gb} for game codes with the \`!gameredeem code\` command.`);
+        }
+
+        let steamApp = null;
+        if (game.System.toLowerCase() == "steam") steamApp = steamGameList.find(g => g.Name.toLowerCase() == game["Game Title"].toLowerCase());
+
+        embed.addField(`${game["Game Title"]} (${game.System})${(game.Rating ? ` [${game.Rating}]` : "")}`, `${gb}${game.Cost}${(steamApp ? ` [[Steam Store Page]](https://store.steampowered.com/app/${steamApp.appid})` : "")}\n\`!gameredeem ${game.Code}\``);
+      }
+      msg.author.send({embed}).catch(u.noop);
+    } catch(error) { u.errorHandler(error, msg); }
   }
 })
 .addCommand({name: "gameredeem",
   syntax: "came code", hidden: true,
   description: "Redeem a game code",
   category: "Ghost Bucks",
-  process: (msg, suffix) => {
-    doc.useServiceAccountAuth(google.creds, (err) => {
-      if (err) u.errorHandler(err, msg);
-      else {
-        doc.getRows(1, async (err, games) => {
-          try {
-            let game = games.filter(g => (g.code == suffix.toUpperCase() && g.date == ""));
-            if (game.length > 0) {
+  process: async (msg, suffix) => {
+    try {
+      await doc.useServiceAccountAuth(google.creds);
+      let games = await doc.sheetsByIndex[0].getRows();
+      let game = games.find(g => (g.Code == suffix.toUpperCase() && g.Date == ""));
+      if (game) {
+        let systems = {
+          steam: {
+            redeem: "https://store.steampowered.com/account/registerkey?key=",
+            img: "https://cdn.discordapp.com/emojis/230374637379256321.png"
+          }
+        };
 
-              let systems = {
-                steam: {
-                  redeem: "https://store.steampowered.com/account/registerkey?key=",
-                  img: "https://cdn.discordapp.com/emojis/230374637379256321.png"
-                }
-              };
+        let balance = await Module.db.bank.getBalance(msg.author.id, "gb");
+        if (balance.balance >= game.Cost) {
+          await Module.db.bank.addCurrency({
+            currency: "gb",
+            discordId: msg.author.id,
+            description: `${game["Game Title"]} (${game.System}) Game Key`,
+            value: -1 * game.Cost,
+            mod: msg.author.id
+          }, "gb");
 
-              game = game[0];
+          let embed = u.embed()
+          .setTitle("Game Code Redemption")
+          .setDescription(`You just redeemed a key for:\n${game["Game Title"]} (${game.System})`)
+          .addField("Cost", gb + game.Cost, true)
+          .addField("Balance", gb + (balance.balance - game.Cost), true)
+          .addField("Game Key", game.Key);
 
-              let balance = await Module.db.bank.getBalance(msg.author.id, "gb");
-              if (balance.balance >= game.cost) {
-                await Module.db.bank.addCurrency({
-                  currency: "gb",
-                  discordId: msg.author.id,
-                  description: `${game.gametitle} (${game.system}) Game Key`,
-                  value: -1 * game.cost,
-                  mod: msg.author.id
-                }, "gb");
+          if (systems[game.System.toLowerCase()]) {
+            let sys = systems[game.System.toLowerCase()];
+            embed.setURL(sys.redeem + game.Key)
+            .addField("Key Redemption Link", `[Redeem key here](${sys.redeem + game.Key})`)
+            .setThumbnail(sys.img);
+          }
 
-                let embed = u.embed()
-                .setTitle("Game Code Redemption")
-                .setDescription(`You just redeemed a key for:\n${game.gametitle} (${game.system})`)
-                .addField("Cost", gb + game.cost, true)
-                .addField("Balance", gb + (balance.balance - game.cost), true)
-                .addField("Game Key", game.key);
-
-                if (systems[game.system.toLowerCase()]) {
-                  let sys = systems[game.system.toLowerCase()];
-                  embed.setURL(sys.redeem + game.key)
-                  .addField("Key Redemption Link", `[Redeem key here](${sys.redeem + game.key})`)
-                  .setThumbnail(sys.img);
-                }
-
-                game.recipient = msg.author.username;
-                game.date = new Date();
-                game.save();
-                msg.author.send({embed}).catch(e => u.errorHandler(e, msg));
-                msg.client.channels.cache.get(modLogs).send(`${msg.author.username} just redeemed ${gb}${game.cost} for a ${game.gametitle} (${game.system}) key.`);
-              } else {
-                msg.reply("You don't currently have enough ghost bucks. Sorry! " + gb);
-              }
-            } else {
-              msg.reply("I couldn't find that game. Use `!gamelist` to see available games.").then(u.clean);
-            }
-          } catch(error) { u.errorHandler(error, msg); }
-        });
+          game.Recipient = msg.author.username;
+          game.Date = new Date();
+          game.save();
+          msg.author.send({embed}).catch(e => u.errorHandler(e, msg));
+          msg.client.channels.cache.get(modLogs).send(`${msg.author.username} just redeemed ${gb}${game.Cost} for a ${game["Game Title"]} (${game.System}) key.`);
+        } else {
+          msg.reply("You don't currently have enough ghost bucks. Sorry! " + gb);
+        }
+      } else {
+        msg.reply("I couldn't find that game. Use `!gamelist` to see available games.").then(u.clean);
       }
-    })
+    } catch(error) { u.errorHandler(error, msg); }
   }
 })
 .addCommand({name: "giveember",
@@ -178,7 +167,7 @@ const Module = new Augur.Module()
         let reason = suffix.replace(/<@!?\d+>/ig, "").trim().split(" ");
         let value = parseInt(reason.shift(), 10);
         reason = reason.join(" ").trim();
-        
+
         for (const [discordId, member] of members) {
           if (discordId == msg.author.id) {
             msg.reply("you can't give to *yourself*, silly.").then(u.clean).catch(u.noop);
