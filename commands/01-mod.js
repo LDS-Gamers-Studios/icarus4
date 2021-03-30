@@ -334,11 +334,7 @@ const Module = new Augur.Module()
     u.clean(msg, 0);
     const members = u.userMentions(msg, true);
 
-    let confirm = await u.confirm(msg, `Are you sure you want to kick the following?\n${members.map(m => u.escapeText(m.displayName)).join("\n")}`);
-
-    if (confirm && members.size > 0) {
-      let reason = suffix.replace(/<@!?\d+>/ig, "").trim() || "[Member Kick] Violating the Code of Conduct";
-      let guild = msg.guild;
+    if (members.size > 0) {
       // Get highest role that isn't "Live"
       const kickerHighRole = msg.member.roles.cache.filter(r => r.id != "281135201407467520").sort((a, b) => b.comparePositionTo(a)).first();
       for (const [memberId, member] of members) {
@@ -346,9 +342,22 @@ const Module = new Augur.Module()
           // Make sure kicker's highest role is higher than kick-ee's highest role
           const kickedHighRole = member.roles.cache.filter(r => r.id != "281135201407467520").sort((a, b) => b.comparePositionTo(a)).first();
           if (kickerHighRole.comparePositionTo(kickedHighRole) <= 0) {
+            members.delete(memberId);
             msg.reply(`you can't kick ${member}!`).then(u.clean);
-            continue;
           }
+        } catch(e) { u.errorHandler(e, msg); }
+      }
+    } else {
+      msg.reply("you need to tell me who to kick!").then(u.clean);
+    }
+    if (members.size == 0) return;
+
+    let confirm = await u.confirm(msg, `Are you sure you want to kick the following?\n${members.map(m => u.escapeText(m.displayName)).join("\n")}`);
+
+    if (confirm) {
+      const reason = suffix.replace(/<@!?\d+>/ig, "").trim() || "[Member Kick] Violating the Code of Conduct";
+      for (const [memberId, member] of members) {
+        try {
           let infraction = {
             discordId: member.id,
             description: reason,
@@ -357,7 +366,7 @@ const Module = new Augur.Module()
           };
           let inf = await Module.db.infraction.save(infraction);
 
-          await member.send(`You were kicked from ${guild.name} for ${reason}`).catch(() => blocked(member));
+          await member.send(`You were kicked from ${msg.guild.name} for ${reason}`).catch(() => blocked(member));
           await member.kick(reason);
           msg.client.channels.cache.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** kicked **${u.escapeText(member.displayName)}** for ${reason}`);
 
@@ -368,10 +377,8 @@ const Module = new Augur.Module()
           }
         } catch(e) { u.errorHandler(e, msg); }
       }
-    } else if (!confirm) {
-      msg.reply("`!kick` cancelled.").then(u.clean);
     } else {
-      msg.reply("you need to tell me who to kick!").then(u.clean);
+      msg.reply("`!kick` cancelled.").then(u.clean);
     }
   }
 })
