@@ -402,7 +402,7 @@ const Module = new Augur.Module()
           mod: interaction.user.id
         };
 
-        let account = await (Module.db.bank.getBalance(interaction.user.id), currency);
+        let account = await Module.db.bank.getBalance(interaction.user.id, currency);
         if ((value < 0) && (!(team && currency == "em") || (discordId == interaction.client.user.id))) {
           interaction.createResponse(`You can't just *take* ${coin}, silly.`).then(u.clean);
         } else if (team || (value <= account.balance)) {
