@@ -199,7 +199,6 @@ const Module = new Augur.Module()
                 member.send(`You were just awarded ${ember}${receipt.value} from ${u.escapeText(msg.member.displayName)} for ${reason}\nYou now have a total of ${ember}${balance.balance} in your LDSG account.`).catch(u.noop);
               }
               msg.channel.send(`${ember}${value} sent to ${member} for ${reason}`).then(u.clean);
-              msg.client.channels.cache.get(modLogs).send(`${(discordId == msg.client.user.id) ? "<@111232201848295424> " : ""}**${u.escapeText(msg.member.displayName)}** gave **${u.escapeText(member.displayName)}** ${ember}${value} for ${reason}`);
               if (!team || (discordId == msg.client.user.id)) {
                 let withdrawl = {
                   currency: "em",
@@ -210,6 +209,9 @@ const Module = new Augur.Module()
                 }
                 let receipt = await Module.db.bank.addCurrency(withdrawl, "em");
                 msg.member.send(`You just sent ${u.escapeText(member.displayName)} ${ember}${value} for ${reason}`).catch(u.noop);
+              }
+              if (team || (discordId == msg.client.user.id)) {
+                msg.client.channels.cache.get("734797868036259860").send(`${(discordId == msg.client.user.id) ? "<@111232201848295424> " : ""}**${u.escapeText(msg.member.displayName)}** gave **${u.escapeText(member.displayName)}** ${ember}${value} for ${reason}`);
               }
             } else {
               msg.reply(`You don't have enough ${ember} to give! You can give up to ${ember}${account.balance}`).then(u.clean);
@@ -264,7 +266,7 @@ const Module = new Augur.Module()
               let receipt = await Module.db.bank.addCurrency(deposit, "gb");
               let balance = await Module.db.bank.getBalance(discordId, "gb");
               msg.channel.send(`${gb}${receipt.value} sent to ${member} for ${reason}`).then(u.clean);
-              msg.client.channels.cache.get(modLogs).send(`**${u.escapeText(msg.member.displayName)}** gave **${u.escapeText(member.displayName)}** ${gb}${receipt.value} for ${reason}`);
+              //msg.client.channels.cache.get(modLogs).send(`**${u.escapeText(msg.member.displayName)}** gave **${u.escapeText(member.displayName)}** ${gb}${receipt.value} for ${reason}`);
               member.send(`You were just awarded ${gb}${receipt.value} from ${u.escapeText(msg.member.displayName)} for ${reason}\nYou now have a total of ${gb}${balance.balance} in your LDSG account.`).catch(u.noop);
               if (!admin) {
                 let withdrawl = {
@@ -377,11 +379,10 @@ const Module = new Augur.Module()
   category: "Ghostbucks",
   process: async (interaction) => {
     try {
-      const MAX = 10000;
       let [discordId, currency, value, reason] = interaction.options.map(o => o.value);
       let ldsg = interaction.guild;
       let team = interaction.member.roles.cache.has(Module.config.roles.team);
-      let coin = (currency == "gb" ? gb : ember);
+      const {coin, MAX} = (currency == "gb" ? {coin: gb, MAX: 1000} : {coin: ember, MAX: 10000});
 
       if (interaction.member.id == discordId) {
         interaction.createResponse("You can't give to *yourself*, silly.").then(u.clean);
@@ -413,7 +414,6 @@ const Module = new Augur.Module()
             member?.send(`You were just awarded ${coin}${receipt.value} from ${u.escapeText(interaction.member.displayName)} for ${reason}\nYou now have a total of ${coin}${balance.balance} in your LDSG account.`).catch(u.noop);
           }
           interaction.createResponse(`${coin}${value} sent to ${member} for ${reason}`).then(u.clean);
-          interaction.client.channels.cache.get(modLogs).send(`${(discordId == interaction.client.user.id) ? "<@111232201848295424> " : ""}**${u.escapeText(interaction.member.displayName)}** gave **${u.escapeText(member.displayName)}** ${coin}${value} for ${reason}`);
           if (!(team && currency == "em") || (discordId == interaction.client.user.id)) {
             let withdrawl = {
               currency,
@@ -424,6 +424,9 @@ const Module = new Augur.Module()
             }
             let receipt = await Module.db.bank.addCurrency(withdrawl);
             interaction.user.send(`You just sent ${u.escapeText(member.displayName)} ${coin}${value} for ${reason}`).catch(u.noop);
+          }
+          if ((currency == "em") && (team || (discordId == interaction.client.user.id))) {
+            interaction.client.channels.cache.get("734797868036259860").send(`${(discordId == interaction.client.user.id) ? "<@111232201848295424> " : ""}**${u.escapeText(interaction.member.displayName)}** gave **${u.escapeText(member.displayName)}** ${coin}${value} for ${reason}`);
           }
         } else {
           interaction.createResponse(`You don't have enough ${coin} to give! You can give up to ${coin}${account.balance}`).then(u.clean);
