@@ -413,8 +413,8 @@ const Module = new Augur.Module()
             member?.send(`You were just awarded ${coin}${receipt.value} from ${u.escapeText(interaction.member.displayName)} for ${reason}\nYou now have a total of ${coin}${balance.balance} in your LDSG account.`).catch(u.noop);
           }
           interaction.createResponse(`${coin}${value} sent to ${member} for ${reason}`).then(u.clean);
-          interaction.client.channels.cache.get(modLogs).send(`${(discordId == msg.client.user.id) ? "<@111232201848295424> " : ""}**${u.escapeText(interaction.member.displayName)}** gave **${u.escapeText(member.displayName)}** ${coin}${value} for ${reason}`);
-          if (!(team && currency == "em") || (discordId == msg.client.user.id)) {
+          interaction.client.channels.cache.get(modLogs).send(`${(discordId == interaction.client.user.id) ? "<@111232201848295424> " : ""}**${u.escapeText(interaction.member.displayName)}** gave **${u.escapeText(member.displayName)}** ${coin}${value} for ${reason}`);
+          if (!(team && currency == "em") || (discordId == interaction.client.user.id)) {
             let withdrawl = {
               currency,
               discordId: interaction.user.id,
