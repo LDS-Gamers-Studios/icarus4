@@ -152,7 +152,7 @@ const Module = new Augur.Module()
     while (match = mentions.exec(suffix)) {
       userId = match[1];
       try {
-        let member = await msg.guild.members.fetch(userId);
+        let member = await msg.guild.members.fetch(userId).catch(u.noop);
         if (member) {
           const bannedHighRole = member.roles.cache.filter(r => r.id != "281135201407467520").sort((a, b) => b.comparePositionTo(a)).first();
           if (bannerHighRole.comparePositionTo(bannedHighRole) <= 0) {
@@ -164,7 +164,7 @@ const Module = new Augur.Module()
         else {
           members.set(userId, undefined);
         }
-      }
+      } catch(error) { u.errorHandler(error, msg); }
     }
     if (members.size == 0) {
       msg.reply("you need to tell me who to ban!").then(u.clean);
@@ -177,19 +177,18 @@ const Module = new Augur.Module()
       let banCount = 0;
       for (const [memberId, member] of members) {
         try {
-          if (member) {
             const infraction = {
-              discordId: member.id,
+              discordId: memberId,
               description: reason,
               value: 30,
               mod: msg.author.id
             };
             let inf = await Module.db.infraction.save(infraction);
 
-            await (member.send(`You were banned from ${msg.guild.name} for ${reason}`).catch(() => blocked(member)));
+            await (member?.send(`You were banned from ${msg.guild.name} for ${reason}`).catch(() => blocked(member)));
             if (!msg.client.ignoreNotifications) msg.client.ignoreNotifications = new Set();
-            msg.client.ignoreNotifications.add(member.id);
-            await member.ban({days: 2, reason});
+            msg.client.ignoreNotifications.add(memberId);
+            await msg.guild.members.ban(memberId, {days: 2, reason});
 
             let embed = u.embed()
               .setAuthor(member.displayName, member.user.displayAvatarURL({dynamic: true}))
@@ -198,9 +197,6 @@ const Module = new Augur.Module()
               .setColor(0x0000FF);
 
             msg.client.channels.cache.get(modLogs).send({embed});
-          } else {
-            msg.guild.members.ban(memberId, {days: 2, reason});
-          }
 
           let memberDoc = await Module.db.user.fetchUser(userId);
           if (memberDoc) {
