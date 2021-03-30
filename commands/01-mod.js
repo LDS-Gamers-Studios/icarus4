@@ -146,10 +146,10 @@ const Module = new Augur.Module()
     const bannerHighRole = msg.member.roles.cache.filter(r => r.id != "281135201407467520").sort((a, b) => b.comparePositionTo(a)).first();
     const mentions = /<@!?(\d+)>/ig;
     const reason = suffix.replace(mentions, "").trim() || "[Member Ban]: Violating the Code of Conduct";
+
+    let members = new u.Collection();
     let match;
-    let banCount = 0;
-    let confirm = await u.confirm(msg, `Are you sure you want to ban the following?\n${msg.mentions.members.map(m => m.displayName).join("\n")}`);
-    while ((match = mentions.exec(suffix)) && confirm) {
+    while (match = mentions.exec(suffix)) {
       userId = match[1];
       try {
         let member = await msg.guild.members.fetch(userId);
@@ -158,18 +158,37 @@ const Module = new Augur.Module()
           if (bannerHighRole.comparePositionTo(bannedHighRole) <= 0) {
             msg.reply(`you cannot ban ${u.escapeText(member.displayName)}!`);
             continue;
-          } else {
+          }
+          members.set(userId, member);
+        }
+        else {
+          members.set(userId, undefined);
+        }
+      }
+    }
+    if (members.size == 0) {
+      msg.reply("you need to tell me who to ban!").then(u.clean);
+      return;
+    }
+
+    let confirm = await u.confirm(msg, `Are you sure you want to ban the following?\n${members.keyArray().map(m => members.get(m) ? u.escapeText(members.get(m).displayName) : m).join("\n")}`);
+
+    if (confirm) {
+      let banCount = 0;
+      for (const [memberId, member] of members) {
+        try {
+          if (member) {
             const infraction = {
               discordId: member.id,
               description: reason,
               value: 30,
               mod: msg.author.id
             };
-            await (member.send(`You were banned from ${msg.guild.name} for ${reason}`).catch(() => blocked(member)));
+            let inf = await Module.db.infraction.save(infraction);
 
+            await (member.send(`You were banned from ${msg.guild.name} for ${reason}`).catch(() => blocked(member)));
             if (!msg.client.ignoreNotifications) msg.client.ignoreNotifications = new Set();
             msg.client.ignoreNotifications.add(member.id);
-
             await member.ban({days: 2, reason});
 
             let embed = u.embed()
@@ -179,25 +198,24 @@ const Module = new Augur.Module()
               .setColor(0x0000FF);
 
             msg.client.channels.cache.get(modLogs).send({embed});
+          } else {
+            msg.guild.members.ban(memberId, {days: 2, reason});
           }
-        } else {
-          msg.guild.members.ban(userId, {days: 2, reason});
-        }
-        let memberDoc = await Module.db.user.fetchUser(userId);
-        if (memberDoc) {
-          memberDoc.roles = memberDoc.roles.filter(r => r != Module.config.roles.trusted).concat(Module.config.roles.muted, Module.config.roles.untrusted);
-          await Module.db.user.update(userId, {roles: memberDoc.roles});
-        }
-        banCount++;
-      } catch(error) { u.errorHandler(error, msg); }
-    }
-    if (banCount > 0) {
-      msg.reply(`${banCount} user(s) banned.`).then(u.clean);
-    } else if (!confirm) {
-      msg.reply("`!ban` cancelled.").then(u.clean);
+
+          let memberDoc = await Module.db.user.fetchUser(userId);
+          if (memberDoc) {
+            memberDoc.roles = memberDoc.roles.filter(r => r != Module.config.roles.trusted).concat(Module.config.roles.muted, Module.config.roles.untrusted);
+            await Module.db.user.update(userId, {roles: memberDoc.roles});
+          }
+          banCount++;
+        } catch (e) { u.errorHandler(e, msg); }
+      }
+      if (banCount > 0)
+        msg.reply(`${banCount} user(s) banned.`).then(u.clean);
     } else {
-      msg.reply("you need to tell me who to ban!").then(u.clean);
+      msg.reply("`!ban` cancelled.").then(u.clean);
     }
+
   }
 })
 .addCommand({name: "channelactivity",
