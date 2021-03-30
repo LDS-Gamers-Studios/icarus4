@@ -19,7 +19,7 @@ const Utils = {
   clean: function(msg, t = 20000) {
     setTimeout((m) => {
       if (m.interaction) {
-        m.interaction.deleteResponse(m.id);
+        m.interaction.deleteResponse(m.id).catch(Utils.noop);
       } else if (m.deletable && !m.deleted) {
         m.delete().catch(Utils.noop);
       }
