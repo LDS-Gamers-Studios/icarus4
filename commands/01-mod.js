@@ -334,7 +334,7 @@ const Module = new Augur.Module()
     u.clean(msg, 0);
     const members = u.userMentions(msg, true);
 
-    let confirm = await u.confirm(msg, `Are you sure you want to kick the following?\n${members.map(m => m.displayName).join("\n")}`);
+    let confirm = await u.confirm(msg, `Are you sure you want to kick the following?\n${members.map(m => u.escapeText(m.displayName)).join("\n")}`);
 
     if (confirm && members.size > 0) {
       let reason = suffix.replace(/<@!?\d+>/ig, "").trim() || "[Member Kick] Violating the Code of Conduct";
