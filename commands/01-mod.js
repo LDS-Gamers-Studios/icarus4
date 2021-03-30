@@ -190,11 +190,12 @@ const Module = new Augur.Module()
             msg.client.ignoreNotifications.add(memberId);
             await msg.guild.members.ban(memberId, {days: 2, reason});
 
-            let embed = u.embed()
-              .setAuthor(member.displayName, member.user.displayAvatarURL({dynamic: true}))
-              .setTitle(`User Ban`)
-              .setDescription(`**${u.escapeText(msg.member.displayName)}** banned **${u.escapeText(member.displayName)}** for ${reason}.`)
-              .setColor(0x0000FF);
+          let user = member?.user || await msg.client.users.fetch(memberId).catch(u.noop);
+          let embed = u.embed()
+            .setAuthor(user?.username, user?.displayAvatarURL({dynamic: true}))
+            .setTitle(`User Ban`)
+            .setDescription(`**${u.escapeText(msg.member.displayName)}** banned **${u.escapeText(user?.username)}** for ${reason}.`)
+            .setColor(0x0000FF);
 
             msg.client.channels.cache.get(modLogs).send({embed});
 
