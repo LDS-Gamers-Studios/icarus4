@@ -323,9 +323,12 @@ const models = {
       if (cmd.attachment) {
         let fs = require("fs");
         let axios = require("axios");
-        axios.get(data.url).then(response => {
-          response.data.pipe(fs.createWriteStream(process.cwd() + "/storage/" + cmd._id));
+        let response = await axios({
+          method: "get",
+          url: data.url,
+          responseType: "stream"
         });
+        response.data.pipe(fs.createWriteStream(process.cwd() + "/storage/" + cmd._id));
       }
       return cmd;
     },
