@@ -177,18 +177,18 @@ const Module = new Augur.Module()
       let banCount = 0;
       for (const [memberId, member] of members) {
         try {
-            const infraction = {
-              discordId: memberId,
-              description: reason,
-              value: 30,
-              mod: msg.author.id
-            };
-            let inf = await Module.db.infraction.save(infraction);
+          const infraction = {
+            discordId: memberId,
+            description: reason,
+            value: 30,
+            mod: msg.author.id
+          };
+          let inf = await Module.db.infraction.save(infraction);
 
-            await (member?.send(`You were banned from ${msg.guild.name} for ${reason}`).catch(() => blocked(member)));
-            if (!msg.client.ignoreNotifications) msg.client.ignoreNotifications = new Set();
-            msg.client.ignoreNotifications.add(memberId);
-            await msg.guild.members.ban(memberId, {days: 2, reason});
+          await (member?.send(`You were banned from ${msg.guild.name} for ${reason}`).catch(() => blocked(member)));
+          if (!msg.client.ignoreNotifications) msg.client.ignoreNotifications = new Set();
+          msg.client.ignoreNotifications.add(memberId);
+          await msg.guild.members.ban(memberId, {days: 2, reason});
 
           let user = member?.user || await msg.client.users.fetch(memberId).catch(u.noop);
           let embed = u.embed()
@@ -197,7 +197,7 @@ const Module = new Augur.Module()
             .setDescription(`**${u.escapeText(msg.member.displayName)}** banned **${u.escapeText(user?.username)}** for ${reason}.`)
             .setColor(0x0000FF);
 
-            msg.client.channels.cache.get(modLogs).send({embed});
+          msg.client.channels.cache.get(modLogs).send({embed});
 
           let memberDoc = await Module.db.user.fetchUser(userId);
           if (memberDoc) {
