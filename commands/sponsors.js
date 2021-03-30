@@ -63,11 +63,11 @@ const Module = new Augur.Module()
         sponsorChannels.set(sponsor.id, {sponsorId: sponsor.id, channelId: channel.id});
 
         try {
-          Module.config.sheets.get("Sponsor Channels").addRow({
-            sponsorname: sponsor.displayName,
-            sponsorid: sponsor.id,
-            channelid: channel.id
-          }, u.noop);
+          await Module.config.sheets.get("Sponsor Channels").addRow({
+            "Sponsor Name": sponsor.displayName,
+            "Sponsor ID": sponsor.id,
+            "Channel ID": channel.id
+          });
         } catch(error) { u.errorHandler(error, "Save Sponsor Channel Info"); }
 
         channel.send(`${sponsor}, welcome to your private channel! Thank you for being a Pro Sponsor! Your contributions each month are very much appreciated! Please accept this channel as a token of our appreciation.\n\nYou should have some administrative abilities for this channel (including changing the name and description), as well as the ability to add people to the channel with \`!coolkids @user(s)\`. If you would like to change default permissions for users in the channel, please contact a member of Management directly.`);
@@ -109,21 +109,19 @@ const Module = new Augur.Module()
     }
   }
 })
-.addEvent("loadConfig", () => {
-  Module.config.sheets.get("Sponsor Channels").getRows((e, rows) => {
-    if (e) u.errorHandler(e, "Error loading sponsor channels.");
-    else {
-      let ldsg = Module.client.guilds.cache.get(Module.config.ldsg);
-      sponsorChannels.clear();
-      for (let row of rows) {
-        if (!(ldsg.members.cache.has(row.sponsorid) && ldsg.members.cache.get(row.sponsorid).roles.cache.has(proSponsor))) continue;
-        sponsorChannels.set(row.sponsorid, {
-          sponsorId: row.sponsorid,
-          channelId: row.channelid
-        });
-      }
+.addEvent("loadConfig", async () => {
+  try {
+    let rows = await Module.config.sheets.get("Sponsor Channels").getRows();
+    let ldsg = Module.client.guilds.cache.get(Module.config.ldsg);
+    sponsorChannels.clear();
+    for (let row of rows) {
+      if (!(ldsg.members.cache.has(row["Sponsor ID"]) && ldsg.members.cache.get(row["Sponsor ID"]).roles.cache.has(proSponsor))) continue;
+      sponsorChannels.set(row["Sponsor ID"], {
+        sponsorId: row["Sponsor ID"],
+        channelId: row["Channel ID"]
+      });
     }
-  });
+  } catch(error) { u.errorHandler(error, "Sponsors loadConfig"); }
 });
 
 module.exports = Module;

@@ -193,23 +193,22 @@ const Module = new Augur.Module()
     }
   }
 })
-.addEvent("loadConfig", () => {
-  Module.config.sheets.get("Opt-In Roles").getRows((e, rows) => {
-    if (e) u.errorHandler(e, "Error loading opt-in roles.");
-    else {
-      for (let i = 0; i < rows.length; i++)
-        roles.set(rows[i].roletag, rows[i].roleid);
-      Module.client.commands.find(c => c.name == "add").info = "Gives you one of the following roles:\n```md\n* " + Array.from(roles.keys()).join("\n* ") + "```";
-      Module.client.commands.find(c => c.name == "remove").info = "Remove one of the following roles:\n```md\n* " + Array.from(roles.keys()).join("\n* ") + "```";
+.addEvent("loadConfig", async () => {
+  try {
+    let rows = await Module.config.sheets.get("Opt-In Roles").getRows();
+    roles.clear();
+    for (let row of rows)
+    roles.set(row["Role Tag"], row["RoleID"]);
+    Module.client.commands.find(c => c.name == "add").info = "Gives you one of the following roles:\n```md\n* " + Array.from(roles.keys()).join("\n* ") + "```";
+    Module.client.commands.find(c => c.name == "remove").info = "Remove one of the following roles:\n```md\n* " + Array.from(roles.keys()).join("\n* ") + "```";
 
-      const fs = require("fs");
-      const roleData = {};
-      for (const [tag, roleId] of roles) {
-        roleData[tag] = roleId;
-      }
-      fs.writeFileSync("./storage/roleInfo.json", JSON.stringify(roleData));
+    const fs = require("fs");
+    const roleData = {};
+    for (const [tag, roleId] of roles) {
+      roleData[tag] = roleId;
     }
-  });
+    fs.writeFileSync("./storage/roleInfo.json", JSON.stringify(roleData));
+  } catch(error) { u.errorHandler(error, "Roles loadConfig"); }
 })
 .setUnload(() => {
   const path = require("path");

@@ -101,14 +101,13 @@ const Module = new Augur.Module()
   },
   permissions: (msg) => msg.guild
 })
-.addEvent("loadConfig", () => {
-  Module.config.sheets.get("WIP Channel Defaults").getRows((e, rows) => {
-    if (e) u.errorHandler(e, "Error loading WIP channel defaults.");
-    else {
-      for (let i = 0; i < rows.length; i++)
-        gameDefaults.set(rows[i].channelid, rows[i].gamename);
-    }
-  });
+.addEvent("loadConfig", async () => {
+  try {
+    let rows = await Module.config.sheets.get("WIP Channel Defaults").getRows();
+    gameDefaults.clear();
+    for (let row of rows)
+      gameDefaults.set(row["ChannelId"], row["Game Name"]);
+  } catch(error) { u.errorHandler(error, "LFG loadConfig"); }
 });
 
 module.exports = Module;

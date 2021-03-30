@@ -4,7 +4,7 @@ const Augur = require("augurbot"),
   Trello = require("simply-trello"),
   u = require("../utils/utils"),
   google = require("../config/google_api.json"),
-  GoogleSpreadsheet = require("google-spreadsheet");
+  {GoogleSpreadsheet} = require("google-spreadsheet");
 
 const doc = new GoogleSpreadsheet(google.sheets.config);
 
@@ -32,18 +32,6 @@ const Module = new Augur.Module()
     } catch(e) { u.errorHandler(e, msg); }
   },
   permissions: (msg) => Module.config.adminId.includes(msg.author.id)
-})
-.addCommand({name: "iamyourdev",
-  enabled: false,
-  hidden: true,
-  permissions: msg => msg.channel.type == "dm" && msg.client.guilds.cache.get(Module.config.ldsg).members.cache.has(msg.author.id),
-  process: async (msg) => {
-    try {
-      msg.react("👌");
-      let botTesting = await msg.client.channels.cache.get("209046676781006849").createOverwrite(msg.author, { VIEW_CHANNEL: true });
-      botTesting.send(`Well, I guess ${msg.author} is my dev now. Please do others a favor and let them find their own way in, rather than telling them. :grin:`);
-    } catch(e) { u.errorHandler(e, msg); }
-  }
 })
 .addCommand({name: "ping",
   category: "Bot Admin",
@@ -231,27 +219,18 @@ const Module = new Augur.Module()
 .addEvent("ready", () => {
   Module.client.guilds.cache.get(Module.config.ldsg).members.fetch();
 })
-.setInit((reload) => {
-  if (!reload) {
-    u.errorLog.send(u.embed().setTimestamp().setDescription("Bot is ready!"));
-  }
-
-  doc.useServiceAccountAuth(google.creds, (err) => {
-    if (err) u.errorHandler(err, "Google Authentication - Config Sheet");
-    else {
-      doc.getInfo((e, r) => {
-        if (e) u.errorHandler(e, "Fetch Google Config Sheet Error");
-        else {
-          const sheets = r.worksheets;
-          Module.config.sheets = new Map();
-          for (let i = 0; i < sheets.length; i++) {
-            Module.config.sheets.set(sheets[i].title, sheets[i]);
-          }
-          Module.client.emit("loadConfig");
-        }
-      });
+.setInit(async (reload) => {
+  try {
+    if (!reload) {
+      u.errorLog.send(u.embed().setTimestamp().setDescription("Bot is ready!"));
     }
-  });
+
+    await doc.useServiceAccountAuth(google.creds);
+    await doc.loadInfo();
+    const sheets = r.worksheets;
+    Module.config.sheets = new Map(doc.sheetsByIndex.map(s => [s.title, s]));
+    Module.client.emit("loadConfig");
+  } catch(error) { u.errorHandler(error, "botAdmin Load"); }
 })
 .setUnload(() => true);
 

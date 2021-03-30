@@ -14,11 +14,11 @@ const Ign = {
 
 class GameSystem {
   constructor(data) {
-    this.system = data.system;
-    this.name = data.name;
-    this.category = (data.category ? data.category : "Game Platforms");
-    this.display = (this.category != "Personal");
-    this.link = data.link;
+    this.system = data.System;
+    this.name = data.Name;
+    this.category = (data.Category ? data.Category : "Game Platforms");
+    this.display = (this.Category != "Personal");
+    this.link = data.Link;
   }
 
   toObject() {
@@ -183,58 +183,41 @@ const Module = new Augur.Module()
     }
   }
 })
-.addEvent("loadConfig", () => {
-  Promise.all([
-    new Promise((fulfill, reject) => {
-      Module.config.sheets.get("IGN").getRows((e, rows) => {
-        if (e) reject(e);
-        else {
-          for (let i = 0; i < rows.length; i++)
-            Ign.gameids.set(rows[i].system, new GameSystem(rows[i]));
+.addEvent("loadConfig", async () => {
+  try {
+    let systems = await Module.config.sheets.get("IGN").getRows();
+    Ign.gameids = new u.Collection(systems.map(s => [s["System"], new GameSystem(s)]));
 
-          let helpList = ["```md"];
+    let helpList = ["```md"];
 
-          for (const category of Ign.categories) {
-            let categoryList = ["# " + category];
-            for (const [slug, system] of Ign.gameids) {
-              if (system.display && system.category == category) categoryList.push(`* ${system.system} (${system.name})`);
-            }
-            if (categoryList.length > 1) {
-              helpList = helpList.concat(categoryList);
-              helpList.push("");
-            }
-          };
+    for (const category of Ign.categories) {
+      let categoryList = ["# " + category];
+      for (const [slug, system] of Ign.gameids.filter(s => s.display && s.category == category).sort((a, b) => a.system.localeCompare(b.system))) {
+        categoryList.push(`* ${system.system} (${system.name})`);
+      }
+      if (categoryList.length > 1) {
+        helpList = helpList.concat(categoryList);
+        helpList.push("");
+      }
+    };
 
-          helpList.push("```");
+    helpList.push("```");
+    helpList = helpList.join("\n");
 
-          helpList = helpList.join("\n");
+    for (const command of Module.commands) {
+      command.info = command.info.replace("{helpList}", helpList);
+    }
 
-          for (const command of Module.commands) {
-            command.info = command.info.replace("{helpList}", helpList);
-          }
-          fulfill(true);
-        }
-      });
-    }),
-    new Promise((fulfill, reject) => {
-      Module.config.sheets.get("IGN Aliases").getRows((e, rows) => {
-        if (e) reject(e);
-        else {
-          for (let i = 0; i < rows.length; i++)
-            Ign.aliases.set(rows[i].alias, rows[i].system);
-          fulfill(true);
-        }
-      });
-    })
-  ]).then(r => {
+    let aliases = await Module.config.sheets.get("IGN Aliases").getRows();
+    Ign.aliases = new u.Collection(aliases.map(a => [a["Alias"], a["System"]]));
+
     const fs = require("fs");
-
     fs.writeFileSync("./storage/ignInfo.json", JSON.stringify({
       categories: Ign.categories,
       aliases: Array.from(Ign.aliases.entries()),
       gameids: Array.from(Ign.gameids.entries())
     }));
-  }).catch(error => u.errorHandler(error, "IGN Load"));
+  } catch(error) { u.errorHandler(error, "IGN loadConfig"); }
 })
 .setUnload(() => {
   const path = require("path");
