@@ -52,9 +52,9 @@ const Module = new Augur.Module()
             }
             await msg.channel.send(response.join("\n") + "```");
           } else {
-            msg.channel.send(member.displayName + " still has all their ankles!");
+            msg.channel.send(u.escapeText(member.displayName) + " still has all their ankles!");
           }
-        } catch (e) { u.errorHandler(e, `Handling lost ankles for user: ${member.displayName}`); }
+        } catch (e) { u.errorHandler(e, `Handling lost ankles for user: ${u.escapeText(member.displayName)}`); }
       }
       for (let [channelId, channel] of channelMentions) {
         try {
@@ -71,7 +71,7 @@ const Module = new Augur.Module()
 
             for (const [discordId, count] of data.perUser) {
               let user = msg.guild.members.cache.get(discordId) || await msg.client.users.fetch(discordId);
-              response.push(`${user.displayName || user.username}: ${count} ankles lost.`);
+              response.push(`${u.escapeText(user.displayName || user.username)}: ${count} ankles lost.`);
             }
             await msg.channel.send(response.join("\n") + "```");
           } else {
@@ -95,7 +95,7 @@ const Module = new Augur.Module()
           response.push("Top 5 users:```");
           let displayCount = 0;
           for (const [discordId, count] of data.perUser) {
-            response.push(`${msg.guild.members.cache.get(discordId).displayName}: ${count} ankles lost.`);
+            response.push(`${u.escapeText(msg.guild.members.cache.get(discordId).displayName)}: ${count} ankles lost.`);
             if (++displayCount == 5) break;
           }
           response[response.length-1] += "```";
@@ -156,7 +156,7 @@ const Module = new Augur.Module()
         if (member) {
           const bannedHighRole = member.roles.cache.filter(r => r.id != "281135201407467520").sort((a, b) => b.comparePositionTo(a)).first();
           if (bannerHighRole.comparePositionTo(bannedHighRole) <= 0) {
-            msg.reply(`you cannot ban ${member.displayName}!`);
+            msg.reply(`you cannot ban ${u.escapeText(member.displayName)}!`);
             continue;
           } else {
             const infraction = {
@@ -175,7 +175,7 @@ const Module = new Augur.Module()
             let embed = u.embed()
               .setAuthor(member.displayName, member.user.displayAvatarURL({dynamic: true}))
               .setTitle(`User Ban`)
-              .setDescription(`**${msg.member.displayName}** banned **${member.displayName}** for ${reason}.`)
+              .setDescription(`**${u.escapeText(msg.member.displayName)}** banned **${u.escapeText(member.displayName)}** for ${reason}.`)
               .setColor(0x0000FF);
 
             msg.client.channels.cache.get(modLogs).send({embed});
@@ -456,9 +456,9 @@ const Module = new Augur.Module()
 
           let embed = u.embed()
           .setColor("#0000FF")
-          .setAuthor(u.escapeText(member.displayName), member.user.displayAvatarURL())
+          .setAuthor(member.displayName, member.user.displayAvatarURL())
           .setDescription(comment)
-          .addField("Resolved", `${msg.author.username} added a note.`)
+          .addField("Resolved", `${u.escapeText(msg.author.username)} added a note.`)
           .addField(`Infraction Summary (${summary.time} Days) `, `Infractions: ${summary.count}\nPoints: ${summary.points}`)
           .setTimestamp();
 
@@ -594,7 +594,7 @@ const Module = new Augur.Module()
 
         await member.setNickname(newNick)
 
-        let comment = `Set nickname to ${newNick} from ${oldNick}.`;
+        let comment = `Set nickname to ${u.escapeText(newNick)} from ${u.escapeText(oldNick)}.`;
 
         let inf = await Module.db.infraction.save({
           discordId: member.id,
@@ -610,12 +610,12 @@ const Module = new Augur.Module()
           .setColor("#0000FF")
           .setAuthor(u.escapeText(member.displayName), member.user.displayAvatarURL())
           .setDescription(comment)
-          .addField("Resolved", `${msg.author.username} changed the user's nickname from ${oldNick} to ${newNick}.`)
+          .addField("Resolved", `${u.escapeText(msg.author.username)} changed the user's nickname from ${u.escapeText(oldNick)} to ${u.escapeText(newNick)}.`)
           .addField(`Infraction Summary (${summary.time} Days) `, `Infractions: ${summary.count}\nPoints: ${summary.points}`)
           .setTimestamp();
 
         msg.client.channels.cache.get(modLogs).send({embed});
-        member.send(`Your nickname has been changed in ${msg.guild.name} from ${oldNick} to ${newNick}. Please contact a moderator or member of the management team if you have questions regarding the change.`).catch(() => blocked(member));
+        member.send(`Your nickname has been changed in ${msg.guild.name} from ${u.escapeText(oldNick)} to ${u.escapeText(newNick)}. Please contact a moderator or member of the management team if you have questions regarding the change.`).catch(() => blocked(member));
       } catch(e) { u.errorHandler(e, msg); }
     }
   }
@@ -639,7 +639,7 @@ const Module = new Augur.Module()
           member.send("Thanks for your purchase from LDSG! You've been awarded the **Swagoteer** role!").catch(() => blocked(m));
         }
       }
-      msg.reply(`I added the *Swagoteer* role to ${members.map(m => m.displayName).join(", ")}`)
+      msg.reply(`I added the *Swagoteer* role to ${members.map(m => u.escapeText(m.displayName)).join(", ")}`)
         .then(u.clean);
     } else {
       msg.reply("you need to @mention the user(s) you want to give the role!")
@@ -778,13 +778,13 @@ const Module = new Augur.Module()
       for (const [memberId, member] of members) {
         try {
           let response = "We have received one or more complaints regarding content you posted. We have reviewed the content in question and have determined, in our sole discretion, that it is against our code of conduct (<http://ldsgamers.com/code-of-conduct>). This content was removed on your behalf. As a reminder, if we believe that you are frequently in breach of our code of conduct or are otherwise acting inconsistently with the letter or spirit of the code, we may limit, suspend or terminate your access to the LDSG discord server.";
-          member.send(`${response}\n\n**${msg.member.displayName}** has issued you a warning for:\n${comment}`).catch(() => blocked(member));
+          member.send(`${response}\n\n**${u.escapeText(msg.member.displayName)}** has issued you a warning for:\n${comment}`).catch(() => blocked(member));
 
           let embed = u.embed()
             .setColor("#0000FF")
-            .setAuthor(u.escapeText(member.displayName), member.user.displayAvatarURL())
+            .setAuthor(member.displayName, member.user.displayAvatarURL())
             .setDescription(comment)
-            .addField("Resolved", `${msg.author.username} issued a ${value} point warning.`)
+            .addField("Resolved", `${u.escapeText(msg.author.username)} issued a ${value} point warning.`)
             .setTimestamp();
           let flag = await msg.client.channels.cache.get(modLogs).send({embed});
 

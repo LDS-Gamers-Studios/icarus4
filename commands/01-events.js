@@ -98,7 +98,7 @@ const Module = new Augur.Module()
         .setFooter(`${user.posts} Posts in ${Math.round((Date.now() - (newMember?.joinedTimestamp || 0)) / (30 * 24 * 60 * 60 * 1000))} Months`)
         .setTitle("User Update");
       if (oldUser.tag != newUser.tag) {
-        embed.addField("**Username Update**", `**Old:** ${oldUser.tag}\n**New:** ${newUser.tag}`);
+        embed.addField("**Username Update**", `**Old:** ${u.escapeText(oldUser.tag)}\n**New:** ${u.escapeText(newUser.tag)}`);
       }
       if (oldUser.avatar != newUser.avatar) {
         embed.addField("**Avatar Update**", "See Below").setImage(newUser.displayAvatarURL({dynamic: true}));
@@ -107,7 +107,7 @@ const Module = new Augur.Module()
       }
       ldsg.channels.cache.get("725797487129919488").send(`${newUser}: ${newUser.id}`, {embed});
     }
-  } catch(error) { u.errorHandler(error, `User Update Error: \`${newUser?.username}\``); }
+  } catch(error) { u.errorHandler(error, `User Update Error: \`${u.escapeText(newUser?.username)}\``); }
 });
 
 module.exports = Module;
