@@ -20,13 +20,15 @@ const Module = new Augur.Module()
       .setThumbnail(msg.client.user.displayAvatarURL({size: 128}));
 
       if (!suffix) { // FULL HELP
+        commands = commands.filter(c => !c.hidden);
+
         embed
         .setTitle(msg.client.user.username + " Commands" + (msg.guild ? ` in ${msg.guild.name}.` : "."))
         .setDescription(`You have access to the following commands. For more info, type \`${prefix}help <command>\`.`)
         .setFooter(`Page 1 of ${Math.ceil(commands.size / perPage)}`);
 
         let categories = commands
-        .filter(c => !c.hidden && c.category != "General")
+        .filter(c => c.category != "General")
         .map(c => c.category)
         .reduce((a, c, i, all) => ((all.indexOf(c) == i) ? a.concat(c) : a), [])
         .sort();
@@ -35,7 +37,7 @@ const Module = new Augur.Module()
 
         let i = 1;
         for (let category of categories) {
-          for (let [name, command] of commands.filter(c => c.category == category && !c.hidden).sort((a, b) => a.name.localeCompare(b.name))) {
+          for (let [name, command] of commands.filter(c => c.category == category).sort((a, b) => a.name.localeCompare(b.name))) {
             embed.addField(`[${category}] ${prefix}${command.name} ${command.syntax}`.trim(), command.description || "*No Description Available*");
             if (++i % perPage == 1) {
               try {
@@ -59,6 +61,7 @@ const Module = new Augur.Module()
           return;
         }
       } else { // SINGLE COMMAND HELP
+        suffix = suffix.toLowerCase();
         let command = null;
         if (commands.has(suffix)) command = commands.get(suffix);
         else if (Module.client.commands.aliases.has(suffix)) command = Module.client.commands.aliases.get(suffix);
