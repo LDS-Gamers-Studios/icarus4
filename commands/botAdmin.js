@@ -227,7 +227,6 @@ const Module = new Augur.Module()
 
     await doc.useServiceAccountAuth(google.creds);
     await doc.loadInfo();
-    const sheets = r.worksheets;
     Module.config.sheets = new Map(doc.sheetsByIndex.map(s => [s.title, s]));
     Module.client.emit("loadConfig");
   } catch(error) { u.errorHandler(error, "botAdmin Load"); }
