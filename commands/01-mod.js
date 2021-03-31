@@ -146,58 +146,73 @@ const Module = new Augur.Module()
     const bannerHighRole = msg.member.roles.cache.filter(r => r.id != "281135201407467520").sort((a, b) => b.comparePositionTo(a)).first();
     const mentions = /<@!?(\d+)>/ig;
     const reason = suffix.replace(mentions, "").trim() || "[Member Ban]: Violating the Code of Conduct";
+
+    let members = new u.Collection();
     let match;
-    let banCount = 0;
-    let confirm = await u.confirm(msg, `Are you sure you want to ban the following?\n${msg.mentions.members.map(m => m.displayName).join("\n")}`);
-    while ((match = mentions.exec(suffix)) && confirm) {
+    while (match = mentions.exec(suffix)) {
       userId = match[1];
       try {
-        let member = await msg.guild.members.fetch(userId);
+        let member = await msg.guild.members.fetch(userId).catch(u.noop);
         if (member) {
           const bannedHighRole = member.roles.cache.filter(r => r.id != "281135201407467520").sort((a, b) => b.comparePositionTo(a)).first();
           if (bannerHighRole.comparePositionTo(bannedHighRole) <= 0) {
             msg.reply(`you cannot ban ${u.escapeText(member.displayName)}!`);
             continue;
-          } else {
-            const infraction = {
-              discordId: member.id,
-              description: reason,
-              value: 30,
-              mod: msg.author.id
-            };
-            await (member.send(`You were banned from ${msg.guild.name} for ${reason}`).catch(() => blocked(member)));
-
-            if (!msg.client.ignoreNotifications) msg.client.ignoreNotifications = new Set();
-            msg.client.ignoreNotifications.add(member.id);
-
-            await member.ban({days: 2, reason});
-
-            let embed = u.embed()
-              .setAuthor(member.displayName, member.user.displayAvatarURL({dynamic: true}))
-              .setTitle(`User Ban`)
-              .setDescription(`**${u.escapeText(msg.member.displayName)}** banned **${u.escapeText(member.displayName)}** for ${reason}.`)
-              .setColor(0x0000FF);
-
-            msg.client.channels.cache.get(modLogs).send({embed});
           }
-        } else {
-          msg.guild.members.ban(userId, {days: 2, reason});
+          members.set(userId, member);
         }
-        let memberDoc = await Module.db.user.fetchUser(userId);
-        if (memberDoc) {
-          memberDoc.roles = memberDoc.roles.filter(r => r != Module.config.roles.trusted).concat(Module.config.roles.muted, Module.config.roles.untrusted);
-          await Module.db.user.update(userId, {roles: memberDoc.roles});
+        else {
+          members.set(userId, undefined);
         }
-        banCount++;
       } catch(error) { u.errorHandler(error, msg); }
     }
-    if (banCount > 0) {
-      msg.reply(`${banCount} user(s) banned.`).then(u.clean);
-    } else if (!confirm) {
-      msg.reply("`!ban` cancelled.").then(u.clean);
-    } else {
+    if (members.size == 0) {
       msg.reply("you need to tell me who to ban!").then(u.clean);
+      return;
     }
+
+    let confirm = await u.confirm(msg, `Are you sure you want to ban the following?\n${members.keyArray().map(m => members.get(m) ? u.escapeText(members.get(m).displayName) : m).join("\n")}`);
+
+    if (confirm) {
+      let banCount = 0;
+      for (const [memberId, member] of members) {
+        try {
+          const infraction = {
+            discordId: memberId,
+            description: reason,
+            value: 30,
+            mod: msg.author.id
+          };
+          let inf = await Module.db.infraction.save(infraction);
+
+          await (member?.send(`You were banned from ${msg.guild.name} for ${reason}`).catch(() => blocked(member)));
+          if (!msg.client.ignoreNotifications) msg.client.ignoreNotifications = new Set();
+          msg.client.ignoreNotifications.add(memberId);
+          await msg.guild.members.ban(memberId, {days: 2, reason});
+
+          let user = member?.user || await msg.client.users.fetch(memberId).catch(u.noop);
+          let embed = u.embed()
+            .setAuthor(user?.username, user?.displayAvatarURL({dynamic: true}))
+            .setTitle(`User Ban`)
+            .setDescription(`**${u.escapeText(msg.member.displayName)}** banned **${u.escapeText(user?.username)}** for ${reason}.`)
+            .setColor(0x0000FF);
+
+          msg.client.channels.cache.get(modLogs).send({embed});
+
+          let memberDoc = await Module.db.user.fetchUser(userId);
+          if (memberDoc) {
+            memberDoc.roles = memberDoc.roles.filter(r => r != Module.config.roles.trusted).concat(Module.config.roles.muted, Module.config.roles.untrusted);
+            await Module.db.user.update(userId, {roles: memberDoc.roles});
+          }
+          banCount++;
+        } catch (e) { u.errorHandler(e, msg); }
+      }
+      if (banCount > 0)
+        msg.reply(`${banCount} user(s) banned.`).then(u.clean);
+    } else {
+      msg.reply("`!ban` cancelled.").then(u.clean);
+    }
+
   }
 })
 .addCommand({name: "channelactivity",
@@ -334,11 +349,7 @@ const Module = new Augur.Module()
     u.clean(msg, 0);
     const members = u.userMentions(msg, true);
 
-    let confirm = await u.confirm(msg, `Are you sure you want to kick the following?\n${members.map(m => u.escapeText(m.displayName)).join("\n")}`);
-
-    if (confirm && members.size > 0) {
-      let reason = suffix.replace(/<@!?\d+>/ig, "").trim() || "[Member Kick] Violating the Code of Conduct";
-      let guild = msg.guild;
+    if (members.size > 0) {
       // Get highest role that isn't "Live"
       const kickerHighRole = msg.member.roles.cache.filter(r => r.id != "281135201407467520").sort((a, b) => b.comparePositionTo(a)).first();
       for (const [memberId, member] of members) {
@@ -346,9 +357,22 @@ const Module = new Augur.Module()
           // Make sure kicker's highest role is higher than kick-ee's highest role
           const kickedHighRole = member.roles.cache.filter(r => r.id != "281135201407467520").sort((a, b) => b.comparePositionTo(a)).first();
           if (kickerHighRole.comparePositionTo(kickedHighRole) <= 0) {
+            members.delete(memberId);
             msg.reply(`you can't kick ${member}!`).then(u.clean);
-            continue;
           }
+        } catch(e) { u.errorHandler(e, msg); }
+      }
+    } else {
+      msg.reply("you need to tell me who to kick!").then(u.clean);
+    }
+    if (members.size == 0) return;
+
+    let confirm = await u.confirm(msg, `Are you sure you want to kick the following?\n${members.map(m => u.escapeText(m.displayName)).join("\n")}`);
+
+    if (confirm) {
+      const reason = suffix.replace(/<@!?\d+>/ig, "").trim() || "[Member Kick] Violating the Code of Conduct";
+      for (const [memberId, member] of members) {
+        try {
           let infraction = {
             discordId: member.id,
             description: reason,
@@ -357,7 +381,7 @@ const Module = new Augur.Module()
           };
           let inf = await Module.db.infraction.save(infraction);
 
-          await member.send(`You were kicked from ${guild.name} for ${reason}`).catch(() => blocked(member));
+          await member.send(`You were kicked from ${msg.guild.name} for ${reason}`).catch(() => blocked(member));
           await member.kick(reason);
           msg.client.channels.cache.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** kicked **${u.escapeText(member.displayName)}** for ${reason}`);
 
@@ -368,10 +392,8 @@ const Module = new Augur.Module()
           }
         } catch(e) { u.errorHandler(e, msg); }
       }
-    } else if (!confirm) {
-      msg.reply("`!kick` cancelled.").then(u.clean);
     } else {
-      msg.reply("you need to tell me who to kick!").then(u.clean);
+      msg.reply("`!kick` cancelled.").then(u.clean);
     }
   }
 })
