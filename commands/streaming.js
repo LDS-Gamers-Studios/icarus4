@@ -183,10 +183,11 @@ async function processTwitch(igns) {
       liveRole = ldsg.roles.cache.get("281135201407467520"),
       notificationChannel = ldsg.channels.cache.get(Module.config.ldsg); // #general
 
-    for (let i = 0; i < igns.length; i += 100) {
-      let streamers = igns.slice(i, i + 100);
+    let perPage = 50;
+    for (let i = 0; i < igns.length; i += perPage) {
+      let streamers = igns.slice(i, i + perPage);
 
-      let streams = await twitch.streams.getStreams({userName: streamers.map(s => s.ign)}).catch(u.noop);
+      let streams = await twitch.streams.getStreams({userName: streamers.map(s => s.ign)}).catch(error => { u.errorHandler(error, "Twitch getStreams()"); });
       if (streams) {
         // Handle Live
         for (let stream of streams.data) {
