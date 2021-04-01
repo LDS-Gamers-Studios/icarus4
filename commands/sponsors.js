@@ -80,13 +80,14 @@ const Module = new Augur.Module()
 .addCommand({name: "uncoolkids",
   description: "Remove user(s) to your Pro Sponsor private channel.",
   suffix: "@user(s)",
-  permissions: (msg) => (msg.guild?.id == Module.config.ldsg) && sponsorChannels.has(msg.member.id),
+  hidden: true,
+  permissions: (msg) => (msg.guild?.id == Module.config.ldsg),
   process: async (msg) => {
     u.clean(msg, 0);
 
     if (msg.mentions.channels.size > 0) {
       try {
-      for (const [channelId, channel] of msg.mentions.channels) {
+        for (const [channelId, channel] of msg.mentions.channels) {
           let myChannel = sponsorChannels.get(msg.author.id)?.channelId;
           if (channelId == myChannel) {
             msg.reply("you can't remove yourself from your own channel!").then(u.clean);
