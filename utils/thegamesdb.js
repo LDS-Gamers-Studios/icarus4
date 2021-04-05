@@ -43,12 +43,4 @@ class theGamesDBApi {
   }
 }
 
-const api = new theGamesDBApi();
-
-api.byGameName("Borderlands 2", {fields: ["rating"]}).then((data) => {
-  for (let game of data.games.filter(g => g.game_title.toLowerCase() == "borderlands 2" && g.rating != "Not Rated")) {
-    console.log(game);
-  }
-});
-
 module.exports = theGamesDBApi;
