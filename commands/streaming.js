@@ -4,7 +4,9 @@ const Augur = require("augurbot"),
   TwitchClient = require("twitch").default,
   twitchConfig = require("../config/twitch.json"),
   u = require("../utils/utils"),
-  yaml = require("js-yaml");
+  yaml = require("js-yaml"),
+  gamesDBApi = require("../utils/thegamesdb"),
+  gamesDB = new gamesDBApi();
 
 const extraLife = (new Date().getMonth() == 10);
 
@@ -14,6 +16,19 @@ const twitch = TwitchClient.withClientCredentials(twitchConfig.clientId, twitchC
   twitchGames = new Map(),
   twitchStatus = new Map(),
   bonusStreams = require("../data/streams.json");
+
+async function gameInfo(gameId) {
+  if (!twitchGames.has(gameId)) {
+    let game = await twitch.games.getGameById(gameId).catch(u.noop);
+    if (game) {
+      twitchGames.set(game.id, game);
+      let ratings = (await gamesDB.byGameName(game.name, {fields: "rating"}))
+        .games?.filter(g => g.game_title.toLowerCase() == game.name.toLowerCase() && g.rating != "Not Rated");
+      twitchGames.get(game.id, game).rating = ratings[0]?.rating;
+    }
+  }
+  return twitchGames.get(gameId);
+}
 
 async function checkStreams() {
   try {
@@ -47,13 +62,10 @@ async function extraLifeEmbed() {
 
       let channels = [];
       for (const stream of streams.data) {
-        if (!twitchGames.has(stream.gameId)) {
-          let game = await twitch.games.getGameById(stream.gameId).catch(u.noop);
-          if (game) twitchGames.set(game.id, game);
-        }
+        let game = await gameInfo(stream.gameId)?.name || "Something?";
         channels.push({
           name: stream.userDisplayName,
-          game: twitchGames.has(stream.gameId) ? twitchGames.get(stream.gameId).name : "Something?",
+          game,
           service: "Twitch",
           title: stream.title,
           url: `https://www.twitch.tv/${stream.userDisplayName}`
@@ -130,9 +142,10 @@ function notificationEmbed(stream, srv = "twitch") {
   let embed = u.embed()
     .setTimestamp();
   if (srv == "twitch") {
+    let gameName = twitchGames.get(stream.gameId)?.name;
     embed.setColor('#6441A4')
       .setThumbnail(stream.thumbnailUrl.replace("{width}", "480").replace("{height}", "270") + "?t=" + Date.now())
-      .setAuthor(stream.userDisplayName + (twitchGames.has(stream.gameId) ? ` playing ${twitchGames.get(stream.gameId).name}` : ""))
+      .setAuthor(stream.userDisplayName + (gameName ? ` playing ${gameName}` : ""))
       .setTitle(stream.title)
       .setURL(stream.streamUrl);
   } else if (srv == "youtube") {
@@ -193,10 +206,7 @@ async function processTwitch(igns) {
         for (let stream of streams.data) {
           let status = twitchStatus.get(stream.userDisplayName.toLowerCase());
           if (!status || ((status.status == "offline") && ((Date.now() - status.since) >= (30 * 60 * 1000)))) {
-            if (!twitchGames.has(stream.gameId)) {
-              let game = await twitch.games.getGameById(stream.gameId);
-              if (game) twitchGames.set(game.id, game);
-            }
+            let rating = (await gameInfo(stream.gameId))?.rating;
             stream.streamUrl = "https://www.twitch.tv/" + encodeURIComponent(stream.userDisplayName);
             if (stream.userDisplayName.toLowerCase() == "ldsgamers") {
               Module.client.user.setActivity(
@@ -216,10 +226,10 @@ async function processTwitch(igns) {
             if (member && isPartnered(member)) member.roles.add(liveRole).catch(u.noop);
             let embed = notificationEmbed(stream, "twitch");
 
-            if (extraLife && member && member.roles.cache.has("507031155627786250") && (stream.title.toLowerCase().includes("extra life") || stream.title.toLowerCase().includes("extralife"))) {
+            if ((rating != "M - Mature 17+") && extraLife && member && member.roles.cache.has("507031155627786250") && (stream.title.toLowerCase().includes("extra life") || stream.title.toLowerCase().includes("extralife"))) {
               notificationChannel.send(`${ldsg.roles.cache.get("768164394248044575")}, **${member.displayName}** is live for Extra Life!`, {embed}).catch(u.noop);
               //ldsg.channels.cache.get("733336823400628275").send({embed});
-            } else
+            } else if (rating != "M - Mature 17+")
               notificationChannel.send({embed}).catch(u.noop);
           }
         }
@@ -254,10 +264,11 @@ function twitchEmbed(stream, online = true) {
     .setColor('#6441A4');
 
   if (online) {
+    let gameName = twitchGames.get(stream.gameId)?.name || "Something";
     embed.setDescription(stream.title)
     .setTitle(stream.userDisplayName)
     .setThumbnail(stream.thumbnailUrl.replace("{width}", "480").replace("{height}", "270") + "?t=" + Date.now())
-    .addField("Playing", (stream.gameId && twitchGames.has(stream.gameId) ? twitchGames.get(stream.gameId).name : "Something"), true)
+    .addField("Playing", gameName, true)
     .addField("Current Viewers", stream.viewers, true)
     .setTimestamp(stream.startDate);
   } else {
@@ -424,10 +435,7 @@ const Module = new Augur.Module()
     try {
       const stream = (await twitch.streams.getStreamByUserName(name));
       if (stream) {
-        if (!twitchGames.has(stream.gameId)) {
-          let game = (await twitch.games.getGameById(stream.gameId));
-          if (game) twitchGames.set(game.id, game);
-        }
+        await gameInfo(stream.gameId);
         stream.streamUrl = "https://www.twitch.tv/" + encodeURIComponent(name).toLowerCase();
         msg.channel.send(twitchEmbed(stream));
       } else { // Offline
@@ -470,13 +478,10 @@ const Module = new Augur.Module()
       for (let service of res) {
         if (service.service == "twitch") {
           for (let stream of service.channels) {
-            if (!twitchGames.has(stream.gameId)) {
-              let game = (await twitch.games.getGameById(stream.gameId));
-              if (game) twitchGames.set(game.id, game);
-            }
+            let game = (await gameInfo(stream.gameId))?.name || "Something?";
             channels.push({
               name: stream.userDisplayName,
-              game: twitchGames.has(stream.gameId) ? twitchGames.get(stream.gameId).name : "Something?",
+              game,
               service: "Twitch",
               title: stream.title,
               url: `https://www.twitch.tv/${stream.userDisplayName}`
@@ -528,10 +533,7 @@ const Module = new Augur.Module()
 
       const stream = await twitch.streams.getStreamByUserName(name).catch(u.noop);
       if (stream) {
-        if (!twitchGames.has(stream.gameId)) {
-          let game = await twitch.games.getGameById(stream.gameId).catch(u.noop);
-          if (game) twitchGames.set(game.id, game);
-        }
+        await gameInfo(stream.gameId);
         stream.streamUrl = "https://www.twitch.tv/" + encodeURIComponent(name).toLowerCase().replace(/[^\w-]+/g,'');
         msg.channel.send(twitchEmbed(stream));
       } else { // Offline
@@ -662,6 +664,7 @@ const Module = new Augur.Module()
   }
 })
 .setInit((data) => {
+  gamesDB._setKey(Module.config.api.thegamesdb);
   if (data) {
     for (const [key, status] of data.twitchStatus) {
       twitchStatus.set(key, status);
