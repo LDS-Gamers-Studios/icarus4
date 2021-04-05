@@ -297,7 +297,7 @@ const Module = new Augur.Module()
   if ((msg.channel.parentID == "363016072200454146") && !u.parse(msg) && !msg.author.bot) {
     let match = null;
     while (match = searchExp.exec(msg.cleanContent))
-      Module.client.commands.execute("verse", msg, match[0]);
+      Module.client.commands.execute(msg, {command: "verse", suffix: match[0], params: match[0].split(" ")});
   }
 })
 .setInit(() => {

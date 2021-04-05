@@ -142,7 +142,7 @@ const Module = new Augur.Module()
               let modLogs = ldsg.channels.cache.get("506575671242260490");
               let gai = ldsg.members.cache.get(Module.config.ownerId);
               await modLogs.send(`${member} has posted ${user.posts} times in chat without being trusted!`);
-              Module.client.commands.execute("fullinfo", {
+              Module.client.commands.execute({
                 author: gai.user,
                 channel: modLogs,
                 client: bot,
@@ -154,7 +154,7 @@ const Module = new Augur.Module()
                 },
                 content: `${Module.config.prefix}fullinfo ${member}`,
                 cleanContent: `${Module.config.prefix}fullinfo @${member.user.tag}`
-              }, member.toString());
+              }, {command: "fullinfo", suffix: member.toString(), params: [member.toString()]});
             }
 
             if (!user.excludeXP) {

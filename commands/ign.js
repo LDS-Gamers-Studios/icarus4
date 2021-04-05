@@ -135,7 +135,7 @@ const Module = new Augur.Module()
           }
         }
         let ign = await Module.db.ign.save(msg.author.id, system, name);
-        Module.client.commands.execute("ign", msg, system);
+        Module.client.commands.execute(msg, {command: "ign", suffix: system, params: system.split(" ")});
       } else msg.channel.send(system + " isn't a valid system.").then(u.clean);
     } catch(e) {
       u.errorHandler(e, msg);
