@@ -33,7 +33,7 @@ function discountLevel(member) {
 }
 
 function filterUnique(e, i, a) {
-  return (a.indexOf(a.find(g => g.gametitle == e.gametitle && g.system == e.system)) == i);
+  return (a.indexOf(a.find(g => g["Game Title"] == e["Game Title"] && g["System"] == e["System"])) == i);
 }
 
 const Module = new Augur.Module()
@@ -71,8 +71,8 @@ const Module = new Augur.Module()
       games = games.filter(g => !g.Recipient).filter(filterUnique).sort((a, b) => a["Game Title"].localeCompare(b["Game Title"]));
 
       // Filter Rated M, unless the member has the Rated M Role
-      if (!(msg.member && msg.member.roles.cache.has("281708645161631745")))
-      games = games.filter(g => g.Rating.toUpperCase() != "M");
+      if (!msg.member?.roles.cache.has("281708645161631745"))
+       games = games.filter(g => g.Rating.toUpperCase() != "M");
 
       let embed = u.embed()
       .setTitle("Games Available to Redeem")
