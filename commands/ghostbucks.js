@@ -61,6 +61,7 @@ const Module = new Augur.Module()
   process: async (msg, suffix) => {
     try {
       await doc.useServiceAccountAuth(google.creds);
+      await doc.loadInfo();
       let games = await doc.sheetsByIndex[0].getRows();
       for (const game of games.filter(g => !g.Code)) {
         game.Code = code(5);
@@ -102,6 +103,7 @@ const Module = new Augur.Module()
   process: async (msg, suffix) => {
     try {
       await doc.useServiceAccountAuth(google.creds);
+      await doc.loadInfo();
       let games = await doc.sheetsByIndex[0].getRows();
       let game = games.find(g => (g.Code == suffix.toUpperCase() && g.Date == ""));
       if (game) {
