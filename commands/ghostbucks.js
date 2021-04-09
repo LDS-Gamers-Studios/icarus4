@@ -105,7 +105,7 @@ const Module = new Augur.Module()
       await doc.useServiceAccountAuth(google.creds);
       await doc.loadInfo();
       let games = await doc.sheetsByIndex[0].getRows();
-      let game = games.find(g => (g.Code == suffix.toUpperCase() && g.Date == ""));
+      let game = games.find(g => (g.Code == suffix.toUpperCase() && !g.Recipient));
       if (game) {
         let systems = {
           steam: {
