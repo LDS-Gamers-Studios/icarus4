@@ -88,7 +88,7 @@ const Module = new Augur.Module()
         }
 
         let steamApp = null;
-        if (game.System?.toLowerCase() == "steam") steamApp = steamGameList.find(g => g.Name.toLowerCase() == game["Game Title"].toLowerCase());
+        if (game.System?.toLowerCase() == "steam") steamApp = steamGameList.find(g => g.name.toLowerCase() == game["Game Title"].toLowerCase());
 
         embed.addField(`${game["Game Title"]} (${game.System})${(game.Rating ? ` [${game.Rating}]` : "")}`, `${gb}${game.Cost}${(steamApp ? ` [[Steam Store Page]](https://store.steampowered.com/app/${steamApp.appid})` : "")}\n\`!gameredeem ${game.Code}\``);
       }
