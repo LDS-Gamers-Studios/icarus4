@@ -23,7 +23,7 @@ async function gameInfo(gameId) {
     if (game) {
       twitchGames.set(game.id, game);
       let ratings = (await gamesDB.byGameName(game.name, {fields: "rating"}))
-        .games?.filter(g => g.game_title.toLowerCase() == game.name.toLowerCase() && g.rating != "Not Rated");
+        .games?.filter(g => g.game_title.toLowerCase() == game.name.toLowerCase() && g.rating && g.rating != "Not Rated");
       twitchGames.get(game.id, game).rating = ratings[0]?.rating;
     }
   }
