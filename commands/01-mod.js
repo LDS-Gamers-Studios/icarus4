@@ -136,6 +136,32 @@ const Module = new Augur.Module()
     u.clean(msg, 0);
   }
 })
+.addCommand({name: "trust+",
+  aliases: ["cstreamer"],
+  description: "Approve an LDSG Streamer for community streaming",
+  syntax: "@user(s)",
+  category: "Mod",
+  process: async (msg) => {
+    u.clean(msg);
+
+    if (u.userMentions(msg, true).size > 0) {
+      msg.react("👌");
+      for (const [id, member] of u.userMentions(msg, true)) {
+        try {
+          if (member.roles.cache.has(Module.config.roles.trusted)) {
+            let streamer = await member.roles.add("698291753308127265");
+            streamer.send("Congratulations! You've been added to the Trusted+ list in LDSG, allowing you to stream to voice channels!\n\nWhile streaming, please remember the Streaming Guidelines ( https://goo.gl/Pm3mwS ) and LDSG Code of Conduct ( http://ldsgamers.com/code-of-conduct ). Also, please be aware that LDSG may make changes to the Trusted+ list from time to time at its discretion.").catch(u.noop);
+            msg.reply("I applied the role to " + streamer.displayName + "!").then(u.clean);
+            msg.guild.channels.cache.get(modLogs).send(`ℹ️ ${msg.member.displayName} has given ${streamer.displayName} Trusted+`);
+          } else {
+            msg.reply(`${member.displayName} needs to be trusted first!`);
+          }
+        } catch(error) { u.errorHandler(error, msg); }
+      }
+    } else msg.reply("you need to tell me who to approve!").then(u.clean);
+  },
+  permissions: isMod
+})
 .addCommand({name: "ban",
   syntax: "<@user>",
   category: "Mod",
@@ -512,7 +538,7 @@ const Module = new Augur.Module()
             }
 
             msg.client.channels.cache.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** sent **${u.escapeText(member.displayName)}** to the office${(duration ? " for " + duration + " minutes." : "")}`);
-            msg.client.channels.cache.get("771515647808372777").send(`${member}, you have been muted in ${msg.guild.name}. Please review our Code of Conduct. A member of the management team will be available to discuss more details.\n\nhttp://ldsgamers.com/code-of-conduct`);
+            msg.client.channels.cache.get("771515647808372777").send(`${member}, you have been sent to the office in ${msg.guild.name}. This allows you and the mods to have a private space to discuss any issues without restricting access to the rest of the server. Please review our Code of Conduct. A member of the mod team will be available to discuss more details.\n\nhttp://ldsgamers.com/code-of-conduct`);
 
               if (duration) {
                 if (mutes.has(memberId)) clearTimeout(mutes.get(memberId));
@@ -763,11 +789,35 @@ const Module = new Augur.Module()
     if (members.size > 0) {
       for (const [memberId, member] of members) {
         try {
-          await member.roles.remove(Module.config.roles.trusted);
+          await member.roles.remove([Module.config.roles.trusted, "698291753308127265"]);
           await member.roles.add(Module.config.roles.untrusted);
           member.send("You have been removed from \"Trusted\" in " + msg.guild.name + ". This means you no longer have the ability to post images. Please remember to follow the Code of Conduct when posting images or links.\n<http://ldsgamers.com/code-of-conduct>").catch(() => blocked(member));
 
           msg.client.channels.cache.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** untrusted **${u.escapeText(member.displayName)}**`);
+        } catch(error) { u.errorHandler(error, msg); }
+      }
+    } else {
+      msg.reply("you need to tell me which users to untrust!")
+        .then(u.clean);
+    }
+  }
+})
+.addCommand({name: "untrust+",
+  syntax: "<@user>",
+  description: "Remove a user from Trusted+", hidden: true,
+  category: "Mod",
+  permissions: isMod,
+  process: async (msg) => {
+    u.clean(msg, 0);
+    let members = u.userMentions(msg, true);
+    if (members.size > 0) {
+      for (const [memberId, member] of members) {
+        try {
+          await member.roles.remove("698291753308127265");
+          //await member.roles.add(Module.config.roles.untrusted);
+          member.send("You have been removed from \"Trusted+\" in " + msg.guild.name + ". This means you no longer have the ability to stream video in the server. Please remember to follow the Code of Conduct.\n<http://ldsgamers.com/code-of-conduct>").catch(() => blocked(member));
+
+          msg.client.channels.cache.get(modLogs).send(`ℹ️ **${u.escapeText(msg.member.displayName)}** removed **${u.escapeText(member.displayName)}** from Trusted+`);
         } catch(error) { u.errorHandler(error, msg); }
       }
     } else {
