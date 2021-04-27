@@ -288,22 +288,6 @@ const Module = new Augur.Module()
       }
     } catch(error) { u.errorHandler(error, msg); }
   }
-})
-.addCommand({name: "valiant",
-  description: "Add a member to the Valiant company",
-  syntax: "@user(s)",
-  category: "Members",
-  permissions: (msg) => msg.member?.roles.cache.has("803392432128655410"),
-  process: async (msg) => {
-    for (const [id, member] of msg.mentions.members) {
-      try {
-        await member.roles.add("801838760961638450");
-      } catch(error) {
-        u.errorHandler(error, `Could not add Valiant role to ${member.displayName}`);
-      }
-    }
-    msg.react("👌");
-  }
 });
 
 module.exports = Module;

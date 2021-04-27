@@ -77,6 +77,38 @@ const Module = new Augur.Module()
       }
     }
   }
+})
+.addCommand({name: "valiantpvp",
+  description: "Add a member to the Valiant Warrior company",
+  syntax: "@user(s)",
+  category: "Members",
+  permissions: (msg) => msg.member?.roles.cache.has("803392432128655410"),
+  process: async (msg) => {
+    for (const [id, member] of msg.mentions.members) {
+      try {
+        await member.roles.add("801838760961638450");
+      } catch(error) {
+        u.errorHandler(error, `Could not add Valiant Warrior role to ${member.displayName}`);
+      }
+    }
+    msg.react("👌");
+  }
+})
+.addCommand({name: "valiantpve",
+  description: "Add a member to the Valiant Marauder company.",
+  syntax: "@user(s)",
+  category: "Members",
+  permissions: (msg) => msg.member?.roles.cache.has("803392432128655410"),
+  process: async (msg) => {
+    for (const [id, member] of msg.mentions.members) {
+      try {
+        await member.roles.add("836362219590516857");
+      } catch(error) {
+        u.errorHandler(error, `Could not add the Valiant Marauder role to ${member.displayName}`);
+      }
+    }
+    msg.react("👌");
+  }
 });
 
 module.exports = Module;
