@@ -6,7 +6,7 @@ const Module = new Augur.Module()
 .addCommand({name: "bookworm",
   description: "Designate a user as a bookworm.",
   syntax: "@user(s) or reset",
-  permissions: msg => msg.member && msg.member.roles.cache.has(Module.config.roles.mod),
+  permissions: msg => msg.member && msg.member.roles.cache.has(Module.config.roles.team),
   process: async (msg, suffix) => {
     try {
       let members = u.userMentions(msg, true);
