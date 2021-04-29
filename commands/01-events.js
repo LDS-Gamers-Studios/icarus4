@@ -6,19 +6,16 @@ const Module = new Augur.Module()
   if (channel.guild?.id == Module.config.ldsg) {
     if (channel.permissionsFor(channel.client.user.id).has(["VIEW_CHANNEL", "MANAGE_CHANNELS"])) {
       channel.createOverwrite(Module.config.roles.muted, {
+        // text
         VIEW_CHANNEL: false,
-        CONNECT: false,
+        ADD_REACTIONS: false,
         SEND_MESSAGES: false,
-        SPEAK: false
-      }).catch(e => u.errorHandler(e, `Update New Channel Permissions: ${channel.name}`));
-      /* Allow them to access the rest of the server while in Ghost's office.
-      channel.createOverwrite("771516264618262607", {
-        VIEW_CHANNEL: false,
+        READ_MESSAGE_HISTORY: false,
+        // voice
         CONNECT: false,
-        SEND_MESSAGES: false,
-        SPEAK: false
+        SPEAK: false,
+        STREAM: false
       }).catch(e => u.errorHandler(e, `Update New Channel Permissions: ${channel.name}`));
-      */
     } else {
       u.errorLog.send(u.embed().setTitle("Update New Channel Permissions").setDescription(`Insufficient permissions to update channel ${channel.name}. Muted permissions need to be applied manually.`));
     }
