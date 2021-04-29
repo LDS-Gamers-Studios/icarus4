@@ -125,7 +125,7 @@ async function warnCard(msg, filtered = null, call = false) {
     let embed = u.embed()
     .setTimestamp()
     .setColor("#FF0000")
-    .setAuthor(msg.member.displayName, msg.author.displayAvatarURL({dynamic: true}))
+    .setAuthor(msg.member?.displayName || msg.author?.username, msg.author.displayAvatarURL({dynamic: true}))
     .setDescription(msg.cleanContent + (msg.editedAt ? "\n[Edited]" : ""));
 
     filtered = (Array.isArray(filtered) ? filtered.join(", ") : filtered);
