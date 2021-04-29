@@ -33,6 +33,37 @@ const Module = new Augur.Module()
   },
   permissions: (msg) => Module.config.adminId.includes(msg.author.id)
 })
+.addCommand({name: "madesk",
+  description: "Request a feature for Discord",
+  info: "Send a feature request to the Discord Trello board.",
+  aliases: ["ma-desk"],
+  syntax: "Requested Feature",
+  permissions: (msg) => msg.member?.roles.cache.has(Module.config.roles.team) || msg.member?.roles.cache.has(Module.config.roles.mod),
+  process: async (msg, suffix) => {
+    if (suffix) {
+      let content = msg.cleanContent.substr(msg.cleanContent.indexOf(" ")).trim();
+      let trelloConfig = require("../config/trello.json");
+      let card = {
+        path: {
+          board: 'MaDesk',
+          list: 'NEW',
+          card: content,
+        },
+        content: {
+          cardDesc: `Submitted by ${msg.member.displayName} in ${msg.channel.name}.`,
+          //cardLabelColors: "blue"
+        }
+      };
+      Trello.send(trelloConfig, card, function(err, result){
+        if (err) u.errorHandler(err, msg);
+        else {
+          msg.react("👌");
+          msg.reply("Request received and put on Maldor's Desk!").then(u.clean);
+        }
+      });
+    } else msg.reply("You need to tell me what your request is!");
+  }
+})
 .addCommand({name: "ping",
   category: "Bot Admin",
   description: "Check bot ping.",
@@ -200,7 +231,7 @@ const Module = new Augur.Module()
         if (err) console.error(err);
         else {
           msg.react("👌");
-          msg.reply("Request received!\n\nNote that if the request was for a *Discord* feature or a command which only gives a single static response, it'll be ignored here. This is for requesting features for Icarus that actually require coding.").then(u.clean);
+          msg.reply("Request received!\n\nNote that if the request was for a *Discord* feature or a command which only gives a single static response, it'll be ignored here. Those can be submitted via `!madesk` by mods or team. This is for requesting features for Icarus that actually require coding.").then(u.clean);
         }
       });
     } else msg.reply("You need to tell me what your request is!");
