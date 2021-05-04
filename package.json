@@ -45,7 +45,7 @@
     "opusscript": "0.0.6",
     "oxford-dictionary-api": "^1.0.1",
     "profanity-matcher": "^1.0.1",
-    "pug": "^2.0.4",
+    "pug": "^3.0.1",
     "request": "^2.88.0",
     "request-promise-native": "^1.0.8",
     "simple-oauth2": "^2.2.1",
