@@ -166,6 +166,9 @@ const models = {
       else if (system) return await Ign.findOne({discordId, system}).exec();
       else return await Ign.find({discordId}).exec();
     },
+    findName: async function(ign, system) {
+      return await Ign.findOne({ign: new RegExp(`^${ign}$`, "i"), system}).exec();
+    },
     getList: async function(system) {
       return await Ign.find({system}).exec();
     },
@@ -432,6 +435,7 @@ const models = {
           ghostBucks: 0,
           house: null,
           excludeXP: true,
+          twitchFollow: false,
           roles: []
         });
         return newMember.save();
