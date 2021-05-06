@@ -38,7 +38,7 @@ const Module = new Augur.Module()
   info: "Send a feature request to the Discord Trello board.",
   aliases: ["ma-desk"],
   syntax: "Requested Feature",
-  permissions: (msg) => msg.member?.roles.cache.has(Module.config.roles.team) || msg.member?.roles.cache.has(Module.config.roles.mod),
+  permissions: (msg) => msg.guild?.id == "136569499859025920" || msg.member?.roles.cache.has(Module.config.roles.team) || msg.member?.roles.cache.has(Module.config.roles.mod),
   process: async (msg, suffix) => {
     if (suffix) {
       let content = msg.cleanContent.substr(msg.cleanContent.indexOf(" ")).trim();
