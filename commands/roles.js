@@ -171,12 +171,9 @@ const Module = new Augur.Module()
           // Check equippables if they're not auto-applying on rejoin
           let newInventory = getInventory(newMember);
           let oldInventory = getInventory(oldMember);
-          for (const id of newInventory) {
-            if (!oldInventory.has(id)) {
-              // New equippable!
-              let role = newMember.guild.roles.cache.get(id);
-              newMember.send(`You now have the color-equippable role **${role.name}**! You can equip the color with the \`!equip ${role.name}\` command.`).catch(u.noop);
-            }
+          let diff = newInventory.filter(r => !oldInventory.has(r));
+          if (diff.size > 0) {
+            newMember.send(`You have new color-equippable ${diff.size > 1 ? "roles" : "role"} ${diff.map(r => `**${newMember.guild.roles.get(r).name}**`).join(", ")}! You can equip the colors with the \`!equip\` command. Check \`!inventory\` command in #bot-lobby to see what colors you can equip.`).catch(u.noop);
           }
         }
         await Module.db.user.updateRoles(newMember);
