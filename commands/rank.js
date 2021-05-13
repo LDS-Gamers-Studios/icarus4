@@ -167,8 +167,8 @@ const Module = new Augur.Module()
 
                 if (Rank.rewards.has(lvl)) {
                   let reward = ldsg.roles.cache.get(Rank.rewards.get(lvl).id);
-                  await member.roles.remove(Rank.rewardRoles);
                   await member.roles.add(reward);
+                  await member.roles.remove(Rank.rewardRoles.filter(r => r != reward.id));
                   message += `\n\nYou have been awarded the ${reward.name} role!`;
                 }
                 member.send(message).catch(u.noop);
