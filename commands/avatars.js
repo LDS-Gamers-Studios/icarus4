@@ -100,8 +100,8 @@ const Module = new Augur.Module()
         let av = await Jimp.read(target);
         av.color([
           { apply: "desaturate", params: [100] },
-          { apply: "saturate", params: [47.7] },
-          { apply: "hue", params: [227] }
+          { apply: "saturate", params: [63.64] }, // { apply: "saturate", params: [47.7] },
+          { apply: "hue", params: [235] }         // { apply: "hue", params: [227] }
         ]);
 
         await msg.channel.send({files: [await av.getBufferAsync(Jimp.MIME_PNG)]});
