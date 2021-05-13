@@ -12,7 +12,8 @@ var steamGameList;
 const discounts = new Map([
   ["114816596341424129", 5],  // Elite
   ["121783798647095297", 10], // Onyx
-  ["121783903630524419", 15]  // Pro
+  ["121783903630524419", 15], // Pro
+  ["814186643002097704", 15]  // Legendary
 ]);
 function code(n) {
   let chars = "123456789ABCDEFGHJKLMNPQRSTUVWXYZ";
@@ -455,7 +456,7 @@ const Module = new Augur.Module()
       if (discountLevel(oldMember).rate != newLevel.rate) {
         // Fetch user
         let user = await Module.db.user.fetchUser(newMember);
-        let role = (newLevel.role ? newMember.roles.cache.get(newLevel.role).name : null);
+        let role = newMember.roles.cache.get(newLevel.role)?.name;
         if (user) {
           // Check if current discount exists.
           let snipcart = require("../utils/snipcart")(Module.config.api.snipcart);
