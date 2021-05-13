@@ -173,7 +173,7 @@ const Module = new Augur.Module()
           let oldInventory = getInventory(oldMember);
           let diff = newInventory.filter(r => !oldInventory.has(r));
           if (diff.size > 0) {
-            newMember.send(`You have new color-equippable ${diff.size > 1 ? "roles" : "role"} ${diff.map(r => `**${newMember.guild.roles.get(r).name}**`).join(", ")}! You can equip the colors with the \`!equip\` command. Check \`!inventory\` command in #bot-lobby to see what colors you can equip.`).catch(u.noop);
+            newMember.send(`You have new color-equippable ${diff.size > 1 ? "roles" : "role"} ${diff.map(r => `**${newMember.guild.roles.cache.get(r).name}**`).join(", ")}! You can equip the colors with the \`!equip\` command. Check \`!inventory\` command in #bot-lobby to see what colors you can equip.`).catch(u.noop);
           }
         }
         await Module.db.user.updateRoles(newMember);
