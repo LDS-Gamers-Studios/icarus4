@@ -2,7 +2,13 @@ const Augur = require("augurbot"),
   u = require("../utils/utils");
 
 const sponsorChannels = new u.Collection();
-let proSponsor = "121783903630524419";
+function isProSponsor(member) {
+  let sponsorRoles = [
+    "814186643002097704", // Legendary Sponsors
+    "121783903630524419"  // Pro Sponsors
+  ];
+  return member.roles.cache.some(r => sponsorRoles.includes(r));
+}
 
 const Module = new Augur.Module()
 .addCommand({name: "coolkids",
@@ -34,7 +40,7 @@ const Module = new Augur.Module()
   suffix: "@sponsor(s)",
   info: "Creates a private channel for a Pro Sponsor, where they can invite individuals to hang out.",
   category: "Admin",
-  permissions: (msg) => (msg.guild?.id == Module.config.ldsg) && (msg.member?.roles.cache.has(Module.config.roles.management) || msg.member?.roles.cache.has("205826273639923722")),
+  permissions: (msg) => (msg.member?.roles.cache.has(Module.config.roles.management) || msg.member?.roles.cache.has("205826273639923722")),
   process: async (msg) => {
     try {
       u.clean(msg);
@@ -45,7 +51,7 @@ const Module = new Augur.Module()
       }
 
       for (const [sponsorId, sponsor] of msg.mentions.members) {
-        if (!sponsor.roles.cache.has(proSponsor)) continue;
+        if (!isProSponsor(sponsor)) continue;
         if (sponsorChannels.has(sponsor.id)) {
           msg.reply(`${sponsor} already has a channel at ${msg.guild.channels.cache.get(sponsorChannels.get(sponsor.id)?.channelId)}!`).then(u.clean);
           continue;
@@ -116,7 +122,7 @@ const Module = new Augur.Module()
     let ldsg = Module.client.guilds.cache.get(Module.config.ldsg);
     sponsorChannels.clear();
     for (let row of rows) {
-      if (!(ldsg.members.cache.has(row["Sponsor ID"]) && ldsg.members.cache.get(row["Sponsor ID"]).roles.cache.has(proSponsor))) continue;
+      if (!(ldsg.members.cache.has(row["Sponsor ID"]) && isProSponsor(ldsg.members.cache.get(row["Sponsor ID"])))) continue;
       sponsorChannels.set(row["Sponsor ID"], {
         sponsorId: row["Sponsor ID"],
         channelId: row["Channel ID"]
