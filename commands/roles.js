@@ -67,8 +67,8 @@ const Module = new Augur.Module()
         msg.reply("sorry, you don't have that color in your inventory. Check `!inventory` to see what you can equip.").then(u.clean);
       } else {
         // The role exists, the member has it in their inventory
-        await member.roles.remove(Array.from(allColors.values()));
-        await member.roles.add(role.id);
+        await msg.member.roles.remove(Array.from(allColors.values()));
+        await msg.member.roles.add(role.id);
         msg.react("👌");
       }
     } catch(e) { u.errorHandler(e, msg); }
