@@ -1,5 +1,5 @@
 const Augur = require("augurbot"),
-  inventory = require("../utils/roleColors"),
+  {allColors, getInventory} = require("../utils/roleColors"),
   u = require("../utils/utils");
 
 const roles = new Map();
@@ -52,25 +52,23 @@ const Module = new Augur.Module()
 .addCommand({name: "equip",
   description: "Equip a color from your inventory.",
   category: "Members",
+  permissions: msg => msg.guild?.id == Module.config.ldsg;
   process: async (msg, suffix) => {
     try {
-      let ldsg = msg.client.guilds.cache.get(Module.config.ldsg);
-      let member = await ldsg.members.fetch(msg.author.id);
-      let role = ldsg.roles.cache.find(r => r.name.toLowerCase() == suffix.toLowerCase().replace(" colors", ""));
+      let available = getInventory(msg.member);
+      suffix = suffix.toLowerCase().replace(" colors", "");
+      let role = msg.guild.roles.cache.find(r => r.name.toLowerCase() == suffix + " colors");
+
       if (!role) {
         u.clean(msg);
-        msg.reply("sorry, that's not a role on the server. Check `!inventory` to see what you can equip.").then(u.clean);
-      } else if (!member.roles.cache.has(role.id)) {
+        msg.reply("sorry, that's not a color role on this server. Check `!inventory` to see what you can equip.").then(u.clean);
+      } else if (!available.has(role.id)) {
         u.clean(msg);
-        msg.reply("sorry, you don't have that role. Check `!inventory` to see what you can equip.").then(u.clean);
-      } else if (!inventory.has(role.id)) {
-        u.clean(msg);
-        msg.reply("sorry, that role isn't equippable. Check `!inventory` to see what you can equip.").then(u.clean);
+        msg.reply("sorry, you don't have that color in your inventory. Check `!inventory` to see what you can equip.").then(u.clean);
       } else {
-        // The role exists, the member has it, and it's equippable
-        let toAdd = inventory.get(role.id);
-        await member.roles.remove(Array.from(inventory.values()));
-        await member.roles.add(toAdd);
+        // The role exists, the member has it in their inventory
+        await member.roles.remove(Array.from(allColors.values()));
+        await member.roles.add(role.id);
         msg.react("👌");
       }
     } catch(e) { u.errorHandler(e, msg); }
@@ -79,11 +77,10 @@ const Module = new Augur.Module()
 .addCommand({name: "unequip",
   description: "Unequip all colors from your inventory.",
   category: "Members",
+  permissions: (msg) => msg.guild?.id == Module.config.ldsg,
   process: async (msg) => {
     try {
-      let ldsg = msg.client.guilds.cache.get(Module.config.ldsg);
-      let member = await ldsg.members.fetch(msg.author.id);
-      await member.roles.remove(Array.from(inventory.values()));
+      await msg.member.roles.remove(Array.from(allColors.values()));
       msg.react("👌");
     } catch(error) { u.errorHandler(error, msg); }
   }
@@ -91,11 +88,13 @@ const Module = new Augur.Module()
 .addCommand({name: "inventory",
   description: "Check your color inventory.",
   category: "Members",
-  permissions: (msg) => msg.guild && msg.guild.id == Module.config.ldsg,
+  permissions: (msg) => msg.guild?.id == Module.config.ldsg,
   process: async (msg) => {
     try {
       let member = msg.member;
-      let roles = inventory.filter((color, base) => member.roles.cache.has(base)).map((color) => msg.guild.roles.cache.get(color).toString());
+      let roles = getInventory(msg.member)
+        .map(color => msg.guild.roles.cache.get(color))
+        .sort((a, b) => b.comparePositionTo(a));
       let embed = u.embed().setAuthor(member.displayName, member.user.displayAvatarURL({size: 32}))
         .setTitle("Equippable Color Inventory")
         .setDescription(`Equip a color role with \`${Module.config.prefix}equip Role Name\`\ne.g. \`${Module.config.prefix}equip novice\`\n\n${roles.join("\n")}`);
@@ -170,9 +169,12 @@ const Module = new Augur.Module()
       try {
         if ((Date.now() - newMember.joinedTimestamp) > 45000) {
           // Check equippables if they're not auto-applying on rejoin
-          for (const [id, role] of newMember.roles.cache) {
-            if (!oldMember.roles.cache.has(id) && inventory.has(id)) {
+          let newInventory = getInventory(newMember);
+          let oldInventory = getInventory(oldMember);
+          for (const id of newInventory) {
+            if (!oldInventory.has(id)) {
               // New equippable!
+              let role = newMember.guild.roles.cache.get(id);
               newMember.send(`You now have the color-equippable role **${role.name}**! You can equip the color with the \`!equip ${role.name}\` command.`).catch(u.noop);
             }
           }
@@ -182,12 +184,10 @@ const Module = new Augur.Module()
     } else if (newMember.roles.cache.size < oldMember.roles.cache.size) {
       // Role removed
       try {
-        for (const [id, role] of oldMember.roles.cache) {
-          if (!newMember.roles.cache.has(id) && inventory.has(id)) {
-            // Lost equippable!
-            await newMember.roles.remove(inventory.get(id));
-          }
-        }
+        let newInventory = getInventory(newMember);
+        let oldInventory = getInventory(oldMember);
+        let diff = oldInventory.filter(r => !newInventory.has(r));
+        if (diff.size > 0) await newMember.roles.remove(Array.from(diff.values()));
         await Module.db.user.updateRoles(newMember);
       } catch(error) { u.errorHandler(error, "Update Roles on Role Remove"); }
     }
