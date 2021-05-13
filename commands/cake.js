@@ -64,6 +64,7 @@ async function testCakeDays() {
         let join = moment(member.joinedAt).subtract(offset?.priorTenure || 0, "days");
         if (join && (join.month() == curDate.month()) && (join.date() == curDate.date()) && (join.year() < curDate.year())) {
           let years = curDate.year() - join.year();
+          await member.roles.remove(tenure).catch(u.noop);
           await member.roles.add(tenure[years - 1]).catch(u.noop);
           try {
             if (member.roles.cache.has(Module.config.roles.trusted)) {
