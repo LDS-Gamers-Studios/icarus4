@@ -11,6 +11,7 @@ const Animation = require("../models/Animation.model"),
   Star = require("../models/Star.model"),
   Tag = require("../models/Tag.model"),
   User = require("../models/User.model"),
+  WebhookId = require("../models/WebhookId.model"),
   config = require("../config/config.json"),
   moment = require("moment"),
   mongoose = require("mongoose");
@@ -478,6 +479,24 @@ const models = {
         {$inc: { priorTenure: moment().diff(moment(member.joinedAt), "days") }},
         {new: true, upsert: false}
       ).exec();
+    }
+  },
+  webhookId: {
+    getOptions: async function(channelId, username) {
+      channelId = channelId.channel?.id || channelId?.id || channelId;
+      let hookId = await WebhookId.findOne({channelId, tag: username.toLowerCase()}).exec();
+      if (hookId) {
+        return {
+          username: hookId?.username,
+          avatarURL: hookId?.avatarURL,
+          disableMentions: "everyone"
+        };
+      } else return null;
+    },
+    save: async function(channelId, username, avatarURL) {
+      channelId = channelId.channel?.id || channelId?.id || channelId;
+      let webhookId = new WebhookId({channelId, username, tag: username.toLowerCase(), avatarURL});
+      return await webhookId.save();
     }
   }
 };
