@@ -22,7 +22,7 @@ const Module = new Augur.Module()
       await msg.channel.createWebhook("Say As Hook");
     }
     let [username, avatarURL] = suffix.split("\n");
-    if (avatarURL.startsWith("<") && avatarURL.endsWith(">")) avatarURL = avatarURL.substring(1, avatarURL.length - 1);
+    if (avatarURL?.startsWith("<") && avatarURL?.endsWith(">")) avatarURL = avatarURL.substring(1, avatarURL.length - 1);
     const hasLink = /^http(s)?:\/\/(\w+(-\w+)*\.)+\w+/;
     if (hasLink.test(avatarURL)) {
       await Module.db.webhookId.save(msg.channel, username, avatarURL);
