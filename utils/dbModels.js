@@ -496,7 +496,11 @@ const models = {
     save: async function(channelId, username, avatarURL) {
       channelId = channelId.channel?.id || channelId?.id || channelId;
       let webhookId = new WebhookId({channelId, username, tag: username.toLowerCase(), avatarURL});
-      return await webhookId.save();
+      return await WebhookId.findOneAndUpdate(
+        { channelId, tag: username.toLowerCase() },
+        { $set: { username, avatarURL } },
+        { upsert: true, new: true }
+      ).exec();
     }
   }
 };
