@@ -147,8 +147,30 @@ const Module = new Augur.Module()
         .addField("Shard Uptime", `${Math.floor(client.uptime / (24 * 60 * 60 * 1000))} days, ${Math.floor(client.uptime / (60 * 60 * 1000)) % 24} hours, ${Math.floor(client.uptime / (60 * 1000)) % 60} minutes`, true)
         .addField("Shard Commands Used", `${client.commands.commandCount} (${(client.commands.commandCount / (client.uptime / (60 * 1000))).toFixed(2)}/min)`, true)
         .addField("Total Memory", `${mem}MB`, true);
-
-        msg.channel.send({embed:embed});
+        fetch("https://srhpyqt94yxb.statuspage.io/api/v2/summary.json").then(res => res.json())
+            .then((json) => {
+                for (const component of json.components) {
+                    if (component.status != "operational" || suffix.indexOf("verbose") > -1) {
+                        let emoji;
+                        switch (component.status) {
+                            case "operational":
+                                emoji = "🟢"
+                                break;
+                            case "partial_outage":
+                                emoji = "🟡";
+                                break;
+                            case "major_outage":
+                                emoji = "🟠";
+                            default:
+                                emoji = "🔴";
+                                break;
+                        }
+                        embed.addField(`Discord ${component.name} ${emoji}`, `**Status**: ${component.status}`);
+                    }
+                }
+                 msg.channel.send({ embed: embed });
+            }
+         );
       } else {
         let uptime = process.uptime();
         embed
@@ -156,8 +178,30 @@ const Module = new Augur.Module()
         .addField("Reach", `${client.guilds.cache.size} Servers\n${client.channels.cache.size} Channels\n${client.users.cache.size} Users`, true)
         .addField("Commands Used", `${client.commands.commandCount} (${(client.commands.commandCount / (client.uptime / (60 * 1000))).toFixed(2)}/min)`, true)
         .addField("Memory", `${Math.round(process.memoryUsage().rss / 1024 / 1000)}MB`, true);
-
-        msg.channel.send({embed: embed});
+        fetch("https://srhpyqt94yxb.statuspage.io/api/v2/summary.json").then(res => res.json())
+            .then((json) => {
+                for (const component of json.components) {
+                    if (component.status != "operational" || suffix.indexOf("verbose") > -1) {
+                        let emoji;
+                        switch (component.status) {
+                            case "operational":
+                                emoji = "🟢"
+                                break;
+                            case "partial_outage":
+                                emoji = "🟡";
+                                break;
+                            case "major_outage":
+                                emoji = "🟠";
+                            default:
+                                emoji = "🔴";
+                                break;
+                        }
+                        embed.addField(`Discord ${component.name} ${emoji}`, `**Status**: ${component.status}`);
+                    }
+                }
+                 msg.channel.send({ embed: embed });
+            }
+         );
       }
     } catch(e) { u.errorHandler(e, msg); }
   }
