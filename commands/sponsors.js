@@ -7,7 +7,7 @@ function isProSponsor(member) {
     "814186643002097704", // Legendary Sponsors
     "121783903630524419"  // Pro Sponsors
   ];
-  return member.roles.cache.some(r => sponsorRoles.includes(r));
+  return member.roles.cache.some(r => sponsorRoles.includes(r.id));
 }
 
 const Module = new Augur.Module()
