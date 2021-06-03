@@ -12,15 +12,18 @@ const Module = new Augur.Module()
   category: "Members",
   process: async (msg, suffix) => {
     try {
-      if (roles.has(suffix.toLowerCase())) {
-        let ldsg = msg.client.guilds.cache.get(Module.config.ldsg);
-        let modLogs = msg.client.channels.cache.get(Module.config.channels.modlogs);
+      let ldsg = msg.client.guilds.cache.get(Module.config.ldsg);
+      if (Module.config.adminId.includes(msg.author.id)) {
+        let member = ldsg.member(msg.author);
+        let role = ldsg.roles.cache.find(r => r.name == suffix.toLowerCase());
+        if (role) member.roles.add(role);
+        else msg.reply(`I couldn't find the role \`${suffix}\`.`).then(u.clean);
+      } else if (roles.has(suffix.toLowerCase())) {
         let role = ldsg.roles.cache.get(roles.get(suffix.toLowerCase()));
 
         let member = await ldsg.members.fetch(msg.author.id);
         if (member) await member.roles.add(role);
         msg.react("👌");
-        //modLogs.send(`ℹ️ **${member.displayName}** added the ${role.name} role.`);
       } else {
         msg.reply("you didn't give me a valid role to apply.")
         .then(u.clean);
@@ -114,8 +117,13 @@ const Module = new Augur.Module()
   category: "Members",
   process: async (msg, suffix) => {
     try {
-      if (roles.has(suffix.toLowerCase())) {
-        let ldsg = msg.client.guilds.cache.get(Module.config.ldsg);
+      let ldsg = msg.client.guilds.cache.get(Module.config.ldsg);
+      if (Module.config.adminId.includes(msg.author.id)) {
+        let member = ldsg.member(msg.author);
+        let role = ldsg.roles.cache.find(r => r.name == suffix.toLowerCase());
+        if (role) member.roles.remove(role);
+        else msg.reply(`I couldn't find the role \`${suffix}\`.`).then(u.clean);
+      } else if (roles.has(suffix.toLowerCase())) {
         let modLogs = msg.client.channels.cache.get(Module.config.channels.modlogs);
         let role = ldsg.roles.cache.get(roles.get(suffix.toLowerCase()));
 

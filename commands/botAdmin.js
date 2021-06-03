@@ -64,18 +64,6 @@ const Module = new Augur.Module()
     } else msg.reply("You need to tell me what your request is!");
   }
 })
-.addCommand({name: "management",
-  category: "Bot Admin",
-  hidden: true,
-  description: "Make me management again",
-  syntax: "[add/remove]",
-  permissions: msg => (msg.author.id == Module.config.ownerId && msg.guild?.id == Module.config.ldsg),
-  process: (msg, suffix) => {
-    suffix = suffix.toLowerCase();
-    if (!["add", "remove"].includes(suffix)) return msg.reply("you need to tell me to add/remove!").then(u.clean);
-    msg.member.roles[suffix](Module.config.roles.management).then(() => msg.react("👌"));
-  }
-})
 .addCommand({name: "ping",
   category: "Bot Admin",
   description: "Check bot ping.",
