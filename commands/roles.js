@@ -15,7 +15,7 @@ const Module = new Augur.Module()
       let ldsg = msg.client.guilds.cache.get(Module.config.ldsg);
       if (Module.config.adminId.includes(msg.author.id)) {
         let member = ldsg.member(msg.author);
-        let role = ldsg.roles.cache.find(r => r.name == suffix.toLowerCase());
+        let role = ldsg.roles.cache.find(r => r.name.toLowerCase() == suffix.toLowerCase());
         if (role) member.roles.add(role);
         else msg.reply(`I couldn't find the role \`${suffix}\`.`).then(u.clean);
       } else if (roles.has(suffix.toLowerCase())) {
@@ -120,7 +120,7 @@ const Module = new Augur.Module()
       let ldsg = msg.client.guilds.cache.get(Module.config.ldsg);
       if (Module.config.adminId.includes(msg.author.id)) {
         let member = ldsg.member(msg.author);
-        let role = ldsg.roles.cache.find(r => r.name == suffix.toLowerCase());
+        let role = ldsg.roles.cache.find(r => r.name.toLowerCase() == suffix.toLowerCase());
         if (role) member.roles.remove(role);
         else msg.reply(`I couldn't find the role \`${suffix}\`.`).then(u.clean);
       } else if (roles.has(suffix.toLowerCase())) {
