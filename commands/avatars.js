@@ -1,6 +1,8 @@
-const Augur = require("augurbot");
-const u = require('../utils/utils');
-const Jimp = require("jimp");
+const Augur = require("augurbot"),
+      u = require('../utils/utils'),
+      Jimp = require("jimp");
+
+const supportedFormats = ["png", "jpg", "jpeg", "bmp", "tiff", "gif"];
 
 async function popart(msg, initialTransform) {
   try {
@@ -20,14 +22,13 @@ async function popart(msg, initialTransform) {
       original = (await u.getMention(msg, false) || msg.author).displayAvatarURL({size: 256, format: "png"});
     }
 
-    try {
-      img = await Jimp.read(original);
-    } catch (error) {
+    if (!supportedFormats.some(format => original.endsWith("." + format))) {
       msg.reply("I couldn't use that image! Make sure its a PNG, JPG, or JPEG.");
       return null;
-    };
-
-
+    }
+    
+    img = await Jimp.read(original);
+    
     const canvas = new Jimp(536, 536, 0xffffffff);
 
     img.resize(256, 256);

@@ -1,5 +1,8 @@
 const Augur = require("augurbot"),
-  u = require("../utils/utils");
+  u = require("../utils/utils"),
+  Jimp = require("jimp");
+
+const supportedFormats = ["png", "jpg", "jpeg", "bmp", "tiff", "gif"];
 
 const Module = new Augur.Module()
 .addCommand({name: "crop",
@@ -14,9 +17,11 @@ const Module = new Augur.Module()
         if (message.author.bot) continue;
         if (message.attachments.size > 0) {
           let a = message.attachments.first();
+          if (!supportedFormats.some(format => a.url.endsWith("." + format))) {
+            continue;
+          }
           processed = true;
 
-          const Jimp = require("jimp");
           const cropped = await Jimp.read(a.url);
 
           let ogw = cropped.bitmap.width
