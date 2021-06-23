@@ -1,5 +1,6 @@
 const Augur = require("augurbot"),
-  u = require("../utils/utils");
+  u = require("../utils/utils"),
+  Jimp = require("jimp");
 
 const supportedFormats = ["png", "jpg", "jpeg", "bmp", "tiff", "gif"];
 
@@ -21,7 +22,6 @@ const Module = new Augur.Module()
           }
           processed = true;
 
-          const Jimp = require("jimp");
           const cropped = await Jimp.read(a.url);
 
           let ogw = cropped.bitmap.width
