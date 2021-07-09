@@ -16,8 +16,14 @@ const Module = new Augur.Module()
       if (Module.config.adminId.includes(msg.author.id)) {
         let member = ldsg.member(msg.author);
         let role = ldsg.roles.cache.find(r => r.name.toLowerCase() == suffix.toLowerCase());
-        if (role) member.roles.add(role);
-        else msg.reply(`I couldn't find the role \`${suffix}\`.`).then(u.clean);
+        if (role) {
+          try {
+            await member.roles.add(role);
+            msg.react("👌");
+          } catch(e) {
+            msg.react("❌");
+          }
+        } else msg.reply(`I couldn't find the role \`${suffix}\`.`).then(u.clean);
       } else if (roles.has(suffix.toLowerCase())) {
         let role = ldsg.roles.cache.get(roles.get(suffix.toLowerCase()));
 
@@ -121,8 +127,14 @@ const Module = new Augur.Module()
       if (Module.config.adminId.includes(msg.author.id)) {
         let member = ldsg.member(msg.author);
         let role = ldsg.roles.cache.find(r => r.name.toLowerCase() == suffix.toLowerCase());
-        if (role) member.roles.remove(role);
-        else msg.reply(`I couldn't find the role \`${suffix}\`.`).then(u.clean);
+        if (role) {
+          try {
+            member.roles.remove(role);
+            msg.react("👌");
+          } catch(e) {
+            msg.react("❌");
+          }
+        } else msg.reply(`I couldn't find the role \`${suffix}\`.`).then(u.clean);
       } else if (roles.has(suffix.toLowerCase())) {
         let modLogs = msg.client.channels.cache.get(Module.config.channels.modlogs);
         let role = ldsg.roles.cache.get(roles.get(suffix.toLowerCase()));
