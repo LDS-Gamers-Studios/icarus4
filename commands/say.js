@@ -49,6 +49,14 @@ const Module = new Augur.Module()
       if (!webhook) {
         webhook = await msg.channel.createWebhook("Say As Hook");
       }
+
+      if (msg.attachments.size > 0) {
+        hookOptions.files = [];
+        for (let [attachmentId, attachment] of msg.attachments) {
+          hookOptions.files.push({attachment: attachment.url, name: attachment.name});
+        }
+      }
+
       webhook.send(text.join("\n"), hookOptions);
     }
     u.clean(msg, 0);
