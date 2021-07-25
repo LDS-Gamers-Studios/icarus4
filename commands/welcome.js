@@ -24,7 +24,12 @@ const Module = new Augur.Module()
       let welcomeString;
 
       if (user) { // Member is returning
-        if (user.roles.length > 0) member = await member.roles.add(user.roles.filter(role => guild.roles.cache.has(role) && !guild.roles.cache.get(role).managed));
+        let toAdd = user.roles.filter(role => (
+          guild.roles.cache.has(role) &&
+          !guild.roles.cache.get(role).managed &&
+          !["281135201407467520", "96360253850935296", "205826273639923722", "503066022912196608", "96345401078087680", "734797110389506108", "801333875329728522", "803315372613697536"].includes(role)
+        ));
+        if (user.roles.length > 0) member = await member.roles.add(toAdd);
 
         let roleString = member.roles.cache.sort((a, b) => b.comparePositionTo(a)).map(role => role.name).join(", ");
         if (roleString.length > 1024) roleString = roleString.substr(0, roleString.indexOf(", ", 1000)) + " ...";
