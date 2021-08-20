@@ -24,6 +24,9 @@ async function updateFactionStatus() {
     }
   } catch (e) { u.errorHandler(e, "Elite Channel Update Error"); }
 
+  // Stop Galnet Posts
+  return;
+
   let latestArticle;
   try {
     // Galnet articles
