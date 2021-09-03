@@ -153,146 +153,6 @@ const Module = new Augur.Module()
     } catch(error) { u.errorHandler(error, msg); }
   }
 })
-.addCommand({name: "giveember",
-  syntax: "@user amount",
-  description: "Give a user Ember",
-  aliases: ["embergive", "giveem", "emgive"],
-  permissions: (msg) => (msg.guild?.id == Module.config.ldsg),
-  category: "Ghost Bucks",
-  process: async (msg, suffix) => {
-    const MAX = 10000;
-    try {
-      u.clean(msg, 0);
-      let members = msg.mentions.members;
-      if (members?.size > 0) {
-        let team = msg.member.roles.cache.has(Module.config.roles.team);
-        let ldsg = msg.client.guilds.cache.get(Module.config.ldsg);
-        let reason = suffix.replace(/<@!?\d+>/ig, "").trim().split(" ");
-        let value = parseInt(reason.shift(), 10);
-        reason = reason.join(" ").trim();
-
-        for (const [discordId, member] of members) {
-          if (discordId == msg.author.id) {
-            msg.reply("you can't give to *yourself*, silly.").then(u.clean).catch(u.noop);
-            continue;
-          } else if ((discordId == msg.client.user.id) && !(reason.length > 0)) {
-            msg.reply("you need to have a reason to give to me!").then(u.clean).catch(u.noop);
-            continue;
-          }
-
-          if (value) {
-            if (value > MAX) value = MAX;
-            if (value < -MAX) value = -MAX;
-
-            let deposit = {
-              currency: "em",
-              discordId,
-              description: `From ${msg.member.displayName}: ${reason || "No particular reason"}`,
-              value,
-              mod: msg.author.id
-            };
-
-            let account = await Module.db.bank.getBalance(msg.author.id, "em");
-            if ((value < 0) && (!team || (discordId == msg.client.user.id))) {
-              msg.reply(`You can't just *take* ${ember}, silly.`).then(u.clean);
-            } else if (team || (value <= account.balance)) {
-              if (discordId != msg.client.user.id) {
-                let receipt = await Module.db.bank.addCurrency(deposit, "em");
-                let balance = await Module.db.bank.getBalance(discordId, "em");
-                member.send(`You were just awarded ${ember}${receipt.value} from ${u.escapeText(msg.member.displayName)} for ${reason}\nYou now have a total of ${ember}${balance.balance} in your LDSG account.`).catch(u.noop);
-              }
-              msg.channel.send(`${ember}${value} sent to ${member} for ${reason}`).then(u.clean);
-              if (!team || (discordId == msg.client.user.id)) {
-                let withdrawl = {
-                  currency: "em",
-                  discordId: msg.member.id,
-                  description: `To ${member.displayName}: ${reason}`,
-                  value: -value,
-                  mod: msg.member.id
-                }
-                let receipt = await Module.db.bank.addCurrency(withdrawl, "em");
-                msg.member.send(`You just sent ${u.escapeText(member.displayName)} ${ember}${value} for ${reason}`).catch(u.noop);
-              }
-              if (team || (discordId == msg.client.user.id)) {
-                msg.client.channels.cache.get("734797868036259860").send(`${(discordId == msg.client.user.id) ? "<@111232201848295424> " : ""}**${u.escapeText(msg.member.displayName)}** gave **${u.escapeText(member.displayName)}** ${ember}${value} for ${reason}`);
-              }
-            } else {
-              msg.reply(`You don't have enough ${ember} to give! You can give up to ${ember}${account.balance}`).then(u.clean);
-            }
-          } else {
-            msg.reply("You need to tell me how many Ember to give!").then(u.clean);
-          }
-        }
-      } else msg.reply("You need to tell me who to give Ember!").then(u.clean);
-    } catch(error) { u.errorHandler(error, msg); }
-  }
-})
-.addCommand({name: "givegb",
-  syntax: "@user amount",
-  description: "Give a user Ghost Bucks",
-  aliases: ["gbgive"],
-  permissions: (msg) => (msg.guild?.id == Module.config.ldsg),
-  category: "Ghost Bucks",
-  process: async (msg, suffix) => {
-    const MAX = 1000;
-    try {
-      u.clean(msg, 0);
-      if (u.userMentions(msg, true).size > 0) {
-        let admin = Module.config.adminId.includes(msg.member.id);
-        let ldsg = msg.client.guilds.cache.get(Module.config.ldsg);
-        let reason = suffix.replace(/<@!?\d+>/ig, "").trim().split(" ");
-        let value = parseInt(reason.shift(), 10);
-        for (const [discordId, member] of u.userMentions(msg, true)) {
-          if (discordId == msg.author.id) {
-            msg.reply("you can't give to *yourself*, silly.").then(u.clean).catch(u.noop);
-            continue;
-          }
-
-          if (value) {
-            if (value > MAX) value = MAX;
-            if (value < -MAX) value = -MAX;
-
-            reason = ((reason.length > 0) ? reason.join(" ") : "No particular reason.").trim();
-
-            let deposit = {
-              currency: "gb",
-              discordId,
-              description: `From ${msg.member.displayName}: ${reason}`,
-              value,
-              mod: msg.author.id
-            };
-
-            let account = await Module.db.bank.getBalance(msg.author.id, "gb");
-            if (!admin && (value < 0)) {
-              msg.reply(`You can't just *take* ${gb}, silly.`).then(u.clean);
-            } else if (admin || (value <= account.balance)) {
-              let receipt = await Module.db.bank.addCurrency(deposit, "gb");
-              let balance = await Module.db.bank.getBalance(discordId, "gb");
-              msg.channel.send(`${gb}${receipt.value} sent to ${member} for ${reason}`).then(u.clean);
-              //msg.client.channels.cache.get(modLogs).send(`**${u.escapeText(msg.member.displayName)}** gave **${u.escapeText(member.displayName)}** ${gb}${receipt.value} for ${reason}`);
-              member.send(`You were just awarded ${gb}${receipt.value} from ${u.escapeText(msg.member.displayName)} for ${reason}\nYou now have a total of ${gb}${balance.balance} in your LDSG account.`).catch(u.noop);
-              if (!admin) {
-                let withdrawl = {
-                  currency: "gb",
-                  discordId: msg.member.id,
-                  description: `To ${member.displayName}: ${reason}`,
-                  value: -value,
-                  mod: msg.member.id
-                }
-                let receipt = await Module.db.bank.addCurrency(withdrawl, "gb");
-                msg.member.send(`You just sent ${u.escapeText(member.displayName)} ${gb}${value} for ${reason}`).catch(u.noop);
-              }
-            } else {
-              msg.reply(`You don't have enough ${gb} to give! You can give up to ${gb}${account.balance}`).then(u.clean);
-            }
-          } else {
-            msg.reply("You need to tell me how many Ghost Bucks to give!").then(u.clean);
-          }
-        }
-      } else msg.reply("You need to tell me who to give Ghost Bucks!").then(u.clean);
-    } catch(error) { u.errorHandler(error, msg); }
-  }
-})
 .addCommand({name: "houseember",
   syntax: "Date (DD MMMM YYYY)",
   description: "Check ember given to a house since a particular date.",
@@ -302,14 +162,14 @@ const Module = new Augur.Module()
     let since = new Date(suffix);
     if (isNaN(since)) return msg.reply("you need to supply a valid date (try `DD MMMM YYYY` format).").then(u.clean);
 
-    let awards = await Module.db.bank.getAwardsFrom(msg.guild.roles.cache.get(Module.config.roles.team).members.keyArray().concat(msg.client.user.id), since);
+    let awards = await Module.db.bank.getPointAwards(since);
 
     let points = ["282364647041007616", "282364721045438464", "282364218282606594"].map(house => {
       let houseRole = msg.guild.roles.cache.get(house);
       let members = houseRole.members;
 
       let embers = awards
-        .filter(a => members.has(a.discordId) && a.discordId != a.mod)
+        .filter(a => members.has(a.discordId) && a.discordId != a.giver)
         .reduce((a, c) => a + c.value, 0);
 
       return {
@@ -403,7 +263,8 @@ const Module = new Augur.Module()
           discordId,
           description: `From ${interaction.member.displayName}: ${reason}`,
           value,
-          mod: interaction.user.id
+          mod: interaction.user.id,
+          hp: (team && (currency == "em"))
         };
 
         let account = await Module.db.bank.getBalance(interaction.user.id, currency);

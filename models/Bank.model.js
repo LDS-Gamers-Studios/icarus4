@@ -9,8 +9,15 @@ var BankSchema = new Schema({
   },
   description: String,
   value: Number,
-  currency: String,
-  mod: String
+  currency: {
+    type: String,
+    default: "em"
+  },
+  giver: String,
+  hp: {
+    type: Boolean,
+    default: false
+  }
 });
 
 module.exports = mongoose.model("Bank", BankSchema);
