@@ -9,8 +9,8 @@ let lowBoosts = false;
 function boostCheck() {
   let ldsg = Module.client.guilds.cache.get(Module.config.ldsg);
   if (ldsg.premiumSubscriptionCount < 30) {
+    if (!lowBoosts) ldsg.channels.cache.get(Module.config.channels.modlogs).send(`⚠️ **We've dropped to ${ldsg.premiumSubscriptionCount} boosts!** 30 boosts are required for Tier 3.`);
     lowBoosts = true;
-    ldsg.channels.cache.get(Moduel.config.channels.modlogs).send(`⚠️ **We've dropped to ${ldsg.premiumSubscriptionCount} boosts!** 30 boosts are required for Tier 3.`);
   } else {
     lowBoosts = false;
   }
