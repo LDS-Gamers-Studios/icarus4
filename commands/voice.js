@@ -448,6 +448,10 @@ const Module = new Augur.Module()
           permissionOverwrites: [{
             id: Module.config.roles.muted,
             deny: ["VIEW_CHANNEL", "CONNECT", "SEND_MESSAGES", "SPEAK"]
+          },
+          {
+            id: "871566171206484008",
+            deny: ["VIEW_CHANNEL", "CONNECT", "SPEAK"]
           }]
         });
       } catch(e) { u.errorHandler(e, "Voice message creation error."); }

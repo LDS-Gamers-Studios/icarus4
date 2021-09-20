@@ -129,13 +129,26 @@ const models = {
       let awards = await Bank.find({
         currency,
         timestamp: { $gte: since },
-        mod: { $in: givenFrom }
+        giver: { $in: givenFrom }
       }).exec();
+      for (const award of awards) {
+        award.mod = award.giver;
+      }
       return awards;
+    },
+    getPointAwards: function(since) {
+      return Bank.find({
+        currency: "em",
+        timestamp: { $gte: since },
+        hp: true
+      }).exec();
     },
     getRegister: async function(discordId, currency = "gb") {
       if (discordId.id) discordId = discordId.id;
       let register = await Bank.find({discordId, currency}).exec();
+      for (const transaction of register) {
+        transaction.mod = transaction.giver;
+      }
       return {
         discordId,
         currency,
@@ -150,7 +163,8 @@ const models = {
         description: data.description,
         currency: data.currency || currency,
         value: data.value,
-        mod: data.mod
+        giver: data.mod,
+        hp: data.hp
       });
       return await record.save();
     }
