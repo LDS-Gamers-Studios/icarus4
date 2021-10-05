@@ -9,8 +9,8 @@ const threshold = new Map([
   ["762505119710969946", 5],  // #brightbeam-commons
   ["801527229372825621", 5],  // #brightbeam-rp
   ["804536778597859358", 5],  // #brightbeam-vc-text
-  ["762505078531293205", 10],  // #freshbeast-commons,
-  ["799335542893314069", 10],  // #freshbeast-rp
+  ["762505078531293205", 8],  // #freshbeast-commons,
+  ["799335542893314069", 8],  // #freshbeast-rp
   ["762505045089452073", 5]   // #starcamp-commons
 ]);
 
