@@ -126,13 +126,12 @@ async function fetchExtraLifeTeam() {
           }
 
           let embed = u.embed()
-          .setTitle("New Donation")
-          .setThumbnail("https://assets.donordrive.com/extralife/images/$event550$/facebookImage.png")
-          .setDescription(donation.message || "[[No Message]]")
-          .addField("Recipient", donation.recipientName, true)
-          .addField("Donor", donation.displayName || "[[Anonymous]]", true)
-          .addField("Incentive", donation.incentiveID || "[[None]]", true)
-          .setColor(donation.participantID == extraLifeApi.participantId || donation.message?.toLowerCase().includes("#ldsg") ? 0x7fd836 : 0x26c2eb)
+            .setAuthor(`Donation From ${donation.displayName || "Anonymous Donor"}`, donation.avatarImageURL)
+            .setDescription(donation.message || "[ No Message ]")
+            .addField("Amount", `$${donation.amount}`, true)
+            .addField("Recipient", donation.recipientName, true)
+            .addField("Incentive", donation.incentiveID || "[ None ]", true)
+            .setColor(donation.participantID == extraLifeApi.participantId || donation.message?.toLowerCase().includes("#ldsg") ? 0x7fd836 : 0x26c2eb)
           Module.client.channels.cache.get(extraLifeDiscussion).send({embed});
         }
       }
