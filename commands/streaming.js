@@ -8,7 +8,11 @@ const Augur = require("augurbot"),
   gamesDBApi = require("../utils/thegamesdb"),
   gamesDB = new gamesDBApi();
 
-const extraLife = (new Date().getMonth() == 10);
+const extraLife = (new Date().getMonth() == 10),
+  teamId = 56862,
+  participantId = 453772,
+  extraLifeDiscussion = "502209774897594368",
+  extraLifeApi = require("../utils/extraLifeAPI").set({ teamId, participantId });
 
 var applicationCount = 0;
 
@@ -44,9 +48,9 @@ async function checkStreams() {
     processApplications();
 
     // Check for Extra Life
-    if (extraLife && (new Date()).getMinutes() < 5) {
+    if ((new Date()).getMinutes() < 5) {
       let embed = await extraLifeEmbed();
-      if (embed) Module.client.channels.cache.get(Module.config.ldsg).send({embed});
+      if (embed && extraLife) Module.client.channels.cache.get(Module.config.ldsg).send({embed});
     }
   } catch(e) { u.errorHandler(e, "Stream Check"); }
 };
@@ -88,7 +92,7 @@ async function fetchExtraLifeStreams(team) {
   try {
     if (!team) team = await fetchExtraLifeTeam().catch(u.noop);
     if (!team) return null;
-    let userName = team.members.filter(m => m.links.stream).map(member => member.links.stream.replace("https://player.twitch.tv/?channel=", ""))
+    let userName = team.participants.filter(m => m.links.stream).map(member => member.links.stream.replace("https://player.twitch.tv/?channel=", ""))
       .filter(channel => !(channel.includes(" ") || channel.includes("/")));
     let streams = await twitch.streams.getStreams({userName}).catch(u.noop);
     return streams;
@@ -97,25 +101,46 @@ async function fetchExtraLifeStreams(team) {
 
 async function fetchExtraLifeTeam() {
   try {
-    let team = await request("https://extralife.donordrive.com/api/teams/51868").catch(u.noop);
-    if (team) {
-      team = JSON.parse(team);
-      let members = await request("https://extralife.donordrive.com/api/teams/51868/participants").catch(u.noop);
-      if (members) team.members = JSON.parse(members);
-    }
+    let team = await extraLifeApi.getTeam().catch(u.noop);
 
     // Check donors while we're at it.
-    let donations = await request("https://extralife.donordrive.com/api/teams/51868/donations").catch(u.noop);
+    let donations = await extraLifeApi.getTeamDonations().catch(u.noop);
     if (donations) {
-      donations = JSON.parse(donations);
-      const donors = JSON.parse(fs.readFileSync("./data/extraLifeDonors.json", "utf8"));
-      const newDonors = new Set();
+      const file = JSON.parse(fs.readFileSync("./data/extraLifeDonors.json", "utf8"));
+      const donors = new Set(file.donors);
+      const donationIDs = new Set(file.donations);
+      let update = false;
+
       for (let donation of donations) {
-        if (donation.displayName && !donors.includes(donation.displayName)) newDonors.add(donation.displayName);
+        if (!donationIDs.has(donation.donationID)) {
+          update = true;
+
+          if (donation.displayName && !donors.has(donation.displayName)) {
+            donors.add(donation.displayName);
+            Module.client.channels.cache.get(extraLifeDiscussion).send({
+              embed: u.embed().setColor(0x7fd836)
+              .setTitle("New Extra Life Donor(s)!")
+              .setThumbnail("https://assets.donordrive.com/extralife/images/$event550$/facebookImage.png")
+              .setDescription([...newDonors].join("\n"))
+            });
+          }
+
+          let embed = u.embed()
+          .setTitle("New Donation")
+          .setThumbnail("https://assets.donordrive.com/extralife/images/$event550$/facebookImage.png")
+          .setDescription(donation.message || "[[No Message]]")
+          .addField("Recipient", donation.recipientName, true)
+          .addField("Donor", donation.displayName || "[[Anonymous]]", true)
+          .addField("Incentive", donation.incentiveID || "[[None]]", true)
+          .setColor(donation.participantID == extraLifeApi.participantId || donation.message?.toLowerCase().includes("#ldsg") ? 0x7fd836 : 0x26c2eb)
+          Module.client.channels.cache.get(extraLifeDiscussion).send({embed});
+        }
       }
-      if (newDonors.size > 0) {
-        Module.client.users.cache.get(Module.config.ownerId).send(`New Extra Life Donor(s)!\n${[...newDonors].join("\n")}`);
-        fs.writeFileSync("./data/extraLifeDonors.json", JSON.stringify(donors.concat([...newDonors])));
+      if (update) {
+        fs.writeFileSync("./data/extraLifeDonors.json", JSON.stringify({
+          donors: [...donors],
+          donationIDs: [...donationIDs]
+        }));
       }
     }
 
@@ -329,29 +354,29 @@ const Module = new Augur.Module()
     try {
       let team = await fetchExtraLifeTeam();
       if (!team) msg.reply("the Extra Life API seems to be down. Please try again in a bit.").then(u.clean);
-      for (let member of team.members) {
+      for (let member of team.participants) {
         if (member.links.stream) member.twitch = member.links.stream.replace("https://player.twitch.tv/?channel=", "");
         member.streamIsLive = false;
       }
       let streams = await fetchExtraLifeStreams(team).catch(u.noop);
       if (streams) {
         for (const stream of streams.data) {
-          let member = team.members.find(m => m.twitch && m.twitch.toLowerCase() == stream.userDisplayName.toLowerCase());
+          let member = team.participants.find(m => m.twitch && m.twitch.toLowerCase() == stream.userDisplayName.toLowerCase());
           if (member) {
             member.streamIsLive = true;
             member.stream = stream;
           }
         }
       }
-      team.members.sort((a, b) => {
+      team.participants.sort((a, b) => {
         if (a.streamIsLive != b.streamIsLive) return (b.streamIsLive - a.streamIsLive);
         else if (a.sumDonations != b.sumDonations) return (b.sumDonations - a.sumDonations);
         else return a.displayName.localeCompare(b.displayName)
       });
       let total = 0;
       let embed = u.embed().setColor(0x7fd836);
-      for (let i = 0; i < Math.min(team.members.length, 25); i++) {
-        let member = team.members[i];
+      for (let i = 0; i < Math.min(team.participants.length, 25); i++) {
+        let member = team.participants[i];
         embed.addField(member.displayName, `$${member.sumDonations} / $${member.fundraisingGoal} (${Math.round(100 * member.sumDonations / member.fundraisingGoal)}%)\n[[Donate]](${member.links.donate})${(member.streamIsLive ? `\n**STREAM NOW LIVE**\n[${member.stream.title}](https://www.twitch.tv/${member.twitch})` : "")}`, true);
         total += member.sumDonations;
       }
@@ -644,6 +669,10 @@ const Module = new Augur.Module()
     for (const [key, status] of data.twitchStatus) {
       twitchStatus.set(key, status);
     }
+  }
+
+  if (extraLife) {
+    extraLifeApi.getTeamParticipants(extraLifeApi.teamId, true);
   }
 })
 .setUnload(() => ({ twitchStatus, applicationCount }))
