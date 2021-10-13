@@ -113,6 +113,7 @@ async function fetchExtraLifeTeam() {
 
       for (let donation of donations) {
         if (!donationIDs.has(donation.donationID)) {
+          donationIDs.add(donation.donationID);
           update = true;
 
           if (donation.displayName && !donors.has(donation.displayName)) {
@@ -122,6 +123,7 @@ async function fetchExtraLifeTeam() {
               .setTitle("New Extra Life Donor(s)!")
               .setThumbnail("https://assets.donordrive.com/extralife/images/$event550$/facebookImage.png")
               .setDescription(donation.displayName)
+              .setTimestamp(new Date(donation.createdDateUTC))
             });
           }
 
@@ -132,6 +134,7 @@ async function fetchExtraLifeTeam() {
             .addField("Recipient", donation.recipientName, true)
             .addField("Incentive", donation.incentiveID || "[ None ]", true)
             .setColor(donation.participantID == extraLifeApi.participantId || donation.message?.toLowerCase().includes("#ldsg") ? 0x7fd836 : 0x26c2eb)
+            .setTimestamp(new Date(donation.createdDateUTC));
           Module.client.channels.cache.get(extraLifeDiscussion).send({embed});
         }
       }
