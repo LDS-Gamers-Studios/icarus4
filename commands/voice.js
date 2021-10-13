@@ -450,7 +450,11 @@ const Module = new Augur.Module()
             deny: ["VIEW_CHANNEL", "CONNECT", "SEND_MESSAGES", "SPEAK"]
           },
           {
-            id: "871566171206484008",
+            id: "771516264618262607", // Duct Tape
+            deny: ["VIEW_CHANNEL", "CONNECT", "SPEAK"]
+          },
+          {
+            id: "871566171206484008", // Suspended
             deny: ["VIEW_CHANNEL", "CONNECT", "SPEAK"]
           }]
         });
