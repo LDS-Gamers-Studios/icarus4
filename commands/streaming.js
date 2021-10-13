@@ -121,7 +121,7 @@ async function fetchExtraLifeTeam() {
               embed: u.embed().setColor(0x7fd836)
               .setTitle("New Extra Life Donor(s)!")
               .setThumbnail("https://assets.donordrive.com/extralife/images/$event550$/facebookImage.png")
-              .setDescription([...newDonors].join("\n"))
+              .setDescription(donation.displayName)
             });
           }
 
@@ -353,7 +353,7 @@ const Module = new Augur.Module()
   process: async (msg) => {
     try {
       let team = await fetchExtraLifeTeam();
-      if (!team) msg.reply("the Extra Life API seems to be down. Please try again in a bit.").then(u.clean);
+      if (!team) return msg.reply("the Extra Life API seems to be down. Please try again in a bit.").then(u.clean);
       for (let member of team.participants) {
         if (member.links.stream) member.twitch = member.links.stream.replace("https://player.twitch.tv/?channel=", "");
         member.streamIsLive = false;
