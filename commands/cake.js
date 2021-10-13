@@ -52,22 +52,26 @@ async function testCakeDays() {
     let offsets = await Module.db.user.getUsers({discordId: {$in: members.keyArray()}, priorTenure: { $gt: 0 }});
 
     for (let [key, member] of members.filter(m => m.roles.cache.has(Module.config.roles.trusted))) {
+      const tenure = [
+        "375047444599275543", // 1
+        "375047691253579787", // 2
+        "375047792487432192", // 3
+        "543065980096741386", // 4
+        "731895666577506345", // 5
+        "889293324236767232", // 6
+        "888619939177562113", // 7
+        "889302270091620402", // 8
+        "889293537810710578", // 9
+        "889302389222428684", // 10
+      ];
       try {
-        const tenure = [
-          "375047444599275543",
-          "375047691253579787",
-          "375047792487432192",
-          "543065980096741386",
-          "731895666577506345"
-        ];
-
         let offset = offsets.find(o => o.discordId == key);
         let join = moment(member.joinedAt).subtract(offset?.priorTenure || 0, "days");
-        if (join && (join.month() == curDate.month()) && (join.date() == curDate.date()) && (join.year() < curDate.year())) {
+        if ((join?.month() == curDate.month()) && (join?.date() == curDate.date()) && (join?.year() < curDate.year())) {
           let years = curDate.year() - join.year();
-          let thisYear = tenure.splice(years - 1, 1)[0];
-          await member.roles.add(thisYear).catch(u.noop);
+          let thisYear = tenure[years - 1];
           await member.roles.remove(tenure).catch(u.noop);
+          await member.roles.add(thisYear).catch(u.noop);
           try {
             if (member.roles.cache.has(Module.config.roles.trusted)) {
               ldsg.channels.cache.get(Module.config.ldsg).send(`${member} has been part of the server for ${years} ${(years > 1 ? "years" : "year")}! Glad you're with us!`);
