@@ -108,7 +108,7 @@ async function fetchExtraLifeTeam() {
     if (donations) {
       const file = JSON.parse(fs.readFileSync("./data/extraLifeDonors.json", "utf8"));
       const donors = new Set(file.donors);
-      const donationIDs = new Set(file.donations);
+      const donationIDs = new Set(file.donationIDs);
       let update = false;
 
       for (let donation of donations) {
