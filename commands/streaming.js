@@ -384,7 +384,7 @@ const Module = new Augur.Module()
       }
       embed.setTitle("LDSG Extra Life Team")
       .setThumbnail("https://assets.donordrive.com/extralife/images/fbLogo.jpg?v=202009241356")
-      .setURL("https://www.extra-life.org/index.cfm?fuseaction=donorDrive.participant&participantID=412575#donate")
+      .setURL(`https://www.extra-life.org/index.cfm?fuseaction=donorDrive.team&teamID=${teamId}#teamTabs`)
       .setDescription(`LDSG is raising money for Extra Life! We are currently at $${total} of our team's $${team.fundraisingGoal} goal for ${new Date().getFullYear()}. That's ${Math.round(100 * total / team.fundraisingGoal)}% there!\n\nYou can help by donating to one of the Extra Life Team below.`);
       msg.channel.send({embed});
     } catch(error) { u.errorHandler(error, msg); }
