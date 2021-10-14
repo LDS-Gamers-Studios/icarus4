@@ -50,12 +50,10 @@ const inventory = new Collection([
   ["448935116262080514", ["697257745971281931"]], // GG
   ["318427374309998592", ["697257742502723745"]], // Tournament Champion
 
-  /* EXTRA LIFE 2020 REWARDS */
-  //["507031155627786250", ["737408727522476093"]], // Extra Life Team
+  /* EXTRA LIFE 2021 REWARDS */
+  ["507031155627786250", ["737408727522476093"]], // Extra Life Team
   ["508030176072957952", ["698293543470497944"]], // Extra Life Donor
-  //["768164394248044575", ["768166036184367186"]], // Extra Life Raiders
-  ["772836045943341146", ["772836221323182120"]], // Origami - Kendama Merchant
-  ["782299117162070110", ["782299284367736863"]], // Pied - Whatever his role ends up being
+  ["768164394248044575", ["768166036184367186"]], // Extra Life Raiders
 ]);
 
 const allColors = inventory.reduce((a, c) => { for (let e of c) a.add(e); return a; }, new USet());
