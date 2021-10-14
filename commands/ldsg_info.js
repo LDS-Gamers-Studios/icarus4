@@ -5,12 +5,13 @@ const Augur = require("augurbot"),
   u = require("../utils/utils");
 
 let lowBoosts = false;
+const tier3 = 15;
 
 function boostCheck() {
   let ldsg = Module.client.guilds.cache.get(Module.config.ldsg);
-  if (ldsg.premiumSubscriptionCount < 30) {
+  if (ldsg.premiumSubscriptionCount < tier3) {
     lowBoosts = true;
-    ldsg.channels.cache.get(Moduel.config.channels.modlogs).send(`⚠️ **We've dropped to ${ldsg.premiumSubscriptionCount} boosts!** 30 boosts are required for Tier 3.`);
+    ldsg.channels.cache.get(Moduel.config.channels.modlogs).send(`⚠️ **We've dropped to ${ldsg.premiumSubscriptionCount} boosts!** ${tier3} boosts are required for Tier 3.`);
   } else {
     lowBoosts = false;
   }
