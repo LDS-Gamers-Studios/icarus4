@@ -56,6 +56,7 @@ const inventory = new Collection([
   ["768164394248044575", ["768166036184367186"]], // Extra Life Raiders
   ["898254688124821566", ["898255673266155540"]], // Razzo Enthusiast Incentive
   ["898318861311574016", ["898319295522676826"]], // Shaoon Incentive
+  ["772836045943341146", ["772836221323182120"]], // Kendama Merchant
 ]);
 
 const allColors = inventory.reduce((a, c) => { for (let e of c) a.add(e); return a; }, new USet());
