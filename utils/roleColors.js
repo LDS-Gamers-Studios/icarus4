@@ -55,8 +55,11 @@ const inventory = new Collection([
   ["508030176072957952", ["698293543470497944"]], // Extra Life Donor
   ["768164394248044575", ["768166036184367186"]], // Extra Life Raiders
   ["898254688124821566", ["898255673266155540"]], // Razzo Enthusiast Incentive
-  ["898318861311574016", ["898319295522676826"]], // Shaoon Incentive
+  ["898318861311574016", ["898319295522676826"]], // Cool Dude
   ["772836045943341146", ["772836221323182120"]], // Kendama Merchant
+  ["900426954161942658", ["900441343212527636"]], // Harbinger of the Sus
+  ["898318861311574016", ["898319295522676826"]], // Cool Dude
+  ["900429731302895656", ["900443092157599814"]], // Worst Streamer In My Basement
 ]);
 
 const allColors = inventory.reduce((a, c) => { for (let e of c) a.add(e); return a; }, new USet());
