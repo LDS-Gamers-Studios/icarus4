@@ -673,7 +673,7 @@ const Module = new Augur.Module()
     }
   }
 
-  extraLifeApi.getTeamParticipants(extraLifeApi.teamId, true);
+  extraLifeApi.getTeamParticipants();
 })
 .setUnload(() => ({ twitchStatus, applicationCount }))
 .setClockwork(() => {
