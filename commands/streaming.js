@@ -101,7 +101,7 @@ async function fetchExtraLifeStreams(team) {
 
 async function fetchExtraLifeTeam() {
   try {
-    let team = await extraLifeApi.getTeam().catch(u.noop);
+    let team = await extraLifeApi.getTeam(teamId, true).catch(u.noop);
 
     // Check donors while we're at it.
     let donations = await extraLifeApi.getTeamDonations().catch(u.noop);
@@ -673,7 +673,7 @@ const Module = new Augur.Module()
     }
   }
 
-  extraLifeApi.getTeamParticipants();
+  extraLifeApi.getTeamParticipants(teamId, true);
 })
 .setUnload(() => ({ twitchStatus, applicationCount }))
 .setClockwork(() => {
