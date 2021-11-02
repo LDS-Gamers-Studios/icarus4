@@ -92,7 +92,7 @@ async function fetchExtraLifeStreams(team) {
   try {
     if (!team) team = await fetchExtraLifeTeam().catch(u.noop);
     if (!team) return null;
-    let userName = team.participants.filter(m => m.links.stream).map(member => member.links.stream.replace("https://player.twitch.tv/?channel=", ""))
+    const userName = team.participants.filter(m => m.links.stream).map(member => member.links.stream.replace("https://player.twitch.tv/?channel=", ""))
       .filter(channel => !(channel.includes(" ") || channel.includes("/")));
     let streams = await twitch.streams.getStreams({userName}).catch(u.noop);
     return streams;
@@ -101,7 +101,7 @@ async function fetchExtraLifeStreams(team) {
 
 async function fetchExtraLifeTeam() {
   try {
-    let team = await extraLifeApi.getTeam(teamId, true).catch(u.noop);
+    const team = await extraLifeApi.getTeamWithParticipants().catch(u.noop);
 
     // Check donors while we're at it.
     let donations = await extraLifeApi.getTeamDonations().catch(u.noop);
@@ -127,7 +127,7 @@ async function fetchExtraLifeTeam() {
             });
           }
 
-          let embed = u.embed()
+          const embed = u.embed()
             .setAuthor(`Donation From ${donation.displayName || "Anonymous Donor"}`, donation.avatarImageURL)
             .setDescription(donation.message || "[ No Message ]")
             .addField("Amount", `$${donation.amount}`, true)
@@ -363,7 +363,7 @@ const Module = new Augur.Module()
       let streams = await fetchExtraLifeStreams(team).catch(u.noop);
       if (streams) {
         for (const stream of streams.data) {
-          let member = team.participants.find(m => m.twitch && m.twitch.toLowerCase() == stream.userDisplayName.toLowerCase());
+          const member = team.participants.find(m => m.twitch && m.twitch.toLowerCase() == stream.userDisplayName.toLowerCase());
           if (member) {
             member.streamIsLive = true;
             member.stream = stream;
@@ -672,8 +672,6 @@ const Module = new Augur.Module()
       twitchStatus.set(key, status);
     }
   }
-
-  extraLifeApi.getTeamParticipants(teamId, true);
 })
 .setUnload(() => ({ twitchStatus, applicationCount }))
 .setClockwork(() => {

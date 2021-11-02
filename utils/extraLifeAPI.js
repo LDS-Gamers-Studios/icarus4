@@ -34,13 +34,9 @@ class ExtraLifeAPI {
     });
   }
 
-  async getParticipant(participantId, force = false) {
-    participantId = participantId || this.participantId;
+  async getParticipant(participantId) {
+    participantId = participantId ?? this.participantId;
     if (!participantId) throw Error("participantId must be provided");
-
-    if (!force && this.participants.has(participantId)) {
-      return this.participants.get(participantId);
-    }
 
     const participant = await this._call(`/participants/${encodeURIComponent(participantId)}`);
     this.participants.set(participantId, participant);
@@ -49,7 +45,7 @@ class ExtraLifeAPI {
   }
 
   async getParticipantDonations(participantId) {
-    participantId = participantId || this.participantId;
+    participantId = participantId ?? this.participantId;
     if (!participantId) throw Error("participantId must be provided");
 
     const donations = await this._call(`/participants/${encodeURIComponent(participantId)}/donations`);
@@ -57,13 +53,9 @@ class ExtraLifeAPI {
     return donations;
   }
 
-  async getTeam(teamId, force = false) {
-    teamId = teamId || this.teamId;
+  async getTeam(teamId) {
+    teamId = teamId ?? this.teamId;
     if (!teamId) throw Error("teamId must be provided");
-
-    if (!force && this.teams.has(teamId)) {
-      return this.teams.get(teamId);
-    }
 
     const team = await this._call(`/teams/${encodeURIComponent(teamId)}`);
     this.teams.set(teamId, team);
@@ -72,7 +64,7 @@ class ExtraLifeAPI {
   }
 
   async getTeamDonations(teamId) {
-    teamId = teamId || this.teamId;
+    teamId = teamId ?? this.teamId;
     if (!teamId) throw Error("teamId must be provided");
 
     const donations = await this._call(`/teams/${encodeURIComponent(teamId)}/donations`);
@@ -80,43 +72,19 @@ class ExtraLifeAPI {
     return donations;
   }
 
-  async getTeamParticipants(teamId, force = false) {
-    teamId = teamId || this.teamId;
+  async getTeamWithParticipants(teamId) {
+    teamId = teamId ?? this.teamId;
     if (!teamId) throw Error("teamId must be provided");
 
-    let team;
-    if (!force && this.teams.has(teamId)) {
-      team = this.teams.get(teamId);
-    } else {
-      team = await this.getTeam(teamId, force);
-    }
-
-    if (!force && team.participants) {
-      return team.participants;
-    }
+    const team = await this.getTeam(teamId);
 
     team.participants = await this._call(`/teams/${encodeURIComponent(teamId)}/participants`);
-    return team.participants;
+    return team;
   }
 
-  set(data = {}) {
-    this.teamId = data.teamId || this.teamId;
-
-    this.participantId = data.participantId || this.participantId;
-
-    this.cache = data.cache ?? this.cache ?? true;
-
-    if (this.teamId) {
-      this.getTeam().then((team) => {
-        this.team = team;
-      });
-    }
-    if (this.participantId) {
-      this.getParticipant().then((participant) => {
-        this.participant = participant;
-      });
-    }
-
+  set({ teamId = undefined, participantId = undefined }) {
+    this.teamId = teamId ?? this.teamId;
+    this.participantId = participantId ?? this.participantId;
     return this;
   }
 }
