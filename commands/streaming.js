@@ -66,7 +66,8 @@ async function extraLifeEmbed() {
 
       let channels = [];
       for (const stream of streams.data) {
-        let game = await gameInfo(stream.gameId)?.name || "Something?";
+        // let game = await gameInfo(stream.gameId)?.name || "Something?";
+        let game = twitchGames.get(stream.gameId)?.name;
         channels.push({
           name: stream.userDisplayName,
           game,
@@ -80,7 +81,7 @@ async function extraLifeEmbed() {
 
       for (let i = 0; i < Math.min(channels.length, 25); i++) {
         let channel = channels[i];
-        embed.addField(`${channel.name} playing ${channel.game}`, `[${channel.title}](${channel.url})`);
+        embed.addField(channel.name + (channel.game ? ` playing ${channel.game}` : ""), `[${channel.title}](${channel.url})`);
       }
 
       return embed;
