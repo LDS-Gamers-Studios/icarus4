@@ -61,6 +61,7 @@ const inventory = new Collection([
   ["898318861311574016", ["898319295522676826"]], // Cool Dude
   ["900429731302895656", ["900443092157599814"]], // Worst Streamer In My Basement
   ["901134648824975360", ["901135063511609344"]], // Classical Literature Fan
+  ["907311470537216032", ["907312115906396270"]], // Grey Guild
 ]);
 
 const allColors = inventory.reduce((a, c) => { for (let e of c) a.add(e); return a; }, new USet());
