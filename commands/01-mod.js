@@ -308,7 +308,7 @@ const Module = new Augur.Module()
 
         let infractionDescription = [`**${u.escapeText(member.displayName)}** has had **${infractionSummary.count}** infraction(s) in the last **${infractionSummary.time}** days, totalling **${infractionSummary.points}** points.`];
         for (let record of infractionSummary.detail) {
-          let recordMod = message.guild.members.cache.get(record.mod);
+          let recordMod = msg.guild.members.cache.get(record.mod);
           infractionDescription.push(`${record.timestamp.toLocaleDateString()} (${record.value}) pts, modded by ${recordMod?.displayName}): ${record.description}`);
         }
 
