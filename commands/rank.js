@@ -68,10 +68,14 @@ const Module = new Augur.Module()
       let members = await msg.guild.members.fetch();
       let users = (await Module.db.user.getUsers({currentXP: {$gt: 0}}))
         .filter(u => members.has(u.discordId));
-      let totalXP = users.reduce((a, c) => a + c.currentXP, 0);
-      let rate = dist / totalXP;
-      let medals = ["🥇", "🥈", "🥉"];
-      let top3 = users
+
+const fs = require("fs");
+fs.writeFileSync("./rankDetail.json", JSON.stringify(users.map(u => ({ discordId: u.discordId, currentXP: u.currentXP }))));
+
+      const totalXP = users.reduce((a, c) => a + c.currentXP, 0);
+      const rate = dist / totalXP;
+      const medals = ["🥇", "🥈", "🥉"];
+      const top3 = users
         .sort((a, b) => b.currentXP - a.currentXP)
         .filter((u, i) => i < 3)
         .map((u, i) => `${medals[i]} - ${members.get(u.discordId)}`)
@@ -83,12 +87,13 @@ const Module = new Augur.Module()
           //let user = users[i];
           let award = Math.round(rate * user.currentXP);
           if (award) {
-            Module.db.bank.addCurrency({
+            await Module.db.bank.addCurrency({
               currency: "em",
               discordId: user.discordId,
               description: "Chat Rank Reset - " + (new Date()).toDateString(),
               value: award,
-              mod: msg.client.user.id
+              mod: msg.client.user.id,
+              hp: true
             }, "em");
           }
         }
@@ -96,7 +101,7 @@ const Module = new Augur.Module()
 
       let announce = `__**CHAT RANK RESET!!**__\n\nAnother chat season has come to a close! In the most recent season, we've had ${users.length} active members who are tracking XP chatting! The three most active members were:\n${top3}`;
       if (dist > 0) announce += `\n\n${ember}${dist} have been distributed among *all* LDSG members who are tracking XP and participated in chat this season, proportional to their participation.`;
-      announce += "\n\nIf you would like to participate in this season's chat ranks and *haven't* opted in, `!trackxp` will get you in the mix. Users who have previously used `!trackxp` don't need to do so again.";
+      announce += "\n\nIf you would like to participate in this season's chat ranks and *haven't* opted in, `/rank track` will get you in the mix. Users who have previously used `/rank track` (or the retired `!trackxp`) don't need to do so again.";
       msg.guild.channels.cache.get("121752198731268099").send(announce);
 
       Module.db.user.resetXP();
