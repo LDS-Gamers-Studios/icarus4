@@ -71,7 +71,7 @@ async function testCakeDays() {
           let years = curDate.year() - join.year();
           let thisYear = tenure[years - 1];
           await member.roles.remove(tenure).catch(u.noop);
-          await member.roles.add(thisYear).catch(u.noop);
+          await member.roles.add(thisYear).catch(u.errorHandler);
           try {
             if (member.roles.cache.has(Module.config.roles.trusted)) {
               ldsg.channels.cache.get(Module.config.ldsg).send(`${member} has been part of the server for ${years} ${(years > 1 ? "years" : "year")}! Glad you're with us!`);
