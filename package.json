@@ -41,7 +41,7 @@
     "moment": "^2.29.1",
     "mongoose": "^5.6.4",
     "mw-dict": "^3.0.0",
-    "nanoid": "^3.1.22",
+    "nanoid": "^3.1.31",
     "opusscript": "0.0.6",
     "oxford-dictionary-api": "^1.0.1",
     "profanity-matcher": "^1.0.1",
