@@ -2,14 +2,14 @@ const Augur = require("augurbot"),
   u = require("../utils/utils");
 
 const channelRef = new u.Collection([
-  ["PC1", "814187227693187102"],
-  ["PC2", "814187436611207208"],
-  ["PC3", "814187580723560498"],
-  ["PS1", "814187685748015114"],
-  ["PS2", "814187784218607676"],
-  ["XB1", "814187956255981658"],
-  ["XB2", "814188049936154644"],
-  ["XB3", "814188137000599592"]
+  ["SPARTANS", "814187227693187102"], // PC1
+  ["LIGHTBREAKERS", "814187436611207208"],  // PC2
+  ["PALADINS", "814187580723560498"],  // PC3
+  ["CURMUDGEONS", "814187685748015114"],  // PS1
+  // ["PS2", "814187784218607676"],
+  ["GUARDIANS", "814187956255981658"],  // XB1
+  ["IRON LORDS", "814188049936154644"],  // XB2
+  // ["XB3", "814188137000599592"]
 ]);
 
 const Module = new Augur.Module()
@@ -78,7 +78,7 @@ const Module = new Augur.Module()
     }
   }
 })
-.addCommand({name: "valiantpvp",
+.addCommand({name: "valiant",
   description: "Add a member to the Valiant Warrior company",
   syntax: "@user(s)",
   category: "Members",
@@ -89,6 +89,22 @@ const Module = new Augur.Module()
         await member.roles.add("801838760961638450");
       } catch(error) {
         u.errorHandler(error, `Could not add Valiant Warrior role to ${member.displayName}`);
+      }
+    }
+    msg.react("👌");
+  }
+})
+.addCommand({name: "valiantremove",
+  description: "Remove a member from the Valiant Warrior company",
+  syntax: "@user(s)",
+  category: "Members",
+  permissions: (msg) => msg.member?.roles.cache.has("803392432128655410"),
+  process: async (msg) => {
+    for (const [id, member] of msg.mentions.members) {
+      try {
+        await member.roles.remove("801838760961638450");
+      } catch(error) {
+        u.errorHandler(error, `Could not remove Valiant Warrior role from ${member.displayName}`);
       }
     }
     msg.react("👌");
