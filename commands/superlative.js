@@ -6,7 +6,7 @@ const threshold = new Map([
   ["default", 8],
   ["800827468315492352", 5],  // Team
   ["363020585988653057", 5],  // Mods
-  ["762505119710969946", 5],  // #brightbeam-commons
+  ["762505119710969946", 8],  // #brightbeam-commons
   ["801527229372825621", 5],  // #brightbeam-rp
   ["804536778597859358", 5],  // #brightbeam-vc-text
   ["762505078531293205", 10],  // #freshbeast-commons,
