@@ -2,7 +2,7 @@ const Augur = require("augurbot"),
   u = require("../utils/utils");
 
 const emojis = new u.Collection([
-  ["209007104852230145", "403553351775551488"], // Icarus - Why
+  ["209007104852230145", "976935604686295060"], // Icarus - Why
   ["281658096130981889", "761342618343833670"], // Indigo - lunaping
   ["487085787326840843", "809815185367367710"], // Behold - ablobping - Emoji by Blob Hub Studios, used under Apache 2.0
   ["224230213611945984", "816163983953494026"], // Werecat - bruh
@@ -13,7 +13,7 @@ const emojis = new u.Collection([
   ["117454089385803780", "826899226105479238"], // Caden - ythoping
   ["buttermelon",        "305039588014161921"],
   ["noice",              "633500960483704843"],
-  ["why",                "403553351775551488"]
+  ["icarus_ping",                "976935604686295060"]
 ]);
 
 const Module = new Augur.Module()
