@@ -1,5 +1,8 @@
 const Augur = require("augurbot"),
-  u = require("../utils/utils");
+  u = require("../utils/utils"),
+  imaps = require('imap-simple'),
+  _ = require('lodash'),
+  {simpleParser} = require('mailparser');
 
 function parseMission(str) {
   let date = new RegExp("(" + [
@@ -87,6 +90,58 @@ const Module = new Augur.Module()
       msg.channel.send("**Current LDSG Missionaries:**\n" + members.join("\n"));
     } catch(error) { u.errorHandler(error, msg); }
   }
+});
+
+async function getEmails () {
+  let missionaries = await Module.db.mission.findAll()
+  let config = {
+    imap: {
+      user: Module.config.email.username, //email@address.com
+      password: Module.config.email.password,
+      host: 'imap.gmail.com',
+      port: 993,
+      tls: true,
+      tlsOptions: { rejectUnauthorized: false },
+      authTimeout: 3000
+    }
+  }
+
+  imaps.connect(config).then(async function (connection) {
+    return connection.openBox('INBOX').then(async function () {
+      var searchCriteria = ['UNSEEN', '1:5'];
+      var fetchOptions = {
+        bodies: ['HEADER', 'TEXT', ''],
+        markSeen: true,
+        struct: true
+      };
+
+      return connection.search(searchCriteria, fetchOptions).then(async function (results) {
+        for (item of results) {
+          let all = _.find(item.parts, {"which": ""}),
+            id = item.attributes.uid,
+            idHeader = `Imap-Id: ${id}\r\n`;
+
+          simpleParser(idHeader + all.body, (err, mail) => {
+            if (err) return u.errorHandler(err, 'Missionary Letter Post');
+            let from = missionaries.find(email => email.email == mail.from.value[0].address);
+            if (!from) return;
+            let {subject, text, attachments, date} = mail,
+              author = Module.client.users.cache.get(from.discordId),
+              embed = u.embed().setTitle(subject).setDescription(text).setAuthor(author.username, author.displayAvatarURL()).setTimestamp(date),
+              channel = Module.client.channels.cache.get('424737599924731905'); //#missionary-emails
+              channel.send({embed});
+            for (atts of attachments) channel.send({files: [{attachment: atts.content, name: atts.filename}]});
+          });
+        };
+      });
+    });
+  })
+};
+
+Module.setClockwork(() => {
+  try{
+    return setInterval(getEmails, 1000 * 60 *60 * 12);
+  } catch(e){u.errorHandler(e, "Missionary Email Clockwork Error")};
 });
 
 module.exports = Module;
