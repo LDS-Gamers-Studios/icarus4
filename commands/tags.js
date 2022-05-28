@@ -8,7 +8,12 @@ function runTag(msg) {
   if (cmd && tags.get(msg.guild.id).has(cmd.command)) {
     let tag = tags.get(msg.guild.id).get(cmd.command);
     let response = tag.response
-      .replace(/<@author>/ig, msg.author)
+    let match, regex = /\<(.*)\>/
+    if(match = regex.exec(tag.response)){
+      let temp = match[1].split('|')
+      if(temp[1]) response = response.replace(match[0], temp[Math.floor(Math.random() * temp.length)])
+    }
+    response.replace(/<@author>/ig, msg.author)
       .replace(/<@authorname>/ig, msg.member.displayName);
     if ((/(<@target>)|(<@targetname>)/i).test(response)) {
       let mentions = u.userMentions(msg, true);
