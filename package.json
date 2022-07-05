@@ -14,7 +14,7 @@
   "license": "MIT",
   "homepage": "https://github.com/Gaiwecoor/icarus4",
   "dependencies": {
-    "@discordjs/opus": "^0.3.2",
+    "@discordjs/opus": "^0.8.0",
     "@ffmpeg-installer/ffmpeg": "^1.0.19",
     "@google-cloud/translate": "^2.1.4",
     "augurbot": "^2.5.5",
