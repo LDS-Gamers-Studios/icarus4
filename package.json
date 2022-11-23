@@ -50,7 +50,7 @@
     "request-promise-native": "^1.0.8",
     "simple-oauth2": "^2.2.1",
     "simply-trello": "0.0.9",
-    "socket.io": "^2.2.0",
+    "socket.io": "^2.5.0",
     "steamapi": "^2.0.7",
     "svg-to-img": "^2.0.9",
     "twitch": "^4.5.3",
