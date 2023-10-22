@@ -208,9 +208,9 @@ function processApplications() {
           .addField("Stream Links", app.streaming_platform_links)
           .addField("Discord Commitment", app.discord_commit)
           .addField("Code Commitment", app.agree_to_conduct);
-
-        Module.client.channels.cache.get("146289578674749440")
-          .send({embed})
+        const streamerApplicationChannel = Module.client.channels.cache.get("146289578674749440")
+        if (!streamerApplicationChannel) return;
+          streamerApplicationChannel.send({embed})
           .then(() => fs.unlinkSync(path))
           .catch(e => u.errorHandler(e, "Delete Approved Streamer Application Error"));
       }
