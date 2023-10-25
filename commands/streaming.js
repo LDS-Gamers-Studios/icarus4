@@ -45,7 +45,8 @@ async function checkStreams() {
     processTwitch(igns);
 
     // Check for new Approved Streamers applications
-    processApplications();
+    // SKIP APPLICATION PROCESSING (Team Server Deprecated)
+    // processApplications();
 
     // Check for Extra Life
     if ((new Date()).getMinutes() < 5) {
@@ -208,11 +209,11 @@ function processApplications() {
           .addField("Stream Links", app.streaming_platform_links)
           .addField("Discord Commitment", app.discord_commit)
           .addField("Code Commitment", app.agree_to_conduct);
-        const streamerApplicationChannel = Module.client.channels.cache.get("146289578674749440")
+        const streamerApplicationChannel = Module.client.channels.cache.get("146289578674749440");
         if (!streamerApplicationChannel) return;
-          streamerApplicationChannel.send({embed})
-          .then(() => fs.unlinkSync(path))
-          .catch(e => u.errorHandler(e, "Delete Approved Streamer Application Error"));
+        streamerApplicationChannel.send({embed})
+        .then(() => fs.unlinkSync(path))
+        .catch(e => u.errorHandler(e, "Delete Approved Streamer Application Error"));
       }
     });
   } catch(e) { u.errorHandler(e, "Streaming Application Check"); }
